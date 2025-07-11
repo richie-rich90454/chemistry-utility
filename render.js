@@ -1,41 +1,45 @@
 //Use: "terser render.js -o render.min.js --compress --mangle" to compress the file (make the min file)
 document.addEventListener("DOMContentLoaded", function(){
     let navLinks=document.querySelectorAll("nav a");
-    let mainGroups=document.querySelectorAll(".main-groups");
-    let navHeight=document.querySelector("nav").getBoundingClientRect().height;
-    for (let i=0;i<navLinks.length;i++){
-        navLinks[i].addEventListener("click", function (event){
-            event.preventDefault();
-            for (let j=0;j<navLinks.length;j++){
-                navLinks[j].classList.remove("active");
-            }
+    let mainGroups=Array.from(document.querySelectorAll(".main-groups"));
+    let nav=document.querySelector("nav");
+    let navHeight=nav.getBoundingClientRect().height;
+    function clearActive(){
+        navLinks.forEach(function(link){
+            link.classList.remove("active");
+        });
+    }
+    navLinks.forEach(function(link){
+        link.addEventListener("click",function(e){
+            e.preventDefault();
+            clearActive();
             this.classList.add("active");
-            let targetId=this.getAttribute("href");
-            let targetElement=document.querySelector(targetId);
-            if (targetElement){
-                let targetPosition=targetElement.offsetTop-navHeight;
+            let targetEl=document.querySelector(this.getAttribute("href"));
+            if (targetEl){
                 window.scrollTo({
-                    top: targetPosition,
-                    behavior: "smooth"
+                    top:targetEl.offsetTop-navHeight,
+                    behavior:"smooth"
                 });
             }
         });
-    }
-    window.addEventListener("scroll", function (){
-        let currentPosition=window.scrollY;
-        for (let i=0;i<mainGroups.length;i++){
-            let section=mainGroups[i];
-            let sectionTop=section.offsetTop-navHeight-20;
-            let sectionBottom=sectionTop+section.offsetHeight;
-            if (currentPosition>=sectionTop&&currentPosition<sectionBottom){
-                let id=section.getAttribute("id");
-                for (let j=0;j<navLinks.length;j++){
-                    navLinks[j].classList.remove("active");
-                    if (navLinks[j].getAttribute("href")=="#"+id){
-                        navLinks[j].classList.add("active");
-                    }
-                }
+    });
+    function onScroll(){
+        let scrollPos=window.scrollY+navHeight+5;
+        let current=mainGroups[0];
+        for(let section of mainGroups){
+            if (section.offsetTop<=scrollPos){
+                current=section;
             }
         }
-    });
+        if (window.scrollY+window.innerHeight>=document.documentElement.scrollHeight-2){
+            current=mainGroups[mainGroups.length-1];
+        }
+        clearActive();
+        let activeLink=document.querySelector('nav a[href="#'+current.id+'"]');
+        if (activeLink){
+            activeLink.classList.add("active");
+        }
+    }
+    window.addEventListener("scroll",onScroll);
+    onScroll();
 });
