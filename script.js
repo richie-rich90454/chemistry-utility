@@ -50,7 +50,6 @@ document.addEventListener("DOMContentLoaded", function(){
             }, duration);
         });
     }
-
     let inputs=document.querySelectorAll("input, select");
     for (let i=0;i<inputs.length;i++){
         inputs[i].addEventListener("focus", function(){
@@ -65,7 +64,6 @@ document.addEventListener("DOMContentLoaded", function(){
             }
         });
     }
-
     let buttons=document.querySelectorAll("button:not(.clear-button)");
     for (let i=0;i<buttons.length;i++){
         buttons[i].addEventListener("mouseenter", function(){
@@ -79,7 +77,6 @@ document.addEventListener("DOMContentLoaded", function(){
             this.style.boxShadow="0 2px 4px var(--shadow-color)";
         });
     }
-
     let clearButtons=document.querySelectorAll(".clear-button");
     for (let i=0;i<clearButtons.length;i++){
         clearButtons[i].addEventListener("click", function(){
@@ -101,7 +98,6 @@ document.addEventListener("DOMContentLoaded", function(){
             }
         });
     }
-
     fetch("/api/ptable",{
         headers:{
             "X-Requested-With": "XMLHttpRequest"
@@ -140,7 +136,6 @@ document.addEventListener("DOMContentLoaded", function(){
                 throw new Error("Invalid element at position "+index);
             }
         }
-
         function parseNumber(formula, index){
             let number=0;
             let formulaLength=formula.length;
@@ -156,7 +151,6 @@ document.addEventListener("DOMContentLoaded", function(){
             let finalNumber=number>0?number:1;
             return [finalNumber, index];
         }
-
         function calculateMolarMass(formula, elements){
             let massStack=[0];
             let index=0;
@@ -212,7 +206,6 @@ document.addEventListener("DOMContentLoaded", function(){
             }
             return massStack[0];
         }
-
         function formatFormula(formula){
             let compound ={};
             let regex=/([A-Z][a-z]*)(\d*)/g;
@@ -232,7 +225,6 @@ document.addEventListener("DOMContentLoaded", function(){
             }
             return compound;
         }
-
         function parseEquation(equation){
             let sides=equation.split("->");
             let trimmedSides=[];
@@ -254,7 +246,6 @@ document.addEventListener("DOMContentLoaded", function(){
             }
             return{ reactants: trimmedReactants, products: trimmedProducts };
         }
-
         function balanceEquation(equation){
             let maxCoefficient=1250;
             let balanceResult=document.getElementById("balance-result");
@@ -278,7 +269,6 @@ document.addEventListener("DOMContentLoaded", function(){
                 }
             }
             uniqueElements=Array.from(elementSet);
-
             function calculateGCD(a, b){
                 if (b==0){
                     return a;
@@ -337,7 +327,6 @@ document.addEventListener("DOMContentLoaded", function(){
                 }
                 coefficientMatrix.push(row);
             }
-
             let variableCount=compoundCount-1;
             let equationCount=elementCount;
             let augmentedMatrix=[];
@@ -349,7 +338,6 @@ document.addEventListener("DOMContentLoaded", function(){
                 row.push(new Fraction(-coefficientMatrix[i][compoundCount-1], 1));
                 augmentedMatrix.push(row);
             }
-
             let rank=0;
             for (let col=0;col<variableCount&&rank<equationCount;col++){
                 let pivotRow=rank;
@@ -377,7 +365,6 @@ document.addEventListener("DOMContentLoaded", function(){
                 }
                 rank=rank+1;
             }
-
             let solution=new Array(compoundCount);
             for (let j=0;j<variableCount;j++){
                 let value=new Fraction(0, 1);
@@ -390,7 +377,6 @@ document.addEventListener("DOMContentLoaded", function(){
                 solution[j]=value;
             }
             solution[compoundCount-1]=new Fraction(1, 1);
-
             let denominators=[];
             for (let i=0;i<solution.length;i++){
                 denominators.push(solution[i].denominator);
@@ -399,14 +385,12 @@ document.addEventListener("DOMContentLoaded", function(){
             for (let i=1;i<denominators.length;i++){
                 commonDenominator=calculateLCM(commonDenominator, denominators[i]);
             }
-
             let coefficients=[];
             for (let i=0;i<solution.length;i++){
                 let fraction=solution[i];
                 let coefficient=fraction.numerator*(commonDenominator/fraction.denominator);
                 coefficients.push(Math.round(coefficient));
             }
-
             let hasNegative=false;
             for (let i=0;i<coefficients.length;i++){
                 if (coefficients[i]<0){
@@ -419,7 +403,6 @@ document.addEventListener("DOMContentLoaded", function(){
                     coefficients[i]=-coefficients[i];
                 }
             }
-
             let gcdAll=coefficients[0];
             for (let i=1;i<coefficients.length;i++){
                 gcdAll=calculateGCD(gcdAll, coefficients[i]);
@@ -427,7 +410,6 @@ document.addEventListener("DOMContentLoaded", function(){
             for (let i=0;i<coefficients.length;i++){
                 coefficients[i]=coefficients[i]/gcdAll;
             }
-
             let hasLargeCoefficient=false;
             for (let i=0;i<coefficients.length;i++){
                 if (Math.abs(coefficients[i])>maxCoefficient){
