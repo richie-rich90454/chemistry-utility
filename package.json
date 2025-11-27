@@ -1,6 +1,6 @@
 {
   "name": "chemical-equation-balancing",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "A program designed to balance chemical equations made with HTML, CSS, and JavaScript.",
   "main": "main.js",
   "scripts": {

@@ -1,4 +1,5 @@
 //Use: "terser render.js -o render.min.js --compress --mangle" to compress the file (make the min file)
+//"terser render.js -o render.min.js --config-file terser.config.json" is also usable
 document.addEventListener("DOMContentLoaded", function(){
     let navLinks=document.querySelectorAll("nav a");
     let mainGroups=Array.from(document.querySelectorAll(".main-groups"));
