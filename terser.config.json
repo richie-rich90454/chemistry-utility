@@ -1,0 +1,38 @@
+{
+    "compress": {
+        "passes": 3,
+        "pure_getters": true,
+        "drop_console": true,
+        "drop_debugger": true,
+        "dead_code": true,
+        "join_vars": true,
+        "collapse_vars": true,
+        "reduce_vars": true,
+        "sequences": true,
+        "properties": true,
+        "unused": true,
+        "hoist_funs": true,
+        "hoist_vars": false,
+        "if_return": true,
+        "comparisons": true,
+        "conditionals": true,
+        "evaluate": true,
+        "booleans": true,
+        "loops": true,
+        "keep_fargs": false,
+        "keep_infinity": false,
+        "side_effects": true,
+        "switches": true,
+        "defaults": true,
+        "arguments": true,
+        "directives": true,
+        "negate_iife": true
+    },
+    "mangle": {
+        "eval": true,
+        "toplevel": true,
+        "reserved": []
+    },
+    "module": true,
+    "toplevel": true
+}
