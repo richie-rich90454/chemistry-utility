@@ -205,9 +205,10 @@ nav a.active{
     margin: 0 0 1.5rem 0;
     border-top: 1px solid #E0E0E0;
     scroll-margin-top: calc(var(--nav-height) + 10px);
-    transition: background-color .3s ease;
+    transition: all .4s cubic-bezier(.25, .46, .45, .94) !important;
     scroll-snap-align: start;
     animation: floatIn .2s ease-out both;
+    position: relative;
 }
 .main-groups:last-child{
     border-bottom: 1px solid #E0E0E0;
@@ -218,6 +219,7 @@ h2{
     background: var(--background-color);
     z-index: 100;
     padding: 1rem 0;
+    cursor: pointer;
 }
 h3{
     font-size: 1.2rem;
@@ -382,6 +384,63 @@ footer, #footer{
 .nav-spacer{
     height: var(--header-height);
 }
+.tool-container{
+    overflow: hidden !important;
+    max-height: 0 !important;
+    transition: max-height .35s ease, padding .35s ease !important;
+    padding: 0 !important;
+    opacity: 0;
+    transform: translate(-8px);
+    transition-property: max-height, padding, opacity, transform !important;
+}
+.main-groups h2:hover ~ .tool-container, .main-groups h2:hover + .tool-container{
+    max-height: 500px !important;
+    padding: .8rem 1rem !important;
+    overflow: visible !important;
+    opacity: 1;
+    transform: translateY(0);
+}
+.main-groups h2:hover ~ .tool-container ~ .main-groups, .main-groups:has(h2:hover){
+    box-shadow: 0 4px 20px var(--shadow-color);
+    background-color: var(--background-secondary);
+    transform: translateY(-1px);
+}
+.tool-description{
+    padding: .8rem 1rem;
+    background-color: var(--background-secondary);
+    border-left: 4px solid var(--primary-blue);
+    margin-bottom: 1rem;
+    border-radius: var(--border-radius);
+    font-family: "EB Garamond" !important;
+    margin: 0;
+    animation: fadeInUp .5s cubic-bezier(.25, .46, .45, .94) both;
+}
+.main-groups::before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-secondary);
+    border-radius: var(--border-radius);
+    opacity: 0;
+    transition: opacity .3s ease;
+    z-index: -1;
+}
+.main-groups:hover::before{
+    opacity: 1;
+}
+@keyframes fadeInUp{
+    from{
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to{
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 @media (max-width: 768px){
     h1{
         font-size: 1.8rem;
@@ -473,7 +532,7 @@ footer, #footer{
     }
     nav ul{
         justify-content: center;
-        padding: 0 0.5rem;
+        padding: 0 .5rem;
     }
 }
 @media (max-width: 360px){
@@ -500,7 +559,7 @@ footer, #footer{
     }
     nav ul{
         justify-content: center;
-        padding: 0 0.25rem;
+        padding: 0 .25rem;
     }
 }
 @media (min-width: 769px) and (max-width: 1024px){

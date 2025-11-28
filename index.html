@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-    <title>Chemistry Utility</title>
     <head>
         <meta charset="UTF-8">
+        <title>Chemistry Utility</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, shrink-to-fit=no">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -15,7 +15,7 @@
         <meta name="theme-color" content="#28465C">
         <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
         <meta name="description" content="Access free chemistry tools for element information lookup, molar mass calculation, chemical equation balancing, and stoichiometry. Instant results for students and educators.">
-        <meta name="keywords" content="chemistry calculator, molar mass calculator, equation balancer, stoichiometry solver, element lookup, chemical tools, chemistry assistant">
+        <meta name="keywords" content="chemistry calculator, molar mass calculator, stoichiometry calculator, equation balancer, dilution calculator, chemistry tools, gas laws calculator, electrochemistry calculator">
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://chemutil.richardsblogs.com/">
         <meta property="og:title" content="Chemistry Utility Tools | Richards's Blogs">
@@ -55,7 +55,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="style.min.css">
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <header>
@@ -82,18 +82,27 @@
         <main id="main">
             <div id="element-lookup" class="main-groups">
                 <h2>Element Information Lookup</h2>
+                <div class="tool-container">
+                    <p class="tool-description">Quickly look up any chemical element to find its atomic number, mass, electron configuration, and group on the periodic table. This tool is perfect for students, teachers, or hobbyists who need fast reference information. Just type the element name or symbol and get accurate, reliable data instantly.</p>
+                </div>
                 <p>Enter the element symbol or name of the element you want to look up: </p>
                 <input type="text" id="element-input" placeholder="E.g., H or Hydrogen" aria-label="Element symbol or name">
                 <div id="element-info" class="result"></div>
             </div>
             <div id="mass-calc" class="main-groups">
                 <h2>Molar Mass Calculation</h2>
+                <div class="tool-container">
+                    <p class="tool-description">This tool helps you quickly find the molar mass of any compound by adding up the atomic weights of its elements. It is useful when preparing solutions, converting grams to moles, or checking your homework. Just enter a chemical formula, and the calculator handles all the isotope-averaging math for you.</p>
+                </div>
                 <p>Enter the formula here: </p>
                 <input type="text" id="formula-input" placeholder="E.g., CH4" aria-label="Chemical formula">
                 <div id="mass-result" class="result"></div>
             </div>
             <div id="balancing" class="main-groups">
                 <h2>Chemical Equation Balancer</h2>
+                <div class="tool-container">
+                    <p class="tool-description">Balancing chemical equations can be surprisingly tricky, especially with combustion or multi-step reactions. This tool checks the atom counts on each side and finds the correct coefficients automatically. It is a simple way to verify your work or understand how mass is conserved in a reaction.</p>
+                </div>
                 <p>Enter the chemical equation: </p>
                 <input type="text" id="equation-input" placeholder="E.g., H2+O2->H2O" aria-label="Chemical equation">
                 <button id="balance-button">Balance Equation</button>
@@ -101,6 +110,9 @@
             </div>
             <div id="dilution-calc" class="main-groups">
                 <h2>Molarity/Dilution Calculator</h2>
+                <div class="tool-container">
+                    <p class="tool-description">The dilution tool helps you figure out how much stock solution and solvent you need to reach a specific concentration. It uses the classic C<sub>1</sub>V<sub>1</sub> = C<sub>2</sub>V<sub>2</sub> relationship, making it easy to scale solutions up or down. Perfect for preparing lab samples or adjusting buffer strengths.</p>
+                </div>
                 <p>Solve for:</p>
                 <select id="dilution-solve-for" aria-label="Select dilution parameter to solve for">
                     <option value="M1">Initial Molarity (M₁)</option>
@@ -119,6 +131,9 @@
             </div>
             <div id="mass-percent-calc" class="main-groups">
                 <h2>Mass Percent and ppm/ppb Calculator</h2>
+                <div class="tool-container">
+                    <p class="tool-description">This calculator shows the mass percent, ppm, or ppb of a solute in a solution. It is useful for environmental chemistry, purity checks, and analytical experiments. Just enter the amounts, and it quickly provides an easy-to-read breakdown of concentrations.</p>
+                </div>
                 <div class="input-group">
                     <input type="number" id="mass-solute" placeholder="Mass of solute (g)" step="any" aria-label="Mass of solute">
                     <input type="number" id="mass-solution" placeholder="Mass of solution (g)" step="any" aria-label="Mass of solution">
@@ -133,6 +148,9 @@
             </div>
             <div id="solution-mixing-calc" class="main-groups">
                 <h2>Solution Mixing Calculator</h2>
+                <div class="tool-container">
+                    <p class="tool-description">Mix two solutions of different concentrations and volumes to find the resulting molarity. This tool is great for preparing reactant mixtures or adjusting stock solutions in the lab. Enter your known values, and it calculates the final solution automatically.</p>
+                </div>
                 <div class="input-group">
                     <input type="number" id="mix-C1" placeholder="C₁ (M)" step="any" aria-label="Concentration 1">
                     <input type="number" id="mix-V1" placeholder="V₁ (L)" step="any" aria-label="Volume 1">
@@ -144,6 +162,9 @@
             </div>
             <div id="nuclear-chemistry" class="main-groups">
                 <h2>Nuclear Chemistry</h2>
+                <div class="tool-container">
+                    <p class="tool-description">The half-life calculator models exponential decay to show how much of a substance remains over time. It is helpful in radiochemistry, nuclear physics, and pharmacokinetics. Enter the initial quantity and half-life, and the calculator handles the rest with precise results.</p>
+                </div>
                 <div id="half-life-calc" class="sub-group">
                     <h3>Half-Life Calculator</h3>
                     <p>Calculate:</p>
@@ -166,6 +187,9 @@
             </div>
             <div id="gas-laws" class="main-groups">
                 <h2>Gas Laws</h2>
+                <div class="tool-container">
+                    <p class="tool-description">Use this suite of gas calculators to solve for pressure, volume, temperature, or moles using the Ideal or Combined Gas Laws. For real gases, the Van der Waals correction adjusts for molecular interactions, giving more accurate predictions. It is perfect for homework, lab problems, or review.</p>
+                </div>
                 <div id="ideal-gas-law">
                     <h3>Ideal Gas Law (PV = nRT)</h3>
                     <p>Solve for:</p>
@@ -227,6 +251,9 @@
             </div>
             <div id="electrochemistry" class="main-groups">
                 <h2>Electrochemistry</h2>
+                <div class="tool-container">
+                    <p class="tool-description">Calculate standard cell potentials, non-standard conditions with the Nernst equation, and electrolysis mass/current/time relationships. This tool is valuable for redox chemistry, battery experiments, and electroplating calculations. Enter your values, and get instant results for your reactions.</p>
+                </div>
                 <div id="cell-potential">
                     <h3>Cell Potential Calculator</h3>
                     <p>Enter the standard reduction potentials for the two half-reactions:</p>
@@ -270,6 +297,9 @@
             </div>
             <div id="stoichiometry" class="main-groups">
                 <h2>Stoichiometry</h2>
+                <div class="tool-container">
+                    <p class="tool-description">This tool walks you through stoichiometric conversions — moles, mass, molecules, and limiting reactants. It is handy for lab planning or problem-solving because it shows how reactants and products relate through mole ratios. Enter known quantities, and the calculator fills in the rest.</p>
+                </div>
                 <p>Enter the balanced chemical equation:</p>
                 <input type="text" id="stoich-equation-input" placeholder="E.g., 2H2+O2->2H2O" aria-label="Balanced chemical equation">
                 <p>Select calculation type:</p>
@@ -284,6 +314,9 @@
             </div>
             <div id="bond-type-predictor" class="main-groups">
                 <h2>Bond Type Predictor</h2>
+                <div class="tool-container">
+                    <p class="tool-description">Predict whether a bond is ionic, covalent, or metallic based on electronegativity differences and periodic table trends. This tool is ideal for students learning about chemical bonding. Simply enter the elements, and get a clear prediction with a brief explanation.</p>
+                </div>
                 <p>Enter two element abbreviations to predict the bond type (Ionic, Covalent, or Metallic):</p>
                 <div class="input-group">
                     <input type="text" id="element1-input" placeholder="First element (e.g., Na)" aria-label="First element">
@@ -300,6 +333,7 @@
             </div>
         </footer>
         <script type="module" src="script.min.js"></script>
-        <script src="render.min.js"></script>
+        <script src="render.min.js" defer></script>
+        <noscript>This chemistry calculator requires JavaScript to run. It includes tools for element lookup, molar mass, equation balancing, gas laws, and more.</noscript>
     </body>
 </html>
