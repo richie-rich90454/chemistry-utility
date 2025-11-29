@@ -290,9 +290,11 @@ button:focus{
     line-height: 1.6;
 }
 a{
-    color: #FCFCFC !important;
     text-decoration: none;
     transition: opacity .3s ease;
+}
+#main-site-a{
+    color: #FCFCFC !important;
 }
 a:hover{
     opacity: .85;
@@ -313,6 +315,14 @@ sup{
 }
 sub{
     font-family: "EB Garamond", serif;
+    font-variant-numeric: subscripts;
+}
+h3 sup{
+    font-family: "Noto Sans", sans-serif;
+    font-variant-numeric: superscripts;
+}
+h3 sub{
+    font-family: "Noto Sans", sans-serif;
     font-variant-numeric: subscripts;
 }
 #footer{
@@ -457,6 +467,9 @@ footer, #footer{
 }
 .main-groups:hover::before{
     opacity: 1;
+}
+p a{
+    color: var(--light-blue) !important;
 }
 @keyframes fadeInUp{
     from{

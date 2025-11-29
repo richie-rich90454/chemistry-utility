@@ -55,7 +55,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <link rel="canonical" href="https://chemutil.richardsblogs.com/">
-        <link rel="stylesheet" href="style.min.css">
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <header>
@@ -91,6 +91,7 @@
                 <p>Enter the element symbol or name of the element you want to look up: </p>
                 <input type="text" id="element-input" placeholder="E.g., H or Hydrogen" aria-label="Element symbol or name">
                 <div id="element-info" class="result"></div>
+                <p>To compute masses using this elemental data, try the <a href="#mass-calc">Molar Mass Calculator</a>.</p>
             </div>
             <div id="mass-calc" class="main-groups">
                 <h2>Molar Mass Calculator - Calculate Molecule/Compound Molar Mass Instantly</h2>
@@ -100,6 +101,7 @@
                 <p>Enter the formula here: </p>
                 <input type="text" id="formula-input" placeholder="E.g., CH4" aria-label="Chemical formula">
                 <div id="mass-result" class="result"></div>
+                <p>After finding molar mass, you can also compute reaction yields using the <a href="#stoichiometry">Stoichiometry Calculator</a>.</p>
             </div>
             <div id="balancing" class="main-groups">
                 <h2>Chemical Equation Balancer - Able to Balance most Chemical Equations</h2>
@@ -110,6 +112,7 @@
                 <input type="text" id="equation-input" placeholder="E.g., H2+O2->H2O" aria-label="Chemical equation">
                 <button id="balance-button">Balance Equation</button>
                 <div id="balance-result" class="result"></div>
+                <p>Once balanced, you can analyze reactants and yields with the <a href="#stoichiometry">Stoichiometry Calculator</a>.</p>
             </div>
             <div id="dilution-calc" class="main-groups">
                 <h2>Molarity and Dilution Calculator - Prepare Solutions Easily</h2>
@@ -131,6 +134,7 @@
                 </div>
                 <button id="calculate-dilution">Calculate</button>
                 <div id="dilution-result" class="result"></div>
+                <p>If you're preparing solutions for reactions, check the <a href="#stoichiometry">Stoichiometry Calculator</a> for molar relationships.</p>
             </div>
             <div id="mass-percent-calc" class="main-groups">
                 <h2>Mass Percent and Concentration Calculator - ppm (parts per million) and ppb (parts per billion)</h2>
@@ -193,6 +197,7 @@
                 <div class="tool-container">
                     <p class="tool-description">Use this suite of gas calculators to solve for pressure, volume, temperature, or moles using the Ideal or Combined Gas Laws. For real gases, the Van der Waals correction adjusts for molecular interactions, giving more accurate predictions. It is perfect for review and more.</p>
                 </div>
+                <p>Working with gases? You may also need molar masses from the <a href="#mass-calc">Molar Mass Calculator</a>.</p>
                 <div id="ideal-gas-law">
                     <h3>Ideal Gas Law Calculator - PV = nRT</h3>
                     <p>Solve for:</p>
@@ -314,6 +319,7 @@
                 <div id="stoich-inputs"></div>
                 <button id="calculate-stoich-button">Calculate</button>
                 <div id="stoich-result" class="result"></div>
+                <p>Need compound masses? Use the <a href="#mass-calc">Molar Mass Calculator</a> to get accurate molar masses.</p>
             </div>
             <div id="bond-type-predictor" class="main-groups">
                 <h2>Bond Type Predictor - Ionic, Covalent, or Metallic</h2>
@@ -332,7 +338,7 @@
         <footer id="footer">
             <div class="footer-content">
                 <p>2025 Richard's Blogs | All Rights Reserved</p>
-                <p>Main site: <a href="https://www.richardsblogs.com" target="_blank">www.richardsblogs.com</a></p>
+                <p>Main site: <a href="https://www.richardsblogs.com" target="_blank" id="main-site-a">www.richardsblogs.com</a></p>
             </div>
         </footer>
         <script type="module" src="script.min.js"></script>
