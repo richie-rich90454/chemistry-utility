@@ -2,6 +2,7 @@ import {defineConfig} from "vite";
 import fs from "fs";
 import path from "path";
 import {fileURLToPath} from "url";
+import {createHtmlPlugin} from "vite-plugin-html";
 let __dirname=path.dirname(fileURLToPath(import.meta.url));
 let terserConfig={};
 try{
@@ -58,7 +59,20 @@ export default defineConfig({
         modules: false,
         postcss: path.join(__dirname, "postcss.config.js"),
     },
-    plugins: [],
+    plugins: [
+        createHtmlPlugin({
+            minify:{
+                collapseWhitespace: true,
+                removeComments: true,
+                removeRedundantAttributes: true,
+                removeScriptTypeAttributes: true,
+                removeStyleLinkTypeAttributes: true,
+                useShortDoctype: true,
+                minifyCSS: true,
+                minifyJS: true,
+            },
+        }),
+    ],
     preview:{
         port: 5000,
         open: true,
