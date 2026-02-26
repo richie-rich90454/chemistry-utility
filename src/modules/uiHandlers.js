@@ -1,4 +1,3 @@
-//Use "terser modules/uiHandlers.full.js -o modules/uiHandlers.js --config-file terser.config.json" to compress the file
 import {slideDown, slideUp} from "./animationUtils.js";
 export function initializeUIHandlers(){
     let headers=document.querySelectorAll(".main-groups h2");

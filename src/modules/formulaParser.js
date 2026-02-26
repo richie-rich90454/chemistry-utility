@@ -1,4 +1,3 @@
-//Use "terser modules/formulaParser.full.js -o modules/formulaParser.js --config-file terser.config.json" to compress the file
 export function parseElement(formula, index){
     let formulaLength=formula.length;
     let currentChar=formula[index];

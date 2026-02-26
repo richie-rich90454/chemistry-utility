@@ -1,4 +1,3 @@
-//Use "terser modules/equationBalancer.full.js -o modules/equationBalancer.js --config-file terser.config.json" to compress the file
 import {formatFormula} from "./formulaParser.js";
 export function parseEquation(equation){
     let sides=equation.split("->");

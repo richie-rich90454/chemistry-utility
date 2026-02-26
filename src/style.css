@@ -1,4 +1,3 @@
-/* Optimize CSS - Use "cleancss -O2 -O1 -O0 -o style.min.css style.css" to compress */
 :root{
     --primary-blue: #28465C;
     --light-blue: #405E7A;

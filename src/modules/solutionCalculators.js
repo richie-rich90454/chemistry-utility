@@ -1,4 +1,3 @@
-//Use "terser modules/solutionCalculators.full.js -o modules/solutionCalculators.js --config-file terser.config.json" to compress the file
 export function validateInputs(inputs, ids){
     for (let i=0; i<inputs.length; i++){
         if (isNaN(inputs[i])){

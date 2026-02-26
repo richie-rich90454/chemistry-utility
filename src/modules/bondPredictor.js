@@ -1,4 +1,3 @@
-//Use "terser modules/bondPredictor.full.js -o modules/bondPredictor.js --config-file terser.config.json" to compress the file
 export function predictBondType(elementsData){
     try{
         let element1Input=document.getElementById("element1-input");

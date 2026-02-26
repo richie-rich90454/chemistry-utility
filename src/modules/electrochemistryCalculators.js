@@ -1,4 +1,3 @@
-//Use "terser modules/electrochemistryCalculators.full.js -o modules/electrochemistryCalculators.js --config-file terser.config.json" to compress the file
 let gasConstant=8.314;
 let faradayConstant=96485;
 export function calculateCellPotential(){

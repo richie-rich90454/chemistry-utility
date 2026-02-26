@@ -1,4 +1,3 @@
-//Use "terser modules/eventListeners.full.js -o modules/eventListeners.js --config-file terser.config.json" to compress the file
 import {calculateMolarMass} from "./formulaParser.js";
 import {balanceEquation} from "./equationBalancer.js";
 import {getCalculationType, calculateStoichiometry} from "./stoichiometryCalculator.js";

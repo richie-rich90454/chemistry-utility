@@ -1,4 +1,3 @@
-//Use "terser modules/stoichiometryCalculator.full.js -o modules/stoichiometryCalculator.js --config-file terser.config.json" to compress the file
 export function parseBalancedEquation(equation){
     let cleanedEquation=equation.replace(/\s+/g, "");
     let parts=cleanedEquation.split("->");

@@ -1,4 +1,3 @@
-//Use "terser modules/animationUtils.full.js -o modules/animationUtils.js --config-file terser.config.json" to compress the file
 export function slideDown(element, duration){
     element.style.display="block";
     element.style.height="0";

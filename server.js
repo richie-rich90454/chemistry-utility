@@ -1,11 +1,8 @@
 let Fastify=require("fastify");
 let path=require("path");
 let fs=require("fs");
-let {v4: uuidv4}=require("uuid");
 let fastify=Fastify({logger: false});
 let PORT=6005;
-let randomDirName=uuidv4();
-let randomDirPath=path.join(__dirname, randomDirName);
 fastify.addHook("onSend", async (request, reply, payload)=>{
     reply.header("X-Powered-By", undefined);
     return payload;
@@ -21,20 +18,6 @@ fastify.addHook("onRequest", async (request, reply)=>{
         reply.code(400).send("Bad Request");
     }
 });
-try{
-    fs.mkdirSync(randomDirPath, {recursive: true, mode: 0o755});
-    let ptableSource=path.join(__dirname, "ptable.json");
-    let ptableDest=path.join(randomDirPath, "ptable.json");
-    if (!fs.existsSync(ptableSource)){
-        throw new Error("ptable.json not found");
-    }
-    fs.copyFileSync(ptableSource, ptableDest, fs.constants.COPYFILE_FICLONE);
-    fs.chmodSync(ptableDest, 0o644);
-}
-catch (err){
-    console.error("Failed to initialize data:", err.message);
-    process.exit(1);
-}
 fastify.get("/api/ptable", async (request, reply)=>{
     if (request.headers["x-requested-with"]!=="XMLHttpRequest"){
         return reply.code(403).send({
@@ -42,7 +25,8 @@ fastify.get("/api/ptable", async (request, reply)=>{
             message: "Direct access to API is not allowed",
         });
     }
-    let filePath=path.join(randomDirPath, "ptable.json");
+    let distPath=path.join(__dirname, "dist");
+    let filePath=path.join(distPath, "ptable.json");
     if (!fs.existsSync(filePath)){
         return reply.code(500).send({
             error: "Server Error",
@@ -51,7 +35,7 @@ fastify.get("/api/ptable", async (request, reply)=>{
     }
     reply.header("X-Content-Type-Options", "nosniff");
     reply.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-    return reply.sendFile("ptable.json", randomDirPath);
+    return reply.sendFile("ptable.json", distPath);
 });
 fastify.get("/ptable.json", async (request, reply)=>{
     reply.code(403).send({
@@ -60,7 +44,7 @@ fastify.get("/ptable.json", async (request, reply)=>{
     });
 });
 fastify.register(require("@fastify/static"),{
-    root: __dirname,
+    root: path.join(__dirname, "dist"),
     setHeaders: (res, filePath)=>{
         res.setHeader(
             "Cache-Control",
@@ -87,7 +71,7 @@ let start=async ()=>{
     try{
         await fastify.listen({port: PORT, host: "::"});
         console.log(`Server running at http://localhost:${PORT}`);
-        console.log(`Secure data path: ${randomDirPath}`);
+        console.log(`Serving static files from: ${path.join(__dirname, "dist")}`);
     }
     catch (err){
         fastify.log.error(err);
@@ -95,13 +79,7 @@ let start=async ()=>{
     }
 };
 start();
-let isShuttingDown=false;
 let gracefulShutdown=async (signal)=>{
-    if (isShuttingDown){
-        console.log("Shutdown already in progress...");
-        return;
-    }
-    isShuttingDown=true;
     console.log(`\n${signal} received. Starting graceful shutdown...`);
     let shutdownTimeout=setTimeout(()=>{
         console.error("Forced shutdown due to timeout");
@@ -109,10 +87,6 @@ let gracefulShutdown=async (signal)=>{
     }, 10000);
     try{
         await fastify.close();
-        if (fs.existsSync(randomDirPath)){
-            fs.rmSync(randomDirPath, {recursive: true, force: true});
-            console.log(`Deleted temporary folder: ${randomDirPath}`);
-        }
         clearTimeout(shutdownTimeout);
         console.log("Cleanup completed successfully");
         process.exit(0);

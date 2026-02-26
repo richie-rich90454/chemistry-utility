@@ -1,4 +1,3 @@
-//Use "terser modules/gasLawCalculators.full.js -o modules/gasLawCalculators.js --config-file terser.config.json" to compress the file
 export function calculateIdealGasLaw(){
     try{
         let select=document.getElementById("ideal-solve-for");

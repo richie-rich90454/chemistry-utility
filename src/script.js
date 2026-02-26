@@ -1,5 +1,3 @@
-//Use: "terser script.js -o script.min.js --compress --mangle --module" to compress the file (make the min file)
-//"terser script.js -o script.min.js --config-file terser.config.json" is also usable
 import {initializeUIHandlers} from "./modules/uiHandlers.js";
 import {initializeEventListeners} from "./modules/eventListeners.js";
 document.addEventListener("DOMContentLoaded", function(){
