@@ -1,6 +1,10 @@
-let Fastify=require("fastify");
-let path=require("path");
-let fs=require("fs");
+import Fastify from "fastify";
+import path from "path";
+import fs from "fs";
+import {fileURLToPath} from "url";
+import staticPlugin from "@fastify/static";
+let __filename=fileURLToPath(import.meta.url);
+let __dirname=path.dirname(__filename);
 let fastify=Fastify({logger: false});
 let PORT=6005;
 fastify.addHook("onSend", async (request, reply, payload)=>{
@@ -43,7 +47,7 @@ fastify.get("/ptable.json", async (request, reply)=>{
         message: "Direct access to file is not allowed",
     });
 });
-fastify.register(require("@fastify/static"),{
+fastify.register(staticPlugin,{
     root: path.join(__dirname, "dist"),
     setHeaders: (res, filePath)=>{
         res.setHeader(
