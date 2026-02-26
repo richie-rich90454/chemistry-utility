@@ -44,7 +44,6 @@
     "katex": "^0.16.22"
   },
   "devDependencies": {
-    "cssnano": "^7.1.2",
     "cssnano-preset-advanced": "^7.0.10",
     "terser": "^5.46.0",
     "vite": "^6.2.2",
