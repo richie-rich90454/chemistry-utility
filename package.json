@@ -3,6 +3,7 @@
   "version": "3.0.0",
   "description": "A program designed to balance chemical equations made with HTML, CSS, and JavaScript.",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "vite dev",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "cssnano": "^7.1.2",
+    "cssnano-preset-advanced": "^7.0.10",
     "terser": "^5.46.0",
     "vite": "^6.2.2"
   }
