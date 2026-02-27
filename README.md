@@ -1,268 +1,387 @@
-# Chemistry Utility at [chemutil.richardsblogs.com](https://chemutil.richardsblogs.com)
-- [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-- A comprehensive web‑based **Chemistry Utility** providing 11 specialized chemistry calculation tools for students, educators, and professionals. Built with **HTML5**, **CSS3**, **JavaScript ES6+**, and **Node.js**, served via **Fastify** for high performance and secure routing.
+# Chemistry Utility 🔬
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
+[![Go Version](https://img.shields.io/badge/go-%3E%3D1.21-00ADD8)](https://golang.org)
+[![Fastify](https://img.shields.io/badge/Fastify-4.x-000000)](https://fastify.dev)
+[![Fiber](https://img.shields.io/badge/Fiber-2.x-00ADD8)](https://gofiber.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF)](https://vitejs.dev)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-ff69b4)](https://github.com/richie-rich90454/chemistry-utility/pulls)
+[![GitHub stars](https://img.shields.io/github/stars/richie-rich90454/chemistry-utility?style=social)](https://github.com/richie-rich90454/chemistry-utility/stargazers)
+[![Go Report Card](https://goreportcard.com/badge/github.com/richie-rich90454/chemistry-utility)](https://goreportcard.com/report/github.com/richie-rich90454/chemistry-utility)
+[![Bundle Size](https://img.shields.io/badge/bundle%20size-optimized-blueviolet)](https://vitejs.dev)
+
+A comprehensive **Chemistry Utility** offering 11 specialized calculation tools for chemistry students, educators, and professionals. Built with **TypeScript**, **HTML5**, **CSS3**, and dual-server architecture with **Node.js/Fastify** and **Go/Fiber** implementations.
+
+🌐 **Live Demo**: [chemutil.richardsblogs.com](https://chemutil.richardsblogs.com)
 
 ---
-## Table of Contents
-* [Features](#features)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Examples](#examples)
-* [File Structure](#file-structure)
-* [Technical Architecture](#technical-architecture)
-* [API Endpoint](#api-endpoint)
-* [Customization](#customization)
-* [Contributing](#contributing)
-* [Tests](#tests)
-* [License](#license)
-* [Acknowledgements](#acknowledgements)
+
+## 📋 Table of Contents
+- [Features](#features)
+- [Dual-Server Architecture](#dual-server-architecture)
+- [Getting Started](#getting-started)
+- [Usage Examples](#usage-examples)
+- [Project Structure](#project-structure)
+- [Technical Architecture](#technical-architecture)
+- [API Reference](#api-reference)
+- [Customization](#customization)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+
 ---
-## Features
-* 🔎 **Element Information Lookup**
-  * Retrieve comprehensive element data including: Symbol, Name, Atomic Mass (u), Atomic Number, Electronegativity, Electron Affinity (kJ/mol), Atomic Radius (pm), Ionization Energy (kJ/mol), Valence & Total Electrons, Group, Period, and Element Type.
 
-* ⚖️ **Molar Mass Calculator**
-  * Compute molar mass for any valid chemical formula—including nested parentheses—with error handling for invalid inputs.
+## ✨ Features
 
-* 🔢 **Chemical Equation Balancer**
-  * Auto-balance chemical equations with adjustable coefficient search up to 10.
+### Core Chemistry Tools
+| Tool | Description |
+|------|-------------|
+| 🔎 **Element Information** | Complete periodic table data for 118 elements including atomic mass, electronegativity, electron affinity, atomic radius, ionization energy, and electron configuration |
+| ⚖️ **Molar Mass Calculator** | Parse complex formulas with nested parentheses, error handling for invalid inputs |
+| 🔢 **Equation Balancer** | Auto-balance chemical equations with adjustable coefficient search range |
+| 🧪 **Stoichiometry Calculator** | Three calculation modes: product from reactant, reactant from product, limiting reactant |
+| 🧪 **Dilution Calculator** | Solve C₁V₁ = C₂V₂ equations with flexible parameter solving |
+| 📊 **Mass Percent & Concentration** | Calculate mass percent, ppm, and ppb concentrations |
+| 🧪 **Solution Mixing** | Determine final molarity when mixing two solutions |
+| ☢️ **Nuclear Chemistry** | Half-life calculator for exponential decay modeling |
+| 🌬️ **Gas Laws** | Ideal gas law, combined gas law, and Van der Waals equation solvers |
+| ⚡ **Electrochemistry** | Cell potential calculations (standard and non-standard), Nernst equation, electrolysis relationships |
+| 🔗 **Bond Type Predictor** | Predict ionic, covalent, or metallic bonds based on electronegativity differences |
 
-* 🧪 **Stoichiometry Calculator**
-  * Three modes: Product from Reactant, Reactant from Product, and Limiting Reactant. Dynamically generates input fields based on balanced equations.
+### Technical Highlights
+- **TypeScript Migration**: Full conversion from JavaScript to TypeScript for improved type safety
+- **Dual-Server Architecture**: Choose between Node.js/Fastify or Go/Fiber implementations
+- **Modular Architecture**: Separated concerns with dedicated modules for each calculator type
+- **Responsive Design**: Mobile-first approach with fluid layouts
+- **Vite Build System**: Fast development with optimized production builds
+- **SEO Optimized**: Structured data, sitemap, and comprehensive meta tags
 
-* 🧪 **Dilution Calculator**
-  * Solution preparation using C₁V₁ = C₂V₂ formula with flexible parameter solving.
-
-* 📊 **Mass Percent & Concentration Calculator**
-  * Calculate mass percent, ppm (parts per million), and ppb (parts per billion) concentrations.
-
-* 🧪 **Solution Mixing Calculator**
-  * Determine final molarity when mixing two solutions of different concentrations and volumes.
-
-* ☢️ **Nuclear Chemistry Tools**
-  * Half-life calculator for exponential decay modeling with multiple solving options.
-
-* 🌬️ **Gas Laws Calculator**
-  * Ideal gas law (PV = nRT), combined gas law, and Van der Waals equation for real gases.
-
-* ⚡ **Electrochemistry Tools**
-  * Cell potential calculations (standard and non-standard), Nernst equation solver, and electrolysis mass/current/time relationships.
-
-* 🔗 **Bond Type Predictor**
-  * Predict ionic, covalent, or metallic bonds based on electronegativity differences.
-
-* 🛡️ **Secure & Robust Server**
-  * Fastify-powered server with security headers, API validation, and graceful shutdown logic.
 ---
-## Installation
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/richie-rich90454/Chemistry-Utility.git
-   cd chemistry-utility
-   ```
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-3. **Ensure** `ptable.json` is present in the project root under the schema defined in `Schema.txt`.
-4. **Start the server**
-   ```bash
-   node server.js
-   ```
-   * By default, listens on port **6005**. Override via `PORT` environment variable if needed.
+
+## 🏗 Dual-Server Architecture
+
+The Chemistry Utility offers two server implementations, allowing you to choose based on your deployment needs:
+
+### Server Comparison
+
+| Feature | Node.js (Fastify) | Go (Fiber) |
+|---------|-------------------|------------|
+| **Language** | JavaScript/TypeScript | Go |
+| **Framework** | Fastify 4.x | Fiber 2.x |
+| **Startup Time** | ~200-400ms | ~5-10ms |
+| **Memory Footprint** | ~30-50 MB | ~5-15 MB |
+| **Concurrency** | Good (event loop) | Excellent (goroutines) |
+| **Development Speed** | Faster (hot reload) | Moderate |
+| **Type Safety** | TypeScript | Native |
+| **Binary Size** | N/A (interpreter) | ~12-15 MB standalone |
+| **Cross-Compilation** | Requires Node.js | Single binary |
+
+### When to Use Each
+
+**Choose Node.js/Fastify if you:**
+- Prefer JavaScript/TypeScript ecosystem
+- Want faster development cycles with hot reload
+- Need access to npm packages
+- Are deploying to traditional Node.js environments
+
+**Choose Go/Fiber if you:**
+- Need minimal resource usage
+- Want a single binary deployment
+- Require maximum performance and concurrency
+- Are deploying to containerized environments
+- Need native cross-platform compilation
+
+### Running Both Servers
+
+```bash
+# Node.js/Fastify server
+npm run dev        # Development with hot reload
+npm start          # Production server
+
+# Go/Fiber server
+go mod download    # Download Go dependencies
+go run main.go     # Run directly
+go build -o server # Build standalone binary
+./server           # Run binary
+```
+
+Both servers run on port `6005` by default (configurable via `PORT` environment variable) and provide identical functionality.
+
 ---
-## Usage
-1. **Start the server:**
-   ```bash
-   node server.js
-   ```
 
-2. **Access the application:**
-   ```
-   http://localhost:6005
-   ```
+## 🚀 Getting Started
 
-3. **Navigate through 11 chemistry tools:**
-   * **Element Lookup** - Enter element symbol or name for detailed atomic data
-   * **Molar Mass Calculator** - Input chemical formulas for molecular weight calculations
-   * **Equation Balancer** - Enter unbalanced equations to get balanced results
-   * **Dilution Calculator** - Solve for any parameter in C₁V₁ = C₂V₂
-   * **Mass Percent Calculator** - Calculate %, ppm, or ppb concentrations
-   * **Solution Mixing Calculator** - Determine final molarity from mixed solutions
-   * **Nuclear Chemistry** - Half-life calculations for exponential decay
-   * **Gas Laws** - Ideal gas law, combined gas law, and Van der Waals equation
-   * **Electrochemistry** - Cell potential, Nernst equation, and electrolysis
-   * **Stoichiometry** - Product/reactant calculations and limiting reactants
-   * **Bond Type Predictor** - Ionic, covalent, or metallic bond prediction
+### Prerequisites
+- **Node.js** 18.x or higher (for Node.js server)
+- **Go** 1.21 or higher (for Go server)
+- **npm** 9.x or higher
 
-4. **Desktop Application (Optional):**
-   ```bash
-   npm start  # Launch Electron desktop app
-   ```
+### Installation
 
-Results update dynamically with instant calculations—no page reloads required.
+```bash
+# Clone the repository
+git clone https://github.com/richie-rich90454/chemistry-utility.git
+cd chemistry-utility
+
+# Install Node.js dependencies
+npm install
+
+# Download Go dependencies
+go mod download
+
+# Build the frontend
+npm run build
+
+# Start the server (choose one)
+npm start                    # Node.js server
+go run main.go              # Go server
+./server                    # Pre-built Go binary
+```
+
+The application will be available at `http://localhost:6005`
+
 ---
-## Examples
-### Molar Mass
-* **Input:** `Al2(SO4)3`
-* **Output:** `342.15 g/mol`
+
+## 💡 Usage Examples
+
+### Molar Mass Calculation
+```
+Input:  Al2(SO4)3
+Output: 342.15 g/mol
+```
 
 ### Equation Balancing
-* **Input:** `C3H8+O2->CO2+H2O`
-* **Output:** `C3H8+5O2->3CO2+4H2O`
+```
+Input:  C3H8+O2->CO2+H2O
+Output: C3H8+5O2->3CO2+4H2O
+```
 
 ### Stoichiometry (Limiting Reactant)
-* **Equation:** `2H2+O2->2H2O`
-* **Inputs:** H2 = 3 mol, O2 = 1 mol
-* **Result:** Limiting reactant: `O2`, Max H2O = `2 mol`
-
-### Gas Laws (Ideal Gas Law)
-* **Input:** P = ?, V = 2.5 L, n = 0.1 mol, T = 298 K
-* **Output:** `P = 0.98 atm`
-
-### Electrochemistry (Cell Potential)
-* **Input:** E°₁ = 0.34 V (Cu²⁺/Cu), E°₂ = -0.76 V (Zn²⁺/Zn)
-* **Output:** `E°_cell = 1.10 V`
-
-### Nuclear Chemistry (Half-Life)
-* **Input:** Initial = 100 g, Time = 10 years, Half-life = 5 years
-* **Output:** `Remaining = 25 g`
+```
+Equation: 2H2 + O2 -> 2H2O
+Inputs:   H2 = 3 mol, O2 = 1 mol
+Result:   Limiting reactant: O2
+          Maximum H2O produced: 2 mol
+```
 
 ### Bond Type Prediction
-* **Input:** Na (0.93) and Cl (3.16)
-* **Output:** `Ionic bond (ΔEN = 2.23)`
+```
+Input:  Sodium (electronegativity 0.93) and Chlorine (3.16)
+Output: Ionic bond (ΔEN = 2.23)
+```
+
 ---
-## Technical Architecture
-### Frontend
-- **HTML5** with comprehensive SEO meta tags and structured data
-- **CSS3** with responsive design and Google Fonts integration
-- **JavaScript ES6+** with modular architecture
-- **Progressive Web App** capabilities with service worker support
 
-### Backend
-- **Node.js** with **Fastify** framework for high-performance serving
-- Secure API endpoints with XMLHttpRequest validation
-- Static file serving with proper cache control headers
-- Security headers (X-Content-Type-Options, HSTS)
+## 📁 Project Structure
 
-### Data Layer
-- **ptable.json** - Complete periodic table data with 118 elements
-- Each element includes comprehensive properties: symbol, name, atomic mass, electronegativity, electron affinity, atomic radius, ionization energy, valence electrons, group, period, and type
-
-### Modular Design
-The application follows a modular architecture with specialized components:
-- **Formula Parser** - Chemical formula parsing and validation
-- **Equation Balancer** - Chemical equation balancing algorithms
-- **Stoichiometry Calculator** - Mole ratio and limiting reactant calculations
-- **Gas Law Solvers** - Ideal, combined, and Van der Waals equations
-- **Electrochemistry Tools** - Cell potential and electrolysis calculations
-- **Solution Calculators** - Concentration, dilution, and mixing calculations
-- **Nuclear Chemistry** - Half-life and exponential decay modeling
-- **Bond Predictor** - Electronegativity-based bond type prediction
-
-### Security Features
-- Removes X-Powered-By header
-- Validates API requests with X-Requested-With header
-- Secure file handling with temporary directories
-- Input sanitization and error handling
-- Graceful shutdown and cleanup procedures
-
-### Build & Deployment
-- **npm** package management
-- **Electron** for cross-platform desktop applications
-- **Fastify** for web server with optimized routing
-- **Minification** for production assets
-- **SEO optimization** with structured data and sitemap
----
-## File Structure
 ```
 chemistry-utility/
-├── index.html              # Main application interface with SEO optimization
-├── style.css              # Responsive CSS styling
-├── script.js              # Main client-side JavaScript logic
-├── script.min.js          # Minified production script
-├── render.js              # UI rendering utilities
-├── render.min.js          # Minified rendering utilities
-├── server.js              # Fastify server with security features
-├── main.js                # Electron main process (desktop app)
-├── package.json           # Project metadata and dependencies
-├── package-lock.json      # Dependency lock file
-├── ptable.json            # Complete periodic table data (118 elements)
-├── Schema.txt             # Data schema for ptable.json
-├── README.md              # Project documentation
-├── LICENSE                # MIT License
-├── sitemap.xml            # SEO sitemap
-├── terser.config.json     # JavaScript minification configuration
-├── favicon.ico            # Website favicon
-├── favicon.png            # PNG favicon
-├── favicon.icns           # macOS icon
-├── apple-touch-icon.png   # iOS touch icon
-├── .gitignore             # Git ignore rules
-└── modules/               # Modular JavaScript components
-    ├── animationUtils.js & .full.js
-    ├── bondPredictor.js & .full.js
-    ├── electrochemistryCalculators.js & .full.js
-    ├── equationBalancer.js & .full.js
-    ├── eventListeners.js & .full.js
-    ├── formulaParser.js & .full.js
-    ├── gasLawCalculators.js & .full.js
-    ├── solutionCalculators.js & .full.js
-    ├── stoichiometryCalculator.js & .full.js
-    └── uiHandlers.js & .full.js
+├── src/                    # TypeScript source files
+│   ├── modules/            # Modular calculator components
+│   │   ├── animationUtils.ts
+│   │   ├── bondPredictor.ts
+│   │   ├── electrochemistryCalculators.ts
+│   │   ├── equationBalancer.ts
+│   │   ├── eventListeners.ts
+│   │   ├── formulaParser.ts
+│   │   ├── gasLawCalculators.ts
+│   │   ├── solutionCalculators.ts
+│   │   ├── stoichiometryCalculator.ts
+│   │   └── uiHandlers.ts
+│   ├── render.ts           # UI rendering utilities
+│   ├── script.ts           # Main client logic
+│   └── types.d.ts          # TypeScript type definitions
+├── public/                 # Static assets
+│   ├── index.html          # Main application interface
+│   ├── style-web.css       # Web styling
+│   ├── style-tauri.css     # Tauri app styling
+│   ├── favicon.ico         # Website favicon
+│   └── sitemap.xml         # SEO sitemap
+├── server/                 # Server implementations
+│   ├── server.js           # Node.js/Fastify server (ES modules)
+│   └── ptable.json         # Periodic table data (118 elements)
+├── main.go                 # Go/Fiber server implementation
+├── go.mod                  # Go module definition
+├── go.sum                  # Go checksums
+├── dist/                   # Production build output
+├── .gitignore
+├── package.json
+├── tsconfig.json
+├── vite.config.js          # Vite configuration
+└── README.md
 ```
+
 ---
-## API Endpoint
+
+## 🏗 Technical Architecture
+
+### Frontend
+- **TypeScript** for type-safe, maintainable code
+- **Vite** for fast development and optimized builds
+- **CSS3** with responsive design patterns
+- **Modular JavaScript** with ES6+ features
+- **Dual CSS** variants (web and Tauri-optimized)
+
+### Backend (Node.js/Fastify)
+- **Node.js** runtime with **Fastify** framework
+- **ES Modules** for modern import/export syntax
+- **Security headers** and request validation
+- **Static file serving** with cache control
+- **Graceful shutdown** with timeout handling
+
+### Backend (Go/Fiber)
+- **Go** compiled binary with **Fiber** framework
+- **Single executable** deployment
+- **Recovery middleware** for panic handling
+- **Security headers** and URL sanitization
+- **Graceful shutdown** with configurable timeout
+
+### Data Layer
+- **Periodic Table JSON** with 118 elements
+- Each element includes: symbol, name, atomic mass, electronegativity, electron affinity, atomic radius, ionization energy, electron configuration, group, period, and type
+
+### Build & Deployment
+- **TypeScript Compiler** for type checking
+- **Vite** for bundling and optimization
+- **Terser** for JavaScript minification
+- **Go compiler** for native binaries
+- **Cross-platform** compatibility
+
+---
+
+## 🔌 API Reference
+
 ### GET `/api/ptable`
-* **Description:** Serves `ptable.json` only when `X-Requested-With: XMLHttpRequest` header is present.
-* **Response:** JSON array of element objects.
-* **Errors:** 403 if header missing, 500 if data missing.
+Returns periodic table data (requires `X-Requested-With: XMLHttpRequest` header)
+
+**Response:** JSON array of element objects
+```json
+[
+  {
+    "symbol": "H",
+    "name": "Hydrogen",
+    "atomicMass": 1.008,
+    "electronegativity": 2.20,
+    "atomicNumber": 1,
+    "group": 1,
+    "period": 1
+  }
+]
+```
+
+**Error Responses:**
+- `403` - Missing required header
+- `500` - Data unavailable
+
 ### GET `/ptable.json`
-* **Response:** 403 Forbidden (direct file access blocked).
-### Static files
-* All other assets and paths (`/`, `/*.html`, `/*.js`, etc.) are served via Fastify’s static plugin with appropriate `Cache-Control` headers.
+Returns `403 Forbidden` (direct file access blocked)
+
+### Static Files
+All other assets are served with appropriate cache headers:
+- `.html` files: `no-store`
+- Other assets: `public, max-age=86400` (24 hours)
+
 ---
-## Customization
+
+## 🎨 Customization
+
 ### Styling
-- **CSS Variables:** Modify CSS custom properties in `style.css` for colors, fonts, and spacing
-- **Responsive Design:** Adjust breakpoints and layout in `style.css`
-- **Google Fonts:** Change font families in `index.html` head section
+Modify CSS variables in `src/style-*.css`:
+```css
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --font-family: 'Noto Sans', sans-serif;
+}
+```
+
+### Adding New Calculators
+1. Create a new module in `src/modules/`
+2. Implement calculation logic
+3. Add event listeners in `src/modules/eventListeners.ts`
+4. Update UI handlers in `src/modules/uiHandlers.ts`
 
 ### Server Configuration
-- **Port:** Set `PORT` environment variable or modify `server.js` default port (6005)
-- **Security Headers:** Customize security policies in Fastify hooks
-- **Caching:** Adjust cache control headers in static file serving
-- **API Routes:** Add new endpoints in `server.js`
+```bash
+# Change port (both servers)
+PORT=3000 npm start
+PORT=3000 go run main.go
 
-### Data Customization
-- **Periodic Table:** Update `ptable.json` following `Schema.txt` format
-- **Element Properties:** Add new element properties or modify existing ones
-- **Validation:** Extend formula parsing in `modules/formulaParser.js`
+# Build Go binary with optimizations
+go build -ldflags="-s -w" -o server
+```
 
-### Module Development
-- **New Calculators:** Create modules following the established pattern
-- **Algorithm Updates:** Modify calculation logic in respective module files
-- **UI Integration:** Add event listeners in `modules/eventListeners.js`
-- **Animation:** Customize UI animations in `modules/animationUtils.js`
+---
 
-### Build Process
-- **Minification:** Configure `terser.config.json` for JavaScript optimization
-- **Electron Build:** Modify `package.json` build settings for desktop distribution
-- **SEO:** Update structured data and meta tags in `index.html`
+## 🗺 Roadmap
+
+### Completed ✓
+- [x] TypeScript migration
+- [x] Vite build system integration
+- [x] ES modules adoption
+- [x] Modular architecture
+- [x] SEO optimization
+- [x] Go/Fiber server implementation
+- [x] Dual-server architecture
+
+### In Progress 🚧
+- [ ] Unit testing with Jest and Go testing
+- [ ] CI/CD pipeline with GitHub Actions
+- [ ] Performance benchmarking suite
+- [ ] Docker containers for both servers
+
+### Planned 🎯
+- [ ] **Tauri v2 desktop application** - Cross-platform native app with smaller bundle size
+- [ ] Offline support with service workers
+- [ ] Chemical structure drawing with ChemDoodle
+- [ ] Periodic table visualization
+- [ ] Save/load calculation history
+- [ ] Export results as PDF
+- [ ] Dark mode theme
+- [ ] Mobile app (React Native)
+- [ ] WebAssembly core for client-side calculations
+
 ---
-## Contributing
-1. Fork the repository and create a feature branch.
-2. Commit changes with clear messages.
-3. Submit a PR describing your feature or fix.
-Please include tests or examples for new logic.
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+5. **Open** a Pull Request
+
+Please ensure your PR:
+- Follows existing code style
+- Includes relevant documentation updates
+- Passes TypeScript compilation (`npm run build`)
+- Passes Go compilation (`go build`)
+
 ---
-## Tests
-> *(No automated tests yet; manual UI tests recommended.)*
-> *Future:* Add a test suite (e.g., Mocha/Chai) and document `npm test`.
+
+## 📄 License
+
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for more information.
+
 ---
-## License
-This project is licensed under the **MIT License**.
-See [LICENSE](LICENSE) for details.
-## Acknowledgements
-* Fastify team for a performant Node.js framework.
-* Periodic table data schema inspired by \[PubChem] and \[Wikidata].
-* Fonts from Google Fonts (Noto Sans & EB Garamond).
+
+## 🙏 Acknowledgements
+
+- [Fastify](https://fastify.dev/) team for the excellent Node.js framework
+- [Fiber](https://gofiber.io/) team for the performant Go framework
+- Periodic table data structure adapted from [PubChem](https://pubchem.ncbi.nlm.nih.gov/)
+- [Vite](https://vitejs.dev/) for the next-generation build tool
+- [TypeScript](https://www.typescriptlang.org/) for making JavaScript scale
+- [Tauri](https://tauri.app/) for future desktop application capabilities
+
+---
+
+<p align="center">
+  <a href="https://chemutil.richardsblogs.com">Live Demo</a> •
+  <a href="https://github.com/richie-rich90454/chemistry-utility/issues">Report Bug</a> •
+  <a href="https://github.com/richie-rich90454/chemistry-utility/issues">Request Feature</a>
+</p>
