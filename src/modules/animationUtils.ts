@@ -1,4 +1,4 @@
-export function slideDown(element, duration){
+export function slideDown(element: HTMLElement, duration: number): void{
     element.style.display="block";
     element.style.height="0";
     element.style.overflow="hidden";
@@ -13,7 +13,7 @@ export function slideDown(element, duration){
         }, duration);
     });
 }
-export function slideUp(element, duration){
+export function slideUp(element: HTMLElement, duration: number): void{
     element.style.height=element.scrollHeight+"px";
     element.style.overflow="hidden";
     element.style.transition="height "+duration+"ms";

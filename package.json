@@ -44,8 +44,10 @@
     "katex": "^0.16.22"
   },
   "devDependencies": {
+    "@types/node": "^25.3.2",
     "cssnano-preset-advanced": "^7.0.10",
     "terser": "^5.46.0",
+    "typescript": "^5.9.3",
     "vite": "^6.2.2",
     "vite-plugin-html": "^3.2.2"
   }
