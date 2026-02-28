@@ -35,19 +35,6 @@ export function initializeUIHandlers(): void{
 			}
 		});
 	}
-	let buttons=document.querySelectorAll("button:not(.clear-button)") as NodeListOf<HTMLElement>;
-	for (let i=0; i<buttons.length; i++){
-		buttons[i].addEventListener("mouseenter", function(this: HTMLElement){
-			this.style.backgroundColor="var(--dark-blue)";
-			this.style.transform="translateY(-2px)";
-			this.style.boxShadow="0 4px 8px var(--shadow-color)";
-		});
-		buttons[i].addEventListener("mouseleave", function(this: HTMLElement){
-			this.style.backgroundColor="var(--primary-blue)";
-			this.style.transform="translateY(0)";
-			this.style.boxShadow="0 2px 4px var(--shadow-color)";
-		});
-	}
 	let clearButtons=document.querySelectorAll(".clear-button") as NodeListOf<HTMLElement>;
 	for (let i=0; i<clearButtons.length; i++){
 		clearButtons[i].addEventListener("click", function(this: HTMLElement){

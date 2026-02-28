@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "start": "go run main.go",
-    "start:nodejs": "node server.js",
+    "build:server": "tsc -p tsconfig.server.json",
+    "start:nodejs": "npm run build:server && node server.js",
+    "build": "tsc && vite build",
     "dev": "vite dev",
-    "preview": "vite preview",
-    "build": "vite build"
+    "preview": "vite preview"
   },
   "keywords": [
     "chemistry",
@@ -32,6 +33,7 @@
     "@types/node": "^25.3.2",
     "cssnano-preset-advanced": "^7.0.10",
     "terser": "^5.46.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vite": "^6.2.2",
     "vite-plugin-html": "^3.2.2"
