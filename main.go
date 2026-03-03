@@ -1,7 +1,9 @@
 package main
 
 import(
+	"context"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -23,6 +25,12 @@ func main(){
 	app:=fiber.New(fiber.Config{
 		DisableStartupMessage: false,
 		ErrorHandler: func(c *fiber.Ctx, err error) error{
+			errStr:=err.Error()
+			if strings.Contains(errStr, "invalid header name")||
+				strings.Contains(errStr, "malformed")||
+				strings.Contains(errStr, "EOF"){
+				return c.Status(fiber.StatusBadRequest).SendString("Bad Request")
+			}
 			log.Printf("Unexpected error: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Internal Server Error",
@@ -76,7 +84,6 @@ func main(){
 		}
 		filePath:=filepath.Join(distPath, path)
 		if _, err:=os.Stat(filePath); err==nil{
-			// Set cache headers based on file type
 			if strings.HasSuffix(path, ".html"){
 				c.Set("Cache-Control", "no-store")
 			}else{
@@ -88,13 +95,38 @@ func main(){
 		return c.SendFile(filepath.Join(distPath, "index.html"))
 	})
 	go func(){
-		log.Printf("Server running at http://localhost:%d", PORT)
+		log.Printf("Server running on port %d (IPv4 and IPv6)", PORT)
 		log.Printf("Serving static files from: %s", distPath)
-		if err:=app.Listen(":"+strconv.Itoa(PORT)); err!=nil{
+		if err:=startDualStackServer(app, PORT); err!=nil{
 			log.Fatal("Failed to start server:", err)
 		}
 	}()
 	gracefulShutdown(app)
+}
+func startDualStackServer(app *fiber.App, port int) error{
+	portStr:=":"+strconv.Itoa(port)
+	lc:=net.ListenConfig{
+		Control: func(network, address string, c syscall.RawConn) error{
+			if network=="tcp6"|| strings.Contains(address, "[::]"){
+				return c.Control(func(fd uintptr){
+					err:=syscall.SetsockoptInt(syscall.Handle(fd), syscall.IPPROTO_IPV6, syscall.IPV6_V6ONLY, 0)
+					if err!=nil{
+						log.Printf("Warning: failed to set IPV6_V6ONLY=0: %v", err)
+					}
+				})
+			}
+			return nil
+		},
+	}
+	ln, err:=lc.Listen(context.Background(), "tcp", "[::]"+portStr)
+	if err!=nil{
+		log.Printf("Dual-stack listener failed, falling back to IPv4: %v", err)
+		ln, err=net.Listen("tcp", "0.0.0.0"+portStr)
+		if err!=nil{
+			return err
+		}
+	}
+	return app.Listener(ln)
 }
 func gracefulShutdown(app *fiber.App){
 	sigChan:=make(chan os.Signal, 1)
