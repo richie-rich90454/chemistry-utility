@@ -26,6 +26,8 @@ func main(){
 	}
 	distPath:=filepath.Join(dir, "dist")
 	app:=fiber.New(fiber.Config{
+		Prefork: os.Getenv("PREFORK")=="true",
+		Concurrency: 256*1024,
 		DisableStartupMessage: false,
 		ErrorHandler: func(c *fiber.Ctx, err error) error{
 			errStr:=err.Error()
@@ -46,7 +48,13 @@ func main(){
 		return err
 	})
 	app.Use(recover.New())
-	app.Use(compress.New())
+	app.Use(compress.New(compress.Config{
+		Level: compress.LevelBestSpeed,
+		Next: func(c *fiber.Ctx) bool {
+			path := c.Path()
+			return isImageOrFont(path)||strings.HasSuffix(path, ".pdf")||strings.HasSuffix(path, ".zip")||strings.HasSuffix(path, ".wasm")
+		},
+	}))
 	app.Use(func(c *fiber.Ctx) error{
 		if strings.Contains(c.OriginalURL(), "://")&&!strings.HasPrefix(c.OriginalURL(), "/"){
 			return c.Status(fiber.StatusBadRequest).SendString("Bad Request")
@@ -105,6 +113,9 @@ func main(){
 	go func(){
 		log.Printf("Server running on port %d (IPv4 and IPv6)", PORT)
 		log.Printf("Serving static files from: %s", distPath)
+		if os.Getenv("PREFORK")=="true"{
+			log.Printf("Prefork mode enabled")
+		}
 		if err:=startDualStackServer(app, PORT); err!=nil{
 			log.Fatal("Failed to start server:", err)
 		}
