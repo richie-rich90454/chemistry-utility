@@ -13,9 +13,12 @@ import(
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
+
 const PORT=6005
+
 func main(){
 	dir, err:=os.Getwd()
 	if err!=nil{
@@ -43,6 +46,7 @@ func main(){
 		return err
 	})
 	app.Use(recover.New())
+	app.Use(compress.New())
 	app.Use(func(c *fiber.Ctx) error{
 		if strings.Contains(c.OriginalURL(), "://")&&!strings.HasPrefix(c.OriginalURL(), "/"){
 			return c.Status(fiber.StatusBadRequest).SendString("Bad Request")
@@ -87,7 +91,11 @@ func main(){
 			if strings.HasSuffix(path, ".html"){
 				c.Set("Cache-Control", "no-store")
 			}else{
-				c.Set("Cache-Control", "public, max-age=86400")
+				if isImageOrFont(path){
+					c.Set("Cache-Control", "public, max-age=31536000, immutable")
+				}else{
+					c.Set("Cache-Control", "public, max-age=86400")
+				}
 			}
 			return c.SendFile(filePath)
 		}
@@ -103,11 +111,22 @@ func main(){
 	}()
 	gracefulShutdown(app)
 }
+
+func isImageOrFont(path string) bool{
+	ext:=strings.ToLower(filepath.Ext(path))
+	switch ext{
+	case ".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp", ".ico",
+		".woff", ".woff2", ".ttf", ".eot", ".otf":
+		return true
+	}
+	return false
+}
+
 func startDualStackServer(app *fiber.App, port int) error{
 	portStr:=":"+strconv.Itoa(port)
 	lc:=net.ListenConfig{
 		Control: func(network, address string, c syscall.RawConn) error{
-			if network=="tcp6"|| strings.Contains(address, "[::]"){
+			if network=="tcp6"||strings.Contains(address, "[::]"){
 				return c.Control(func(fd uintptr){
 					err:=syscall.SetsockoptInt(syscall.Handle(fd), syscall.IPPROTO_IPV6, syscall.IPV6_V6ONLY, 0)
 					if err!=nil{
@@ -128,6 +147,7 @@ func startDualStackServer(app *fiber.App, port int) error{
 	}
 	return app.Listener(ln)
 }
+
 func gracefulShutdown(app *fiber.App){
 	sigChan:=make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -150,6 +170,7 @@ func gracefulShutdown(app *fiber.App){
 
 	os.Exit(0)
 }
+
 func init(){
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
