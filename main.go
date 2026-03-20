@@ -19,6 +19,7 @@ const PORT=6005
 var (
 	ptableData []byte
 	ptableErr  error
+	htmlCache  = make(map[string][]byte)
 )
 func main(){
 	dir, err:=os.Getwd()
@@ -30,6 +31,10 @@ func main(){
 	ptableData, ptableErr=os.ReadFile(ptablePath)
 	if ptableErr!=nil{
 		log.Printf("Warning: could not pre-load ptable.json: %v", ptableErr)
+	}
+	err=preloadHTMLFiles(distPath)
+	if err!=nil{
+		log.Printf("Warning: could not preload HTML files: %v", err)
 	}
 	app:=fiber.New(fiber.Config{
 		Prefork: os.Getenv("PREFORK")=="true",
@@ -91,30 +96,22 @@ func main(){
 			"message": "Direct access to file is not allowed",
 		})
 	})
+	app.Static("/", distPath, fiber.Static{
+		MaxAge: 86400,
+		Index: "",
+	})
 	app.Get("/*", func(c *fiber.Ctx) error{
 		path:=c.Path()
 		if strings.HasPrefix(path, "/api/"){
 			return c.Next()
 		}
-		if path=="/"{
-			c.Set("Cache-Control", "no-store")
+		indexHTML, ok:=htmlCache["index.html"]
+		if !ok{
 			return c.SendFile(filepath.Join(distPath, "index.html"))
 		}
-		filePath:=filepath.Join(distPath, path)
-		if _, err:=os.Stat(filePath); err==nil{
-			if strings.HasSuffix(path, ".html"){
-				c.Set("Cache-Control", "no-store")
-			}else{
-				if isImageOrFont(path){
-					c.Set("Cache-Control", "public, max-age=31536000, immutable")
-				}else{
-					c.Set("Cache-Control", "public, max-age=86400")
-				}
-			}
-			return c.SendFile(filePath)
-		}
 		c.Set("Cache-Control", "no-store")
-		return c.SendFile(filepath.Join(distPath, "index.html"))
+		c.Type("html")
+		return c.Send(indexHTML)
 	})
 	go func(){
 		log.Printf("Server running on port %d (IPv4 and IPv6)", PORT)
@@ -127,6 +124,29 @@ func main(){
 		}
 	}()
 	gracefulShutdown(app)
+}
+func preloadHTMLFiles(distPath string) error{
+	return filepath.WalkDir(distPath, func(path string, d os.DirEntry, err error) error{
+		if err!=nil{
+			return err
+		}
+		if d.IsDir(){
+			return nil
+		}
+		if strings.HasSuffix(d.Name(), ".html"){
+			rel, err:=filepath.Rel(distPath, path)
+			if err!=nil{
+				return err
+			}
+			content, err:=os.ReadFile(path)
+			if err!=nil{
+				log.Printf("Failed to read %s: %v", path, err)
+				return nil
+			}
+			htmlCache[rel]=content
+		}
+		return nil
+	})
 }
 func isImageOrFont(path string) bool{
 	ext:=strings.ToLower(filepath.Ext(path))
