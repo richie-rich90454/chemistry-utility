@@ -11,20 +11,26 @@ import(
 	"strings"
 	"syscall"
 	"time"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
-
 const PORT=6005
-
+var (
+	ptableData []byte
+	ptableErr  error
+)
 func main(){
 	dir, err:=os.Getwd()
 	if err!=nil{
 		log.Fatal("Failed to get working directory:", err)
 	}
 	distPath:=filepath.Join(dir, "dist")
+	ptablePath:=filepath.Join(distPath, "ptable.json")
+	ptableData, ptableErr=os.ReadFile(ptablePath)
+	if ptableErr!=nil{
+		log.Printf("Warning: could not pre-load ptable.json: %v", ptableErr)
+	}
 	app:=fiber.New(fiber.Config{
 		Prefork: os.Getenv("PREFORK")=="true",
 		Concurrency: 256*1024,
@@ -50,8 +56,8 @@ func main(){
 	app.Use(recover.New())
 	app.Use(compress.New(compress.Config{
 		Level: compress.LevelBestSpeed,
-		Next: func(c *fiber.Ctx) bool {
-			path := c.Path()
+		Next: func(c *fiber.Ctx) bool{
+			path:=c.Path()
 			return isImageOrFont(path)||strings.HasSuffix(path, ".pdf")||strings.HasSuffix(path, ".zip")||strings.HasSuffix(path, ".wasm")
 		},
 	}))
@@ -70,14 +76,14 @@ func main(){
 		}
 		c.Set("X-Content-Type-Options", "nosniff")
 		c.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
-		filePath:=filepath.Join(distPath, "ptable.json")
-		if _, err:=os.Stat(filePath); os.IsNotExist(err){
+		if ptableErr!=nil{
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error":   "Server Error",
-				"message": "Data file not found",
+				"message": "Data file not loaded",
 			})
 		}
-		return c.SendFile(filePath)
+		c.Set("Content-Type", "application/json")
+		return c.Send(ptableData)
 	})
 	app.Get("/ptable.json", func(c *fiber.Ctx) error{
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
@@ -122,7 +128,6 @@ func main(){
 	}()
 	gracefulShutdown(app)
 }
-
 func isImageOrFont(path string) bool{
 	ext:=strings.ToLower(filepath.Ext(path))
 	switch ext{
@@ -132,7 +137,6 @@ func isImageOrFont(path string) bool{
 	}
 	return false
 }
-
 func startDualStackServer(app *fiber.App, port int) error{
 	portStr:=":"+strconv.Itoa(port)
 	lc:=net.ListenConfig{
@@ -158,7 +162,6 @@ func startDualStackServer(app *fiber.App, port int) error{
 	}
 	return app.Listener(ln)
 }
-
 func gracefulShutdown(app *fiber.App){
 	sigChan:=make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -173,15 +176,13 @@ func gracefulShutdown(app *fiber.App){
 		done <- true
 	}()
 	select{
-		case <-done:
-			log.Println("Cleanup completed successfully")
-		case <-time.After(11 * time.Second):
-			log.Println("Forced shutdown due to timeout")
+	case <-done:
+		log.Println("Cleanup completed successfully")
+	case <-time.After(11 * time.Second):
+		log.Println("Forced shutdown due to timeout")
 	}
-
 	os.Exit(0)
 }
-
 func init(){
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
