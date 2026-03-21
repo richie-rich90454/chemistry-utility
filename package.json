@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "start": "go run main.go",
-    "build": "tsc && vite build",
     "dev": "vite dev",
-    "preview": "vite preview"
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:go": "go build -o src-tauri/binaries/chemistry-backend ./main.go",
+    "tauri": "tauri dev"
   },
   "keywords": [
     "chemistry",
@@ -26,10 +28,8 @@
     "katex": "^0.16.22"
   },
   "devDependencies": {
-    "@fastify/static": "^9.0.0",
+    "@tauri-apps/cli": "^2.10.1",
     "@types/node": "^25.5.0",
-    "fastify": "^5.8.2",
-    "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
     "vite": "^8.0.1",
     "vite-plugin-html": "^3.2.2"

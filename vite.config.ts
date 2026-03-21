@@ -6,11 +6,11 @@ const __dirname=path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
 	base: "/",
 	server:{
-		port: 3000,
+		port: 6005,
 		proxy:{
 			"/api": "http://localhost:6005",
 		},
-		open: true,
+		open: false,
 	},
 	build:{
 		minify: "oxc",
@@ -58,7 +58,7 @@ export default defineConfig({
 		}),
 	],
 	preview:{
-		port: 5000,
-		open: true,
+		port: 6005,
+		open: false,
 	},
 });
