@@ -1,11 +1,11 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "chemistry-utility",
-  "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "version": "1.0.0",
+  "identifier": "com.richierich.chemutil",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:6005",
+    "devUrl": "http://localhost:6005/index-app.html",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build"
   },
