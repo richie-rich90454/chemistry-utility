@@ -18,6 +18,10 @@ export default defineConfig({
 		target: "es2015",
 		sourcemap: false,
 		rollupOptions:{
+			input:{
+				main: path.resolve(__dirname, "index.html"),
+				app: path.resolve(__dirname, "index-app.html")
+			},
 			output:{
 				manualChunks(id){
 					if (id.includes("node_modules")){

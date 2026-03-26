@@ -2,17 +2,22 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Chemistry Utility | Free Online Chemistry Tools</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, shrink-to-fit=no">
-        <link rel="stylesheet" href="/src/style.css">
+        <title>Chemistry Utility</title>
+        <link rel="stylesheet" href="/src/style-app.css">
     </head>
     <body>
-        <header>
-            <h1>Chemistry Utility</h1>
-        </header>
-        <div class="nav-spacer"></div>
-        <nav>
-            <div class="nav-container">
+    <div class="app-layout">
+        <aside class="sidebar" aria-label="Main navigation">
+            <div class="sidebar-header">
+                <h1>Chemistry Utility</h1>
+                <button class="icon-button theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+                    </svg>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
                 <ul>
                     <li><a href="#element-lookup" class="active">Element Lookup</a></li>
                     <li><a href="#mass-calc">Molar Mass</a></li>
@@ -26,48 +31,36 @@
                     <li><a href="#stoichiometry">Stoichiometry</a></li>
                     <li><a href="#bond-type-predictor">Bond Type</a></li>
                 </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <p>&copy; 2026 Richard's Blogs</p>
             </div>
-        </nav>
-        <main id="main">
-            <section class="intro">
-                <p>This Chemistry Utility is a free online chemistry toolkit offering molar mass calculation, chemical equation balancing, stoichiometry solving, gas law calculations, dilution formulas, and more.</p>
-            </section>
-            <div id="element-lookup" class="main-groups">
-                <h2>Element Information Lookup - Atomic Number, Mass, Electron Configuration and more</h2>
-                <div class="tool-container">
-                    <p class="tool-description">Quickly look up any chemical element to find its atomic number, mass, electron configuration, and group on the periodic table. This tool is perfect for students, teachers, or hobbyists who need fast reference information. Just type the element name or symbol and get accurate, reliable data instantly.</p>
-                </div>
-                <p>Enter the element symbol or name of the element you want to look up: </p>
+        </aside>
+        <main class="main-content">
+            <div id="element-lookup" class="main-groups card">
+                <h2>Element Information Lookup</h2>
+                <p>Enter the element symbol or name of the element you want to look up:</p>
                 <input type="text" id="element-input" placeholder="E.g., H or Hydrogen" aria-label="Element symbol or name">
                 <div id="element-info" class="result"></div>
                 <p>To compute masses using this elemental data, try the <a href="#mass-calc">Molar Mass Calculator</a>.</p>
             </div>
-            <div id="mass-calc" class="main-groups">
-                <h2>Molar Mass Calculator - Calculate Molecule/Compound Molar Mass Instantly</h2>
-                <div class="tool-container">
-                    <p class="tool-description">This tool helps you quickly find the molar mass of any compound by adding up the atomic weights of its elements. It is useful when preparing solutions, converting grams to moles, and more. Just enter a chemical formula, and the calculator handles all the isotope-averaging math for you.</p>
-                </div>
-                <p>Enter the formula here: </p>
+            <div id="mass-calc" class="main-groups card">
+                <h2>Molar Mass Calculator</h2>
+                <p>Enter the formula here:</p>
                 <input type="text" id="formula-input" placeholder="E.g., CH4" aria-label="Chemical formula">
                 <div id="mass-result" class="result"></div>
                 <p>After finding molar mass, you can also compute reaction yields using the <a href="#stoichiometry">Stoichiometry Calculator</a>.</p>
             </div>
-            <div id="balancing" class="main-groups">
-                <h2>Chemical Equation Balancer - Able to Balance most Chemical Equations</h2>
-                <div class="tool-container">
-                    <p class="tool-description">Balancing chemical equations can be surprisingly tricky, especially with combustion or multi-step reactions. This tool checks the atom counts on each side and finds the correct coefficients automatically. It is a simple way to verify your work or understand how mass is conserved in a reaction.</p>
-                </div>
-                <p>Enter the chemical equation: </p>
+            <div id="balancing" class="main-groups card">
+                <h2>Chemical Equation Balancer</h2>
+                <p>Enter the chemical equation:</p>
                 <input type="text" id="equation-input" placeholder="E.g., H2+O2->H2O" aria-label="Chemical equation">
-                <button id="balance-button">Balance Equation</button>
+                <button id="balance-button" class="primary-button">Balance Equation</button>
                 <div id="balance-result" class="result"></div>
                 <p>Once balanced, you can analyze reactants and yields with the <a href="#stoichiometry">Stoichiometry Calculator</a>.</p>
             </div>
-            <div id="dilution-calc" class="main-groups">
-                <h2>Molarity and Dilution Calculator - Prepare Solutions Easily</h2>
-                <div class="tool-container">
-                    <p class="tool-description">The dilution tool helps you figure out how much stock solution and solvent you need to reach a specific concentration. It uses the classic C<sub>1</sub>V<sub>1</sub> = C<sub>2</sub>V<sub>2</sub> relationship, making it easy to scale solutions up or down. Perfect for preparing lab samples or adjusting buffer strengths.</p>
-                </div>
+            <div id="dilution-calc" class="main-groups card">
+                <h2>Molarity and Dilution Calculator</h2>
                 <p>Solve for:</p>
                 <select id="dilution-solve-for" aria-label="Select dilution parameter to solve for">
                     <option value="M1">Initial Molarity (M₁)</option>
@@ -81,15 +74,12 @@
                     <input type="number" id="dilution-M2" placeholder="M₂ (M)" step="any" aria-label="Final molarity">
                     <input type="number" id="dilution-V2" placeholder="V₂ (L)" step="any" aria-label="Final volume">
                 </div>
-                <button id="calculate-dilution">Calculate</button>
+                <button id="calculate-dilution" class="primary-button">Calculate</button>
                 <div id="dilution-result" class="result"></div>
                 <p>If you're preparing solutions for reactions, check the <a href="#stoichiometry">Stoichiometry Calculator</a> for molar relationships.</p>
             </div>
-            <div id="mass-percent-calc" class="main-groups">
-                <h2>Mass Percent and Concentration Calculator - ppm (parts per million) and ppb (parts per billion)</h2>
-                <div class="tool-container">
-                    <p class="tool-description">This calculator shows the mass percent, ppm, or ppb of a solute in a solution. It is useful for environmental chemistry, purity checks, and analytical experiments. Just enter the amounts, and it quickly provides an easy-to-read breakdown of concentrations.</p>
-                </div>
+            <div id="mass-percent-calc" class="main-groups card">
+                <h2>Mass Percent and Concentration Calculator</h2>
                 <div class="input-group">
                     <input type="number" id="mass-solute" placeholder="Mass of solute (g)" step="any" aria-label="Mass of solute">
                     <input type="number" id="mass-solution" placeholder="Mass of solution (g)" step="any" aria-label="Mass of solution">
@@ -99,37 +89,31 @@
                         <option value="ppb">ppb</option>
                     </select>
                 </div>
-                <button id="calculate-mass-percent">Calculate</button>
+                <button id="calculate-mass-percent" class="primary-button">Calculate</button>
                 <div id="mass-percent-result" class="result"></div>
             </div>
-            <div id="solution-mixing-calc" class="main-groups">
-                <h2>Solution Mixing Calculator - Calculate Final Molarity and more</h2>
-                <div class="tool-container">
-                    <p class="tool-description">Mix two solutions of different concentrations and volumes to find the resulting molarity. This tool is great for preparing reactant mixtures or adjusting stock solutions in the lab. Enter your known values, and it calculates the final solution automatically.</p>
-                </div>
+            <div id="solution-mixing-calc" class="main-groups card">
+                <h2>Solution Mixing Calculator</h2>
                 <div class="input-group">
                     <input type="number" id="mix-C1" placeholder="C₁ (M)" step="any" aria-label="Concentration 1">
                     <input type="number" id="mix-V1" placeholder="V₁ (L)" step="any" aria-label="Volume 1">
                     <input type="number" id="mix-C2" placeholder="C₂ (M)" step="any" aria-label="Concentration 2">
                     <input type="number" id="mix-V2" placeholder="V₂ (L)" step="any" aria-label="Volume 2">
                 </div>
-                <button id="calculate-mixing">Calculate</button>
+                <button id="calculate-mixing" class="primary-button">Calculate</button>
                 <div id="mixing-result" class="result"></div>
             </div>
-            <div id="nuclear-chemistry" class="main-groups">
+            <div id="nuclear-chemistry" class="main-groups card">
                 <h2>Nuclear Chemistry Calculators</h2>
-                <div class="tool-container">
-                    <p class="tool-description">The half-life calculator models exponential decay to show how much of a substance remains over time. It is helpful in radiochemistry, nuclear physics, and pharmacokinetics. Enter the initial quantity and half-life, and the calculator handles the rest with precise results.</p>
-                </div>
                 <div id="half-life-calc" class="sub-group">
-                    <h3>Half-Life Calculator - Exponential Decay in Nuclear Chemistry</h3>
+                    <h3>Half-Life Calculator</h3>
                     <p>Calculate:</p>
                     <select id="half-life-solve-for" aria-label="Select half-life parameter to solve for">
                         <option value="remaining">Remaining Quantity</option>
                         <option value="time">Time Required</option>
                         <option value="half-life">Half-Life</option>
                     </select>
-                    <button id="calculate-half-life">Calculate</button>
+                    <button id="calculate-half-life" class="primary-button">Calculate</button>
                     <div class="input-group">
                         <input type="number" id="initial-quantity" placeholder="Initial Quantity" step="any" aria-label="Initial quantity">
                         <input type="number" id="time-input" placeholder="Time (s/min/yr)" step="any" aria-label="Time">
@@ -141,14 +125,11 @@
                     <div id="half-life-result" class="result"></div>
                 </div>
             </div>
-            <div id="gas-laws" class="main-groups">
+            <div id="gas-laws" class="main-groups card">
                 <h2>Gas Laws</h2>
-                <div class="tool-container">
-                    <p class="tool-description">Use this suite of gas calculators to solve for pressure, volume, temperature, or moles using the Ideal or Combined Gas Laws. For real gases, the Van der Waals correction adjusts for molecular interactions, giving more accurate predictions. It is perfect for review and more.</p>
-                </div>
                 <p>Working with gases? You may also need molar masses from the <a href="#mass-calc">Molar Mass Calculator</a>.</p>
                 <div id="ideal-gas-law">
-                    <h3>Ideal Gas Law Calculator - PV = nRT</h3>
+                    <h3>Ideal Gas Law Calculator</h3>
                     <p>Solve for:</p>
                     <select id="ideal-solve-for" aria-label="Select ideal gas law parameter to solve for">
                         <option value="P">Pressure (P)</option>
@@ -167,11 +148,11 @@
                         <option value="atm-L">atm, L (R=0.08206)</option>
                         <option value="SI">Pa, m³ (R=8.314)</option>
                     </select>
-                    <button id="calculate-ideal">Calculate</button>
+                    <button id="calculate-ideal" class="primary-button">Calculate</button>
                     <div id="ideal-result" class="result"></div>
                 </div>
                 <div id="combined-gas-law">
-                    <h3>Combined Gas Law Calculator - P<sub>1</sub>V<sub>1</sub>/T<sub>1</sub> = P<sub>2</sub>V<sub>2</sub>/T<sub>2</sub></h3>
+                    <h3>Combined Gas Law Calculator</h3>
                     <p>Solve for:</p>
                     <select id="combined-solve-for" aria-label="Select combined gas law parameter to solve for">
                         <option value="P1">P₁</option>
@@ -189,11 +170,11 @@
                         <input type="number" id="combined-V2" placeholder="V₂" step="any" aria-label="Final volume">
                         <input type="number" id="combined-T2" placeholder="T₂ (K)" step="any" aria-label="Final temperature">
                     </div>
-                    <button id="calculate-combined">Calculate</button>
+                    <button id="calculate-combined" class="primary-button">Calculate</button>
                     <div id="combined-result" class="result"></div>
                 </div>
                 <div id="van-der-waals" style="margin-bottom: 1.5rem;">
-                    <h3>Van der Waals Equation - Real Gas Pressure Calculator</h3>
+                    <h3>Van der Waals Equation</h3>
                     <p>Calculate Pressure (P) for a real gas.</p>
                     <div class="input-group">
                         <input type="number" id="vdw-V" placeholder="V (L)" step="any" aria-label="Volume">
@@ -202,27 +183,24 @@
                         <input type="number" id="vdw-a" placeholder="a (L² atm mol⁻²)" step="any" aria-label="Van der Waals constant a">
                         <input type="number" id="vdw-b" placeholder="b (L mol⁻¹)" step="any" aria-label="Van der Waals constant b">
                     </div>
-                    <button id="calculate-vdw">Calculate P</button>
+                    <button id="calculate-vdw" class="primary-button">Calculate P</button>
                     <div id="vdw-result" class="result"></div>
                 </div>
             </div>
-            <div id="electrochemistry" class="main-groups">
+            <div id="electrochemistry" class="main-groups card">
                 <h2>Electrochemistry</h2>
-                <div class="tool-container">
-                    <p class="tool-description">Calculate standard cell potentials, non-standard conditions with the Nernst equation, and electrolysis mass/current/time relationships. This tool is valuable for redox chemistry, battery experiments, and electroplating calculations. Enter your values, and get instant results for your reactions.</p>
-                </div>
                 <div id="cell-potential">
-                    <h3>Cell Potential Calculator - Standard and Non-Standard</h3>
+                    <h3>Cell Potential Calculator</h3>
                     <p>Enter the standard reduction potentials for the two half-reactions:</p>
                     <div class="input-group">
                         <input type="number" id="E1" placeholder="E°_1 (V)" step="any" aria-label="First reduction potential">
                         <input type="number" id="E2" placeholder="E°_2 (V)" step="any" aria-label="Second reduction potential">
                     </div>
-                    <button id="calculate-cell-potential">Calculate E°_cell</button>
+                    <button id="calculate-cell-potential" class="primary-button">Calculate E°_cell</button>
                     <div id="cell-potential-result" class="result"></div>
                 </div>
                 <div id="nernst-equation">
-                    <h3>Nernst Equation Solver - Non-Standard Cell Potential</h3>
+                    <h3>Nernst Equation Solver</h3>
                     <p>Calculate cell potential under non-standard conditions.</p>
                     <div class="input-group">
                         <input type="number" id="E-standard" placeholder="E° (V)" step="any" aria-label="Standard cell potential">
@@ -230,11 +208,11 @@
                         <input type="number" id="n-electrons" placeholder="n (moles of e⁻)" step="any" aria-label="Number of electrons">
                         <input type="number" id="Q-reaction" placeholder="Q (reaction quotient)" step="any" aria-label="Reaction quotient">
                     </div>
-                    <button id="calculate-nernst">Calculate E</button>
+                    <button id="calculate-nernst" class="primary-button">Calculate E</button>
                     <div id="nernst-result" class="result"></div>
                 </div>
                 <div id="electrolysis">
-                    <h3>Electrolysis Calculator - Mass, Current, Time</h3>
+                    <h3>Electrolysis Calculator</h3>
                     <p>Solve for:</p>
                     <select id="electrolysis-solve-for" aria-label="Select electrolysis parameter to solve for">
                         <option value="mass">Mass (m)</option>
@@ -248,15 +226,12 @@
                         <input type="number" id="electrolysis-z" placeholder="z (electrons/ion)" step="any" aria-label="Electrons per ion">
                         <input type="number" id="electrolysis-M" placeholder="Molar mass (g/mol)" step="any" aria-label="Molar mass">
                     </div>
-                    <button id="calculate-electrolysis">Calculate</button>
+                    <button id="calculate-electrolysis" class="primary-button">Calculate</button>
                     <div id="electrolysis-result" class="result"></div>
                 </div>
             </div>
-            <div id="stoichiometry" class="main-groups">
-                <h2>Stoichiometry Calculator - Moles, Mass, and Limiting Reactants</h2>
-                <div class="tool-container">
-                    <p class="tool-description">This tool walks you through stoichiometric conversions — moles, mass, molecules, and limiting reactants. It is handy for lab planning or problem-solving because it shows how reactants and products relate through mole ratios. Enter known quantities, and the calculator fills in the rest.</p>
-                </div>
+            <div id="stoichiometry" class="main-groups card">
+                <h2>Stoichiometry Calculator</h2>
                 <p>Enter the balanced chemical equation:</p>
                 <input type="text" id="stoich-equation-input" placeholder="E.g., 2H2+O2->2H2O" aria-label="Balanced chemical equation">
                 <p>Select calculation type:</p>
@@ -266,32 +241,24 @@
                     <option value="limiting-reactant">Limiting Reactant</option>
                 </select>
                 <div id="stoich-inputs"></div>
-                <button id="calculate-stoich-button">Calculate</button>
+                <button id="calculate-stoich-button" class="primary-button">Calculate</button>
                 <div id="stoich-result" class="result"></div>
                 <p>Need compound masses? Use the <a href="#mass-calc">Molar Mass Calculator</a> to get accurate molar masses.</p>
             </div>
-            <div id="bond-type-predictor" class="main-groups">
-                <h2>Bond Type Predictor - Ionic, Covalent, or Metallic</h2>
-                <div class="tool-container">
-                    <p class="tool-description">Predict whether a bond is ionic, covalent, or metallic based on electronegativity differences and periodic table trends. This tool is ideal for students learning about chemical bonding. Simply enter the elements, and get a clear prediction with a brief explanation.</p>
-                </div>
+            <div id="bond-type-predictor" class="main-groups card">
+                <h2>Bond Type Predictor</h2>
                 <p>Enter two element abbreviations to predict the bond type (Ionic, Covalent, or Metallic):</p>
                 <div class="input-group">
                     <input type="text" id="element1-input" placeholder="First element (e.g., Na)" aria-label="First element">
                     <input type="text" id="element2-input" placeholder="Second element (e.g., Cl)" aria-label="Second element">
                 </div>
-                <button id="calculate-bond-type">Predict Bond Type</button>
+                <button id="calculate-bond-type" class="primary-button">Predict Bond Type</button>
                 <div id="bond-type-result" class="result"></div>
             </div>
         </main>
-        <footer id="footer">
-            <div class="footer-content">
-                <p>2025 Richard's Blogs | All Rights Reserved</p>
-                <p>Main site: <a href="https://www.richardsblogs.com" target="_blank" id="main-site-a">www.richardsblogs.com</a></p>
-            </div>
-        </footer>
-        <script type="module" src="/src/script.ts"></script>
-        <script type="module" src="/src/render.ts" defer></script>
-        <noscript>This chemistry calculator requires JavaScript to run. It includes tools for element lookup, molar mass, equation balancing, gas laws, and more.</noscript>
+    </div>
+    <script type="module" src="/src/script.ts"></script>
+    <script type="module" src="/src/render.ts" defer></script>
+    <noscript>This chemistry calculator requires JavaScript to run. It includes tools for element lookup, molar mass, equation balancing, gas laws, and more.</noscript>
     </body>
 </html>
