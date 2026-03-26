@@ -5,13 +5,13 @@ function parseFormulaToCounts(formula: string): Record<string, number>{
 	let i=0;
 	while (i<formula.length){
 		let ch=formula[i];
-		if (ch==='('){
+		if (ch==='('||ch==='['){
 			stack.push({ multiplier: currentMultiplier, counts: currentCounts });
 			currentMultiplier=1;
 			currentCounts={};
 			i++;
 		}
-		else if (ch===')'){
+		else if (ch===')'||ch===']'){
 			let j=i+1;
 			let numStr="";
 			while (j<formula.length&&formula[j]>='0'&&formula[j]<='9'){
@@ -33,7 +33,7 @@ function parseFormulaToCounts(formula: string): Record<string, number>{
 		}
 		else{
 			let j=i;
-			while (j<formula.length&&formula[j]!=='('&&formula[j]!==')'){
+			while (j<formula.length&&formula[j]!=='('&&formula[j]!==')'&&formula[j]!=='['&&formula[j]!==']'){
 				j++;
 			}
 			let segment=formula.substring(i,j);
@@ -180,24 +180,26 @@ function solveHomogeneous(matrix: Fraction[][]): RREFResult{
 		}
 		row++;
 	}
+	let rank=row;
 	let isPivot=new Array(n).fill(false);
 	for (let col of pivotCols){
 		isPivot[col]=true;
 	}
-	if (pivotCols.length===n){
+	if (rank===n){
 		return { solution: [], hasSolution: false };
 	}
-	let solution=new Array<Fraction>(n).fill(Fraction.fromNumber(0));
+	let freeCols: number[]=[];
 	for (let j=0; j<n; j++){
-		if (!isPivot[j]){
-			solution[j]=Fraction.fromNumber(1);
-		}
+		if (!isPivot[j]) freeCols.push(j);
 	}
-	for (let i=0; i<pivotCols.length; i++){
+	let solution=new Array<Fraction>(n).fill(Fraction.fromNumber(0));
+	let chosenFree=freeCols[freeCols.length-1];
+	solution[chosenFree]=Fraction.fromNumber(1);
+	for (let i=rank-1; i>=0; i--){
 		let col=pivotCols[i];
 		let sum=Fraction.fromNumber(0);
 		for (let j=0; j<n; j++){
-			if (!isPivot[j]&&!rref[i][j].isZero()){
+			if (j!==col&&!rref[i][j].isZero()){
 				sum=sum.add(rref[i][j].mul(solution[j]));
 			}
 		}
