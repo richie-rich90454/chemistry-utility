@@ -1,85 +1,3 @@
-function parseFormulaToCounts(formula: string): Record<string, number>{
-	let stack: { multiplier: number; counts: Record<string, number> }[]=[];
-	let currentCounts: Record<string, number>={};
-	let currentMultiplier=1;
-	let i=0;
-	while (i<formula.length){
-		let ch=formula[i];
-		if (ch==='('||ch==='['){
-			stack.push({ multiplier: currentMultiplier, counts: currentCounts });
-			currentMultiplier=1;
-			currentCounts={};
-			i++;
-		}
-		else if (ch===')'||ch===']'){
-			let j=i+1;
-			let numStr="";
-			while (j<formula.length&&formula[j]>='0'&&formula[j]<='9'){
-				numStr+=formula[j];
-				j++;
-			}
-			let repeat=numStr.length?parseInt(numStr,10):1;
-			let prev=stack.pop()!;
-			let multiplied: Record<string, number>={};
-			for (let el in currentCounts){
-				multiplied[el]=(currentCounts[el]||0)*repeat;
-			}
-			for (let el in multiplied){
-				prev.counts[el]=(prev.counts[el]||0)+multiplied[el];
-			}
-			currentCounts=prev.counts;
-			currentMultiplier=prev.multiplier;
-			i=j;
-		}
-		else{
-			let j=i;
-			while (j<formula.length&&formula[j]!=='('&&formula[j]!==')'&&formula[j]!=='['&&formula[j]!==']'){
-				j++;
-			}
-			let segment=formula.substring(i,j);
-			let k=0;
-			while (k<segment.length){
-				if (segment[k]>='A'&&segment[k]<='Z'){
-					let element=segment[k];
-					k++;
-					if (k<segment.length&&segment[k]>='a'&&segment[k]<='z'){
-						element+=segment[k];
-						k++;
-					}
-					let numStr="";
-					while (k<segment.length&&segment[k]>='0'&&segment[k]<='9'){
-						numStr+=segment[k];
-						k++;
-					}
-					let count=numStr.length?parseInt(numStr,10):1;
-					currentCounts[element]=(currentCounts[element]||0)+count*currentMultiplier;
-				}
-				else{
-					k++;
-				}
-			}
-			i=j;
-		}
-	}
-	return currentCounts;
-}
-export function parseEquation(equation: string): { reactants: string[]; products: string[] }{
-	let sides=equation.split("->");
-	if (sides.length!==2){
-		throw new Error("Equation must contain exactly one '->'");
-	}
-	let left=sides[0].trim();
-	let right=sides[1].trim();
-	if (left.length===0||right.length===0){
-		throw new Error("Both sides of the equation must contain at least one compound");
-	}
-	let reactants=left.split("+").map(s=>s.trim()).filter(s=>s.length>0);
-	let products=right.split("+").map(s=>s.trim()).filter(s=>s.length>0);
-	if (reactants.length===0||products.length===0){
-		throw new Error("Each side must contain at least one compound");
-	}
-	return { reactants, products };
-}
 function gcd(a: number, b: number): number{
 	a=Math.abs(a);
 	b=Math.abs(b);
@@ -92,189 +10,148 @@ function gcd(a: number, b: number): number{
 }
 function lcm(a: number, b: number): number{
 	if (a===0||b===0) return 0;
-	return (a/gcd(a,b))*b;
-}
-function lcmArray(nums: number[]): number{
-	return nums.reduce((acc,n)=>lcm(acc,n),1);
+	return Math.abs(a*b)/gcd(a, b);
 }
 class Fraction{
-	numerator: number;
-	denominator: number;
-	constructor(numerator: number, denominator: number){
-		if (denominator===0){
-			throw new Error("Denominator cannot be zero");
-		}
-		this.numerator=numerator;
-		this.denominator=denominator;
-		this.normalize();
+	n: number;
+	d: number;
+	constructor(n: number, d: number=1){
+		if (d===0) throw new Error("Denominator zero");
+		this.n=n;
+		this.d=d;
+		this.simplify();
 	}
-	normalize(): void{
-		if (this.denominator<0){
-			this.numerator=-this.numerator;
-			this.denominator=-this.denominator;
+	simplify(): void{
+		let common=gcd(this.n, this.d);
+		this.n/=common;
+		this.d/=common;
+		if (this.d<0){
+			this.n=-this.n;
+			this.d=-this.d;
 		}
-		let g=gcd(Math.abs(this.numerator),this.denominator);
-		if (g!==0){
-			this.numerator/=g;
-			this.denominator/=g;
-		}
+	}
+	add(f: Fraction): Fraction{
+		return new Fraction(this.n*f.d+f.n*this.d, this.d*f.d);
+	}
+	sub(f: Fraction): Fraction{
+		return new Fraction(this.n*f.d-f.n*this.d, this.d*f.d);
+	}
+	mul(f: Fraction): Fraction{
+		return new Fraction(this.n*f.n, this.d*f.d);
+	}
+	div(f: Fraction): Fraction{
+		return new Fraction(this.n*f.d, this.d*f.n);
 	}
 	isZero(): boolean{
-		return this.numerator===0;
-	}
-	equals(other: Fraction): boolean{
-		return this.numerator===other.numerator&&this.denominator===other.denominator;
-	}
-	add(other: Fraction): Fraction{
-		let num=this.numerator*other.denominator+other.numerator*this.denominator;
-		let den=this.denominator*other.denominator;
-		return new Fraction(num,den);
-	}
-	sub(other: Fraction): Fraction{
-		let num=this.numerator*other.denominator-other.numerator*this.denominator;
-		let den=this.denominator*other.denominator;
-		return new Fraction(num,den);
-	}
-	mul(other: Fraction): Fraction{
-		return new Fraction(this.numerator*other.numerator,this.denominator*other.denominator);
-	}
-	div(other: Fraction): Fraction{
-		if (other.isZero()){
-			throw new Error("Division by zero");
-		}
-		return new Fraction(this.numerator*other.denominator,this.denominator*other.numerator);
-	}
-	static fromNumber(n: number): Fraction{
-		return new Fraction(n,1);
+		return this.n===0;
 	}
 }
-interface RREFResult{
-	solution: Fraction[];
-	hasSolution: boolean;
+function parseFormulaToCounts(formula: string): Record<string, number>{
+	let stack: Record<string, number>[]=[{}];
+	let i=0;
+	while (i<formula.length){
+		let ch=formula[i];
+		if (ch==="("||ch==="["||ch==="{"){
+			stack.push({});
+			i++;
+		}
+		else if (ch===")"||ch==="]"||ch==="}"){
+			let top=stack.pop()!;
+			i++;
+			let start=i;
+			while (i<formula.length&&/\d/.test(formula[i])) i++;
+			let multiplier=parseInt(formula.substring(start, i), 10)||1;
+			for (let el in top){
+				stack[stack.length-1][el]=(stack[stack.length-1][el]||0)+top[el]*multiplier;
+			}
+		}
+		else if (/[A-Z]/.test(ch)){
+			let start=i++;
+			while (i<formula.length&&/[a-z]/.test(formula[i])) i++;
+			let el=formula.substring(start, i);
+			start=i;
+			while (i<formula.length&&/\d/.test(formula[i])) i++;
+			let count=parseInt(formula.substring(start, i), 10)||1;
+			stack[stack.length-1][el]=(stack[stack.length-1][el]||0)+count;
+		}
+		else if (ch==="+"||ch==="-"){
+			let sign=ch==="+"?1:-1;
+			i++;
+			let start=i;
+			while (i<formula.length&&/\d/.test(formula[i])) i++;
+			let mag=parseInt(formula.substring(start, i), 10)||1;
+			stack[stack.length-1]["_charge"]=(stack[stack.length-1]["_charge"]||0)+mag*sign;
+		}
+		else i++;
+	}
+	return stack[0];
 }
-function solveHomogeneous(matrix: Fraction[][]): RREFResult{
-	let m=matrix.length;
-	let n=matrix[0].length;
-	let rref: Fraction[][]=matrix.map(row=>row.map(cell=>new Fraction(cell.numerator,cell.denominator)));
-	let row=0;
-	let pivotCols: number[]=[];
-	for (let col=0; col<n&&row<m; col++){
-		let pivot=row;
-		while (pivot<m&&rref[pivot][col].isZero()){
-			pivot++;
-		}
-		if (pivot===m) continue;
-		[rref[row],rref[pivot]]=[rref[pivot],rref[row]];
-		pivotCols.push(col);
-		let pivotVal=rref[row][col];
-		for (let j=col; j<n; j++){
-			rref[row][j]=rref[row][j].div(pivotVal);
-		}
-		for (let i=0; i<m; i++){
-			if (i!==row&&!rref[i][col].isZero()){
-				let factor=rref[i][col];
-				for (let j=col; j<n; j++){
-					rref[i][j]=rref[i][j].sub(factor.mul(rref[row][j]));
-				}
+export function parseEquation(equation: string): { reactants: string[], products: string[] }{
+	let sides=equation.split(/->|=/);
+	if (sides.length!==2) throw new Error("Invalid equation format");
+	let reactants=sides[0].split("+").map(s=>s.trim()).filter(s=>s.length>0);
+	let products=sides[1].split("+").map(s=>s.trim()).filter(s=>s.length>0);
+	return { reactants, products };
+}
+function solveHomogeneous(matrix: Fraction[][]): Fraction[]{
+	let r=matrix.length;
+	let c=matrix[0].length;
+	let pivot=0;
+	for (let j=0; j<c&&pivot<r; j++){
+		let sel=pivot;
+		while (sel<r&&matrix[sel][j].isZero()) sel++;
+		if (sel===r) continue;
+		[matrix[pivot], matrix[sel]]=[matrix[sel], matrix[pivot]];
+		let root=matrix[pivot][j];
+		for (let k=j; k<c; k++) matrix[pivot][k]=matrix[pivot][k].div(root);
+		for (let i=0; i<r; i++){
+			if (i!==pivot){
+				let factor=matrix[i][j];
+				for (let k=j; k<c; k++) matrix[i][k]=matrix[i][k].sub(factor.mul(matrix[pivot][k]));
 			}
 		}
-		row++;
+		pivot++;
 	}
-	let rank=row;
-	let isPivot=new Array(n).fill(false);
-	for (let col of pivotCols){
-		isPivot[col]=true;
-	}
-	if (rank===n){
-		return { solution: [], hasSolution: false };
-	}
-	let freeCols: number[]=[];
-	for (let j=0; j<n; j++){
-		if (!isPivot[j]) freeCols.push(j);
-	}
-	let solution=new Array<Fraction>(n).fill(Fraction.fromNumber(0));
-	let chosenFree=freeCols[freeCols.length-1];
-	solution[chosenFree]=Fraction.fromNumber(1);
-	for (let i=rank-1; i>=0; i--){
-		let col=pivotCols[i];
-		let sum=Fraction.fromNumber(0);
-		for (let j=0; j<n; j++){
-			if (j!==col&&!rref[i][j].isZero()){
-				sum=sum.add(rref[i][j].mul(solution[j]));
+	let res=new Array(c).fill(new Fraction(0));
+	res[c-1]=new Fraction(1);
+	for (let i=0; i<pivot; i++){
+		let firstIdx=-1;
+		for (let k=0; k<matrix[i].length; k++){
+			if (!matrix[i][k].isZero()){
+				firstIdx=k;
+				break;
 			}
 		}
-		solution[col]=sum.mul(Fraction.fromNumber(-1));
+		if (firstIdx!==-1&&firstIdx<c-1) res[firstIdx]=matrix[i][c-1].mul(new Fraction(-1));
 	}
-	return { solution, hasSolution: true };
+	return res;
 }
 export function balanceEquation(equation: string, maxCoefficient: number=4000): string{
 	let { reactants, products }=parseEquation(equation);
-	let allCompounds=[...reactants,...products];
-	let nCompounds=allCompounds.length;
-	let parsed=allCompounds.map(comp=>parseFormulaToCounts(comp));
-	let elementSet=new Set<string>();
-	for (let counts of parsed){
-		for (let el of Object.keys(counts)){
-			elementSet.add(el);
-		}
+	let all=reactants.concat(products);
+	let parsed=all.map(parseFormulaToCounts);
+	let allKeys: string[]=[];
+	for (let i=0; i<parsed.length; i++){
+		allKeys=allKeys.concat(Object.keys(parsed[i]));
 	}
-	let elements=Array.from(elementSet);
-	let nElements=elements.length;
-	if (nElements===0){
-		let left=reactants.map((c,i)=>(i>0?"+":"")+c).join("");
-		let right=products.map((c,i)=>(i>0?"+":"")+c).join("");
-		return left+" -> "+right;
-	}
-	let A: Fraction[][]=[];
-	for (let i=0; i<nElements; i++){
-		let el=elements[i];
-		let row: Fraction[]=[];
-		for (let j=0; j<nCompounds; j++){
-			let count=parsed[j][el]||0;
-			let sign=j<reactants.length?1:-1;
-			row.push(Fraction.fromNumber(sign*count));
-		}
-		A.push(row);
-	}
-	let { solution, hasSolution }=solveHomogeneous(A);
-	if (!hasSolution){
-		throw new Error("The chemical equation cannot be balanced (only trivial solution exists).");
-	}
-	let denominators=solution.map(frac=>frac.denominator);
-	let commonDen=lcmArray(denominators);
-	let intCoeffs=solution.map(frac=>Math.round(frac.numerator*(commonDen/frac.denominator)));
-	if (intCoeffs.some(c=>c===0)){
-		throw new Error("One or more compounds have coefficient zero – the equation cannot be balanced as given.");
-	}
-	let allPositive=intCoeffs.every(c=>c>0);
-	if (!allPositive){
-		for (let i=0; i<intCoeffs.length; i++){
-			intCoeffs[i]=-intCoeffs[i];
-		}
-		allPositive=intCoeffs.every(c=>c>0);
-		if (!allPositive){
-			throw new Error("Unable to obtain all positive coefficients – the equation may be unbalanced by nature.");
-		}
-		if (intCoeffs.some(c=>c===0)){
-			throw new Error("One or more compounds have coefficient zero – the equation cannot be balanced as given.");
-		}
-	}
-	let g=intCoeffs.reduce(gcd,0);
-	if (g>1){
-		for (let i=0; i<intCoeffs.length; i++){
-			intCoeffs[i]/=g;
-		}
-	}
-	if (intCoeffs.some(c=>Math.abs(c)>maxCoefficient)){
-		throw new Error(`No solution found with coefficients up to ${maxCoefficient}`);
-	}
-	let leftSide=reactants.map((c,i)=>{
-		let coeff=intCoeffs[i];
-		return coeff===1?c:`${coeff}${c}`;
-	}).join("+");
-	let rightSide=products.map((c,i)=>{
-		let coeff=intCoeffs[reactants.length+i];
-		return coeff===1?c:`${coeff}${c}`;
-	}).join("+");
-	return `${leftSide} -> ${rightSide}`;
+	let elements=Array.from(new Set(allKeys));
+	let A: Fraction[][]=elements.map((el: string)=>{
+		return all.map((_, col)=>{
+			let count=parsed[col][el]||0;
+			return new Fraction(col<reactants.length?count:-count);
+		});
+	});
+	let sol=solveHomogeneous(A);
+	let denLcm=sol.reduce((acc, f)=>lcm(acc, f.d), 1);
+	let coeffs=sol.map(f=>Math.abs(f.n*(denLcm/f.d)));
+	let commonGcd=coeffs.reduce((acc, c)=>gcd(acc, c), 0);
+	coeffs=coeffs.map(c=>c/commonGcd);
+	if (coeffs.some(c=>c>maxCoefficient)) throw new Error("Coefficients exceed limit");
+	let format=(parts: string[], offset: number)=>{
+		return parts.map((p, i)=>{
+			let c=coeffs[offset+i];
+			return (c===1?"": c)+p;
+		}).join(" + ");
+	};
+	return format(reactants, 0) + " -> " + format(products, reactants.length);
 }
