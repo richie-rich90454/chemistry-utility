@@ -14,21 +14,37 @@ export function calculateDilution(): void{
 		}
 		if (solveFor=="M1"){
 			validateInputs([V1, M2, V2], ["dilution-V1", "dilution-M2", "dilution-V2"]);
+			if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
+			if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
+			if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
+			if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 			result=(M2*V2)/V1;
 			formula="M<sub>1</sub>=(M<sub>2</sub> x V<sub>2</sub>)/V<sub>1</sub>";
 		}
 		else if (solveFor=="V1"){
 			validateInputs([M1, M2, V2], ["dilution-M1", "dilution-M2", "dilution-V2"]);
+			if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
+			if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
+			if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
+			if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 			result=(M2*V2)/M1;
 			formula="V<sub>1</sub>=(M<sub>2</sub> x V<sub>2</sub>)/M<sub>1</sub>";
 		}
 		else if (solveFor=="M2"){
 			validateInputs([M1, V1, V2], ["dilution-M1", "dilution-V1", "dilution-V2"]);
+			if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
+			if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
+			if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
+			if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 			result=(M1*V1)/V2;
 			formula="M<sub>2</sub>=(M<sub>1</sub> x V<sub>1</sub>)/V<sub>2</sub>";
 		}
 		else if (solveFor=="V2"){
 			validateInputs([M1, V1, M2], ["dilution-M1", "dilution-V1", "dilution-M2"]);
+			if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
+			if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
+			if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
+			if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 			result=(M1*V1)/M2;
 			formula="V<sub>2</sub>=(M<sub>1</sub> x V<sub>1</sub>)/M<sub>2</sub>";
 		}
@@ -60,6 +76,7 @@ export function calculateMassPercent(): void{
 		if (solution==0){
 			throw new Error("Solution mass cannot be zero");
 		}
+		if (solute<0) throw new Error("Solute mass cannot be negative");
 		let ratio=solute/solution;
 		let result: number, unitText: string;
 		if (unit=="percent"){
@@ -98,6 +115,10 @@ export function calculateMixing(): void{
 			inputs[i].classList.remove("error");
 		}
 		validateInputs([C1, V1, C2, V2], ["mix-C1", "mix-V1", "mix-C2", "mix-V2"]);
+		if (C1<=0) throw new Error("First solution concentration must be positive");
+		if (C2<=0) throw new Error("Second solution concentration must be positive");
+		if (V1<=0) throw new Error("First solution volume must be positive");
+		if (V2<=0) throw new Error("Second solution volume must be positive");
 		if (V1+V2==0){
 			throw new Error("Total volume cannot be zero");
 		}
