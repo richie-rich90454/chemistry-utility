@@ -89,13 +89,21 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		copyBtn.setAttribute("aria-label", "Copy result");
 		copyBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
 		copyBtn.addEventListener("click", function(){
-			let text=resultEl.textContent||"";
+			let clone=resultEl.cloneNode(true) as HTMLElement;
+			let btn=clone.querySelector(".copy-button");
+			if (btn) btn.remove();
+			let text=clone.textContent||"";
 			navigator.clipboard.writeText(text.trim()).then(function(){
 				copyBtn.classList.add("copied");
 				copyBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
 				setTimeout(function(){
 					copyBtn.classList.remove("copied");
 					copyBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+				}, 2000);
+			}).catch(function(){
+				copyBtn.style.color="var(--error)";
+				setTimeout(function(){
+					copyBtn.style.color="";
 				}, 2000);
 			});
 		});
