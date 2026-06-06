@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "go run main.go",
-    "dev": "vite dev",
+    "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "build:go": "go build -o src-tauri/binaries/chemistry-backend ./main.go",
@@ -25,9 +25,7 @@
   ],
   "author": "richie-rich90454",
   "license": "MIT",
-  "dependencies": {
-    "katex": "^0.16.22"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@tauri-apps/cli": "^2.10.1",
     "@types/node": "^25.5.0",
