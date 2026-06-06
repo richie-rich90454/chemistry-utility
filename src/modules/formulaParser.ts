@@ -90,22 +90,43 @@ export function calculateMolarMass(formula: string, elements: ChemicalElement[])
 	}
 	return massStack[0];
 }
-export function formatFormula(formula: string): Record<string, number>{
-	let compound: Record<string, number>={};
-	let regex=/([A-Z][a-z]*)(\d*)/g;
-	let match: RegExpExecArray|null;
-	let lastIndex=0;
-	while ((match=regex.exec(formula))!=null){
-		let element=match[1];
-		let subscript=match[2]?parseInt(match[2]):1;
-		if (compound[element]){
-			throw new Error("Oops, "+element+" shows up twice in "+formula);
-		}
-		compound[element]=subscript;
-		lastIndex=regex.lastIndex;
-	}
-	if (lastIndex!=formula.length){
-		throw new Error("Bad formula: "+formula);
-	}
-	return compound;
+export function formatFormula(formula: string): string{
+    let result="";
+    let i=0;
+    while (i<formula.length){
+        if (formula[i]==="("||formula[i]==="["){
+            let depth=1;
+            let start=i;
+            i++;
+            while (i<formula.length&&depth>0){
+                if (formula[i]==="("||formula[i]==="[") depth++;
+                else if (formula[i]===")"||formula[i]==="]") depth--;
+                i++;
+            }
+            let inner=formula.substring(start+1, i-1);
+            let numStr="";
+            while (i<formula.length&&/\d/.test(formula[i])){ numStr+=formula[i]; i++; }
+            let count=numStr===""?1:parseInt(numStr, 10);
+            let formatted=formatFormula(inner);
+            for (let j=0; j<count; j++){
+                result+=formatted;
+            }
+        }
+        else if (/[A-Z]/.test(formula[i])){
+            let start=i;
+            i++;
+            while (i<formula.length&&/[a-z]/.test(formula[i])) i++;
+            let element=formula.substring(start, i);
+            let numStr="";
+            while (i<formula.length&&/\d/.test(formula[i])){ numStr+=formula[i]; i++; }
+            let count=numStr===""?1:parseInt(numStr, 10);
+            result+=element;
+            if (count>1) result+=count;
+        }
+        else{
+            i++;
+        }
+    }
+    if (result==="") throw new Error("Bad formula");
+    return result;
 }
