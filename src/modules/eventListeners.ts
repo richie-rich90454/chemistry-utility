@@ -53,6 +53,61 @@ export function initializeEventListeners(elementsData: ChemicalElement[]): void{
 	(document.getElementById("calculate-bond-type") as HTMLButtonElement).addEventListener("click", function(){
 		predictBondType(elementsData);
 	});
+	// Enter key support for all calculator inputs
+	function addEnterListener(id: string, handler: ()=>void): void{
+		let el=document.getElementById(id) as HTMLInputElement;
+		if (el) el.addEventListener("keyup", function(e: KeyboardEvent){
+			if (e.key==="Enter") handler();
+		});
+	}
+	// Dilution
+	addEnterListener("dilution-M1", calculateDilution);
+	addEnterListener("dilution-V1", calculateDilution);
+	addEnterListener("dilution-M2", calculateDilution);
+	addEnterListener("dilution-V2", calculateDilution);
+	// Mass percent
+	addEnterListener("mass-solute", calculateMassPercent);
+	addEnterListener("mass-solution", calculateMassPercent);
+	// Solution mixing
+	addEnterListener("mix-C1", calculateMixing);
+	addEnterListener("mix-V1", calculateMixing);
+	addEnterListener("mix-C2", calculateMixing);
+	addEnterListener("mix-V2", calculateMixing);
+	// Ideal gas law
+	addEnterListener("ideal-P", calculateIdealGasLaw);
+	addEnterListener("ideal-V", calculateIdealGasLaw);
+	addEnterListener("ideal-n", calculateIdealGasLaw);
+	addEnterListener("ideal-T", calculateIdealGasLaw);
+	// Combined gas law
+	addEnterListener("combined-P1", calculateCombinedGasLaw);
+	addEnterListener("combined-V1", calculateCombinedGasLaw);
+	addEnterListener("combined-T1", calculateCombinedGasLaw);
+	addEnterListener("combined-P2", calculateCombinedGasLaw);
+	addEnterListener("combined-V2", calculateCombinedGasLaw);
+	addEnterListener("combined-T2", calculateCombinedGasLaw);
+	// Van der Waals
+	addEnterListener("vdw-V", calculateVanDerWaals);
+	addEnterListener("vdw-n", calculateVanDerWaals);
+	addEnterListener("vdw-T", calculateVanDerWaals);
+	addEnterListener("vdw-a", calculateVanDerWaals);
+	addEnterListener("vdw-b", calculateVanDerWaals);
+	// Cell potential
+	addEnterListener("E1", calculateCellPotential);
+	addEnterListener("E2", calculateCellPotential);
+	// Nernst
+	addEnterListener("E-standard", calculateNernst);
+	addEnterListener("temperature", calculateNernst);
+	addEnterListener("n-electrons", calculateNernst);
+	addEnterListener("Q-reaction", calculateNernst);
+	// Electrolysis
+	addEnterListener("electrolysis-m", calculateElectrolysis);
+	addEnterListener("electrolysis-I", calculateElectrolysis);
+	addEnterListener("electrolysis-t", calculateElectrolysis);
+	addEnterListener("electrolysis-z", calculateElectrolysis);
+	addEnterListener("electrolysis-M", calculateElectrolysis);
+	// Bond type
+	addEnterListener("element1-input", function(){ predictBondType(elementsData); });
+	addEnterListener("element2-input", function(){ predictBondType(elementsData); });
 }
 function lookUpElement(elementsData: ChemicalElement[]): void{
 	let input=document.getElementById("element-input") as HTMLInputElement;
