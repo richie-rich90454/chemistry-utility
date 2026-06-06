@@ -6,6 +6,10 @@ import {calculateIdealGasLaw, calculateCombinedGasLaw, calculateVanDerWaals, cal
 import {calculateCellPotential, calculateNernst, calculateElectrolysis} from "./electrochemistryCalculators";
 import {predictBondType} from "./bondPredictor";
 import {ChemicalElement} from "../types";
+function escapeHtml(str: string|number|undefined|null): string{
+	if (str==null) return "";
+	return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
 export function initializeEventListeners(elementsData: ChemicalElement[]): void{
 	(document.getElementById("element-input") as HTMLInputElement).addEventListener("keyup", function(){
 		lookUpElement(elementsData);
@@ -133,19 +137,19 @@ function lookUpElement(elementsData: ChemicalElement[]): void{
 	}
 	let elementInfo=document.getElementById("element-info") as HTMLElement;
 	if (element!=null){
-		let info="<p><strong>Symbol:</strong> "+element.symbol+"</p>"+
-			"<p><strong>Name:</strong> "+element.name+"</p>"+
-			"<p><strong>Atomic Mass:</strong> "+element.atomicMass+" u</p>"+
-			"<p><strong>Atomic Number:</strong> "+element.atomicNumber+"</p>"+
-			"<p><strong>Electronegativity:</strong> "+(element.electronegativity!=null?element.electronegativity:"N/A")+"</p>"+
-			"<p><strong>Electron Affinity:</strong> "+(element.electronAffinity!=null?element.electronAffinity:"N/A")+" kJ/mol</p>"+
-			"<p><strong>Atomic Radius:</strong> "+(element.atomicRadius!=null?element.atomicRadius:"N/A")+" pm</p>"+
-			"<p><strong>Ionization Energy:</strong> "+(element.ionizationEnergy!=null?element.ionizationEnergy:"N/A")+" kJ/mol</p>"+
-			"<p><strong>Valence Electrons:</strong> "+element.valenceElectrons+"</p>"+
-			"<p><strong>Total Electrons:</strong> "+element.totalElectrons+"</p>"+
-			"<p><strong>Group:</strong> "+element.group+"</p>"+
-			"<p><strong>Period:</strong> "+element.period+"</p>"+
-			"<p><strong>Type:</strong> "+element.type+"</p>";
+		let info="<p><strong>Symbol:</strong> "+escapeHtml(element.symbol)+"</p>"+
+			"<p><strong>Name:</strong> "+escapeHtml(element.name)+"</p>"+
+			"<p><strong>Atomic Mass:</strong> "+escapeHtml(element.atomicMass)+" u</p>"+
+			"<p><strong>Atomic Number:</strong> "+escapeHtml(element.atomicNumber)+"</p>"+
+			"<p><strong>Electronegativity:</strong> "+(element.electronegativity!=null?escapeHtml(element.electronegativity):"N/A")+"</p>"+
+			"<p><strong>Electron Affinity:</strong> "+(element.electronAffinity!=null?escapeHtml(element.electronAffinity):"N/A")+" kJ/mol</p>"+
+			"<p><strong>Atomic Radius:</strong> "+(element.atomicRadius!=null?escapeHtml(element.atomicRadius):"N/A")+" pm</p>"+
+			"<p><strong>Ionization Energy:</strong> "+(element.ionizationEnergy!=null?escapeHtml(element.ionizationEnergy):"N/A")+" kJ/mol</p>"+
+			"<p><strong>Valence Electrons:</strong> "+escapeHtml(element.valenceElectrons)+"</p>"+
+			"<p><strong>Total Electrons:</strong> "+escapeHtml(element.totalElectrons)+"</p>"+
+			"<p><strong>Group:</strong> "+escapeHtml(element.group)+"</p>"+
+			"<p><strong>Period:</strong> "+escapeHtml(element.period)+"</p>"+
+			"<p><strong>Type:</strong> "+escapeHtml(element.type)+"</p>";
 		elementInfo.innerHTML=info;
 		elementInfo.classList.add("show");
 	}
