@@ -349,7 +349,7 @@ select{
     color: var(--text-on-primary);
     background-color: var(--accent-alt);
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     cursor: pointer;
     transition: all var(--transition-normal);
     min-height: 36px;
