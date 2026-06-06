@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded",function(){
 	},observerOptions);
 	sections.forEach(section=>observer.observe(section));
 	window.addEventListener("scroll",()=>{
+		if (sections.length === 0) return;
 		let scrollY=window.scrollY;
 		if(scrollY<10)setActiveLink(sections[0].id);
 		if((window.innerHeight+scrollY)>=document.documentElement.scrollHeight-10){
