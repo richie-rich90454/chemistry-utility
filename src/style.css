@@ -387,6 +387,90 @@ select{
     margin: 0.25rem 0;
     color: var(--text-primary);
 }
+.result{
+    position: relative;
+}
+.copy-button{
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-tertiary);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.copy-button:hover{
+    color: var(--text-secondary);
+}
+.copy-button.copied{
+    color: var(--success);
+}
+.card label, .main-groups label{
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0 var(--spacing-lg) var(--spacing-xs);
+}
+.skip-link{
+    position: absolute;
+    top: -100%;
+    left: 0;
+    background: var(--primary);
+    color: var(--text-on-primary);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    z-index: 1000;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 0 0 var(--radius-md) 0;
+    transition: top var(--transition-fast);
+}
+.skip-link:focus{
+    top: 0;
+}
+#scroll-top{
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-normal), box-shadow var(--transition-normal);
+    z-index: 20;
+    box-shadow: var(--shadow-md);
+}
+#scroll-top.visible{
+    opacity: 1;
+    pointer-events: auto;
+}
+#scroll-top:hover{
+    box-shadow: var(--shadow-lg);
+    color: var(--primary);
+}
+.nav-category{
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-tertiary);
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-xs);
+    list-style: none;
+}
 #remaining-quantity-group{
     display: none;
 }
