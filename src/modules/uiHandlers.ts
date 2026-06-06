@@ -21,20 +21,6 @@ export function initializeUIHandlers(): void{
 			}
 		});
 	}
-	let inputs=document.querySelectorAll("input, select") as NodeListOf<HTMLElement>;
-	for (let i=0; i<inputs.length; i++){
-		inputs[i].addEventListener("focus", function(this: HTMLElement){
-			this.style.borderColor="var(--primary-blue)";
-			this.style.boxShadow="0 0 5px rgba(28, 148, 233, .5)";
-		});
-		inputs[i].addEventListener("blur", function(this: HTMLElement){
-			let hasErrorClass=this.classList.contains("error");
-			if (!hasErrorClass){
-				this.style.borderColor="#DDD";
-				this.style.boxShadow="none";
-			}
-		});
-	}
 	let clearButtons=document.querySelectorAll(".clear-button") as NodeListOf<HTMLElement>;
 	for (let i=0; i<clearButtons.length; i++){
 		clearButtons[i].addEventListener("click", function(this: HTMLElement){
