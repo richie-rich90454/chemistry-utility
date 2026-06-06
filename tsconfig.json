@@ -18,11 +18,6 @@
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ]
-        },
         "useDefineForClassFields": false,
         "noEmit": true
     },
