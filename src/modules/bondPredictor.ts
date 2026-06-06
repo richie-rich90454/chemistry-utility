@@ -37,7 +37,7 @@ export function predictBondType(elementsData: ChemicalElement[]): void{
 		}
 		let en1=element1.electronegativity;
 		let en2=element2.electronegativity;
-		if (en1==null||en2==null||en1==undefined||en2==undefined){
+		if (en1==null||en2==null){
 			resultDiv.innerHTML="<p>Bond prediction not possible due to unavailable electronegativity data</p>";
 			resultDiv.classList.add("show");
 			return;
