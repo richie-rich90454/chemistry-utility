@@ -25,10 +25,10 @@
   ],
   "author": "richie-rich90454",
   "license": "MIT",
-  "dependencies": {},
   "devDependencies": {
     "@tauri-apps/cli": "^2.10.1",
     "@types/node": "^25.5.0",
+    "jsdom": "^29.1.1",
     "typescript": "^5.9.3",
     "vite": "^8.0.3",
     "vite-plugin-html": "^3.2.2",
