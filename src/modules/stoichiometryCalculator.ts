@@ -6,6 +6,9 @@ interface BalancedEquation{
 	reactants: Term[];
 	products: Term[];
 }
+function sanitizeId(formula: string): string{
+	return formula.replace(/[\(\)\[\]\{\}\,\s]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+}
 export function parseBalancedEquation(equation: string): BalancedEquation{
 	let cleanedEquation=equation.replace(/\s+/g, "");
 	let parts=cleanedEquation.split("->");
@@ -78,7 +81,7 @@ export function getCalculationType(equation: string): void{
 		let reactantInputs="";
 		for (let i=0; i<parsed.reactants.length; i++){
 			let reactant=parsed.reactants[i];
-			reactantInputs=reactantInputs+"<label for=\"moles-"+reactant.formula+"\">Moles of "+reactant.formula+"</label><input type=\"number\" id=\"moles-"+reactant.formula+"\" placeholder=\"Moles of "+reactant.formula+"\" min=\"0\" step=\"any\">";
+			reactantInputs=reactantInputs+"<label for=\"moles-"+sanitizeId(reactant.formula)+"\">Moles of "+reactant.formula+"</label><input type=\"number\" id=\"moles-"+sanitizeId(reactant.formula)+"\" placeholder=\"Moles of "+reactant.formula+"\" min=\"0\" step=\"any\">";
 		}
 		let productOptions="";
 		for (let i=0; i<parsed.products.length; i++){
@@ -166,7 +169,7 @@ export function calculateStoichiometry(equation: string): void{
 		let reactantMoles: Record<string, number>={};
 		for (let i=0; i<parsed.reactants.length; i++){
 			let reactant=parsed.reactants[i];
-			let molesInput=document.getElementById("moles-"+reactant.formula) as HTMLInputElement;
+			let molesInput=document.getElementById("moles-"+sanitizeId(reactant.formula)) as HTMLInputElement;
 			let moles=parseFloat(molesInput.value);
 			let isMolesValid=!isNaN(moles)&&moles>0;
 			if (!isMolesValid){
