@@ -22,7 +22,12 @@ export function initializeEventListeners(elementsData: ChemicalElement[]): void{
 	});
 	(document.getElementById("calculate-stoich-button") as HTMLButtonElement).addEventListener("click", function(){
 		let equation=(document.getElementById("stoich-equation-input") as HTMLInputElement).value.trim();
-		calculateStoichiometry(equation);
+		try {
+			calculateStoichiometry(equation);
+		} catch (e: any) {
+			let result = document.getElementById("stoichiometry-result") as HTMLElement;
+			if (result) result.textContent = e.message || "An error occurred";
+		}
 	});
 	(document.getElementById("calculate-dilution") as HTMLButtonElement).addEventListener("click", calculateDilution);
 	(document.getElementById("calculate-mass-percent") as HTMLButtonElement).addEventListener("click", calculateMassPercent);
@@ -51,7 +56,12 @@ export function initializeEventListeners(elementsData: ChemicalElement[]): void{
 	(document.getElementById("calculate-nernst") as HTMLButtonElement).addEventListener("click", calculateNernst);
 	(document.getElementById("calculate-electrolysis") as HTMLButtonElement).addEventListener("click", calculateElectrolysis);
 	(document.getElementById("calculate-bond-type") as HTMLButtonElement).addEventListener("click", function(){
-		predictBondType(elementsData);
+		try {
+			predictBondType(elementsData);
+		} catch (e: any) {
+			let result = document.getElementById("bond-result") as HTMLElement;
+			if (result) result.textContent = e.message || "An error occurred";
+		}
 	});
 	// Enter key support for all calculator inputs
 	function addEnterListener(id: string, handler: ()=>void): void{
