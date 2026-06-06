@@ -144,6 +144,8 @@ export function calculateVanDerWaals(): void{
 			inputs[i].classList.remove("error");
 		}
 		validateInputs([V, n, T, a, b], ["vdw-V", "vdw-n", "vdw-T", "vdw-a", "vdw-b"]);
+		if (V<=0) throw new Error("Volume must be positive");
+		if (V-n*b<=0) throw new Error("Volume is too small for the given amount of gas (V must be greater than n*b)");
 		let R=0.08206;
 		let P=(n*R*T)/(V-n*b)-a*Math.pow(n/V, 2);
 		let resultDiv=document.getElementById("vdw-result") as HTMLElement;
@@ -171,6 +173,8 @@ export function calculateHalfLife(): void{
 		let result: number;
 		if (solveFor=="remaining"){
 			validateInputs([N0, t, t_half], ["initial-quantity", "time-input", "half-life-input"]);
+			if (t_half<=0) throw new Error("Half-life must be positive");
+			if (N0<=0) throw new Error("Initial quantity must be positive");
 			result=N0*Math.pow(0.5, t/t_half);
 			let resultDiv=document.getElementById("half-life-result") as HTMLElement;
 			resultDiv.innerHTML="<p>Remaining: "+result.toFixed(4)+" (after "+t+" units)</p>";
@@ -178,6 +182,9 @@ export function calculateHalfLife(): void{
 		}
 		else if (solveFor=="time"){
 			validateInputs([N0, t_half, Nt], ["initial-quantity", "half-life-input", "remaining-quantity"]);
+			if (t_half<=0) throw new Error("Half-life must be positive");
+			if (N0<=0) throw new Error("Initial quantity must be positive");
+			if (Nt<=0) throw new Error("Remaining quantity must be positive");
 			result=(Math.log(Nt/N0)/Math.log(0.5))*t_half;
 			let resultDiv=document.getElementById("half-life-result") as HTMLElement;
 			resultDiv.innerHTML="<p>Time needed: "+result.toFixed(4)+" units</p>";
@@ -185,6 +192,8 @@ export function calculateHalfLife(): void{
 		}
 		else if (solveFor=="half-life"){
 			validateInputs([N0, t, Nt], ["initial-quantity", "time-input", "remaining-quantity"]);
+			if (N0<=0) throw new Error("Initial quantity must be positive");
+			if (Nt<=0) throw new Error("Remaining quantity must be positive");
 			result=t/(Math.log(Nt/N0)/Math.log(0.5));
 			let resultDiv=document.getElementById("half-life-result") as HTMLElement;
 			resultDiv.innerHTML="<p>Half-life: "+result.toFixed(4)+" units</p>";
