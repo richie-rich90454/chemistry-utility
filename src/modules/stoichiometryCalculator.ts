@@ -54,7 +54,7 @@ export function getCalculationType(equation: string): void{
 			productOptions=productOptions+"<option value=\""+product.formula+"\">"+product.formula+"</option>";
 		}
 		let productSelect="<select id=\"product-select\">"+productOptions+"</select>";
-		inputsDiv.innerHTML="<p>Select reactant: "+reactantSelect+"</p><p>Enter moles: "+molesInput+"</p><p>Select product: "+productSelect+"</p>";
+		inputsDiv.innerHTML="<label for=\"reactant-select\">Select reactant</label>"+reactantSelect+"<label for=\"reactant-moles\">Enter moles</label>"+molesInput+"<label for=\"product-select\">Select product</label>"+productSelect;
 		inputsDiv.classList.add("show");
 	}
 	else if (type=="reactant-from-product"){
@@ -71,14 +71,14 @@ export function getCalculationType(equation: string): void{
 			reactantOptions=reactantOptions+"<option value=\""+reactant.formula+"\">"+reactant.formula+"</option>";
 		}
 		let reactantSelect="<select id=\"reactant-select\">"+reactantOptions+"</select>";
-		inputsDiv.innerHTML="<p>Select product: "+productSelect+"</p><p>Enter moles: "+molesInput+"</p><p>Select reactant: "+reactantSelect+"</p>";
+		inputsDiv.innerHTML="<label for=\"product-select\">Select product</label>"+productSelect+"<label for=\"product-moles\">Enter moles</label>"+molesInput+"<label for=\"reactant-select\">Select reactant</label>"+reactantSelect;
 		inputsDiv.classList.add("show");
 	}
 	else if (type=="limiting-reactant"){
 		let reactantInputs="";
 		for (let i=0; i<parsed.reactants.length; i++){
 			let reactant=parsed.reactants[i];
-			reactantInputs=reactantInputs+"<p>"+reactant.formula+": <input type=\"number\" id=\"moles-"+reactant.formula+"\" placeholder=\"Moles of "+reactant.formula+"\" min=\"0\" step=\"any\"></p>";
+			reactantInputs=reactantInputs+"<label for=\"moles-"+reactant.formula+"\">Moles of "+reactant.formula+"</label><input type=\"number\" id=\"moles-"+reactant.formula+"\" placeholder=\"Moles of "+reactant.formula+"\" min=\"0\" step=\"any\">";
 		}
 		let productOptions="";
 		for (let i=0; i<parsed.products.length; i++){
@@ -86,7 +86,7 @@ export function getCalculationType(equation: string): void{
 			productOptions=productOptions+"<option value=\""+product.formula+"\">"+product.formula+"</option>";
 		}
 		let productSelect="<select id=\"product-select\">"+productOptions+"</select>";
-		inputsDiv.innerHTML=reactantInputs+"<p>Select product to calculate: "+productSelect+"</p>";
+		inputsDiv.innerHTML=reactantInputs+"<label for=\"product-select\">Select product to calculate</label>"+productSelect;
 		inputsDiv.classList.add("show");
 	}
 }
