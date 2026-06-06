@@ -1,3 +1,4 @@
+import {validateInputs} from "./validation.js";
 export function calculateIdealGasLaw(): void{
 	try{
 		let select=document.getElementById("ideal-solve-for") as HTMLSelectElement;
@@ -194,16 +195,5 @@ export function calculateHalfLife(): void{
 		let resultDiv=document.getElementById("half-life-result") as HTMLElement;
 		resultDiv.innerHTML="<p>Error: "+(error as Error).message+"</p>";
 		resultDiv.classList.add("show");
-	}
-}
-function validateInputs(inputs: number[], ids: string[]): void{
-	for (let i=0; i<inputs.length; i++){
-		if (isNaN(inputs[i])){
-			if (ids&&ids[i]){
-				let input=document.getElementById(ids[i]) as HTMLInputElement;
-				input.classList.add("error");
-			}
-			throw new Error("Please fill all required fields with valid numbers");
-		}
 	}
 }

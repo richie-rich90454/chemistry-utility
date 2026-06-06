@@ -1,14 +1,4 @@
-export function validateInputs(inputs: number[], ids: string[]): void{
-	for (let i=0; i<inputs.length; i++){
-		if (isNaN(inputs[i])){
-			if (ids&&ids[i]){
-				let input=document.getElementById(ids[i]) as HTMLInputElement;
-				input.classList.add("error");
-			}
-			throw new Error("Please fill all required fields with valid numbers");
-		}
-	}
-}
+import {validateInputs} from "./validation.js";
 export function calculateDilution(): void{
 	try{
 		let select=document.getElementById("dilution-solve-for") as HTMLSelectElement;
