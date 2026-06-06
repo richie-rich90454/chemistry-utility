@@ -55,8 +55,6 @@
     --transition-slow: 300ms cubic-bezier(0.2, 0, 0, 1);
     --footer-height: 28px;
     --blur-amount: 0px;
-    --wave-color: transparent;
-    --wave-color-alt: transparent;
     --overlay-color: rgba(0, 0, 0, 0.03);
 }
 .light{
@@ -374,6 +372,7 @@ select{
     outline: none;
 }
 .result{
+    position: relative;
     padding: var(--spacing-md);
     background: var(--surface-alt);
     border: 1px solid var(--border);
@@ -386,9 +385,6 @@ select{
 .result p{
     margin: 0.25rem 0;
     color: var(--text-primary);
-}
-.result{
-    position: relative;
 }
 .copy-button{
     position: absolute;

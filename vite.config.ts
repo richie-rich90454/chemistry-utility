@@ -6,7 +6,7 @@ const __dirname=path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
 	base: "/",
 	server:{
-		port: 6005,
+		port: 5173,
 		proxy:{
 			"/api": "http://localhost:6005",
 		},
@@ -45,7 +45,6 @@ export default defineConfig({
 	},
 	css:{
 		modules: false,
-		postcss: path.join(__dirname, "postcss.config.js"),
 	},
 	plugins: [
 		createHtmlPlugin({
