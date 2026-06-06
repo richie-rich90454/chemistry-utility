@@ -11,7 +11,7 @@ function sanitizeId(formula: string): string{
 }
 export function parseBalancedEquation(equation: string): BalancedEquation{
 	let cleanedEquation=equation.replace(/\s+/g, "");
-	let parts=cleanedEquation.split("->");
+	let parts=cleanedEquation.split(/->|=/);
 	if (parts.length!=2){
 		throw new Error("Invalid equation format: missing \"->\"");
 	}
