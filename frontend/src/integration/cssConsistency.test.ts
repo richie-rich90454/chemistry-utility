@@ -57,20 +57,31 @@ describe("CSS: Variable Consistency", () => {
     });
 
     it("light and dark themes define the same color variables", () => {
-        const lightVars = extractVariables(extractBlock(".light", css));
+        const rootVars = extractVariables(extractBlock(":root", css));
         const darkVars = extractVariables(extractBlock(".dark", css));
 
-        const lightOnly = [...lightVars].filter(v => !darkVars.has(v));
-        const darkOnly = [...darkVars].filter(v => !lightVars.has(v));
+        // Only compare color/surface/elevation/state variables (not shape/spacing/motion which are theme-independent)
+        const isThemeVar = (v: string) =>
+            v.startsWith("md-primary") || v.startsWith("md-on-primary") ||
+            v.startsWith("md-secondary") || v.startsWith("md-on-secondary") ||
+            v.startsWith("md-tertiary") || v.startsWith("md-on-tertiary") ||
+            v.startsWith("md-error") || v.startsWith("md-on-error") ||
+            v.startsWith("md-success") || v.startsWith("md-on-success") ||
+            v.startsWith("md-warning") || v.startsWith("md-on-warning") ||
+            v.startsWith("md-surface") || v.startsWith("md-on-surface") ||
+            v.startsWith("md-inverse") || v.startsWith("md-outline") ||
+            v.startsWith("md-background") || v.startsWith("md-on-background") ||
+            v.startsWith("md-scrim") || v.startsWith("md-elevation") ||
+            v.startsWith("md-state-");
 
-        // Known gaps: .light defines text-tertiary and text-on-primary but .dark does not
-        // These fall through to :root values in dark mode, which is acceptable
-        const knownLightOnlyGaps = ["text-tertiary", "text-on-primary"];
-        const unexpectedLightOnly = lightOnly.filter(v => !knownLightOnlyGaps.includes(v) && !v.includes("shadow-glass"));
-        const unexpectedDarkOnly = darkOnly.filter(v => !v.includes("shadow-glass"));
+        const rootThemeVars = [...rootVars].filter(isThemeVar);
+        const darkThemeVars = [...darkVars].filter(isThemeVar);
 
-        expect(unexpectedLightOnly).toEqual([]);
-        expect(unexpectedDarkOnly).toEqual([]);
+        const rootOnly = rootThemeVars.filter(v => !darkVars.has(v));
+        const darkOnly = darkThemeVars.filter(v => !rootVars.has(v));
+
+        expect(rootOnly).toEqual([]);
+        expect(darkOnly).toEqual([]);
     });
 
     it("no duplicate variable definitions within :root", () => {
