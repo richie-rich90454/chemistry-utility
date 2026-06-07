@@ -105,8 +105,8 @@ describe("CSS: Variable Consistency", () => {
         expect(rootVars.has("radius-lg")).toBe(true);
 
         // Check shadow variables
-        expect(rootVars.has("shadow-sm")).toBe(true);
-        expect(rootVars.has("shadow-lg")).toBe(true);
+        expect(rootVars.has("shadow-1")).toBe(true);
+        expect(rootVars.has("shadow-2")).toBe(true);
 
         // Check transition variables
         expect(rootVars.has("transition-fast")).toBe(true);

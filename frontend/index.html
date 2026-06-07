@@ -71,6 +71,9 @@
         <div class="app-layout">
             <aside class="sidebar" aria-label="Main navigation">
                 <div class="sidebar-header">
+                    <div class="logo-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="5" cy="8.5" r="1"/><circle cx="19" cy="8.5" r="1"/><circle cx="5" cy="15.5" r="1"/><circle cx="19" cy="15.5" r="1"/><line x1="12" y1="6" x2="12" y2="11"/><line x1="12" y1="13" x2="12" y2="18"/><line x1="6.2" y1="9.2" x2="10.6" y2="11.4"/><line x1="13.4" y1="12.6" x2="17.8" y2="14.8"/><line x1="6.2" y1="14.8" x2="10.6" y2="12.6"/><line x1="13.4" y1="11.4" x2="17.8" y2="9.2"/></svg>
+                    </div>
                     <h1>Chemistry Utility</h1>
                     <button class="icon-button theme-toggle" id="theme-toggle" aria-label="Toggle theme">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -82,20 +85,20 @@
                 <nav class="sidebar-nav">
                     <ul>
                         <li class="nav-category">General</li>
-                        <li><a href="#element-lookup" class="active">Element Lookup</a></li>
-                        <li><a href="#mass-calc">Molar Mass</a></li>
-                        <li><a href="#balancing">Equation Balancer</a></li>
+                        <li><a href="#element-lookup"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Element Lookup</a></li>
+                        <li><a href="#mass-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/></svg>Molar Mass</a></li>
+                        <li><a href="#balancing"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M12 2v4"/><path d="M12 18v4"/></svg>Equation Balancer</a></li>
                         <li class="nav-category">Solutions</li>
-                        <li><a href="#dilution-calc">Dilution</a></li>
-                        <li><a href="#mass-percent-calc">Mass Percent</a></li>
-                        <li><a href="#solution-mixing-calc">Solution Mixing</a></li>
+                        <li><a href="#dilution-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-1 9H9L8 2z"/><path d="M9 11a3 3 0 0 0 6 0"/><path d="M12 14v8"/></svg>Dilution</a></li>
+                        <li><a href="#mass-percent-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg>Mass Percent</a></li>
+                        <li><a href="#solution-mixing-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M12 2v5"/><path d="M12 17v5"/><circle cx="12" cy="12" r="4"/></svg>Solution Mixing</a></li>
                         <li class="nav-category">Physical Chemistry</li>
-                        <li><a href="#nuclear-chemistry">Nuclear</a></li>
-                        <li><a href="#gas-laws">Gas Laws</a></li>
-                        <li><a href="#electrochemistry">Electrochemistry</a></li>
+                        <li><a href="#nuclear-chemistry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>Nuclear</a></li>
+                        <li><a href="#gas-laws"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>Gas Laws</a></li>
+                        <li><a href="#electrochemistry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electrochemistry</a></li>
                         <li class="nav-category">Reactions &amp; Bonds</li>
-                        <li><a href="#stoichiometry">Stoichiometry</a></li>
-                        <li><a href="#bond-type-predictor">Bond Type</a></li>
+                        <li><a href="#stoichiometry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h6"/><path d="M17 12l5 5-5 5"/></svg>Stoichiometry</a></li>
+                        <li><a href="#bond-type-predictor"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Bond Type</a></li>
                     </ul>
                 </nav>
                 <div class="sidebar-footer">
