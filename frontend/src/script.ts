@@ -4,7 +4,7 @@ import {initializeAppNav} from "./app-nav.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	initializeUIHandlers();
 	initializeAppNav();
-	// Load periodic table data — use Wails bindings in desktop mode, HTTP fetch in web mode
+	// Load periodic table data — use Wails bindings in desktop mode, direct JSON fetch in web mode
 	async function loadPTableData(): Promise<any[]>{
 		// Check if running in Wails desktop mode
 		if (typeof window!=="undefined"&&"__wails__" in window){
@@ -12,12 +12,8 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			const data=await GetPTableData();
 			return JSON.parse(data);
 		}
-		// Fallback to HTTP fetch for web mode
-		const response=await fetch("/api/ptable",{
-			headers:{
-				"X-Requested-With": "XMLHttpRequest"
-			}
-		});
+		// Direct JSON file fetch for web mode (no API server needed)
+		const response=await fetch("/ptable.json");
 		if (!response.ok){
 			throw new Error("HTTP error! status: "+response.status);
 		}

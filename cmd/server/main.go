@@ -6,8 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"chemistry-utility/internal/ptable"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,22 +16,10 @@ func main() {
 	}
 
 	distDir := "frontend/dist"
-	ptableSvc := ptable.New(filepath.Join(distDir, "ptable.json"))
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
-
-	// API endpoint for periodic table data
-	r.GET("/api/ptable", func(c *gin.Context) {
-		data, err := ptableSvc.GetData()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to load periodic table data"})
-			return
-		}
-		c.Header("Content-Type", "application/json")
-		c.String(http.StatusOK, data)
-	})
 
 	// Serve all static files from dist directory
 	r.Static("/assets", filepath.Join(distDir, "assets"))
