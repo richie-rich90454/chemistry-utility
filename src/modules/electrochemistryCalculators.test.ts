@@ -3,43 +3,11 @@ import {
     calculateCellPotential,
     calculateNernst,
     calculateElectrolysis,
-} from "./electrochemistryCalculators";
+} from "./electrochemistryCalculators.js";
+import { setOrCreateInput, setOrCreateSelect, getResultHTML } from "../test/helpers.js";
 
 const FARADAY = 96485;
 const GAS_R = 8.314;
-
-function setOrCreateInput(id: string, value: string, parentId: string) {
-    let input = document.getElementById(id) as HTMLInputElement | null;
-    if (!input) {
-        input = document.createElement("input");
-        input.id = id;
-        document.getElementById(parentId)!.appendChild(input);
-    }
-    input.value = value;
-    input.classList.remove("error");
-}
-
-function setOrCreateSelect(id: string, value: string, parentId: string, optionValues?: string[]) {
-    let select = document.getElementById(id) as HTMLSelectElement | null;
-    if (!select) {
-        select = document.createElement("select");
-        select.id = id;
-        const opts = optionValues || [value];
-        for (const v of opts) {
-            const o = document.createElement("option");
-            o.value = v;
-            o.textContent = v;
-            select.appendChild(o);
-        }
-        document.getElementById(parentId)!.appendChild(select);
-    }
-    select.value = value;
-}
-
-function getResultHTML(id: string): string {
-    const el = document.getElementById(id);
-    return el ? el.innerHTML : "";
-}
 
 describe("electrochemistryCalculators", () => {
     beforeEach(() => {

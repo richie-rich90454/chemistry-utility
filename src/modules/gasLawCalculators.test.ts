@@ -5,46 +5,7 @@ import {
 	calculateVanDerWaals,
 	calculateHalfLife,
 } from "./gasLawCalculators.js";
-
-function createInput(id: string, value: string): HTMLInputElement {
-	const input = document.createElement("input");
-	input.id = id;
-	input.type = "number";
-	input.value = value;
-	document.body.appendChild(input);
-	return input;
-}
-
-function createSelect(id: string, value: string): HTMLSelectElement {
-	const select = document.createElement("select");
-	select.id = id;
-	const option = document.createElement("option");
-	option.value = value;
-	option.textContent = value;
-	select.appendChild(option);
-	select.value = value;
-	document.body.appendChild(select);
-	return select;
-}
-
-function createResultDiv(id: string): HTMLDivElement {
-	const div = document.createElement("div");
-	div.id = id;
-	document.body.appendChild(div);
-	return div;
-}
-
-function createFormDiv(id: string): HTMLDivElement {
-	const div = document.createElement("div");
-	div.id = id;
-	document.body.appendChild(div);
-	return div;
-}
-
-function getResultText(id: string): string {
-	const el = document.getElementById(id);
-	return el?.textContent?.trim() || "";
-}
+import {createContainer, createInput, createSelect, createResultDiv, getResultText} from "../test/helpers.js";
 
 function extractResultNumber(text: string): number | null {
 	const match = text.match(/Result:\s*([\d.]+)/);
@@ -54,8 +15,8 @@ function extractResultNumber(text: string): number | null {
 describe("calculateIdealGasLaw", () => {
 	beforeEach(() => {
 		document.body.innerHTML = "";
-		createFormDiv("ideal-gas-law");
-		createResultDiv("ideal-result");
+		createContainer("ideal-gas-law");
+		createResultDiv("ideal-result", "ideal-gas-law");
 	});
 
 	afterEach(() => {
@@ -63,12 +24,12 @@ describe("calculateIdealGasLaw", () => {
 	});
 
 	it("should solve for P: n=1, V=22.4, T=273 → P≈1 atm", () => {
-		createSelect("ideal-solve-for", "P");
-		createSelect("ideal-R-units", "atm-L");
-		createInput("ideal-P", "");
-		createInput("ideal-V", "22.4");
-		createInput("ideal-n", "1");
-		createInput("ideal-T", "273");
+		createSelect("ideal-solve-for", "P", ["P"], "ideal-gas-law");
+		createSelect("ideal-R-units", "atm-L", ["atm-L"], "ideal-gas-law");
+		createInput("ideal-P", "", "ideal-gas-law");
+		createInput("ideal-V", "22.4", "ideal-gas-law");
+		createInput("ideal-n", "1", "ideal-gas-law");
+		createInput("ideal-T", "273", "ideal-gas-law");
 
 		calculateIdealGasLaw();
 
@@ -80,12 +41,12 @@ describe("calculateIdealGasLaw", () => {
 	});
 
 	it("should solve for V: P=1, n=1, T=273 → V≈22.4 L", () => {
-		createSelect("ideal-solve-for", "V");
-		createSelect("ideal-R-units", "atm-L");
-		createInput("ideal-P", "1");
-		createInput("ideal-V", "");
-		createInput("ideal-n", "1");
-		createInput("ideal-T", "273");
+		createSelect("ideal-solve-for", "V", ["V"], "ideal-gas-law");
+		createSelect("ideal-R-units", "atm-L", ["atm-L"], "ideal-gas-law");
+		createInput("ideal-P", "1", "ideal-gas-law");
+		createInput("ideal-V", "", "ideal-gas-law");
+		createInput("ideal-n", "1", "ideal-gas-law");
+		createInput("ideal-T", "273", "ideal-gas-law");
 
 		calculateIdealGasLaw();
 
@@ -97,12 +58,12 @@ describe("calculateIdealGasLaw", () => {
 	});
 
 	it("should solve for n: P=1, V=22.4, T=273 → n≈1 mol", () => {
-		createSelect("ideal-solve-for", "n");
-		createSelect("ideal-R-units", "atm-L");
-		createInput("ideal-P", "1");
-		createInput("ideal-V", "22.4");
-		createInput("ideal-n", "");
-		createInput("ideal-T", "273");
+		createSelect("ideal-solve-for", "n", ["n"], "ideal-gas-law");
+		createSelect("ideal-R-units", "atm-L", ["atm-L"], "ideal-gas-law");
+		createInput("ideal-P", "1", "ideal-gas-law");
+		createInput("ideal-V", "22.4", "ideal-gas-law");
+		createInput("ideal-n", "", "ideal-gas-law");
+		createInput("ideal-T", "273", "ideal-gas-law");
 
 		calculateIdealGasLaw();
 
@@ -114,12 +75,12 @@ describe("calculateIdealGasLaw", () => {
 	});
 
 	it("should solve for T: P=1, n=1, V=22.4 → T≈273 K", () => {
-		createSelect("ideal-solve-for", "T");
-		createSelect("ideal-R-units", "atm-L");
-		createInput("ideal-P", "1");
-		createInput("ideal-V", "22.4");
-		createInput("ideal-n", "1");
-		createInput("ideal-T", "");
+		createSelect("ideal-solve-for", "T", ["T"], "ideal-gas-law");
+		createSelect("ideal-R-units", "atm-L", ["atm-L"], "ideal-gas-law");
+		createInput("ideal-P", "1", "ideal-gas-law");
+		createInput("ideal-V", "22.4", "ideal-gas-law");
+		createInput("ideal-n", "1", "ideal-gas-law");
+		createInput("ideal-T", "", "ideal-gas-law");
 
 		calculateIdealGasLaw();
 
@@ -134,8 +95,8 @@ describe("calculateIdealGasLaw", () => {
 describe("calculateCombinedGasLaw", () => {
 	beforeEach(() => {
 		document.body.innerHTML = "";
-		createFormDiv("combined-gas-law");
-		createResultDiv("combined-result");
+		createContainer("combined-gas-law");
+		createResultDiv("combined-result", "combined-gas-law");
 	});
 
 	afterEach(() => {
@@ -143,13 +104,13 @@ describe("calculateCombinedGasLaw", () => {
 	});
 
 	it("should solve for T2: P1=1, V1=1, T1=273, P2=2, V2=1 → T2=546", () => {
-		createSelect("combined-solve-for", "T2");
-		createInput("combined-P1", "1");
-		createInput("combined-V1", "1");
-		createInput("combined-T1", "273");
-		createInput("combined-P2", "2");
-		createInput("combined-V2", "1");
-		createInput("combined-T2", "");
+		createSelect("combined-solve-for", "T2", ["T2"], "combined-gas-law");
+		createInput("combined-P1", "1", "combined-gas-law");
+		createInput("combined-V1", "1", "combined-gas-law");
+		createInput("combined-T1", "273", "combined-gas-law");
+		createInput("combined-P2", "2", "combined-gas-law");
+		createInput("combined-V2", "1", "combined-gas-law");
+		createInput("combined-T2", "", "combined-gas-law");
 
 		calculateCombinedGasLaw();
 
@@ -160,13 +121,13 @@ describe("calculateCombinedGasLaw", () => {
 	});
 
 	it("should solve for P2: P1=1, V1=2, T1=300, V2=1, T2=300 → P2=2", () => {
-		createSelect("combined-solve-for", "P2");
-		createInput("combined-P1", "1");
-		createInput("combined-V1", "2");
-		createInput("combined-T1", "300");
-		createInput("combined-P2", "");
-		createInput("combined-V2", "1");
-		createInput("combined-T2", "300");
+		createSelect("combined-solve-for", "P2", ["P2"], "combined-gas-law");
+		createInput("combined-P1", "1", "combined-gas-law");
+		createInput("combined-V1", "2", "combined-gas-law");
+		createInput("combined-T1", "300", "combined-gas-law");
+		createInput("combined-P2", "", "combined-gas-law");
+		createInput("combined-V2", "1", "combined-gas-law");
+		createInput("combined-T2", "300", "combined-gas-law");
 
 		calculateCombinedGasLaw();
 
@@ -177,13 +138,13 @@ describe("calculateCombinedGasLaw", () => {
 	});
 
 	it("should solve for V2: P1=2, V1=1, T1=300, P2=1, T2=300 → V2=2", () => {
-		createSelect("combined-solve-for", "V2");
-		createInput("combined-P1", "2");
-		createInput("combined-V1", "1");
-		createInput("combined-T1", "300");
-		createInput("combined-P2", "1");
-		createInput("combined-V2", "");
-		createInput("combined-T2", "300");
+		createSelect("combined-solve-for", "V2", ["V2"], "combined-gas-law");
+		createInput("combined-P1", "2", "combined-gas-law");
+		createInput("combined-V1", "1", "combined-gas-law");
+		createInput("combined-T1", "300", "combined-gas-law");
+		createInput("combined-P2", "1", "combined-gas-law");
+		createInput("combined-V2", "", "combined-gas-law");
+		createInput("combined-T2", "300", "combined-gas-law");
 
 		calculateCombinedGasLaw();
 
@@ -197,8 +158,8 @@ describe("calculateCombinedGasLaw", () => {
 describe("calculateVanDerWaals", () => {
 	beforeEach(() => {
 		document.body.innerHTML = "";
-		createFormDiv("van-der-waals");
-		createResultDiv("vdw-result");
+		createContainer("van-der-waals");
+		createResultDiv("vdw-result", "van-der-waals");
 	});
 
 	afterEach(() => {
@@ -206,34 +167,28 @@ describe("calculateVanDerWaals", () => {
 	});
 
 	it("should calculate pressure with Van der Waals equation", () => {
-		// For N2: a=1.39, b=0.0391, n=1, V=22.4, T=273
-		createInput("vdw-V", "22.4");
-		createInput("vdw-n", "1");
-		createInput("vdw-T", "273");
-		createInput("vdw-a", "1.39");
-		createInput("vdw-b", "0.0391");
+		createInput("vdw-V", "22.4", "van-der-waals");
+		createInput("vdw-n", "1", "van-der-waals");
+		createInput("vdw-T", "273", "van-der-waals");
+		createInput("vdw-a", "1.39", "van-der-waals");
+		createInput("vdw-b", "0.0391", "van-der-waals");
 
 		calculateVanDerWaals();
 
 		const text = getResultText("vdw-result");
-		// P = (nRT)/(V-nb) - a*(n/V)^2
-		// P = (1*0.08206*273)/(22.4-0.0391) - 1.39*(1/22.4)^2
-		// P ≈ 22.40238/22.3609 - 1.39*0.001993
-		// P ≈ 1.00185 - 0.002770 ≈ 0.9991
 		expect(text).not.toContain("Error");
 		expect(text).toContain("atm");
-		// Extract the P value
 		const match = text.match(/P=\s*([\d.]+)/);
 		expect(match).not.toBeNull();
 		expect(parseFloat(match![1])).toBeCloseTo(0.9991, 2);
 	});
 
 	it("should show error when V<=0", () => {
-		createInput("vdw-V", "0");
-		createInput("vdw-n", "1");
-		createInput("vdw-T", "273");
-		createInput("vdw-a", "1.39");
-		createInput("vdw-b", "0.0391");
+		createInput("vdw-V", "0", "van-der-waals");
+		createInput("vdw-n", "1", "van-der-waals");
+		createInput("vdw-T", "273", "van-der-waals");
+		createInput("vdw-a", "1.39", "van-der-waals");
+		createInput("vdw-b", "0.0391", "van-der-waals");
 
 		calculateVanDerWaals();
 
@@ -243,12 +198,11 @@ describe("calculateVanDerWaals", () => {
 	});
 
 	it("should show error when V-n*b<=0", () => {
-		// V=0.03, n=1, b=0.0391 → V-nb = 0.03-0.0391 = -0.0091 < 0
-		createInput("vdw-V", "0.03");
-		createInput("vdw-n", "1");
-		createInput("vdw-T", "273");
-		createInput("vdw-a", "1.39");
-		createInput("vdw-b", "0.0391");
+		createInput("vdw-V", "0.03", "van-der-waals");
+		createInput("vdw-n", "1", "van-der-waals");
+		createInput("vdw-T", "273", "van-der-waals");
+		createInput("vdw-a", "1.39", "van-der-waals");
+		createInput("vdw-b", "0.0391", "van-der-waals");
 
 		calculateVanDerWaals();
 
@@ -261,8 +215,8 @@ describe("calculateVanDerWaals", () => {
 describe("calculateHalfLife", () => {
 	beforeEach(() => {
 		document.body.innerHTML = "";
-		createFormDiv("half-life-calc");
-		createResultDiv("half-life-result");
+		createContainer("half-life-calc");
+		createResultDiv("half-life-result", "half-life-calc");
 	});
 
 	afterEach(() => {
@@ -270,11 +224,11 @@ describe("calculateHalfLife", () => {
 	});
 
 	it("should solve for remaining: N0=100, t=10, t_half=5 → Nt≈25", () => {
-		createSelect("half-life-solve-for", "remaining");
-		createInput("initial-quantity", "100");
-		createInput("time-input", "10");
-		createInput("half-life-input", "5");
-		createInput("remaining-quantity", "");
+		createSelect("half-life-solve-for", "remaining", ["remaining"], "half-life-calc");
+		createInput("initial-quantity", "100", "half-life-calc");
+		createInput("time-input", "10", "half-life-calc");
+		createInput("half-life-input", "5", "half-life-calc");
+		createInput("remaining-quantity", "", "half-life-calc");
 
 		calculateHalfLife();
 
@@ -285,11 +239,11 @@ describe("calculateHalfLife", () => {
 	});
 
 	it("should solve for time: N0=100, Nt=25, t_half=5 → t≈10", () => {
-		createSelect("half-life-solve-for", "time");
-		createInput("initial-quantity", "100");
-		createInput("time-input", "");
-		createInput("half-life-input", "5");
-		createInput("remaining-quantity", "25");
+		createSelect("half-life-solve-for", "time", ["time"], "half-life-calc");
+		createInput("initial-quantity", "100", "half-life-calc");
+		createInput("time-input", "", "half-life-calc");
+		createInput("half-life-input", "5", "half-life-calc");
+		createInput("remaining-quantity", "25", "half-life-calc");
 
 		calculateHalfLife();
 
@@ -300,11 +254,11 @@ describe("calculateHalfLife", () => {
 	});
 
 	it("should solve for half-life: N0=100, Nt=25, t=10 → t_half≈5", () => {
-		createSelect("half-life-solve-for", "half-life");
-		createInput("initial-quantity", "100");
-		createInput("time-input", "10");
-		createInput("half-life-input", "");
-		createInput("remaining-quantity", "25");
+		createSelect("half-life-solve-for", "half-life", ["half-life"], "half-life-calc");
+		createInput("initial-quantity", "100", "half-life-calc");
+		createInput("time-input", "10", "half-life-calc");
+		createInput("half-life-input", "", "half-life-calc");
+		createInput("remaining-quantity", "25", "half-life-calc");
 
 		calculateHalfLife();
 
@@ -315,11 +269,11 @@ describe("calculateHalfLife", () => {
 	});
 
 	it("should show error when t_half<=0 (solving for remaining)", () => {
-		createSelect("half-life-solve-for", "remaining");
-		createInput("initial-quantity", "100");
-		createInput("time-input", "10");
-		createInput("half-life-input", "0");
-		createInput("remaining-quantity", "");
+		createSelect("half-life-solve-for", "remaining", ["remaining"], "half-life-calc");
+		createInput("initial-quantity", "100", "half-life-calc");
+		createInput("time-input", "10", "half-life-calc");
+		createInput("half-life-input", "0", "half-life-calc");
+		createInput("remaining-quantity", "", "half-life-calc");
 
 		calculateHalfLife();
 
@@ -329,11 +283,11 @@ describe("calculateHalfLife", () => {
 	});
 
 	it("should show error when N0<=0 (solving for remaining)", () => {
-		createSelect("half-life-solve-for", "remaining");
-		createInput("initial-quantity", "0");
-		createInput("time-input", "10");
-		createInput("half-life-input", "5");
-		createInput("remaining-quantity", "");
+		createSelect("half-life-solve-for", "remaining", ["remaining"], "half-life-calc");
+		createInput("initial-quantity", "0", "half-life-calc");
+		createInput("time-input", "10", "half-life-calc");
+		createInput("half-life-input", "5", "half-life-calc");
+		createInput("remaining-quantity", "", "half-life-calc");
 
 		calculateHalfLife();
 
@@ -343,11 +297,11 @@ describe("calculateHalfLife", () => {
 	});
 
 	it("should show error when N0<=0 (solving for time)", () => {
-		createSelect("half-life-solve-for", "time");
-		createInput("initial-quantity", "-10");
-		createInput("time-input", "");
-		createInput("half-life-input", "5");
-		createInput("remaining-quantity", "25");
+		createSelect("half-life-solve-for", "time", ["time"], "half-life-calc");
+		createInput("initial-quantity", "-10", "half-life-calc");
+		createInput("time-input", "", "half-life-calc");
+		createInput("half-life-input", "5", "half-life-calc");
+		createInput("remaining-quantity", "25", "half-life-calc");
 
 		calculateHalfLife();
 
@@ -357,11 +311,11 @@ describe("calculateHalfLife", () => {
 	});
 
 	it("should show error when Nt<=0 (solving for time)", () => {
-		createSelect("half-life-solve-for", "time");
-		createInput("initial-quantity", "100");
-		createInput("time-input", "");
-		createInput("half-life-input", "5");
-		createInput("remaining-quantity", "0");
+		createSelect("half-life-solve-for", "time", ["time"], "half-life-calc");
+		createInput("initial-quantity", "100", "half-life-calc");
+		createInput("time-input", "", "half-life-calc");
+		createInput("half-life-input", "5", "half-life-calc");
+		createInput("remaining-quantity", "0", "half-life-calc");
 
 		calculateHalfLife();
 

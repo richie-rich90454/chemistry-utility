@@ -1,51 +1,12 @@
 import {describe, it, expect, beforeEach, afterEach} from "vitest";
 import {calculateDilution, calculateMassPercent, calculateMixing} from "./solutionCalculators.js";
-
-function createInput(id: string, value: string): HTMLInputElement {
-	const input = document.createElement("input");
-	input.id = id;
-	input.type = "number";
-	input.value = value;
-	document.body.appendChild(input);
-	return input;
-}
-
-function createSelect(id: string, value: string): HTMLSelectElement {
-	const select = document.createElement("select");
-	select.id = id;
-	const option = document.createElement("option");
-	option.value = value;
-	option.textContent = value;
-	select.appendChild(option);
-	select.value = value;
-	document.body.appendChild(select);
-	return select;
-}
-
-function createResultDiv(id: string): HTMLDivElement {
-	const div = document.createElement("div");
-	div.id = id;
-	document.body.appendChild(div);
-	return div;
-}
-
-function createFormDiv(id: string): HTMLDivElement {
-	const div = document.createElement("div");
-	div.id = id;
-	document.body.appendChild(div);
-	return div;
-}
-
-function getResultText(id: string): string {
-	const el = document.getElementById(id);
-	return el?.textContent?.trim() || "";
-}
+import {createContainer, createInput, createSelect, createResultDiv, getResultText} from "../test/helpers.js";
 
 describe("calculateDilution", () => {
 	beforeEach(() => {
 		document.body.innerHTML = "";
-		createFormDiv("dilution-calc");
-		createResultDiv("dilution-result");
+		createContainer("dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
 	});
 
 	afterEach(() => {
@@ -53,11 +14,11 @@ describe("calculateDilution", () => {
 	});
 
 	it("should solve for M2: M1=2, V1=1, V2=4 → M2=0.5", () => {
-		createSelect("dilution-solve-for", "M2");
-		createInput("dilution-M1", "2");
-		createInput("dilution-V1", "1");
-		createInput("dilution-M2", "");
-		createInput("dilution-V2", "4");
+		createSelect("dilution-solve-for", "M2", ["M2"], "dilution-calc");
+		createInput("dilution-M1", "2", "dilution-calc");
+		createInput("dilution-V1", "1", "dilution-calc");
+		createInput("dilution-M2", "", "dilution-calc");
+		createInput("dilution-V2", "4", "dilution-calc");
 
 		calculateDilution();
 
@@ -67,11 +28,11 @@ describe("calculateDilution", () => {
 	});
 
 	it("should solve for V1: M1=6, M2=2, V2=500 → V1≈166.67", () => {
-		createSelect("dilution-solve-for", "V1");
-		createInput("dilution-M1", "6");
-		createInput("dilution-V1", "");
-		createInput("dilution-M2", "2");
-		createInput("dilution-V2", "500");
+		createSelect("dilution-solve-for", "V1", ["V1"], "dilution-calc");
+		createInput("dilution-M1", "6", "dilution-calc");
+		createInput("dilution-V1", "", "dilution-calc");
+		createInput("dilution-M2", "2", "dilution-calc");
+		createInput("dilution-V2", "500", "dilution-calc");
 
 		calculateDilution();
 
@@ -81,11 +42,11 @@ describe("calculateDilution", () => {
 	});
 
 	it("should solve for M1: M2=0.5, V1=1, V2=4 → M1=2", () => {
-		createSelect("dilution-solve-for", "M1");
-		createInput("dilution-M1", "");
-		createInput("dilution-V1", "1");
-		createInput("dilution-M2", "0.5");
-		createInput("dilution-V2", "4");
+		createSelect("dilution-solve-for", "M1", ["M1"], "dilution-calc");
+		createInput("dilution-M1", "", "dilution-calc");
+		createInput("dilution-V1", "1", "dilution-calc");
+		createInput("dilution-M2", "0.5", "dilution-calc");
+		createInput("dilution-V2", "4", "dilution-calc");
 
 		calculateDilution();
 
@@ -95,11 +56,11 @@ describe("calculateDilution", () => {
 	});
 
 	it("should solve for V2: M1=6, V1=100, M2=2 → V2=300", () => {
-		createSelect("dilution-solve-for", "V2");
-		createInput("dilution-M1", "6");
-		createInput("dilution-V1", "100");
-		createInput("dilution-M2", "2");
-		createInput("dilution-V2", "");
+		createSelect("dilution-solve-for", "V2", ["V2"], "dilution-calc");
+		createInput("dilution-M1", "6", "dilution-calc");
+		createInput("dilution-V1", "100", "dilution-calc");
+		createInput("dilution-M2", "2", "dilution-calc");
+		createInput("dilution-V2", "", "dilution-calc");
 
 		calculateDilution();
 
@@ -109,11 +70,11 @@ describe("calculateDilution", () => {
 	});
 
 	it("should show error for zero V1 when solving for M2", () => {
-		createSelect("dilution-solve-for", "M2");
-		createInput("dilution-M1", "2");
-		createInput("dilution-V1", "0");
-		createInput("dilution-M2", "");
-		createInput("dilution-V2", "4");
+		createSelect("dilution-solve-for", "M2", ["M2"], "dilution-calc");
+		createInput("dilution-M1", "2", "dilution-calc");
+		createInput("dilution-V1", "0", "dilution-calc");
+		createInput("dilution-M2", "", "dilution-calc");
+		createInput("dilution-V2", "4", "dilution-calc");
 
 		calculateDilution();
 
@@ -122,11 +83,11 @@ describe("calculateDilution", () => {
 	});
 
 	it("should show error for negative V2 when solving for M2", () => {
-		createSelect("dilution-solve-for", "M2");
-		createInput("dilution-M1", "2");
-		createInput("dilution-V1", "1");
-		createInput("dilution-M2", "");
-		createInput("dilution-V2", "-4");
+		createSelect("dilution-solve-for", "M2", ["M2"], "dilution-calc");
+		createInput("dilution-M1", "2", "dilution-calc");
+		createInput("dilution-V1", "1", "dilution-calc");
+		createInput("dilution-M2", "", "dilution-calc");
+		createInput("dilution-V2", "-4", "dilution-calc");
 
 		calculateDilution();
 
@@ -135,11 +96,11 @@ describe("calculateDilution", () => {
 	});
 
 	it("should show error for negative M1 when solving for V2", () => {
-		createSelect("dilution-solve-for", "V2");
-		createInput("dilution-M1", "-6");
-		createInput("dilution-V1", "100");
-		createInput("dilution-M2", "2");
-		createInput("dilution-V2", "");
+		createSelect("dilution-solve-for", "V2", ["V2"], "dilution-calc");
+		createInput("dilution-M1", "-6", "dilution-calc");
+		createInput("dilution-V1", "100", "dilution-calc");
+		createInput("dilution-M2", "2", "dilution-calc");
+		createInput("dilution-V2", "", "dilution-calc");
 
 		calculateDilution();
 
@@ -151,8 +112,8 @@ describe("calculateDilution", () => {
 describe("calculateMassPercent", () => {
 	beforeEach(() => {
 		document.body.innerHTML = "";
-		createFormDiv("mass-percent-calc");
-		createResultDiv("mass-percent-result");
+		createContainer("mass-percent-calc");
+		createResultDiv("mass-percent-result", "mass-percent-calc");
 	});
 
 	afterEach(() => {
@@ -160,9 +121,9 @@ describe("calculateMassPercent", () => {
 	});
 
 	it("should calculate percent: 10g solute, 100g solution → 10%", () => {
-		createSelect("concentration-unit", "percent");
-		createInput("mass-solute", "10");
-		createInput("mass-solution", "100");
+		createSelect("concentration-unit", "percent", ["percent"], "mass-percent-calc");
+		createInput("mass-solute", "10", "mass-percent-calc");
+		createInput("mass-solution", "100", "mass-percent-calc");
 
 		calculateMassPercent();
 
@@ -172,9 +133,9 @@ describe("calculateMassPercent", () => {
 	});
 
 	it("should calculate ppm: small solute in large solution", () => {
-		createSelect("concentration-unit", "ppm");
-		createInput("mass-solute", "0.001");
-		createInput("mass-solution", "1");
+		createSelect("concentration-unit", "ppm", ["ppm"], "mass-percent-calc");
+		createInput("mass-solute", "0.001", "mass-percent-calc");
+		createInput("mass-solution", "1", "mass-percent-calc");
 
 		calculateMassPercent();
 
@@ -184,9 +145,9 @@ describe("calculateMassPercent", () => {
 	});
 
 	it("should calculate ppb: very small solute in large solution", () => {
-		createSelect("concentration-unit", "ppb");
-		createInput("mass-solute", "0.000001");
-		createInput("mass-solution", "1");
+		createSelect("concentration-unit", "ppb", ["ppb"], "mass-percent-calc");
+		createInput("mass-solute", "0.000001", "mass-percent-calc");
+		createInput("mass-solution", "1", "mass-percent-calc");
 
 		calculateMassPercent();
 
@@ -196,9 +157,9 @@ describe("calculateMassPercent", () => {
 	});
 
 	it("should show error when solution mass is zero", () => {
-		createSelect("concentration-unit", "percent");
-		createInput("mass-solute", "10");
-		createInput("mass-solution", "0");
+		createSelect("concentration-unit", "percent", ["percent"], "mass-percent-calc");
+		createInput("mass-solute", "10", "mass-percent-calc");
+		createInput("mass-solution", "0", "mass-percent-calc");
 
 		calculateMassPercent();
 
@@ -208,9 +169,9 @@ describe("calculateMassPercent", () => {
 	});
 
 	it("should show error when solute mass is negative", () => {
-		createSelect("concentration-unit", "percent");
-		createInput("mass-solute", "-5");
-		createInput("mass-solution", "100");
+		createSelect("concentration-unit", "percent", ["percent"], "mass-percent-calc");
+		createInput("mass-solute", "-5", "mass-percent-calc");
+		createInput("mass-solution", "100", "mass-percent-calc");
 
 		calculateMassPercent();
 
@@ -223,8 +184,8 @@ describe("calculateMassPercent", () => {
 describe("calculateMixing", () => {
 	beforeEach(() => {
 		document.body.innerHTML = "";
-		createFormDiv("solution-mixing-calc");
-		createResultDiv("mixing-result");
+		createContainer("solution-mixing-calc");
+		createResultDiv("mixing-result", "solution-mixing-calc");
 	});
 
 	afterEach(() => {
@@ -232,19 +193,10 @@ describe("calculateMixing", () => {
 	});
 
 	it("should calculate basic mixing: C1=1, V1=100, C2=0, V2=100 → C_final=0.5", () => {
-		// Note: C2=0 will throw because C2<=0 is checked. Let's use C2=0.5 instead
-		// Actually, the code checks C2<=0, so C2=0 will throw. Let's test with C2=0.5
-		// Wait, the task says C2=0. But the code throws for C2<=0. Let me check the task again.
-		// The task says: "Basic mixing: C1=1, V1=100, C2=0, V2=100 → C_final=0.5"
-		// But the source code throws for C2<=0. So this will produce an error.
-		// I'll test with C2=0 which should produce an error, then test with a valid C2.
-		// Actually, let me re-read the code: if (C2<=0) throw new Error(...)
-		// So C2=0 will throw. The test expectation in the task may be wrong about C2=0.
-		// I'll test the actual behavior: C2=0 should throw, and test with C2=0.5 for the valid case.
-		createInput("mix-C1", "1");
-		createInput("mix-V1", "100");
-		createInput("mix-C2", "0");
-		createInput("mix-V2", "100");
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "100", "solution-mixing-calc");
+		createInput("mix-C2", "0", "solution-mixing-calc");
+		createInput("mix-V2", "100", "solution-mixing-calc");
 
 		calculateMixing();
 
@@ -253,10 +205,10 @@ describe("calculateMixing", () => {
 	});
 
 	it("should calculate mixing with valid concentrations: C1=1, V1=100, C2=0.5, V2=100 → C_final=0.75", () => {
-		createInput("mix-C1", "1");
-		createInput("mix-V1", "100");
-		createInput("mix-C2", "0.5");
-		createInput("mix-V2", "100");
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "100", "solution-mixing-calc");
+		createInput("mix-C2", "0.5", "solution-mixing-calc");
+		createInput("mix-V2", "100", "solution-mixing-calc");
 
 		calculateMixing();
 
@@ -266,10 +218,10 @@ describe("calculateMixing", () => {
 	});
 
 	it("should return same concentration when both solutions have same concentration", () => {
-		createInput("mix-C1", "2");
-		createInput("mix-V1", "50");
-		createInput("mix-C2", "2");
-		createInput("mix-V2", "150");
+		createInput("mix-C1", "2", "solution-mixing-calc");
+		createInput("mix-V1", "50", "solution-mixing-calc");
+		createInput("mix-C2", "2", "solution-mixing-calc");
+		createInput("mix-V2", "150", "solution-mixing-calc");
 
 		calculateMixing();
 
@@ -278,10 +230,10 @@ describe("calculateMixing", () => {
 	});
 
 	it("should show error for zero volume", () => {
-		createInput("mix-C1", "1");
-		createInput("mix-V1", "0");
-		createInput("mix-C2", "1");
-		createInput("mix-V2", "100");
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "0", "solution-mixing-calc");
+		createInput("mix-C2", "1", "solution-mixing-calc");
+		createInput("mix-V2", "100", "solution-mixing-calc");
 
 		calculateMixing();
 
@@ -290,10 +242,10 @@ describe("calculateMixing", () => {
 	});
 
 	it("should show error for negative concentration", () => {
-		createInput("mix-C1", "-1");
-		createInput("mix-V1", "100");
-		createInput("mix-C2", "1");
-		createInput("mix-V2", "100");
+		createInput("mix-C1", "-1", "solution-mixing-calc");
+		createInput("mix-V1", "100", "solution-mixing-calc");
+		createInput("mix-C2", "1", "solution-mixing-calc");
+		createInput("mix-V2", "100", "solution-mixing-calc");
 
 		calculateMixing();
 
@@ -302,10 +254,10 @@ describe("calculateMixing", () => {
 	});
 
 	it("should show error for negative volume", () => {
-		createInput("mix-C1", "1");
-		createInput("mix-V1", "-100");
-		createInput("mix-C2", "1");
-		createInput("mix-V2", "100");
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "-100", "solution-mixing-calc");
+		createInput("mix-C2", "1", "solution-mixing-calc");
+		createInput("mix-V2", "100", "solution-mixing-calc");
 
 		calculateMixing();
 

@@ -1,23 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { predictBondType } from "./bondPredictor";
+import { predictBondType } from "./bondPredictor.js";
 import { mockElements } from "../test/elementsData";
+import { setOrCreateInput, getResultHTML } from "../test/helpers.js";
 import type { ChemicalElement } from "../types";
-
-function setOrCreateInput(id: string, value: string, parentId: string) {
-    let input = document.getElementById(id) as HTMLInputElement | null;
-    if (!input) {
-        input = document.createElement("input");
-        input.id = id;
-        document.getElementById(parentId)!.appendChild(input);
-    }
-    input.value = value;
-    input.classList.remove("error");
-}
-
-function getResultHTML(id: string): string {
-    const el = document.getElementById(id);
-    return el ? el.innerHTML : "";
-}
 
 describe("bondPredictor", () => {
     beforeEach(() => {
@@ -35,24 +20,24 @@ describe("bondPredictor", () => {
     });
 
     it("should predict Metallic bond for Metal + Metal (Na + Ca)", () => {
-        setOrCreateInput("element1-input", "Na", "bond-predictor");
-        setOrCreateInput("element2-input", "Ca", "bond-predictor");
+        setOrCreateInput("element1-input", "Na", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "Ca", "bond-predictor", "text");
         predictBondType(mockElements);
         const html = getResultHTML("bond-type-result");
         expect(html).toContain("Metallic");
     });
 
     it("should predict Ionic bond for Metal + Non-metal (Na + Cl)", () => {
-        setOrCreateInput("element1-input", "Na", "bond-predictor");
-        setOrCreateInput("element2-input", "Cl", "bond-predictor");
+        setOrCreateInput("element1-input", "Na", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "Cl", "bond-predictor", "text");
         predictBondType(mockElements);
         const html = getResultHTML("bond-type-result");
         expect(html).toContain("Ionic");
     });
 
     it("should predict Polar Covalent bond for Non-metal + Non-metal with high deltaEN (H + O)", () => {
-        setOrCreateInput("element1-input", "H", "bond-predictor");
-        setOrCreateInput("element2-input", "O", "bond-predictor");
+        setOrCreateInput("element1-input", "H", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "O", "bond-predictor", "text");
         predictBondType(mockElements);
         const html = getResultHTML("bond-type-result");
         // H=2.20, O=3.44, deltaEN=1.24 → since one is not metal and deltaEN < 1.7, it's Polar Covalent
@@ -60,8 +45,8 @@ describe("bondPredictor", () => {
     });
 
     it("should predict Polar Covalent for C + O (deltaEN = 0.89)", () => {
-        setOrCreateInput("element1-input", "C", "bond-predictor");
-        setOrCreateInput("element2-input", "O", "bond-predictor");
+        setOrCreateInput("element1-input", "C", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "O", "bond-predictor", "text");
         predictBondType(mockElements);
         const html = getResultHTML("bond-type-result");
         // C=2.55, O=3.44, deltaEN=0.89 → 0.4 <= 0.89 < 1.7, both non-metals → Polar Covalent
@@ -69,8 +54,8 @@ describe("bondPredictor", () => {
     });
 
     it("should predict Nonpolar Covalent for same element (deltaEN = 0)", () => {
-        setOrCreateInput("element1-input", "H", "bond-predictor");
-        setOrCreateInput("element2-input", "H", "bond-predictor");
+        setOrCreateInput("element1-input", "H", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "H", "bond-predictor", "text");
         predictBondType(mockElements);
         const html = getResultHTML("bond-type-result");
         // Same element: deltaEN=0 → Nonpolar Covalent
@@ -78,16 +63,16 @@ describe("bondPredictor", () => {
     });
 
     it("should handle case-insensitive input (na + cl)", () => {
-        setOrCreateInput("element1-input", "na", "bond-predictor");
-        setOrCreateInput("element2-input", "cl", "bond-predictor");
+        setOrCreateInput("element1-input", "na", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "cl", "bond-predictor", "text");
         predictBondType(mockElements);
         const html = getResultHTML("bond-type-result");
         expect(html).toContain("Ionic");
     });
 
     it("should show error for missing element", () => {
-        setOrCreateInput("element1-input", "Xx", "bond-predictor");
-        setOrCreateInput("element2-input", "Na", "bond-predictor");
+        setOrCreateInput("element1-input", "Xx", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "Na", "bond-predictor", "text");
         predictBondType(mockElements);
         const html = getResultHTML("bond-type-result");
         expect(html).toContain("Error");
@@ -113,16 +98,16 @@ describe("bondPredictor", () => {
                 totalElectrons: 1,
             },
         ];
-        setOrCreateInput("element1-input", "Zz", "bond-predictor");
-        setOrCreateInput("element2-input", "H", "bond-predictor");
+        setOrCreateInput("element1-input", "Zz", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "H", "bond-predictor", "text");
         predictBondType(elementsWithNullEN);
         const html = getResultHTML("bond-type-result");
         expect(html).toContain("unavailable electronegativity data");
     });
 
     it("should show error when inputs are empty", () => {
-        setOrCreateInput("element1-input", "", "bond-predictor");
-        setOrCreateInput("element2-input", "", "bond-predictor");
+        setOrCreateInput("element1-input", "", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "", "bond-predictor", "text");
         predictBondType(mockElements);
         const html = getResultHTML("bond-type-result");
         expect(html).toContain("Error");
