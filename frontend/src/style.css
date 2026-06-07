@@ -889,6 +889,16 @@ select{
     align-items: center;
     justify-content: space-around;
 }
+.tab-indicator{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 0;
+    background: var(--primary);
+    border-radius: 1px 1px 0 0;
+    transition: left 200ms cubic-bezier(0.2, 0, 0, 1), width 200ms cubic-bezier(0.2, 0, 0, 1);
+}
 .tab-item{
     display: flex;
     flex-direction: column;

@@ -134,6 +134,23 @@ function updateTabActive(targetId:string):void{
 			tab.classList.remove("active");
 		}
 	});
+	// Update tab indicator position
+	updateTabIndicator(targetId);
+}
+
+function updateTabIndicator(targetId:string):void{
+	let indicator=document.querySelector(".tab-indicator") as HTMLElement;
+	let tabContainer=document.querySelector(".bottom-tabs") as HTMLElement;
+	if (!indicator||!tabContainer) return;
+	let activeTab=tabContainer.querySelector('.tab-item[data-target="'+targetId+'"]') as HTMLElement;
+	if (!activeTab||targetId==="more"){
+		indicator.style.width="0";
+		return;
+	}
+	let containerRect=tabContainer.getBoundingClientRect();
+	let tabRect=activeTab.getBoundingClientRect();
+	indicator.style.left=(tabRect.left-containerRect.left+4)+"px";
+	indicator.style.width=(tabRect.width-8)+"px";
 }
 
 function updateSheetActive(targetId:string):void{
