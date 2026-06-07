@@ -165,7 +165,11 @@ body{
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background-color var(--transition-slow), color var(--transition-slow);
+    transition: background-color 0.4s ease, color 0.3s ease;
+}
+/* Smooth theme transition for all elements */
+.sidebar, .main-content, .card, .result, input, select, .bottom-tabs, .nav-sheet, .welcome-card, .command-palette{
+    transition: background-color 0.4s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 .app-layout{
     display: flex;
