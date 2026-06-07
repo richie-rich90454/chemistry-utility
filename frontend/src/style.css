@@ -293,7 +293,12 @@ body{
 
 /* Drawer Headline */
 .sidebar-header{
-    padding: var(--md-space-4) var(--md-space-4) var(--md-space-3);
+    padding: var(--md-space-4) var(--md-space-4) var(--md-space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-2);
+}
+.sidebar-header .header-top{
     display: flex;
     align-items: center;
     gap: var(--md-space-3);
@@ -567,7 +572,7 @@ input, select, textarea{
     padding: 10px var(--md-space-3);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
-    background: var(--md-surface);
+    background: var(--md-surface-container-high);
     color: var(--md-on-surface);
     border: 1px solid var(--md-outline);
     border-radius: var(--md-shape-xs);
@@ -581,9 +586,6 @@ input, select, textarea{
     min-height: 48px;
     /* Force text color — browsers with color-scheme:dark can override CSS color on form elements */
     -webkit-text-fill-color: var(--md-on-surface);
-    /* Firefox: force dark mode form control colors */
-    --input-color: var(--md-on-surface);
-    --input-bg: var(--md-surface);
 }
 input::placeholder, textarea::placeholder{
     color: var(--md-on-surface-variant);
@@ -622,7 +624,7 @@ input:disabled, select:disabled, textarea:disabled{
 @-moz-document url-prefix(""){
     input, select, textarea{
         color: var(--md-on-surface) !important;
-        background: var(--md-surface) !important;
+        background: var(--md-surface-container-high) !important;
     }
 }
 select{
@@ -1239,13 +1241,17 @@ input[type="number"]{
     align-items: center;
 }
 .sidebar.collapsed .sidebar-header{
-    flex-direction: column;
     padding: var(--md-space-2) var(--md-space-1);
     gap: var(--md-space-1);
     align-items: center;
 }
 .sidebar.collapsed .sidebar-header h1{
     display: none;
+}
+.sidebar.collapsed .sidebar-header .header-top{
+    flex-direction: column;
+    gap: var(--md-space-1);
+    align-items: center;
 }
 .sidebar.collapsed .sidebar-search{
     display: none;
