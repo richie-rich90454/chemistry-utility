@@ -1463,6 +1463,12 @@ select{
         align-items: stretch;
         background: var(--app-bg);
     }
+    .app-view .main-content::before{
+        left: 0;
+    }
+    .app-view .main-content::after{
+        left: 0;
+    }
     .app-view .calculator-view{
         max-width: 100%;
     }
@@ -1490,6 +1496,18 @@ select{
     }
     .nav-sheet{
         max-height: 60vh;
+    }
+    /* Touch feedback for mobile */
+    .tab-item:active{
+        transform: scale(0.92);
+        transition: transform 0.1s ease;
+    }
+    .welcome-card:active{
+        transform: scale(0.97);
+        transition: transform 0.1s ease;
+    }
+    .primary-button:active{
+        transform: scale(0.95);
     }
 }
 @media (max-width: 480px){
