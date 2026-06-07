@@ -55,6 +55,13 @@
     /* Background */
     --md-background: #fdfbff;
     --md-on-background: #1c1b1f;
+    /* Form element overrides — explicit colors that bypass color-scheme */
+    --md-input-bg: #ffffff;
+    --md-input-text: #1c1b1f;
+    --md-input-border: #79747e;
+    --md-input-placeholder: #49454f;
+    --md-input-focus-border: #1a73e8;
+    --md-input-hover-border: #1c1b1f;
     /* Scrim */
     --md-scrim: rgba(0,0,0,0.4);
     /* Elevation shadows (MD3) */
@@ -150,6 +157,13 @@
     --md-outline-variant: #49454f;
     --md-background: #1c1b1f;
     --md-on-background: #e6e1e5;
+    /* Form element overrides — explicit dark colors */
+    --md-input-bg: #1c1b1f;
+    --md-input-text: #e6e1e5;
+    --md-input-border: #938f99;
+    --md-input-placeholder: #cac4d0;
+    --md-input-focus-border: #a8c7fa;
+    --md-input-hover-border: #e6e1e5;
     --md-scrim: rgba(0,0,0,0.6);
     --md-elevation-1: 0 1px 3px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
     --md-elevation-2: 0 2px 6px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
@@ -212,6 +226,13 @@
         --md-outline-variant: #49454f;
         --md-background: #1c1b1f;
         --md-on-background: #e6e1e5;
+        /* Form element overrides — explicit dark colors */
+        --md-input-bg: #1c1b1f;
+        --md-input-text: #e6e1e5;
+        --md-input-border: #938f99;
+        --md-input-placeholder: #cac4d0;
+        --md-input-focus-border: #a8c7fa;
+        --md-input-hover-border: #e6e1e5;
         --md-scrim: rgba(0,0,0,0.6);
         --md-elevation-1: 0 1px 3px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
         --md-elevation-2: 0 2px 6px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
@@ -416,32 +437,6 @@ body{
 }
 .sidebar-footer a:hover{text-decoration:underline}
 
-/* Theme Toggle — MD3 Icon Button */
-.theme-toggle{
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--md-on-surface-variant);
-    border-radius: var(--md-shape-full);
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard);
-    flex-shrink: 0;
-}
-.theme-toggle:hover{
-    background: var(--md-state-hover);
-}
-.theme-toggle:active{
-    background: var(--md-state-pressed);
-}
-.theme-toggle:focus-visible{
-    outline: 2px solid var(--md-primary);
-    outline-offset: 2px;
-}
-
 /* ═══════════════════════════════════════════════════════════════
    Main Content
    ═══════════════════════════════════════════════════════════════ */
@@ -566,15 +561,17 @@ body{
 
 /* ═══════════════════════════════════════════════════════════════
    Form Elements — MD3 Outlined Text Fields
+   Using dedicated --md-input-* variables with !important to
+   override browser color-scheme internal styling.
    ═══════════════════════════════════════════════════════════════ */
 input, select, textarea{
     width: 100%;
     padding: 10px var(--md-space-3);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
-    background: var(--md-surface-container-high);
-    color: var(--md-on-surface);
-    border: 1px solid var(--md-outline);
+    background: var(--md-input-bg) !important;
+    color: var(--md-input-text) !important;
+    border: 1px solid var(--md-input-border);
     border-radius: var(--md-shape-xs);
     transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
                 box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
@@ -584,26 +581,25 @@ input, select, textarea{
     -moz-appearance: none;
     appearance: none;
     min-height: 48px;
-    /* Force text color — browsers with color-scheme:dark can override CSS color on form elements */
-    -webkit-text-fill-color: var(--md-on-surface);
+    -webkit-text-fill-color: var(--md-input-text) !important;
 }
 input::placeholder, textarea::placeholder{
-    color: var(--md-on-surface-variant);
-    opacity: 1;
-    -webkit-text-fill-color: var(--md-on-surface-variant);
+    color: var(--md-input-placeholder) !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: var(--md-input-placeholder) !important;
 }
 input:hover, select:hover, textarea:hover{
-    border-color: var(--md-on-surface);
+    border-color: var(--md-input-hover-border);
 }
 input:focus, select:focus, textarea:focus{
-    border-color: var(--md-primary);
+    border-color: var(--md-input-focus-border);
     box-shadow: none;
     outline: none;
     border-width: 2px;
     padding: 9px 11px;
 }
 input:focus-visible, select:focus-visible, textarea:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--md-input-focus-border);
     outline-offset: 1px;
 }
 input.error, select.error, textarea.error{
@@ -620,13 +616,6 @@ input:disabled, select:disabled, textarea:disabled{
     cursor: not-allowed;
     pointer-events: none;
 }
-/* Firefox-specific: force input colors in dark mode */
-@-moz-document url-prefix(""){
-    input, select, textarea{
-        color: var(--md-on-surface) !important;
-        background: var(--md-surface-container-high) !important;
-    }
-}
 select{
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2379747e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -634,10 +623,10 @@ select{
     background-size: 12px;
     padding-right: 36px;
 }
-/* Select dropdown options need explicit styling in dark mode */
+/* Select dropdown options */
 select option{
-    background: var(--md-surface-container);
-    color: var(--md-on-surface);
+    background: var(--md-input-bg) !important;
+    color: var(--md-input-text) !important;
 }
 .dark select{
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23938f99' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
@@ -647,7 +636,7 @@ select option{
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23938f99' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     }
 }
-/* Remove number input spinners for consistent cross-browser look */
+/* Remove number input spinners */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button{
     -webkit-appearance: none;
@@ -660,6 +649,13 @@ input[type="number"]{
 /* ═══════════════════════════════════════════════════════════════
    MD3 Filled Button
    ═══════════════════════════════════════════════════════════════ */
+button{
+    font-family: "Noto Sans", sans-serif;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: inherit;
+}
 .primary-button{
     display: inline-flex;
     align-items: center;
@@ -670,8 +666,8 @@ input[type="number"]{
     font-size: 0.875rem;
     font-weight: 500;
     letter-spacing: 0.1px;
-    color: var(--md-on-primary);
-    background-color: var(--md-primary);
+    color: var(--md-on-primary) !important;
+    background-color: var(--md-primary) !important;
     border: none;
     border-radius: var(--md-shape-full);
     cursor: pointer;
@@ -699,6 +695,60 @@ input[type="number"]{
 }
 .primary-button:focus:not(:focus-visible), .icon-button:focus:not(:focus-visible){
     outline: none;
+}
+/* MD3 Icon Button */
+.icon-button{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--md-shape-full);
+    border: none;
+    background: transparent;
+    color: var(--md-on-surface-variant);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.icon-button:hover{
+    background: var(--md-state-hover);
+}
+.icon-button:active{
+    background: var(--md-state-pressed);
+}
+.icon-button svg{
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+/* Sidebar Toggle — same as icon-button but specific */
+.sidebar-toggle{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--md-shape-full);
+    border: none;
+    background: transparent;
+    color: var(--md-on-surface-variant);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.sidebar-toggle:hover{
+    background: var(--md-state-hover);
+}
+.sidebar-toggle:active{
+    background: var(--md-state-pressed);
+}
+.sidebar-toggle svg{
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1299,30 +1349,6 @@ input[type="number"]{
 }
 .sidebar.collapsed .sidebar-nav a .shortcut-hint{
     display: none;
-}
-.sidebar-toggle{
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    color: var(--md-on-surface-variant);
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--md-shape-full);
-    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard);
-    flex-shrink: 0;
-}
-.sidebar-toggle:hover{
-    background: var(--md-state-hover);
-}
-.sidebar-toggle:active{
-    background: var(--md-state-pressed);
-}
-.sidebar-toggle:focus-visible{
-    outline: 2px solid var(--md-primary);
-    outline-offset: 2px;
 }
 
 /* ═══════════════════════════════════════════════════════════════
