@@ -233,8 +233,28 @@ body{
     font-size: 0.875rem;
     font-weight: 500;
     border-radius: var(--radius-full);
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: color var(--transition-fast);
     white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+.sidebar-nav a::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--surface-container);
+    border-radius: var(--radius-full);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 150ms cubic-bezier(0.2, 0, 0, 1);
+    z-index: -1;
+}
+.sidebar-nav a:hover::before{
+    transform: scaleX(1);
+}
+.sidebar-nav a.active::before{
+    transform: scaleX(1);
+    background: var(--primary-container);
 }
 .sidebar-nav a .nav-icon{
     width: 20px;
@@ -243,12 +263,10 @@ body{
     opacity: 0.7;
 }
 .sidebar-nav a:hover{
-    background: var(--surface-container);
     color: var(--text-primary);
 }
 .sidebar-nav a:hover .nav-icon{opacity:1}
 .sidebar-nav a.active{
-    background: var(--primary-container);
     color: var(--on-primary-container);
     font-weight: 600;
 }
