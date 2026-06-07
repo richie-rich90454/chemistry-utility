@@ -119,13 +119,13 @@
                             teachers, or hobbyists who need fast reference information. Just type the element name or symbol
                             and get accurate, reliable data instantly.</p>
                     </div>
-                    <p>Enter the element symbol or name of the element you want to look up: </p>
                     <label for="element-input">Element symbol or name</label>
                     <input type="text" id="element-input" placeholder="E.g., H or Hydrogen"
                         aria-label="Element symbol or name">
                     <div id="element-info" class="result"></div>
                     <p>To compute masses using this elemental data, try the <a href="#mass-calc">Molar Mass Calculator</a>.
                     </p>
+                    <p class="card-desc">Enter the element symbol or name of the element you want to look up: </p>
                 </div>
                 <div id="mass-calc" class="main-groups card">
                     <h2>Molar Mass Calculator - Calculate Molecule/Compound Molar Mass Instantly</h2>
@@ -135,12 +135,12 @@
                             grams to moles, and more. Just enter a chemical formula, and the calculator handles all the
                             isotope-averaging math for you.</p>
                     </div>
-                    <p>Enter the formula here: </p>
                     <label for="formula-input">Chemical formula</label>
                     <input type="text" id="formula-input" placeholder="E.g., CH4" aria-label="Chemical formula">
                     <div id="mass-result" class="result"></div>
                     <p>After finding molar mass, you can also compute reaction yields using the <a
                             href="#stoichiometry">Stoichiometry Calculator</a>.</p>
+                    <p class="card-desc">Enter the formula here: </p>
                 </div>
                 <div id="balancing" class="main-groups card">
                     <h2>Chemical Equation Balancer - Able to Balance most Chemical Equations</h2>
@@ -150,13 +150,13 @@
                             correct coefficients automatically. It is a simple way to verify your work or understand how
                             mass is conserved in a reaction.</p>
                     </div>
-                    <p>Enter the chemical equation: </p>
                     <label for="equation-input">Chemical equation</label>
                     <input type="text" id="equation-input" placeholder="E.g., H2+O2->H2O" aria-label="Chemical equation">
                     <button id="balance-button" class="primary-button">Balance Equation</button>
                     <div id="balance-result" class="result"></div>
                     <p>Once balanced, you can analyze reactants and yields with the <a href="#stoichiometry">Stoichiometry
                             Calculator</a>.</p>
+                    <p class="card-desc">Enter the chemical equation: </p>
                 </div>
                 <div id="dilution-calc" class="main-groups card">
                     <h2>Molarity and Dilution Calculator - Prepare Solutions Easily</h2>
@@ -166,7 +166,6 @@
                             C<sub>1</sub>V<sub>1</sub> = C<sub>2</sub>V<sub>2</sub> relationship, making it easy to scale
                             solutions up or down. Perfect for preparing lab samples or adjusting buffer strengths.</p>
                     </div>
-                    <p>Solve for:</p>
                     <label for="dilution-solve-for">Select parameter</label>
                     <select id="dilution-solve-for" aria-label="Select dilution parameter to solve for">
                         <option value="M1">Initial Molarity (M₁)</option>
@@ -185,6 +184,7 @@
                     <div id="dilution-result" class="result"></div>
                     <p>If you're preparing solutions for reactions, check the <a href="#stoichiometry">Stoichiometry
                             Calculator</a> for molar relationships.</p>
+                    <p class="card-desc">Solve for:</p>
                 </div>
                 <div id="mass-percent-calc" class="main-groups card">
                     <h2>Mass Percent and Concentration Calculator - ppm (parts per million) and ppb (parts per billion)</h2>
@@ -409,7 +409,6 @@
                             shows how reactants and products relate through mole ratios. Enter known quantities, and the
                             calculator fills in the rest.</p>
                     </div>
-                    <p>Enter the balanced chemical equation:</p>
                     <label for="stoich-equation-input">Balanced chemical equation</label>
                     <input type="text" id="stoich-equation-input" placeholder="E.g., 2H2+O2->2H2O"
                         aria-label="Balanced chemical equation">
@@ -425,6 +424,7 @@
                     <div id="stoich-result" class="result"></div>
                     <p>Need compound masses? Use the <a href="#mass-calc">Molar Mass Calculator</a> to get accurate molar
                         masses.</p>
+                    <p class="card-desc">Enter the balanced chemical equation:</p>
                 </div>
                 <div id="bond-type-predictor" class="main-groups card">
                     <h2>Bond Type Predictor - Ionic, Covalent, or Metallic</h2>
@@ -434,7 +434,6 @@
                             learning about chemical bonding. Simply enter the elements, and get a clear prediction with a
                             brief explanation.</p>
                     </div>
-                    <p>Enter two element abbreviations to predict the bond type (Ionic, Covalent, or Metallic):</p>
                     <label>Element symbols</label>
                     <div class="input-group">
                         <input type="text" id="element1-input" placeholder="First element (e.g., Na)"
@@ -444,6 +443,7 @@
                     </div>
                     <button id="calculate-bond-type" class="primary-button">Predict Bond Type</button>
                     <div id="bond-type-result" class="result"></div>
+                    <p class="card-desc">Enter two element abbreviations to predict the bond type (Ionic, Covalent, or Metallic):</p>
                 </div>
                 <button id="scroll-top" aria-label="Scroll to top">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -454,6 +454,7 @@
         </div>
         <script type="module" src="/src/script.ts"></script>
         <script type="module" src="/src/render.ts" defer></script>
+        <script type="module" src="/src/animate.ts" defer></script>
         <noscript>This chemistry calculator requires JavaScript to run. It includes tools for element lookup, molar mass,
             equation balancing, gas laws, and more.</noscript>
     </body>

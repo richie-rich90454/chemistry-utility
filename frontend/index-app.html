@@ -51,29 +51,28 @@
                 </section>
                 <div id="element-lookup" class="main-groups card">
                     <h2>Element Information Lookup</h2>
-                    <p>Enter the element symbol or name:</p>
                     <label for="element-input">Element symbol or name</label>
                     <input type="text" id="element-input" placeholder="E.g., H or Hydrogen" aria-label="Element symbol or name">
                     <div id="element-info" class="result"></div>
+                    <p class="card-desc">Enter the element symbol or name:</p>
                 </div>
                 <div id="mass-calc" class="main-groups card">
                     <h2>Molar Mass Calculator</h2>
-                    <p>Enter the formula here:</p>
                     <label for="formula-input">Chemical formula</label>
                     <input type="text" id="formula-input" placeholder="E.g., CH4" aria-label="Chemical formula">
                     <div id="mass-result" class="result"></div>
+                    <p class="card-desc">Enter the formula here:</p>
                 </div>
                 <div id="balancing" class="main-groups card">
                     <h2>Chemical Equation Balancer</h2>
-                    <p>Enter the chemical equation:</p>
                     <label for="equation-input">Chemical equation</label>
                     <input type="text" id="equation-input" placeholder="E.g., H2+O2->H2O" aria-label="Chemical equation">
                     <button id="balance-button" class="primary-button">Balance Equation</button>
                     <div id="balance-result" class="result"></div>
+                    <p class="card-desc">Enter the chemical equation:</p>
                 </div>
                 <div id="dilution-calc" class="main-groups card">
                     <h2>Molarity and Dilution Calculator</h2>
-                    <p>Solve for:</p>
                     <label for="dilution-solve-for">Select parameter</label>
                     <select id="dilution-solve-for" aria-label="Select dilution parameter to solve for">
                         <option value="M1">Initial Molarity (M1)</option>
@@ -90,6 +89,7 @@
                     </div>
                     <button id="calculate-dilution" class="primary-button">Calculate</button>
                     <div id="dilution-result" class="result"></div>
+                    <p class="card-desc">Solve for:</p>
                 </div>
                 <div id="mass-percent-calc" class="main-groups card">
                     <h2>Mass Percent and Concentration Calculator</h2>
@@ -259,7 +259,6 @@
                 </div>
                 <div id="stoichiometry" class="main-groups card">
                     <h2>Stoichiometry Calculator</h2>
-                    <p>Enter the balanced chemical equation:</p>
                     <label for="stoich-equation-input">Balanced chemical equation</label>
                     <input type="text" id="stoich-equation-input" placeholder="E.g., 2H2+O2->2H2O" aria-label="Balanced chemical equation">
                     <p>Select calculation type:</p>
@@ -272,10 +271,10 @@
                     <div id="stoich-inputs"></div>
                     <button id="calculate-stoich-button" class="primary-button">Calculate</button>
                     <div id="stoich-result" class="result"></div>
+                    <p class="card-desc">Enter the balanced chemical equation:</p>
                 </div>
                 <div id="bond-type-predictor" class="main-groups card">
                     <h2>Bond Type Predictor</h2>
-                    <p>Enter two element abbreviations to predict the bond type:</p>
                     <label>Element symbols</label>
                     <div class="input-group">
                         <input type="text" id="element1-input" placeholder="First element (e.g., Na)" aria-label="First element">
@@ -283,6 +282,7 @@
                     </div>
                     <button id="calculate-bond-type" class="primary-button">Predict Bond Type</button>
                     <div id="bond-type-result" class="result"></div>
+                    <p class="card-desc">Enter two element abbreviations to predict the bond type:</p>
                 </div>
                 <button id="scroll-top" aria-label="Scroll to top">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -293,5 +293,6 @@
         </div>
         <script type="module" src="/src/script.ts"></script>
         <script type="module" src="/src/render.ts" defer></script>
+        <script type="module" src="/src/animate.ts" defer></script>
     </body>
 </html>

@@ -42,7 +42,6 @@
     --transition-normal: 150ms cubic-bezier(0.2, 0, 0, 1);
     --transition-slow: 250ms cubic-bezier(0.2, 0, 0, 1);
     --sidebar-width: 256px;
-    --topbar-height: 0px;
 }
 .dark{
     --primary: #8ab4f8;
@@ -149,6 +148,7 @@ body{
     z-index: 10;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+    flex-shrink: 0;
 }
 .sidebar::-webkit-scrollbar{width:4px}
 .sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -166,6 +166,10 @@ body{
     margin: 0;
     letter-spacing: -0.01em;
     flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .sidebar-header .logo-icon{
     width: 28px;
@@ -267,16 +271,30 @@ body{
     max-width: 900px;
     margin: 0 auto;
     width: 100%;
+    min-width: 0;
 }
 /* ── Intro Card ── */
 .intro{
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 85%, var(--accent)) 100%);
     color: var(--on-primary);
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl) var(--spacing-2xl);
     margin-bottom: var(--spacing-xl);
     border: none;
     box-shadow: var(--shadow-2);
+    position: relative;
+    overflow: hidden;
+}
+.intro::after{
+    content: "";
+    position: absolute;
+    top: -30%;
+    right: -10%;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
 }
 .intro p{
     color: var(--on-primary);
@@ -285,6 +303,8 @@ body{
     opacity: 0.92;
     padding: 0;
     margin: 0;
+    position: relative;
+    z-index: 1;
 }
 /* ── Cards ── */
 .card{
@@ -348,10 +368,19 @@ body{
 .card button, .main-groups button{
     margin: var(--spacing-sm) var(--spacing-lg) var(--spacing-lg) var(--spacing-lg);
 }
+/* ── Card description (moved to bottom) ── */
+.card-desc{
+    padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-lg);
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    border-top: 1px solid var(--divider);
+    margin-top: var(--spacing-sm);
+}
 /* ── Input Group ── */
 .input-group{
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: var(--spacing-sm);
     margin: var(--spacing-sm) 0;
 }
@@ -405,7 +434,7 @@ select{
     border: none;
     border-radius: var(--radius-full);
     cursor: pointer;
-    transition: background var(--transition-fast), box-shadow var(--transition-fast);
+    transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
     min-height: 40px;
     width: auto;
     letter-spacing: 0.01em;
@@ -419,6 +448,7 @@ select{
 .primary-button:active{
     box-shadow: none;
     background-color: var(--primary-dark);
+    transform: scale(0.97);
 }
 .primary-button:focus-visible, .icon-button:focus-visible{
     outline: 2px solid var(--primary);
@@ -539,33 +569,56 @@ select{
 }
 /* ── Hidden ── */
 #remaining-quantity-group{display:none}
+/* ── Sub-group divider ── */
+.sub-group{
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--divider);
+    margin-bottom: var(--spacing-lg);
+}
+.sub-group:last-child{
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
 /* ── Responsive ── */
 @media (max-width: 768px){
     .app-layout{flex-direction:column}
     .sidebar{
         width: 100%;
         height: auto;
-        position: relative;
+        position: sticky;
+        top: 0;
         border-right: none;
         border-bottom: 1px solid var(--divider);
+        z-index: 50;
+    }
+    .sidebar-nav{
+        padding: 0 var(--spacing-sm);
     }
     .sidebar-nav ul{
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 2px;
-        padding: 0 var(--spacing-sm);
+        padding: 0 var(--spacing-sm) var(--spacing-sm);
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
     }
+    .sidebar-nav ul::-webkit-scrollbar{display:none}
     .sidebar-nav a{
         border-radius: var(--radius-full);
         padding: 0 var(--spacing-md);
         height: 32px;
         font-size: 0.8125rem;
+        flex-shrink: 0;
     }
     .sidebar-nav a .nav-icon{display:none}
     .nav-category{display:none}
     .sidebar-footer{display:none}
     .main-content{
-        padding: var(--spacing-lg);
+        padding: var(--spacing-lg) var(--spacing-md);
+        max-width: 100%;
     }
     .input-group{
         grid-template-columns: 1fr;
@@ -573,10 +626,59 @@ select{
     .primary-button{
         width: 100%;
     }
+    .card h2, .main-groups h2{
+        font-size: 1rem;
+    }
+    #scroll-top{
+        bottom: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+    }
 }
 @media (max-width: 480px){
     html{font-size:13px}
     .sidebar-header h1{font-size:1rem}
+    .main-content{
+        padding: var(--spacing-md) var(--spacing-sm);
+    }
+    .card input, .card select, .card textarea, .main-groups input, .main-groups select, .main-groups textarea{
+        margin-left: var(--spacing-md);
+        margin-right: var(--spacing-md);
+        width: calc(100% - 2 * var(--spacing-md));
+    }
+    .card .input-group, .main-groups .input-group{
+        margin-left: var(--spacing-md);
+        margin-right: var(--spacing-md);
+        width: calc(100% - 2 * var(--spacing-md));
+    }
+    .card .result, .main-groups .result{
+        margin-left: var(--spacing-md);
+        margin-right: var(--spacing-md);
+    }
+    .card button, .main-groups button{
+        margin-left: var(--spacing-md);
+        margin-right: var(--spacing-md);
+    }
+    .card label, .main-groups label{
+        margin-left: var(--spacing-md);
+        margin-right: var(--spacing-md);
+    }
+    .card p, .main-groups p{
+        padding: 0 var(--spacing-md);
+    }
+    .card h2, .main-groups h2{
+        padding-left: var(--spacing-md);
+        padding-right: var(--spacing-md);
+    }
+    .card h3, .main-groups h3{
+        margin-left: var(--spacing-md);
+        margin-right: var(--spacing-md);
+    }
+    .card-desc{
+        padding-left: var(--spacing-md);
+        padding-right: var(--spacing-md);
+    }
 }
 @media (prefers-reduced-motion: reduce){
     *{
