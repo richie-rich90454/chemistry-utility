@@ -1154,12 +1154,24 @@ select{
 /* ── Mobile responsive for app-view ── */
 @media (max-width: 768px){
     .app-view .main-content{
-        padding: var(--spacing-lg) var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-sm);
         padding-bottom: 72px;
-        align-items: flex-start;
+        padding-top: var(--spacing-sm);
+        align-items: stretch;
+        background: var(--app-bg);
     }
     .app-view .calculator-view{
         max-width: 100%;
+    }
+    .app-view .main-groups.card{
+        padding: var(--spacing-md);
+    }
+    .app-view .main-groups.card h2{
+        font-size: 1.125rem;
+    }
+    .view-header{
+        padding-bottom: var(--spacing-sm);
+        margin-bottom: var(--spacing-sm);
     }
     .bottom-tabs{
         display: flex;
@@ -1173,10 +1185,41 @@ select{
     .sidebar-nav a .shortcut-hint{
         display: none;
     }
+    .nav-sheet{
+        max-height: 60vh;
+    }
 }
 @media (max-width: 480px){
     .welcome-grid{
         grid-template-columns: 1fr;
+    }
+    .app-view .main-content{
+        padding-bottom: 68px;
+    }
+    .bottom-tabs{
+        height: 52px;
+    }
+    .tab-item{
+        min-width: 48px;
+    }
+    .tab-item svg{
+        width: 20px;
+        height: 20px;
+    }
+    .tab-item .tab-label{
+        font-size: 0.5625rem;
+    }
+}
+/* Landscape mobile */
+@media (max-height: 400px) and (max-width: 900px){
+    .bottom-tabs{
+        height: 48px;
+    }
+    .app-view .main-content{
+        padding-bottom: 56px;
+    }
+    .nav-sheet{
+        max-height: 50vh;
     }
 }
 a{color:var(--primary)}
