@@ -1171,6 +1171,115 @@ select{
 .sidebar-nav a:hover .shortcut-hint{
     opacity: 1;
 }
+/* ── Command Palette ── */
+.palette-backdrop{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100;
+}
+.palette-backdrop.open{
+    display: block;
+}
+.command-palette{
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 480px;
+    max-width: calc(100vw - 32px);
+    max-height: 60vh;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-4);
+    z-index: 101;
+    overflow: hidden;
+    flex-direction: column;
+}
+.command-palette.open{
+    display: flex;
+}
+.palette-input-wrap{
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--divider);
+}
+.palette-search-icon{
+    width: 18px;
+    height: 18px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+}
+.palette-input{
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.9375rem;
+    color: var(--text-primary);
+    outline: none;
+    padding: 0;
+    min-height: 28px;
+}
+.palette-input::placeholder{
+    color: var(--text-tertiary);
+}
+.palette-list{
+    overflow-y: auto;
+    padding: var(--spacing-xs);
+    max-height: calc(60vh - 56px);
+}
+.palette-item{
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+.palette-item:hover, .palette-item.selected{
+    background: var(--surface-container);
+    color: var(--text-primary);
+}
+.palette-item svg{
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+}
+.palette-item .palette-item-name{
+    flex: 1;
+}
+.palette-item .palette-item-category{
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.palette-item .palette-item-shortcut{
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    font-family: monospace;
+    margin-left: auto;
+}
+.palette-empty{
+    padding: var(--spacing-xl);
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.875rem;
+}
 /* ── Mobile responsive for app-view ── */
 @media (max-width: 768px){
     .app-view .main-content{

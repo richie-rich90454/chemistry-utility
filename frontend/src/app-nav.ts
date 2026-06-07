@@ -302,13 +302,129 @@ function initializeSearch():void{
 
 		if (noResults) noResults.style.display=visibleCount===0?"block":"none";
 	});
+}
 
-	// Ctrl+K shortcut
+// ── Command Palette ──
+let paletteSelectedIndex=0;
+
+function openPalette():void{
+	let backdrop=document.querySelector(".palette-backdrop") as HTMLElement;
+	let palette=document.querySelector(".command-palette") as HTMLElement;
+	let input=document.querySelector(".palette-input") as HTMLInputElement;
+	if (!backdrop||!palette||!input) return;
+	backdrop.classList.add("open");
+	palette.classList.add("open");
+	input.value="";
+	input.focus();
+	paletteSelectedIndex=0;
+	renderPaletteList("");
+}
+
+function closePalette():void{
+	let backdrop=document.querySelector(".palette-backdrop") as HTMLElement;
+	let palette=document.querySelector(".command-palette") as HTMLElement;
+	if (!backdrop||!palette) return;
+	backdrop.classList.remove("open");
+	palette.classList.remove("open");
+}
+
+function renderPaletteList(query:string):void{
+	let list=document.querySelector(".palette-list") as HTMLElement;
+	if (!list) return;
+	let q=query.toLowerCase().trim();
+	let filtered=CALCULATORS.filter(function(c:CalculatorInfo):boolean{
+		if (!q) return true;
+		return c.name.toLowerCase().includes(q)||c.category.toLowerCase().includes(q)||c.description.toLowerCase().includes(q);
+	});
+	if (filtered.length===0){
+		list.innerHTML='<div class="palette-empty">No calculators found</div>';
+		return;
+	}
+	let html="";
+	filtered.forEach(function(calc:CalculatorInfo,i:number):void{
+		let shortcut="";
+		if (i<9) shortcut="Alt+"+(i+1);
+		else if (i===9) shortcut="Alt+0";
+		else if (i===10) shortcut="Alt+-";
+		html+='<button class="palette-item'+(i===paletteSelectedIndex?" selected":"")+'" data-target="'+calc.id+'">';
+		html+=getIconSvg(calc.icon);
+		html+='<span class="palette-item-name">'+calc.name+'</span>';
+		html+='<span class="palette-item-category">'+calc.category+'</span>';
+		if (shortcut) html+='<span class="palette-item-shortcut">'+shortcut+'</span>';
+		html+='</button>';
+	});
+	list.innerHTML=html;
+
+	// Click handlers
+	list.querySelectorAll(".palette-item").forEach(function(item:HTMLElement):void{
+		item.addEventListener("click",function():void{
+			let targetId=item.getAttribute("data-target");
+			if (targetId){
+				switchView(targetId);
+				closePalette();
+			}
+		});
+	});
+}
+
+function initializeCommandPalette():void{
+	let backdrop=document.querySelector(".palette-backdrop") as HTMLElement;
+	let input=document.querySelector(".palette-input") as HTMLInputElement;
+	if (!backdrop||!input) return;
+
+	// Ctrl+K opens palette (replaces sidebar search shortcut)
 	document.addEventListener("keydown",function(e:KeyboardEvent):void{
 		if ((e.ctrlKey||e.metaKey)&&e.key==="k"){
 			e.preventDefault();
-			searchInput.focus();
+			let palette=document.querySelector(".command-palette") as HTMLElement;
+			if (palette&&palette.classList.contains("open")){
+				closePalette();
+			}else{
+				openPalette();
+			}
 		}
+		if (e.key==="Escape"){
+			let palette=document.querySelector(".command-palette") as HTMLElement;
+			if (palette&&palette.classList.contains("open")){
+				closePalette();
+			}
+		}
+		// Arrow keys and Enter in palette
+		if (document.querySelector(".command-palette.open")){
+			if (e.key==="ArrowDown"){
+				e.preventDefault();
+				let items=document.querySelectorAll(".palette-item") as NodeListOf<HTMLElement>;
+				if (items.length>0){
+					paletteSelectedIndex=Math.min(paletteSelectedIndex+1,items.length-1);
+					renderPaletteList(input.value);
+				}
+			}
+			if (e.key==="ArrowUp"){
+				e.preventDefault();
+				paletteSelectedIndex=Math.max(paletteSelectedIndex-1,0);
+				renderPaletteList(input.value);
+			}
+			if (e.key==="Enter"){
+				e.preventDefault();
+				let items=document.querySelectorAll(".palette-item") as NodeListOf<HTMLElement>;
+				if (items[paletteSelectedIndex]){
+					let targetId=items[paletteSelectedIndex].getAttribute("data-target");
+					if (targetId){
+						switchView(targetId);
+						closePalette();
+					}
+				}
+			}
+		}
+	});
+
+	// Backdrop click closes
+	backdrop.addEventListener("click",closePalette);
+
+	// Input filters
+	input.addEventListener("input",function():void{
+		paletteSelectedIndex=0;
+		renderPaletteList(input.value);
 	});
 }
 
@@ -479,6 +595,7 @@ export function initializeAppNav():void{
 
 	// Initialize features
 	initializeSearch();
+	initializeCommandPalette();
 	initializeKeyboardShortcuts();
 	initializeSidebarCollapse();
 	initializeBottomTabs();
