@@ -531,7 +531,7 @@ select{
     overflow: hidden;
 }
 .primary-button:hover{
-    box-shadow: var(--shadow-1);
+    box-shadow: var(--shadow-1), 0 0 12px color-mix(in srgb, var(--primary) 30%, transparent);
     background-color: var(--primary-dark);
 }
 .primary-button:active{
@@ -545,6 +545,43 @@ select{
 }
 .primary-button:focus:not(:focus-visible), .icon-button:focus:not(:focus-visible){
     outline: none;
+}
+/* ── LiteFX: Glow and Pulse Animations ── */
+@keyframes glowPulse{
+    0%, 100%{box-shadow: 0 0 4px color-mix(in srgb, var(--primary) 20%, transparent)}
+    50%{box-shadow: 0 0 12px color-mix(in srgb, var(--primary) 35%, transparent)}
+}
+@keyframes subtleFloat{
+    0%, 100%{transform: translateY(0)}
+    50%{transform: translateY(-3px)}
+}
+@keyframes borderGlow{
+    0%, 100%{border-color: var(--primary)}
+    50%{border-color: var(--primary-light)}
+}
+/* Active sidebar link glow */
+.sidebar-nav a.active{
+    animation: glowPulse 3s ease-in-out infinite;
+}
+/* Welcome card subtle float on hover */
+.welcome-card:hover{
+    animation: subtleFloat 2s ease-in-out infinite;
+}
+/* Result border glow when active */
+.result:not(:empty):not(.error){
+    animation: borderGlow 4s ease-in-out infinite;
+}
+/* Primary button glow on focus */
+.primary-button:focus-visible{
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 25%, transparent), 0 0 16px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+/* Logo icon pulse */
+.logo-icon{
+    animation: glowPulse 4s ease-in-out infinite;
+}
+/* View category pill glow */
+.view-category{
+    animation: glowPulse 5s ease-in-out infinite;
 }
 /* ── Result ── */
 .result{
