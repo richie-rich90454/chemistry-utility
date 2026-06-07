@@ -44,7 +44,8 @@
     --sidebar-width: 240px;
     --sidebar-collapsed-width: 64px;
 }
-.dark{
+.dark,
+:root:not(.light){
     --primary: #8ab4f8;
     --primary-dark: #aecbfa;
     --primary-light: #669df6;
@@ -73,24 +74,6 @@
     --shadow-2: 0 2px 6px 2px rgba(0,0,0,.3), 0 1px 2px 0 rgba(0,0,0,.4);
     --shadow-3: 0 4px 8px 3px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.4);
     --shadow-4: 0 6px 10px 4px rgba(0,0,0,.25), 0 2px 3px rgba(0,0,0,.4);
-}
-/* Dark mode: sidebar uses slightly different surface */
-.dark .sidebar{
-    background: #242424;
-    border-right-color: #333;
-}
-.dark .bottom-tabs{
-    background: #242424;
-    border-top-color: #333;
-}
-.dark .nav-sheet{
-    background: #292929;
-}
-.dark .welcome-card{
-    background: #292929;
-}
-.dark .welcome-card:hover{
-    background: #333;
 }
 @media (prefers-color-scheme: dark){
     :root:not(.light){
@@ -122,6 +105,43 @@
         --shadow-2: 0 2px 6px 2px rgba(0,0,0,.3), 0 1px 2px 0 rgba(0,0,0,.4);
         --shadow-3: 0 4px 8px 3px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.4);
         --shadow-4: 0 6px 10px 4px rgba(0,0,0,.25), 0 2px 3px rgba(0,0,0,.4);
+    }
+}
+/* Dark mode: component-specific overrides */
+.dark .sidebar{
+    background: #242424;
+    border-right-color: #333;
+}
+.dark .bottom-tabs{
+    background: #242424;
+    border-top-color: #333;
+}
+.dark .nav-sheet{
+    background: #292929;
+}
+.dark .welcome-card{
+    background: #292929;
+}
+.dark .welcome-card:hover{
+    background: #333;
+}
+@media (prefers-color-scheme: dark){
+    :root:not(.light) .sidebar{
+        background: #242424;
+        border-right-color: #333;
+    }
+    :root:not(.light) .bottom-tabs{
+        background: #242424;
+        border-top-color: #333;
+    }
+    :root:not(.light) .nav-sheet{
+        background: #292929;
+    }
+    :root:not(.light) .welcome-card{
+        background: #292929;
+    }
+    :root:not(.light) .welcome-card:hover{
+        background: #333;
     }
 }
 *{
