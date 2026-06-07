@@ -823,6 +823,33 @@ select{
         animation: none;
     }
 }
+/* ── Page Load Overlay ── */
+.page-overlay{
+    position: fixed;
+    inset: 0;
+    background: var(--app-bg);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
+}
+.page-overlay.loaded{
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.page-overlay .loader{
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin{
+    to{transform: rotate(360deg)}
+}
 /* ── App View: Single-calculator layout ── */
 .app-view .main-content{
     display: flex;

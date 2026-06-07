@@ -4,6 +4,15 @@ import {initializeAppNav} from "./app-nav.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	initializeUIHandlers();
 	initializeAppNav();
+
+	// Dismiss page load overlay
+	let overlay=document.querySelector(".page-overlay") as HTMLElement;
+	if (overlay){
+		setTimeout(function():void{
+			overlay.classList.add("loaded");
+			setTimeout(function():void{overlay.remove()},500);
+		},300);
+	}
 	// Load periodic table data — use Wails bindings in desktop mode, direct JSON fetch in web mode
 	async function loadPTableData(): Promise<any[]>{
 		// Check if running in Wails desktop mode
