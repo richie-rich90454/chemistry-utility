@@ -36,6 +36,20 @@ func main(){
 	if err!=nil{
 		log.Printf("Warning: could not preload HTML files: %v", err)
 	}
+	app:=setupApp(distPath)
+	go func(){
+		log.Printf("Server running on port %d (IPv4 and IPv6)", PORT)
+		log.Printf("Serving static files from: %s", distPath)
+		if os.Getenv("PREFORK")=="true"{
+			log.Printf("Prefork mode enabled")
+		}
+		if err:=startDualStackServer(app, PORT); err!=nil{
+			log.Fatal("Failed to start server:", err)
+		}
+	}()
+	gracefulShutdown(app)
+}
+func setupApp(distPath string) *fiber.App{
 	app:=fiber.New(fiber.Config{
 		Prefork: os.Getenv("PREFORK")=="true",
 		Concurrency: 256*1024,
@@ -113,17 +127,7 @@ func main(){
 		c.Type("html")
 		return c.Send(indexHTML)
 	})
-	go func(){
-		log.Printf("Server running on port %d (IPv4 and IPv6)", PORT)
-		log.Printf("Serving static files from: %s", distPath)
-		if os.Getenv("PREFORK")=="true"{
-			log.Printf("Prefork mode enabled")
-		}
-		if err:=startDualStackServer(app, PORT); err!=nil{
-			log.Fatal("Failed to start server:", err)
-		}
-	}()
-	gracefulShutdown(app)
+	return app
 }
 func preloadHTMLFiles(distPath string) error{
 	return filepath.WalkDir(distPath, func(path string, d os.DirEntry, err error) error{
