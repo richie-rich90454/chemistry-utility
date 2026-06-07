@@ -729,11 +729,6 @@ select{
 }
 .app-view .main-groups.card.view-active{
     display: block;
-    animation: viewFadeIn 0.2s ease-out;
-}
-@keyframes viewFadeIn{
-    from{opacity:0;transform:translateY(8px)}
-    to{opacity:1;transform:translateY(0)}
 }
 .app-view #scroll-top{
     display: none;

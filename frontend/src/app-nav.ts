@@ -52,11 +52,16 @@ function getIconSvg(type:string):string{
 	return icons[type]||icons.element;
 }
 
-function switchView(targetId:string,addToHistory:boolean=true):void{
+function switchView(targetId:string,direction:"forward"|"back"|"none"="forward",addToHistory:boolean=true):void{
 	if (targetId===activeViewId) return;
 
 	let sections=document.querySelectorAll(".app-view .main-groups.card") as NodeListOf<HTMLElement>;
 	let welcomeScreen=document.querySelector(".app-view .welcome-screen") as HTMLElement;
+
+	// Determine direction from nav history if not explicitly set
+	if (direction==="forward"&&navHistory.indexOf(targetId)!==-1){
+		direction="back";
+	}
 
 	// Add to history before switching
 	if (addToHistory&&activeViewId){
@@ -64,23 +69,33 @@ function switchView(targetId:string,addToHistory:boolean=true):void{
 		if (navHistory.length>20) navHistory.shift();
 	}
 
-	// Hide all sections
-	sections.forEach(function(section:HTMLElement):void{
-		section.classList.remove("view-active");
-		section.classList.add("view-hidden");
-	});
+	// Animate outgoing view
+	let outgoing=document.querySelector(".app-view .main-groups.card.view-active") as HTMLElement;
+	if (outgoing&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+		let outX=direction==="back"?30:-30;
+		gsap.to(outgoing,{opacity:0,x:outX,duration:0.15,ease:"power2.in",onComplete:function():void{
+			outgoing.classList.remove("view-active");
+			outgoing.classList.add("view-hidden");
+			gsap.set(outgoing,{opacity:1,x:0});
+		}});
+	}else{
+		sections.forEach(function(section:HTMLElement):void{
+			section.classList.remove("view-active");
+			section.classList.add("view-hidden");
+		});
+	}
 
 	// Hide welcome screen
 	if (welcomeScreen) welcomeScreen.style.display="none";
 
-	// Show target
+	// Show target with directional animation
 	let target=document.getElementById(targetId) as HTMLElement;
 	if (target){
 		target.classList.remove("view-hidden");
 		target.classList.add("view-active");
-		// GSAP entrance
 		if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-			gsap.fromTo(target,{opacity:0,y:10},{opacity:1,y:0,duration:0.2,ease:"power2.out"});
+			let inX=direction==="back"?-30:30;
+			gsap.fromTo(target,{opacity:0,x:inX},{opacity:1,x:0,duration:0.2,ease:"power2.out"});
 		}
 	}
 
@@ -448,7 +463,7 @@ export function initializeAppNav():void{
 	window.addEventListener("popstate",function():void{
 		let h=window.location.hash.slice(1);
 		if (h&&document.getElementById(h)){
-			switchView(h,false);
+			switchView(h,"back",false);
 		}else{
 			showWelcome();
 		}
