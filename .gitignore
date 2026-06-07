@@ -163,6 +163,7 @@ Thumbs.db
 dist/
 node_modules/
 build/bin/
+*.md5
 
 # Go air hot reload
 tmp/

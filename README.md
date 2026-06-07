@@ -196,7 +196,7 @@ chemistry-utility/
 ├── public/                 # Static assets
 │   ├── index.html          # Main application interface
 │   ├── style-web.css       # Web styling
-│   ├── style-tauri.css     # Tauri app styling
+│   └── style-app.css     # Wails desktop app font styling
 │   ├── favicon.ico         # Website favicon
 │   └── sitemap.xml         # SEO sitemap
 ├── server/                 # Server implementations
@@ -222,7 +222,7 @@ chemistry-utility/
 - **Vite** for fast development and optimized builds
 - **CSS3** with responsive design patterns
 - **Modular JavaScript** with ES6+ features
-- **Dual CSS** variants (web and Tauri-optimized)
+- **Dual CSS** variants (web with CDN fonts and desktop with local fonts)
 
 ### Backend (Node.js/Fastify)
 - **Node.js** runtime with **Fastify** framework
@@ -333,7 +333,7 @@ go build -ldflags="-s -w" -o server
 - [ ] Docker containers for both servers
 
 ### Planned 🎯
-- [ ] **Tauri v2 desktop application** - Cross-platform native app with smaller bundle size
+- [x] **Wails v2 desktop application** - Cross-platform native app with Go backend
 - [ ] Offline support with service workers
 - [ ] Chemical structure drawing with ChemDoodle
 - [ ] Periodic table visualization
@@ -376,7 +376,7 @@ Distributed under the **MIT License**. See [LICENSE](LICENSE) for more informati
 - Periodic table data structure adapted from [PubChem](https://pubchem.ncbi.nlm.nih.gov/)
 - [Vite](https://vitejs.dev/) for the next-generation build tool
 - [TypeScript](https://www.typescriptlang.org/) for making JavaScript scale
-- [Tauri](https://tauri.app/) for future desktop application capabilities
+- [Wails](https://wails.io/) for Go-powered desktop application
 
 ---
 
