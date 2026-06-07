@@ -70,9 +70,9 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		});
 	}
 
-	// Card scroll-triggered entrances
+	// Card scroll-triggered entrances with stagger and parallax depth
 	let cards=document.querySelectorAll(".main-groups.card") as NodeListOf<HTMLElement>;
-	cards.forEach(function(card: HTMLElement): void{
+	cards.forEach(function(card: HTMLElement, index: number): void{
 		gsap.from(card, {
 			scrollTrigger: {
 				trigger: card,
@@ -80,8 +80,9 @@ document.addEventListener("DOMContentLoaded", function(): void{
 				toggleActions: "play none none none"
 			},
 			opacity: 0,
-			y: 16,
-			duration: 0.4,
+			y: 24 + (index % 3) * 8,
+			x: (index % 2 === 0 ? -8 : 8),
+			duration: 0.5,
 			ease: "power2.out"
 		});
 	});
