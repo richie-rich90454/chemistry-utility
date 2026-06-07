@@ -1009,6 +1009,15 @@ select{
 }
 .app-view .main-groups.card.view-active{
     display: block;
+    contain: layout style;
+}
+/* GPU acceleration hints */
+.sidebar-nav a::before,
+.tab-indicator,
+.welcome-card,
+.result,
+.primary-button{
+    will-change: transform, opacity;
 }
 /* Skeleton loading */
 .skeleton{
