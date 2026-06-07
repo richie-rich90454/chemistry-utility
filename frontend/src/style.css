@@ -765,6 +765,7 @@ select{
     justify-content: center;
     padding: var(--spacing-xl);
     overflow-y: auto;
+    background: linear-gradient(180deg, var(--app-bg) 0%, color-mix(in srgb, var(--primary-container) 8%, var(--app-bg)) 100%);
 }
 .view-header{
     width: 100%;
@@ -822,6 +823,18 @@ select{
 }
 .app-view .main-groups.card{
     margin-bottom: 0;
+    box-shadow: var(--shadow-2);
+    padding: var(--spacing-lg);
+}
+.app-view .main-groups.card h2{
+    font-size: 1.25rem;
+    border-bottom: 1px solid var(--divider);
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+.app-view .main-groups.card p{
+    font-size: 0.875rem;
+    line-height: 1.6;
 }
 .app-view .main-groups.card.view-hidden{
     display: none;
