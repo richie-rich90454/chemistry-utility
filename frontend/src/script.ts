@@ -2,17 +2,26 @@ import {initializeUIHandlers} from "./modules/uiHandlers.js";
 import {initializeEventListeners} from "./modules/eventListeners.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	initializeUIHandlers();
-	fetch("/api/ptable",{
-		headers:{
-			"X-Requested-With": "XMLHttpRequest"
+	// Load periodic table data — use Wails bindings in desktop mode, HTTP fetch in web mode
+	async function loadPTableData(): Promise<any[]>{
+		// Check if running in Wails desktop mode
+		if (typeof window!=="undefined"&&"__wails__" in window){
+			const {GetPTableData}=await import("../wailsjs/go/main/PTableService.js");
+			const data=await GetPTableData();
+			return JSON.parse(data);
 		}
-	})
-	.then(function(response: Response): Promise<any>{
+		// Fallback to HTTP fetch for web mode
+		const response=await fetch("/api/ptable",{
+			headers:{
+				"X-Requested-With": "XMLHttpRequest"
+			}
+		});
 		if (!response.ok){
 			throw new Error("HTTP error! status: "+response.status);
 		}
 		return response.json();
-	})
+	}
+	loadPTableData()
 	.then(function(elementsData: any): void{
 		initializeEventListeners(elementsData);
 	})
