@@ -206,7 +206,7 @@ describe("script.ts", () => {
 
             // Wait for the clipboard promise to reject
             await vi.waitFor(() => {
-                expect(copyBtn.style.color).toBe("var(--error)");
+                expect(copyBtn.style.color).toBe("var(--md-error)");
             });
 
             // Wait for the timeout to clear the color
