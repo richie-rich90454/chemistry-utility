@@ -2,12 +2,10 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { calculateDilution, calculateMassPercent, calculateMixing } from "../modules/solutionCalculators.js";
 import {
     calculateIdealGasLaw,
-    calculateCombinedGasLaw,
     calculateVanDerWaals,
     calculateHalfLife,
 } from "../modules/gasLawCalculators.js";
 import {
-    calculateCellPotential,
     calculateNernst,
     calculateElectrolysis,
 } from "../modules/electrochemistryCalculators.js";

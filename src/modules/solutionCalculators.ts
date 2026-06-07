@@ -2,7 +2,7 @@ import {validateInputs} from "./validation.js";
 export function calculateDilution(): void{
 	try{
 		let select=document.getElementById("dilution-solve-for") as HTMLSelectElement;
-		let solveFor=select.value;
+		let solveFor=select.value as string;
 		let M1=parseFloat((document.getElementById("dilution-M1") as HTMLInputElement).value);
 		let V1=parseFloat((document.getElementById("dilution-V1") as HTMLInputElement).value);
 		let M2=parseFloat((document.getElementById("dilution-M2") as HTMLInputElement).value);
@@ -12,39 +12,28 @@ export function calculateDilution(): void{
 		for (let i=0; i<inputs.length; i++){
 			inputs[i].classList.remove("error");
 		}
+		// Validate positive values for non-solved-for fields
+		if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
+		if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
+		if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
+		if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 		if (solveFor=="M1"){
 			validateInputs([V1, M2, V2], ["dilution-V1", "dilution-M2", "dilution-V2"]);
-			if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
-			if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
-			if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
-			if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 			result=(M2*V2)/V1;
 			formula="M<sub>1</sub>=(M<sub>2</sub> x V<sub>2</sub>)/V<sub>1</sub>";
 		}
 		else if (solveFor=="V1"){
 			validateInputs([M1, M2, V2], ["dilution-M1", "dilution-M2", "dilution-V2"]);
-			if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
-			if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
-			if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
-			if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 			result=(M2*V2)/M1;
 			formula="V<sub>1</sub>=(M<sub>2</sub> x V<sub>2</sub>)/M<sub>1</sub>";
 		}
 		else if (solveFor=="M2"){
 			validateInputs([M1, V1, V2], ["dilution-M1", "dilution-V1", "dilution-V2"]);
-			if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
-			if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
-			if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
-			if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 			result=(M1*V1)/V2;
 			formula="M<sub>2</sub>=(M<sub>1</sub> x V<sub>1</sub>)/V<sub>2</sub>";
 		}
 		else if (solveFor=="V2"){
 			validateInputs([M1, V1, M2], ["dilution-M1", "dilution-V1", "dilution-M2"]);
-			if (solveFor!=="M1"&&M1<=0) throw new Error("Initial molarity must be positive");
-			if (solveFor!=="M2"&&M2<=0) throw new Error("Final molarity must be positive");
-			if (solveFor!=="V1"&&V1<=0) throw new Error("Initial volume must be positive");
-			if (solveFor!=="V2"&&V2<=0) throw new Error("Final volume must be positive");
 			result=(M1*V1)/M2;
 			formula="V<sub>2</sub>=(M<sub>1</sub> x V<sub>1</sub>)/M<sub>2</sub>";
 		}

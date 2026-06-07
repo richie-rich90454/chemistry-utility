@@ -35,7 +35,7 @@ describe("script.ts", () => {
         vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
             ok: true,
             json: () => Promise.resolve([]),
-        }));
+        } as Response));
     });
 
     afterEach(() => {
@@ -229,7 +229,7 @@ describe("script.ts", () => {
             vi.mocked(fetch).mockResolvedValue({
                 ok: true,
                 json: () => Promise.resolve(mockData),
-            });
+            } as Response);
 
             await initScript();
 

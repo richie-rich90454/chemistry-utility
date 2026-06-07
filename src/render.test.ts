@@ -55,6 +55,7 @@ describe("render.ts", () => {
         scrollTopBtn.id = "scroll-top";
         document.body.appendChild(scrollTopBtn);
 
+        // @ts-expect-error render.ts is a side-effect script with no exports
         await import("./render");
 
         // Trigger the captured DOMContentLoaded callbacks
@@ -119,7 +120,8 @@ describe("render.ts", () => {
             scrollTopBtn.id = "scroll-top";
             document.body.appendChild(scrollTopBtn);
 
-            await import("./render");
+            // @ts-expect-error render.ts is a side-effect script with no exports
+        await import("./render");
             domContentLoadedCallbacks.forEach(cb => cb());
 
             expect(() => window.dispatchEvent(new Event("scroll"))).not.toThrow();
