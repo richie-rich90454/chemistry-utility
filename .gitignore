@@ -162,6 +162,7 @@ Thumbs.db
 # Build output
 dist/
 node_modules/
+build/bin/
 
 # Go air hot reload
 tmp/

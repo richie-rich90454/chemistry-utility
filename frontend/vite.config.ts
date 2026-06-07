@@ -3,7 +3,7 @@ import path from "path";
 import {fileURLToPath} from "url";
 import {createHtmlPlugin} from "vite-plugin-html";
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
-export default defineConfig({
+export default defineConfig(({mode})=>({
 	base: "/",
 	server:{
 		port: 5173,
@@ -15,10 +15,9 @@ export default defineConfig({
 		target: "es2015",
 		sourcemap: false,
 		rollupOptions:{
-			input:{
-				main: path.resolve(__dirname, "index.html"),
-				app: path.resolve(__dirname, "index-app.html")
-			},
+			input: mode==="app"
+				?{index: path.resolve(__dirname, "index-app.html")}
+				:{main: path.resolve(__dirname, "index.html"), app: path.resolve(__dirname, "index-app.html")},
 			output:{
 				manualChunks(id){
 					if (id.includes("node_modules")){
@@ -57,4 +56,4 @@ export default defineConfig({
 			},
 		}),
 	],
-});
+}));

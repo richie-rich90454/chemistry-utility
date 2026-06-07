@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:app": "vite build --mode app",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -14,7 +15,6 @@
     "katex": "^0.16.11"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.10.1",
     "@types/node": "^25.5.0",
     "jsdom": "^29.1.1",
     "typescript": "^5.9.3",
