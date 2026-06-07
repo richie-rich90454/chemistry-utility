@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded",function(){
+	let isAppView=document.querySelector(".app-view")!==null;
+	if (isAppView) return; // app-nav.ts handles navigation in app mode
+
 	let sidebarLinks=document.querySelectorAll(".sidebar-nav a")as NodeListOf<HTMLAnchorElement>;
 	let sections=Array.from(document.querySelectorAll(".main-groups"))as HTMLElement[];
 	let header=document.querySelector(".sidebar-header")as HTMLElement;

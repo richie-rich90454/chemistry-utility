@@ -1,7 +1,9 @@
 import {initializeUIHandlers} from "./modules/uiHandlers.js";
 import {initializeEventListeners} from "./modules/eventListeners.js";
+import {initializeAppNav} from "./app-nav.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	initializeUIHandlers();
+	initializeAppNav();
 	// Load periodic table data — use Wails bindings in desktop mode, HTTP fetch in web mode
 	async function loadPTableData(): Promise<any[]>{
 		// Check if running in Wails desktop mode

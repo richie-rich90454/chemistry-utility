@@ -16,270 +16,282 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="5" cy="8.5" r="1"/><circle cx="19" cy="8.5" r="1"/><circle cx="5" cy="15.5" r="1"/><circle cx="19" cy="15.5" r="1"/><line x1="12" y1="6" x2="12" y2="11"/><line x1="12" y1="13" x2="12" y2="18"/><line x1="6.2" y1="9.2" x2="10.6" y2="11.4"/><line x1="13.4" y1="12.6" x2="17.8" y2="14.8"/><line x1="6.2" y1="14.8" x2="10.6" y2="12.6"/><line x1="13.4" y1="11.4" x2="17.8" y2="9.2"/></svg>
                     </div>
                     <h1>Chemistry Utility</h1>
+                    <button class="sidebar-toggle" aria-label="Toggle sidebar">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+                    </button>
                     <button class="icon-button theme-toggle" id="theme-toggle" aria-label="Toggle theme">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
                         </svg>
                     </button>
                 </div>
+                <div class="sidebar-search">
+                    <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+                    <input type="text" placeholder="Search calculators..." aria-label="Search calculators">
+                </div>
+                <div class="nav-recent"></div>
                 <nav class="sidebar-nav">
                     <ul>
                         <li class="nav-category">General</li>
-                        <li><a href="#element-lookup"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Element Lookup</a></li>
-                        <li><a href="#mass-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/></svg>Molar Mass</a></li>
-                        <li><a href="#balancing"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M12 2v4"/><path d="M12 18v4"/></svg>Equation Balancer</a></li>
+                        <li><a href="#element-lookup"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="nav-label">Element Lookup</span></a></li>
+                        <li><a href="#mass-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/></svg><span class="nav-label">Molar Mass</span></a></li>
+                        <li><a href="#balancing"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M12 2v4"/><path d="M12 18v4"/></svg><span class="nav-label">Equation Balancer</span></a></li>
                         <li class="nav-category">Solutions</li>
-                        <li><a href="#dilution-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-1 9H9L8 2z"/><path d="M9 11a3 3 0 0 0 6 0"/><path d="M12 14v8"/></svg>Dilution</a></li>
-                        <li><a href="#mass-percent-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg>Mass Percent</a></li>
-                        <li><a href="#solution-mixing-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M12 2v5"/><path d="M12 17v5"/><circle cx="12" cy="12" r="4"/></svg>Solution Mixing</a></li>
+                        <li><a href="#dilution-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-1 9H9L8 2z"/><path d="M9 11a3 3 0 0 0 6 0"/><path d="M12 14v8"/></svg><span class="nav-label">Dilution</span></a></li>
+                        <li><a href="#mass-percent-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg><span class="nav-label">Mass Percent</span></a></li>
+                        <li><a href="#solution-mixing-calc"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M12 2v5"/><path d="M12 17v5"/><circle cx="12" cy="12" r="4"/></svg><span class="nav-label">Solution Mixing</span></a></li>
                         <li class="nav-category">Physical Chemistry</li>
-                        <li><a href="#nuclear-chemistry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>Nuclear</a></li>
-                        <li><a href="#gas-laws"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>Gas Laws</a></li>
-                        <li><a href="#electrochemistry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Electrochemistry</a></li>
+                        <li><a href="#nuclear-chemistry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg><span class="nav-label">Nuclear</span></a></li>
+                        <li><a href="#gas-laws"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8"/><path d="M12 8v8"/></svg><span class="nav-label">Gas Laws</span></a></li>
+                        <li><a href="#electrochemistry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span class="nav-label">Electrochemistry</span></a></li>
                         <li class="nav-category">Reactions &amp; Bonds</li>
-                        <li><a href="#stoichiometry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h6"/><path d="M17 12l5 5-5 5"/></svg>Stoichiometry</a></li>
-                        <li><a href="#bond-type-predictor"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Bond Type</a></li>
+                        <li><a href="#stoichiometry"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h6"/><path d="M17 12l5 5-5 5"/></svg><span class="nav-label">Stoichiometry</span></a></li>
+                        <li><a href="#bond-type-predictor"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="nav-label">Bond Type</span></a></li>
                     </ul>
+                    <div class="no-results" style="display:none">No calculators found</div>
                 </nav>
                 <div class="sidebar-footer">
                     <p>&copy; 2026 Richard's Blogs</p>
                 </div>
             </aside>
-            <main id="main-content" class="main-content">
-                <div id="element-lookup" class="main-groups card">
-                    <h2>Element Information Lookup</h2>
-                    <p>Enter the element symbol or name:</p>
-                    <label for="element-input">Element symbol or name</label>
-                    <input type="text" id="element-input" placeholder="E.g., H or Hydrogen" aria-label="Element symbol or name">
-                    <div id="element-info" class="result"></div>
-                </div>
-                <div id="mass-calc" class="main-groups card">
-                    <h2>Molar Mass Calculator</h2>
-                    <p>Enter the formula here:</p>
-                    <label for="formula-input">Chemical formula</label>
-                    <input type="text" id="formula-input" placeholder="E.g., CH4" aria-label="Chemical formula">
-                    <div id="mass-result" class="result"></div>
-                </div>
-                <div id="balancing" class="main-groups card">
-                    <h2>Chemical Equation Balancer</h2>
-                    <p>Enter the chemical equation:</p>
-                    <label for="equation-input">Chemical equation</label>
-                    <input type="text" id="equation-input" placeholder="E.g., H2+O2->H2O" aria-label="Chemical equation">
-                    <button id="balance-button" class="primary-button">Balance Equation</button>
-                    <div id="balance-result" class="result"></div>
-                </div>
-                <div id="dilution-calc" class="main-groups card">
-                    <h2>Molarity and Dilution Calculator</h2>
-                    <p>Solve for:</p>
-                    <label for="dilution-solve-for">Select parameter</label>
-                    <select id="dilution-solve-for" aria-label="Select dilution parameter to solve for">
-                        <option value="M1">Initial Molarity (M1)</option>
-                        <option value="V1">Initial Volume (V1)</option>
-                        <option value="M2">Final Molarity (M2)</option>
-                        <option value="V2">Final Volume (V2)</option>
-                    </select>
-                    <label>Dilution parameters</label>
-                    <div class="input-group">
-                        <input type="number" id="dilution-M1" placeholder="M1 (M)" step="any" aria-label="Initial molarity">
-                        <input type="number" id="dilution-V1" placeholder="V1 (L)" step="any" aria-label="Initial volume">
-                        <input type="number" id="dilution-M2" placeholder="M2 (M)" step="any" aria-label="Final molarity">
-                        <input type="number" id="dilution-V2" placeholder="V2 (L)" step="any" aria-label="Final volume">
+            <main id="main-content" class="main-content app-view">
+                <div class="calculator-view">
+                    <div class="welcome-screen"></div>
+                    <div id="element-lookup" class="main-groups card view-hidden">
+                        <h2>Element Information Lookup</h2>
+                        <p>Enter the element symbol or name:</p>
+                        <label for="element-input">Element symbol or name</label>
+                        <input type="text" id="element-input" placeholder="E.g., H or Hydrogen" aria-label="Element symbol or name">
+                        <div id="element-info" class="result"></div>
                     </div>
-                    <button id="calculate-dilution" class="primary-button">Calculate</button>
-                    <div id="dilution-result" class="result"></div>
-                </div>
-                <div id="mass-percent-calc" class="main-groups card">
-                    <h2>Mass Percent and Concentration Calculator</h2>
-                    <label for="mass-solute">Mass of solute (g)</label>
-                    <label for="concentration-unit">Concentration unit</label>
-                    <div class="input-group">
-                        <input type="number" id="mass-solute" placeholder="Mass of solute (g)" step="any" aria-label="Mass of solute">
-                        <input type="number" id="mass-solution" placeholder="Mass of solution (g)" step="any" aria-label="Mass of solution">
-                        <select id="concentration-unit" aria-label="Select concentration unit">
-                            <option value="percent">%</option>
-                            <option value="ppm">ppm</option>
-                            <option value="ppb">ppb</option>
+                    <div id="mass-calc" class="main-groups card view-hidden">
+                        <h2>Molar Mass Calculator</h2>
+                        <p>Enter the formula here:</p>
+                        <label for="formula-input">Chemical formula</label>
+                        <input type="text" id="formula-input" placeholder="E.g., CH4" aria-label="Chemical formula">
+                        <div id="mass-result" class="result"></div>
+                    </div>
+                    <div id="balancing" class="main-groups card view-hidden">
+                        <h2>Chemical Equation Balancer</h2>
+                        <p>Enter the chemical equation:</p>
+                        <label for="equation-input">Chemical equation</label>
+                        <input type="text" id="equation-input" placeholder="E.g., H2+O2->H2O" aria-label="Chemical equation">
+                        <button id="balance-button" class="primary-button">Balance Equation</button>
+                        <div id="balance-result" class="result"></div>
+                    </div>
+                    <div id="dilution-calc" class="main-groups card view-hidden">
+                        <h2>Molarity and Dilution Calculator</h2>
+                        <p>Solve for:</p>
+                        <label for="dilution-solve-for">Select parameter</label>
+                        <select id="dilution-solve-for" aria-label="Select dilution parameter to solve for">
+                            <option value="M1">Initial Molarity (M1)</option>
+                            <option value="V1">Initial Volume (V1)</option>
+                            <option value="M2">Final Molarity (M2)</option>
+                            <option value="V2">Final Volume (V2)</option>
                         </select>
-                    </div>
-                    <button id="calculate-mass-percent" class="primary-button">Calculate</button>
-                    <div id="mass-percent-result" class="result"></div>
-                </div>
-                <div id="solution-mixing-calc" class="main-groups card">
-                    <h2>Solution Mixing Calculator</h2>
-                    <label>Mixing parameters</label>
-                    <div class="input-group">
-                        <input type="number" id="mix-C1" placeholder="C1 (M)" step="any" aria-label="Concentration 1">
-                        <input type="number" id="mix-V1" placeholder="V1 (L)" step="any" aria-label="Volume 1">
-                        <input type="number" id="mix-C2" placeholder="C2 (M)" step="any" aria-label="Concentration 2">
-                        <input type="number" id="mix-V2" placeholder="V2 (L)" step="any" aria-label="Volume 2">
-                    </div>
-                    <button id="calculate-mixing" class="primary-button">Calculate</button>
-                    <div id="mixing-result" class="result"></div>
-                </div>
-                <div id="nuclear-chemistry" class="main-groups card">
-                    <h2>Nuclear Chemistry Calculators</h2>
-                    <div id="half-life-calc" class="sub-group">
-                        <h3>Half-Life Calculator</h3>
-                        <p>Calculate:</p>
-                        <label for="half-life-solve-for">Calculate</label>
-                        <select id="half-life-solve-for" aria-label="Select half-life parameter to solve for">
-                            <option value="remaining">Remaining Quantity</option>
-                            <option value="time">Time Required</option>
-                            <option value="half-life">Half-Life</option>
-                        </select>
-                        <button id="calculate-half-life" class="primary-button">Calculate</button>
-                        <label>Half-life parameters</label>
+                        <label>Dilution parameters</label>
                         <div class="input-group">
-                            <input type="number" id="initial-quantity" placeholder="Initial Quantity" step="any" aria-label="Initial quantity">
-                            <input type="number" id="time-input" placeholder="Time (s/min/yr)" step="any" aria-label="Time">
-                            <input type="number" id="half-life-input" placeholder="Half-Life" step="any" aria-label="Half-life">
-                            <div id="remaining-quantity-group">
-                                <input type="number" id="remaining-quantity" placeholder="Remaining Quantity" step="any" aria-label="Remaining quantity">
+                            <input type="number" id="dilution-M1" placeholder="M1 (M)" step="any" aria-label="Initial molarity">
+                            <input type="number" id="dilution-V1" placeholder="V1 (L)" step="any" aria-label="Initial volume">
+                            <input type="number" id="dilution-M2" placeholder="M2 (M)" step="any" aria-label="Final molarity">
+                            <input type="number" id="dilution-V2" placeholder="V2 (L)" step="any" aria-label="Final volume">
+                        </div>
+                        <button id="calculate-dilution" class="primary-button">Calculate</button>
+                        <div id="dilution-result" class="result"></div>
+                    </div>
+                    <div id="mass-percent-calc" class="main-groups card view-hidden">
+                        <h2>Mass Percent and Concentration Calculator</h2>
+                        <label for="mass-solute">Mass of solute (g)</label>
+                        <label for="concentration-unit">Concentration unit</label>
+                        <div class="input-group">
+                            <input type="number" id="mass-solute" placeholder="Mass of solute (g)" step="any" aria-label="Mass of solute">
+                            <input type="number" id="mass-solution" placeholder="Mass of solution (g)" step="any" aria-label="Mass of solution">
+                            <select id="concentration-unit" aria-label="Select concentration unit">
+                                <option value="percent">%</option>
+                                <option value="ppm">ppm</option>
+                                <option value="ppb">ppb</option>
+                            </select>
+                        </div>
+                        <button id="calculate-mass-percent" class="primary-button">Calculate</button>
+                        <div id="mass-percent-result" class="result"></div>
+                    </div>
+                    <div id="solution-mixing-calc" class="main-groups card view-hidden">
+                        <h2>Solution Mixing Calculator</h2>
+                        <label>Mixing parameters</label>
+                        <div class="input-group">
+                            <input type="number" id="mix-C1" placeholder="C1 (M)" step="any" aria-label="Concentration 1">
+                            <input type="number" id="mix-V1" placeholder="V1 (L)" step="any" aria-label="Volume 1">
+                            <input type="number" id="mix-C2" placeholder="C2 (M)" step="any" aria-label="Concentration 2">
+                            <input type="number" id="mix-V2" placeholder="V2 (L)" step="any" aria-label="Volume 2">
+                        </div>
+                        <button id="calculate-mixing" class="primary-button">Calculate</button>
+                        <div id="mixing-result" class="result"></div>
+                    </div>
+                    <div id="nuclear-chemistry" class="main-groups card view-hidden">
+                        <h2>Nuclear Chemistry Calculators</h2>
+                        <div id="half-life-calc" class="sub-group">
+                            <h3>Half-Life Calculator</h3>
+                            <p>Calculate:</p>
+                            <label for="half-life-solve-for">Calculate</label>
+                            <select id="half-life-solve-for" aria-label="Select half-life parameter to solve for">
+                                <option value="remaining">Remaining Quantity</option>
+                                <option value="time">Time Required</option>
+                                <option value="half-life">Half-Life</option>
+                            </select>
+                            <button id="calculate-half-life" class="primary-button">Calculate</button>
+                            <label>Half-life parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="initial-quantity" placeholder="Initial Quantity" step="any" aria-label="Initial quantity">
+                                <input type="number" id="time-input" placeholder="Time (s/min/yr)" step="any" aria-label="Time">
+                                <input type="number" id="half-life-input" placeholder="Half-Life" step="any" aria-label="Half-life">
+                                <div id="remaining-quantity-group">
+                                    <input type="number" id="remaining-quantity" placeholder="Remaining Quantity" step="any" aria-label="Remaining quantity">
+                                </div>
                             </div>
+                            <div id="half-life-result" class="result"></div>
                         </div>
-                        <div id="half-life-result" class="result"></div>
                     </div>
-                </div>
-                <div id="gas-laws" class="main-groups card">
-                    <h2>Gas Laws</h2>
-                    <div id="ideal-gas-law">
-                        <h3>Ideal Gas Law Calculator - PV = nRT</h3>
-                        <p>Solve for:</p>
-                        <label for="ideal-solve-for">Solve for</label>
-                        <select id="ideal-solve-for" aria-label="Select ideal gas law parameter to solve for">
-                            <option value="P">Pressure (P)</option>
-                            <option value="V">Volume (V)</option>
-                            <option value="n">Moles (n)</option>
-                            <option value="T">Temperature (T)</option>
+                    <div id="gas-laws" class="main-groups card view-hidden">
+                        <h2>Gas Laws</h2>
+                        <div id="ideal-gas-law">
+                            <h3>Ideal Gas Law Calculator - PV = nRT</h3>
+                            <p>Solve for:</p>
+                            <label for="ideal-solve-for">Solve for</label>
+                            <select id="ideal-solve-for" aria-label="Select ideal gas law parameter to solve for">
+                                <option value="P">Pressure (P)</option>
+                                <option value="V">Volume (V)</option>
+                                <option value="n">Moles (n)</option>
+                                <option value="T">Temperature (T)</option>
+                            </select>
+                            <label>Ideal gas parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="ideal-P" placeholder="P (atm)" step="any" aria-label="Pressure">
+                                <input type="number" id="ideal-V" placeholder="V (L)" step="any" aria-label="Volume">
+                                <input type="number" id="ideal-n" placeholder="n (mol)" step="any" aria-label="Moles">
+                                <input type="number" id="ideal-T" placeholder="T (K)" step="any" aria-label="Temperature">
+                            </div>
+                            <p>Select units for R:</p>
+                            <label for="ideal-R-units">Gas constant units</label>
+                            <select id="ideal-R-units" aria-label="Select gas constant units">
+                                <option value="atm-L">atm, L (R=0.08206)</option>
+                                <option value="SI">Pa, m3 (R=8.314)</option>
+                            </select>
+                            <button id="calculate-ideal" class="primary-button">Calculate</button>
+                            <div id="ideal-result" class="result"></div>
+                        </div>
+                        <div id="combined-gas-law">
+                            <h3>Combined Gas Law Calculator</h3>
+                            <p>Solve for:</p>
+                            <label for="combined-solve-for">Solve for</label>
+                            <select id="combined-solve-for" aria-label="Select combined gas law parameter to solve for">
+                                <option value="P1">P1</option>
+                                <option value="V1">V1</option>
+                                <option value="T1">T1</option>
+                                <option value="P2">P2</option>
+                                <option value="V2">V2</option>
+                                <option value="T2">T2</option>
+                            </select>
+                            <label>Combined gas parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="combined-P1" placeholder="P1" step="any" aria-label="Initial pressure">
+                                <input type="number" id="combined-V1" placeholder="V1" step="any" aria-label="Initial volume">
+                                <input type="number" id="combined-T1" placeholder="T1 (K)" step="any" aria-label="Initial temperature">
+                                <input type="number" id="combined-P2" placeholder="P2" step="any" aria-label="Final pressure">
+                                <input type="number" id="combined-V2" placeholder="V2" step="any" aria-label="Final volume">
+                                <input type="number" id="combined-T2" placeholder="T2 (K)" step="any" aria-label="Final temperature">
+                            </div>
+                            <button id="calculate-combined" class="primary-button">Calculate</button>
+                            <div id="combined-result" class="result"></div>
+                        </div>
+                        <div id="van-der-waals" style="margin-bottom: 1.5rem;">
+                            <h3>Van der Waals Equation</h3>
+                            <p>Calculate Pressure (P) for a real gas.</p>
+                            <label>Van der Waals parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="vdw-V" placeholder="V (L)" step="any" aria-label="Volume">
+                                <input type="number" id="vdw-n" placeholder="n (mol)" step="any" aria-label="Moles">
+                                <input type="number" id="vdw-T" placeholder="T (K)" step="any" aria-label="Temperature">
+                                <input type="number" id="vdw-a" placeholder="a (L2 atm mol-2)" step="any" aria-label="Van der Waals constant a">
+                                <input type="number" id="vdw-b" placeholder="b (L mol-1)" step="any" aria-label="Van der Waals constant b">
+                            </div>
+                            <button id="calculate-vdw" class="primary-button">Calculate P</button>
+                            <div id="vdw-result" class="result"></div>
+                        </div>
+                    </div>
+                    <div id="electrochemistry" class="main-groups card view-hidden">
+                        <h2>Electrochemistry</h2>
+                        <div id="cell-potential">
+                            <h3>Cell Potential Calculator</h3>
+                            <p>Enter the standard reduction potentials for the two half-reactions:</p>
+                            <label>Reduction potentials</label>
+                            <div class="input-group">
+                                <input type="number" id="E1" placeholder="E1 (V)" step="any" aria-label="First reduction potential">
+                                <input type="number" id="E2" placeholder="E2 (V)" step="any" aria-label="Second reduction potential">
+                            </div>
+                            <button id="calculate-cell-potential" class="primary-button">Calculate E cell</button>
+                            <div id="cell-potential-result" class="result"></div>
+                        </div>
+                        <div id="nernst-equation">
+                            <h3>Nernst Equation Solver</h3>
+                            <p>Calculate cell potential under non-standard conditions.</p>
+                            <label>Nernst equation parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="E-standard" placeholder="E (V)" step="any" aria-label="Standard cell potential">
+                                <input type="number" id="temperature" placeholder="T (K)" step="any" aria-label="Temperature">
+                                <input type="number" id="n-electrons" placeholder="n (moles of e-)" step="any" aria-label="Number of electrons">
+                                <input type="number" id="Q-reaction" placeholder="Q (reaction quotient)" step="any" aria-label="Reaction quotient">
+                            </div>
+                            <button id="calculate-nernst" class="primary-button">Calculate E</button>
+                            <div id="nernst-result" class="result"></div>
+                        </div>
+                        <div id="electrolysis">
+                            <h3>Electrolysis Calculator</h3>
+                            <p>Solve for:</p>
+                            <label for="electrolysis-solve-for">Solve for</label>
+                            <select id="electrolysis-solve-for" aria-label="Select electrolysis parameter to solve for">
+                                <option value="mass">Mass (m)</option>
+                                <option value="current">Current (I)</option>
+                                <option value="time">Time (t)</option>
+                            </select>
+                            <label>Electrolysis parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="electrolysis-m" placeholder="Mass (g)" step="any" aria-label="Mass">
+                                <input type="number" id="electrolysis-I" placeholder="Current (A)" step="any" aria-label="Current">
+                                <input type="number" id="electrolysis-t" placeholder="Time (s)" step="any" aria-label="Time">
+                                <input type="number" id="electrolysis-z" placeholder="z (electrons/ion)" step="any" aria-label="Electrons per ion">
+                                <input type="number" id="electrolysis-M" placeholder="Molar mass (g/mol)" step="any" aria-label="Molar mass">
+                            </div>
+                            <button id="calculate-electrolysis" class="primary-button">Calculate</button>
+                            <div id="electrolysis-result" class="result"></div>
+                        </div>
+                    </div>
+                    <div id="stoichiometry" class="main-groups card view-hidden">
+                        <h2>Stoichiometry Calculator</h2>
+                        <p>Enter the balanced chemical equation:</p>
+                        <label for="stoich-equation-input">Balanced chemical equation</label>
+                        <input type="text" id="stoich-equation-input" placeholder="E.g., 2H2+O2->2H2O" aria-label="Balanced chemical equation">
+                        <p>Select calculation type:</p>
+                        <label for="calculation-type">Calculation type</label>
+                        <select id="calculation-type" aria-label="Select stoichiometry calculation type">
+                            <option value="product-from-reactant">Product from Reactant</option>
+                            <option value="reactant-from-product">Reactant from Product</option>
+                            <option value="limiting-reactant">Limiting Reactant</option>
                         </select>
-                        <label>Ideal gas parameters</label>
+                        <div id="stoich-inputs"></div>
+                        <button id="calculate-stoich-button" class="primary-button">Calculate</button>
+                        <div id="stoich-result" class="result"></div>
+                    </div>
+                    <div id="bond-type-predictor" class="main-groups card view-hidden">
+                        <h2>Bond Type Predictor</h2>
+                        <p>Enter two element abbreviations to predict the bond type:</p>
+                        <label>Element symbols</label>
                         <div class="input-group">
-                            <input type="number" id="ideal-P" placeholder="P (atm)" step="any" aria-label="Pressure">
-                            <input type="number" id="ideal-V" placeholder="V (L)" step="any" aria-label="Volume">
-                            <input type="number" id="ideal-n" placeholder="n (mol)" step="any" aria-label="Moles">
-                            <input type="number" id="ideal-T" placeholder="T (K)" step="any" aria-label="Temperature">
+                            <input type="text" id="element1-input" placeholder="First element (e.g., Na)" aria-label="First element">
+                            <input type="text" id="element2-input" placeholder="Second element (e.g., Cl)" aria-label="Second element">
                         </div>
-                        <p>Select units for R:</p>
-                        <label for="ideal-R-units">Gas constant units</label>
-                        <select id="ideal-R-units" aria-label="Select gas constant units">
-                            <option value="atm-L">atm, L (R=0.08206)</option>
-                            <option value="SI">Pa, m3 (R=8.314)</option>
-                        </select>
-                        <button id="calculate-ideal" class="primary-button">Calculate</button>
-                        <div id="ideal-result" class="result"></div>
+                        <button id="calculate-bond-type" class="primary-button">Predict Bond Type</button>
+                        <div id="bond-type-result" class="result"></div>
                     </div>
-                    <div id="combined-gas-law">
-                        <h3>Combined Gas Law Calculator</h3>
-                        <p>Solve for:</p>
-                        <label for="combined-solve-for">Solve for</label>
-                        <select id="combined-solve-for" aria-label="Select combined gas law parameter to solve for">
-                            <option value="P1">P1</option>
-                            <option value="V1">V1</option>
-                            <option value="T1">T1</option>
-                            <option value="P2">P2</option>
-                            <option value="V2">V2</option>
-                            <option value="T2">T2</option>
-                        </select>
-                        <label>Combined gas parameters</label>
-                        <div class="input-group">
-                            <input type="number" id="combined-P1" placeholder="P1" step="any" aria-label="Initial pressure">
-                            <input type="number" id="combined-V1" placeholder="V1" step="any" aria-label="Initial volume">
-                            <input type="number" id="combined-T1" placeholder="T1 (K)" step="any" aria-label="Initial temperature">
-                            <input type="number" id="combined-P2" placeholder="P2" step="any" aria-label="Final pressure">
-                            <input type="number" id="combined-V2" placeholder="V2" step="any" aria-label="Final volume">
-                            <input type="number" id="combined-T2" placeholder="T2 (K)" step="any" aria-label="Final temperature">
-                        </div>
-                        <button id="calculate-combined" class="primary-button">Calculate</button>
-                        <div id="combined-result" class="result"></div>
-                    </div>
-                    <div id="van-der-waals" style="margin-bottom: 1.5rem;">
-                        <h3>Van der Waals Equation</h3>
-                        <p>Calculate Pressure (P) for a real gas.</p>
-                        <label>Van der Waals parameters</label>
-                        <div class="input-group">
-                            <input type="number" id="vdw-V" placeholder="V (L)" step="any" aria-label="Volume">
-                            <input type="number" id="vdw-n" placeholder="n (mol)" step="any" aria-label="Moles">
-                            <input type="number" id="vdw-T" placeholder="T (K)" step="any" aria-label="Temperature">
-                            <input type="number" id="vdw-a" placeholder="a (L2 atm mol-2)" step="any" aria-label="Van der Waals constant a">
-                            <input type="number" id="vdw-b" placeholder="b (L mol-1)" step="any" aria-label="Van der Waals constant b">
-                        </div>
-                        <button id="calculate-vdw" class="primary-button">Calculate P</button>
-                        <div id="vdw-result" class="result"></div>
-                    </div>
-                </div>
-                <div id="electrochemistry" class="main-groups card">
-                    <h2>Electrochemistry</h2>
-                    <div id="cell-potential">
-                        <h3>Cell Potential Calculator</h3>
-                        <p>Enter the standard reduction potentials for the two half-reactions:</p>
-                        <label>Reduction potentials</label>
-                        <div class="input-group">
-                            <input type="number" id="E1" placeholder="E1 (V)" step="any" aria-label="First reduction potential">
-                            <input type="number" id="E2" placeholder="E2 (V)" step="any" aria-label="Second reduction potential">
-                        </div>
-                        <button id="calculate-cell-potential" class="primary-button">Calculate E cell</button>
-                        <div id="cell-potential-result" class="result"></div>
-                    </div>
-                    <div id="nernst-equation">
-                        <h3>Nernst Equation Solver</h3>
-                        <p>Calculate cell potential under non-standard conditions.</p>
-                        <label>Nernst equation parameters</label>
-                        <div class="input-group">
-                            <input type="number" id="E-standard" placeholder="E (V)" step="any" aria-label="Standard cell potential">
-                            <input type="number" id="temperature" placeholder="T (K)" step="any" aria-label="Temperature">
-                            <input type="number" id="n-electrons" placeholder="n (moles of e-)" step="any" aria-label="Number of electrons">
-                            <input type="number" id="Q-reaction" placeholder="Q (reaction quotient)" step="any" aria-label="Reaction quotient">
-                        </div>
-                        <button id="calculate-nernst" class="primary-button">Calculate E</button>
-                        <div id="nernst-result" class="result"></div>
-                    </div>
-                    <div id="electrolysis">
-                        <h3>Electrolysis Calculator</h3>
-                        <p>Solve for:</p>
-                        <label for="electrolysis-solve-for">Solve for</label>
-                        <select id="electrolysis-solve-for" aria-label="Select electrolysis parameter to solve for">
-                            <option value="mass">Mass (m)</option>
-                            <option value="current">Current (I)</option>
-                            <option value="time">Time (t)</option>
-                        </select>
-                        <label>Electrolysis parameters</label>
-                        <div class="input-group">
-                            <input type="number" id="electrolysis-m" placeholder="Mass (g)" step="any" aria-label="Mass">
-                            <input type="number" id="electrolysis-I" placeholder="Current (A)" step="any" aria-label="Current">
-                            <input type="number" id="electrolysis-t" placeholder="Time (s)" step="any" aria-label="Time">
-                            <input type="number" id="electrolysis-z" placeholder="z (electrons/ion)" step="any" aria-label="Electrons per ion">
-                            <input type="number" id="electrolysis-M" placeholder="Molar mass (g/mol)" step="any" aria-label="Molar mass">
-                        </div>
-                        <button id="calculate-electrolysis" class="primary-button">Calculate</button>
-                        <div id="electrolysis-result" class="result"></div>
-                    </div>
-                </div>
-                <div id="stoichiometry" class="main-groups card">
-                    <h2>Stoichiometry Calculator</h2>
-                    <p>Enter the balanced chemical equation:</p>
-                    <label for="stoich-equation-input">Balanced chemical equation</label>
-                    <input type="text" id="stoich-equation-input" placeholder="E.g., 2H2+O2->2H2O" aria-label="Balanced chemical equation">
-                    <p>Select calculation type:</p>
-                    <label for="calculation-type">Calculation type</label>
-                    <select id="calculation-type" aria-label="Select stoichiometry calculation type">
-                        <option value="product-from-reactant">Product from Reactant</option>
-                        <option value="reactant-from-product">Reactant from Product</option>
-                        <option value="limiting-reactant">Limiting Reactant</option>
-                    </select>
-                    <div id="stoich-inputs"></div>
-                    <button id="calculate-stoich-button" class="primary-button">Calculate</button>
-                    <div id="stoich-result" class="result"></div>
-                </div>
-                <div id="bond-type-predictor" class="main-groups card">
-                    <h2>Bond Type Predictor</h2>
-                    <p>Enter two element abbreviations to predict the bond type:</p>
-                    <label>Element symbols</label>
-                    <div class="input-group">
-                        <input type="text" id="element1-input" placeholder="First element (e.g., Na)" aria-label="First element">
-                        <input type="text" id="element2-input" placeholder="Second element (e.g., Cl)" aria-label="Second element">
-                    </div>
-                    <button id="calculate-bond-type" class="primary-button">Predict Bond Type</button>
-                    <div id="bond-type-result" class="result"></div>
                 </div>
                 <section class="intro card">
                     <p>This Chemistry Utility is a free online chemistry toolkit offering molar mass calculation, chemical equation balancing, stoichiometry solving, gas law calculations, dilution formulas, and more.</p>
@@ -291,8 +303,35 @@
                 </button>
             </main>
         </div>
+        <!-- Mobile bottom tab bar -->
+        <nav class="bottom-tabs" aria-label="Quick access">
+            <button class="tab-item" data-target="element-lookup">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span class="tab-label">Elements</span>
+            </button>
+            <button class="tab-item" data-target="mass-calc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/></svg>
+                <span class="tab-label">Molar Mass</span>
+            </button>
+            <button class="tab-item" data-target="balancing">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M12 2v4"/><path d="M12 18v4"/></svg>
+                <span class="tab-label">Balancer</span>
+            </button>
+            <button class="tab-item" data-target="dilution-calc">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-1 9H9L8 2z"/><path d="M9 11a3 3 0 0 0 6 0"/><path d="M12 14v8"/></svg>
+                <span class="tab-label">Dilution</span>
+            </button>
+            <button class="tab-item" data-target="more">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                <span class="tab-label">More</span>
+            </button>
+        </nav>
+        <!-- Mobile nav sheet -->
+        <div class="nav-sheet-backdrop"></div>
+        <div class="nav-sheet"></div>
         <script type="module" src="/src/script.ts"></script>
         <script type="module" src="/src/render.ts" defer></script>
         <script type="module" src="/src/animate.ts" defer></script>
+        <script type="module" src="/src/app-nav.ts" defer></script>
     </body>
 </html>
