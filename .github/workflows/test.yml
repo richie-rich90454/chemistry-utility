@@ -27,6 +27,8 @@ jobs:
         run: cd frontend && npm run build
       - name: Run Go tests
         run: go test ./...
+      - name: Build server binary
+        run: go build -o build/bin/server ./cmd/server
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
       - name: Build application

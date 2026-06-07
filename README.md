@@ -3,8 +3,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.21-00ADD8)](https://golang.org)
-[![Fastify](https://img.shields.io/badge/Fastify-4.x-000000)](https://fastify.dev)
-[![Fiber](https://img.shields.io/badge/Fiber-2.x-00ADD8)](https://gofiber.io)
+[![Gin](https://img.shields.io/badge/Gin-1.x-00ADD8)](https://gin-gonic.com)
+[![Wails](https://img.shields.io/badge/Wails-2.x-F24E4E)](https://wails.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org)
 [![Vite](https://img.shields.io/badge/Vite-5.x-646CFF)](https://vitejs.dev)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-ff69b4)](https://github.com/richie-rich90454/chemistry-utility/pulls)
@@ -12,7 +12,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/richie-rich90454/chemistry-utility)](https://goreportcard.com/report/github.com/richie-rich90454/chemistry-utility)
 [![Bundle Size](https://img.shields.io/badge/bundle%20size-optimized-blueviolet)](https://vitejs.dev)
 
-A comprehensive **Chemistry Utility** offering 11 specialized calculation tools for chemistry students, educators, and professionals. Built with **TypeScript**, **HTML5**, **CSS3**, and dual-server architecture with **Node.js/Fastify** and **Go/Fiber** implementations.
+A comprehensive **Chemistry Utility** offering 11 specialized calculation tools for chemistry students, educators, and professionals. Built with **TypeScript**, **HTML5**, **CSS3**, with a **Wails** desktop app and **Gin** web server.
 
 🌐 **Live Demo**: [chemutil.richardsblogs.com](https://chemutil.richardsblogs.com)
 
@@ -20,7 +20,7 @@ A comprehensive **Chemistry Utility** offering 11 specialized calculation tools 
 
 ## 📋 Table of Contents
 - [Features](#features)
-- [Dual-Server Architecture](#dual-server-architecture)
+- [Dual-Mode Architecture](#dual-mode-architecture)
 - [Getting Started](#getting-started)
 - [Usage Examples](#usage-examples)
 - [Project Structure](#project-structure)
@@ -52,7 +52,7 @@ A comprehensive **Chemistry Utility** offering 11 specialized calculation tools 
 
 ### Technical Highlights
 - **TypeScript Migration**: Full conversion from JavaScript to TypeScript for improved type safety
-- **Dual-Server Architecture**: Choose between Node.js/Fastify or Go/Fiber implementations
+- **Dual-Mode Architecture**: Wails desktop app and Gin web server
 - **Modular Architecture**: Separated concerns with dedicated modules for each calculator type
 - **Responsive Design**: Mobile-first approach with fluid layouts
 - **Vite Build System**: Fast development with optimized production builds
@@ -60,62 +60,45 @@ A comprehensive **Chemistry Utility** offering 11 specialized calculation tools 
 
 ---
 
-## 🏗 Dual-Server Architecture
+## 🏗 Dual-Mode Architecture
 
-The Chemistry Utility offers two server implementations, allowing you to choose based on your deployment needs:
+The Chemistry Utility offers two deployment modes: a native desktop application and a web server.
 
-### Server Comparison
+### Mode Comparison
 
-| Feature | Node.js (Fastify) | Go (Fiber) |
-|---------|-------------------|------------|
-| **Language** | JavaScript/TypeScript | Go |
-| **Framework** | Fastify 4.x | Fiber 2.x |
-| **Startup Time** | ~200-400ms | ~5-10ms |
-| **Memory Footprint** | ~30-50 MB | ~5-15 MB |
-| **Concurrency** | Good (event loop) | Excellent (goroutines) |
-| **Development Speed** | Faster (hot reload) | Moderate |
-| **Type Safety** | TypeScript | Native |
-| **Binary Size** | N/A (interpreter) | ~12-15 MB standalone |
-| **Cross-Compilation** | Requires Node.js | Single binary |
+| Feature | Desktop (Wails) | Web Server (Gin) |
+|---------|-----------------|-------------------|
+| **Use Case** | Local desktop app | Web deployment |
+| **Framework** | Wails v2 | Gin v1 |
+| **Frontend** | Embedded (go:embed) | Served from disk |
+| **Data Loading** | Wails bindings (IPC) | HTTP API endpoint |
+| **HTML Entry** | index-app.html (minimal) | index.html (SEO optimized) |
+| **Fonts** | Local (embedded) | CDN (Google Fonts) |
+| **Startup** | ~1-2s | ~5-10ms |
+| **Memory** | ~50-80 MB | ~10-15 MB |
 
-### When to Use Each
-
-**Choose Node.js/Fastify if you:**
-- Prefer JavaScript/TypeScript ecosystem
-- Want faster development cycles with hot reload
-- Need access to npm packages
-- Are deploying to traditional Node.js environments
-
-**Choose Go/Fiber if you:**
-- Need minimal resource usage
-- Want a single binary deployment
-- Require maximum performance and concurrency
-- Are deploying to containerized environments
-- Need native cross-platform compilation
-
-### Running Both Servers
+### Running Both Modes
 
 ```bash
-# Node.js/Fastify server
-npm run dev        # Development with hot reload
-npm start          # Production server
+# Desktop app (Wails)
+wails dev          # Development with hot reload
+wails build        # Build desktop binary
 
-# Go/Fiber server
-go mod download    # Download Go dependencies
-go run main.go     # Run directly
-go build -o server # Build standalone binary
-./server           # Run binary
+# Web server (Gin)
+go run ./cmd/server     # Run directly
+go build -o server ./cmd/server  # Build standalone binary
+./server                # Run binary
 ```
 
-Both servers run on port `6005` by default (configurable via `PORT` environment variable) and provide identical functionality.
+Both the desktop app and web server provide identical chemistry functionality. The web server runs on port `6005` by default (configurable via `PORT` environment variable).
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** 18.x or higher (for Node.js server)
-- **Go** 1.21 or higher (for Go server)
+- **Go** 1.21 or higher
+- **Node.js** 18.x or higher (for frontend build)
 - **npm** 9.x or higher
 
 ### Installation
@@ -125,22 +108,18 @@ Both servers run on port `6005` by default (configurable via `PORT` environment 
 git clone https://github.com/richie-rich90454/chemistry-utility.git
 cd chemistry-utility
 
-# Install Node.js dependencies
-npm install
-
-# Download Go dependencies
-go mod download
+# Install frontend dependencies
+cd frontend && npm install && cd ..
 
 # Build the frontend
-npm run build
+cd frontend && npm run build && cd ..
 
-# Start the server (choose one)
-npm start                    # Node.js server
-go run main.go              # Go server
-./server                    # Pre-built Go binary
+# Start the web server
+go run ./cmd/server
+
+# Or build the desktop app
+wails dev
 ```
-
-The application will be available at `http://localhost:6005`
 
 ---
 
@@ -178,31 +157,25 @@ Output: Ionic bond (ΔEN = 2.23)
 
 ```
 chemistry-utility/
-├── src/                    # TypeScript source files
-│   ├── modules/            # Modular calculator components
-│   │   ├── animationUtils.ts
-│   │   ├── bondPredictor.ts
-│   │   ├── electrochemistryCalculators.ts
-│   │   ├── equationBalancer.ts
-│   │   ├── eventListeners.ts
-│   │   ├── formulaParser.ts
-│   │   ├── gasLawCalculators.ts
-│   │   ├── solutionCalculators.ts
-│   │   ├── stoichiometryCalculator.ts
-│   │   └── uiHandlers.ts
-│   ├── render.ts           # UI rendering utilities
-│   ├── script.ts           # Main client logic
-│   └── types.d.ts          # TypeScript type definitions
-├── public/                 # Static assets
-│   ├── index.html          # Main application interface
-│   ├── style-web.css       # Web styling
-│   └── style-app.css     # Wails desktop app font styling
-│   ├── favicon.ico         # Website favicon
-│   └── sitemap.xml         # SEO sitemap
-├── server/                 # Server implementations
-│   ├── server.js           # Node.js/Fastify server (ES modules)
-│   └── ptable.json         # Periodic table data (118 elements)
-├── main.go                 # Go/Fiber server implementation
+├── frontend/               # Frontend application
+│   ├── src/                # TypeScript source files
+│   │   ├── modules/        # Modular calculator components
+│   │   ├── render.ts       # UI rendering utilities
+│   │   ├── script.ts       # Main client logic
+│   │   ├── style.css       # Shared base styles
+│   │   └── style-app.css   # Desktop app local fonts
+│   ├── public/             # Static assets (fonts, icons, ptable.json)
+│   ├── index.html          # Web version (SEO optimized, CDN fonts)
+│   └── index-app.html      # Desktop version (minimal, local fonts)
+├── cmd/
+│   └── server/             # Gin web server binary
+│       └── main.go         # Server entry point
+├── internal/
+│   └── ptable/             # Shared periodic table service
+│       ├── ptable.go       # Service implementation
+│       └── ptable_test.go  # Service tests
+├── main.go                 # Wails desktop app entry point
+├── app.go                  # Wails app struct and bindings
 ├── go.mod                  # Go module definition
 ├── go.sum                  # Go checksums
 ├── dist/                   # Production build output
@@ -224,19 +197,18 @@ chemistry-utility/
 - **Modular JavaScript** with ES6+ features
 - **Dual CSS** variants (web with CDN fonts and desktop with local fonts)
 
-### Backend (Node.js/Fastify)
-- **Node.js** runtime with **Fastify** framework
-- **ES Modules** for modern import/export syntax
-- **Security headers** and request validation
-- **Static file serving** with cache control
-- **Graceful shutdown** with timeout handling
+### Backend (Desktop — Wails)
+- **Wails v2** for native desktop application
+- **Go** backend with Wails bindings for frontend communication
+- **Embedded frontend** via go:embed
+- **Local fonts** for offline operation
 
-### Backend (Go/Fiber)
-- **Go** compiled binary with **Fiber** framework
-- **Single executable** deployment
+### Backend (Web Server — Gin)
+- **Gin v1** for high-performance HTTP serving
+- **Single binary** deployment
 - **Recovery middleware** for panic handling
-- **Security headers** and URL sanitization
-- **Graceful shutdown** with configurable timeout
+- **SPA fallback** for client-side routing
+- **Static file serving** from frontend/dist
 
 ### Data Layer
 - **Periodic Table JSON** with 118 elements
@@ -323,8 +295,9 @@ go build -ldflags="-s -w" -o server
 - [x] ES modules adoption
 - [x] Modular architecture
 - [x] SEO optimization
-- [x] Go/Fiber server implementation
-- [x] Dual-server architecture
+- [x] Go/Gin web server implementation
+- [x] Wails desktop application
+- [x] Dual-mode architecture (desktop + web)
 
 ### In Progress 🚧
 - [ ] Unit testing with Jest and Go testing
@@ -371,12 +344,11 @@ Distributed under the **MIT License**. See [LICENSE](LICENSE) for more informati
 
 ## 🙏 Acknowledgements
 
-- [Fastify](https://fastify.dev/) team for the excellent Node.js framework
-- [Fiber](https://gofiber.io/) team for the performant Go framework
+- [Gin](https://gin-gonic.com/) team for the high-performance Go web framework
+- [Wails](https://wails.io/) team for the Go desktop framework
 - Periodic table data structure adapted from [PubChem](https://pubchem.ncbi.nlm.nih.gov/)
 - [Vite](https://vitejs.dev/) for the next-generation build tool
 - [TypeScript](https://www.typescriptlang.org/) for making JavaScript scale
-- [Wails](https://wails.io/) for Go-powered desktop application
 
 ---
 

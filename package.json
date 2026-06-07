@@ -5,6 +5,7 @@
     "start": "wails dev",
     "dev": "cd frontend && npm run dev",
     "build": "wails build",
+    "build:server": "go build -o build/bin/server.exe ./cmd/server",
     "test": "cd frontend && npm test && cd .. && go test ./..."
   }
 }
