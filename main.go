@@ -27,6 +27,7 @@ func main() {
 		OnShutdown: app.shutdown,
 		Bind: []interface{}{
 			app,
+			app.ptableSvc,
 		},
 		Windows: &windows.Options{
 			WebviewIsTransparent: false,

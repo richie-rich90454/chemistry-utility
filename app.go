@@ -4,12 +4,15 @@ import "context"
 
 // App is the main Wails application struct
 type App struct {
-	ctx context.Context
+	ctx       context.Context
+	ptableSvc *PTableService
 }
 
 // NewApp creates a new App instance
 func NewApp() *App {
-	return &App{}
+	return &App{
+		ptableSvc: NewPTableService("frontend/dist/ptable.json"),
+	}
 }
 
 // startup is called when the app starts
