@@ -1,39 +1,10 @@
 {
   "name": "chemistry-utility",
   "version": "3.0.0",
-  "description": "A program designed to balance chemical equations and solve other chemistry problems made with HTML, CSS, and TypeScript.",
-  "type": "module",
   "scripts": {
-    "start": "go run main.go",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "build:go": "go build -o src-tauri/binaries/chemistry-backend ./main.go",
-    "tauri": "tauri dev",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
-  },
-  "keywords": [
-    "chemistry",
-    "chemical-equation-balancer",
-    "molar-mass-calculator",
-    "stoichiometry-solver",
-    "element-lookup-tool",
-    "gas-laws-calculator",
-    "educational-chemistry",
-    "chemistry-student-tools",
-    "web-based-chemistry-tool"
-  ],
-  "author": "richie-rich90454",
-  "license": "MIT",
-  "devDependencies": {
-    "@tauri-apps/cli": "^2.10.1",
-    "@types/node": "^25.5.0",
-    "jsdom": "^29.1.1",
-    "typescript": "^5.9.3",
-    "vite": "^8.0.16",
-    "vite-plugin-html": "^3.2.2",
-    "vitest": "^4.1.2"
+    "start": "wails dev",
+    "dev": "cd frontend && npm run dev",
+    "build": "wails build",
+    "test": "cd frontend && npm test && cd .. && go test ./..."
   }
 }
