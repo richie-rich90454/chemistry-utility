@@ -313,7 +313,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			let x=(e as MouseEvent).clientX-rect.left;
 			let y=(e as MouseEvent).clientY-rect.top;
 			let ripple=document.createElement("span");
-			ripple.style.cssText="position:absolute;border-radius:50%;background:rgba(255,255,255,0.3);pointer-events:none;transform:scale(0);";
+			ripple.style.cssText="position:absolute;border-radius:50%;background:var(--md-state-pressed);pointer-events:none;transform:scale(0);";
 			ripple.style.left=x+"px";
 			ripple.style.top=y+"px";
 			ripple.style.width=ripple.style.height="20px";
