@@ -601,6 +601,7 @@ select{
     font-size: 1.0625rem;
     overflow-wrap: break-word;
     line-height: 1.6;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 .result:empty{display:none}
 .result p{
@@ -619,6 +620,10 @@ select{
     border-color: color-mix(in srgb, var(--error) 40%, transparent);
     border-left-color: var(--error);
     background: color-mix(in srgb, var(--error) 6%, var(--surface-alt));
+    box-shadow: inset 0 0 12px color-mix(in srgb, var(--error) 5%, transparent);
+}
+.result:not(:empty):not(.error){
+    background: color-mix(in srgb, var(--primary) 3%, var(--surface-alt));
 }
 /* ── Copy Button ── */
 .copy-button{
