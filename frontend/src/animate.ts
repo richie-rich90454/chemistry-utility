@@ -157,6 +157,22 @@ document.addEventListener("DOMContentLoaded", function(): void{
 					ease: "power2.out",
 					clearProps: "opacity,y"
 				});
+				// Green border flash on success
+				if (!target.classList.contains("error")&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+					let computedBorder=getComputedStyle(target).borderLeftColor;
+					gsap.fromTo(target,{borderLeftColor:getComputedStyle(document.documentElement).getPropertyValue("--success").trim()},{
+						borderLeftColor:computedBorder,
+						duration:0.6,
+						ease:"power2.out",
+						clearProps:"borderLeftColor"
+					});
+					gsap.fromTo(target,{boxShadow:"0 0 8px color-mix(in srgb, var(--success) 20%, transparent)"},{
+						boxShadow:"0 0 0px transparent",
+						duration:0.5,
+						ease:"power2.out",
+						clearProps:"boxShadow"
+					});
+				}
 			}
 			// Animate when .show class is added
 			if (mutation.type==="attributes"&&mutation.attributeName==="class"){
