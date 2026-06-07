@@ -524,7 +524,7 @@ function buildWelcomeScreen():void{
 
 	let html='<h2>Chemistry Utility</h2><p>Pick a calculator to get started</p><div class="welcome-grid">';
 	CALCULATORS.forEach(function(calc:CalculatorInfo):void{
-		html+='<div class="welcome-card" data-target="'+calc.id+'">';
+		html+='<div class="welcome-card" tabindex="0" data-target="'+calc.id+'">';
 		html+='<div class="welcome-card-icon">'+getIconSvg(calc.icon)+'</div>';
 		html+='<div class="welcome-card-title">'+calc.name+'</div>';
 		html+='<div class="welcome-card-desc">'+calc.description+'</div>';
@@ -538,6 +538,12 @@ function buildWelcomeScreen():void{
 		card.addEventListener("click",function():void{
 			let targetId=card.getAttribute("data-target");
 			if (targetId) switchView(targetId);
+		});
+		card.addEventListener("keydown",function(e:KeyboardEvent):void{
+			if (e.key==="Enter"){
+				let targetId=card.getAttribute("data-target");
+				if (targetId) switchView(targetId);
+			}
 		});
 	});
 }
