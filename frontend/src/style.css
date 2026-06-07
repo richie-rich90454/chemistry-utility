@@ -1333,6 +1333,30 @@ select{
     height: 14px;
     opacity: 0.5;
 }
+/* ── Keyboard navigation visual indicators ── */
+.sidebar-nav a:focus-visible{
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    border-radius: var(--radius-full);
+}
+.tab-item:focus-visible{
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    border-radius: var(--radius-md);
+}
+.welcome-card:focus-visible{
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+.palette-item:focus-visible{
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+.back-button:focus-visible{
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-full);
+}
 /* ── Keyboard shortcut hints ── */
 .sidebar-nav a .shortcut-hint{
     margin-left: auto;
