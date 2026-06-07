@@ -10,7 +10,9 @@
     "preview": "vite preview",
     "build:go": "go build -o src-tauri/binaries/chemistry-backend ./main.go",
     "tauri": "tauri dev",
-    "test": "vitest"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [
     "chemistry",
