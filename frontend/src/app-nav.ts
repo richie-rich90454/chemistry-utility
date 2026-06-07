@@ -107,10 +107,36 @@ function switchView(targetId:string,direction:"forward"|"back"|"none"="forward",
 	updateTabActive(targetId);
 	// Update nav sheet active state
 	updateSheetActive(targetId);
+	// Update view header
+	updateViewHeader(targetId);
 	// Save to recent
 	addRecent(targetId);
 	// Update URL hash
 	history.pushState(null,"","#"+targetId);
+}
+
+function updateViewHeader(targetId:string):void{
+	let header=document.querySelector(".view-header") as HTMLElement;
+	if (!header) return;
+	let calc=CALCULATORS.find(function(c:CalculatorInfo):boolean{return c.id===targetId});
+	if (!calc){
+		header.style.display="none";
+		return;
+	}
+	header.style.display="flex";
+	let title=header.querySelector(".view-title") as HTMLElement;
+	let category=header.querySelector(".view-category") as HTMLElement;
+	if (title) title.textContent=calc.name;
+	if (category) category.textContent=calc.category;
+	if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+		gsap.fromTo(header,{opacity:0},{opacity:1,duration:0.15,ease:"power2.out",clearProps:"opacity"});
+	}
+}
+
+function goBack():void{
+	if (navHistory.length===0) return;
+	let prevId=navHistory.pop()!;
+	switchView(prevId,"back",false);
 }
 
 function updateSidebarActive(targetId:string):void{
@@ -167,6 +193,7 @@ function updateSheetActive(targetId:string):void{
 function showWelcome():void{
 	let sections=document.querySelectorAll(".app-view .main-groups.card") as NodeListOf<HTMLElement>;
 	let welcomeScreen=document.querySelector(".app-view .welcome-screen") as HTMLElement;
+	let header=document.querySelector(".view-header") as HTMLElement;
 
 	sections.forEach(function(section:HTMLElement):void{
 		section.classList.remove("view-active");
@@ -179,6 +206,8 @@ function showWelcome():void{
 			gsap.fromTo(welcomeScreen,{opacity:0,y:12},{opacity:1,y:0,duration:0.3,ease:"power2.out"});
 		}
 	}
+
+	if (header) header.style.display="none";
 
 	activeViewId=null;
 	updateSidebarActive("");
@@ -454,6 +483,12 @@ export function initializeAppNav():void{
 	initializeSidebarCollapse();
 	initializeBottomTabs();
 	initializeNavSheet();
+
+	// Back button
+	let backBtn=document.querySelector(".back-button") as HTMLElement;
+	if (backBtn){
+		backBtn.addEventListener("click",goBack);
+	}
 
 	// Sidebar link click handlers (override scroll behavior)
 	let sidebarLinks=document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;

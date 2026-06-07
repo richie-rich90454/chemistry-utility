@@ -760,10 +760,61 @@ select{
 /* ── App View: Single-calculator layout ── */
 .app-view .main-content{
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: var(--spacing-xl);
     overflow-y: auto;
+}
+.view-header{
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--divider);
+}
+.back-button{
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    transition: background var(--transition-fast), color var(--transition-fast);
+    flex-shrink: 0;
+}
+.back-button:hover{
+    background: var(--surface-container);
+    color: var(--text-primary);
+}
+.view-title{
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.view-category{
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary);
+    background: var(--primary-container);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .app-view .calculator-view{
     width: 100%;
