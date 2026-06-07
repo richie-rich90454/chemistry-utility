@@ -291,6 +291,22 @@ body{
     font-weight: 600;
 }
 .sidebar-nav a.active .nav-icon{opacity:1}
+/* Sidebar active indicator bar */
+.sidebar-nav a.active::after{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 25%;
+    height: 50%;
+    width: 3px;
+    background: var(--primary);
+    border-radius: 0 2px 2px 0;
+    animation: indicatorSlide 0.2s ease-out;
+}
+@keyframes indicatorSlide{
+    from{transform: scaleY(0);opacity:0}
+    to{transform: scaleY(1);opacity:1}
+}
 .sidebar-footer{
     padding: var(--spacing-md) var(--spacing-lg);
     border-top: 1px solid var(--divider);
