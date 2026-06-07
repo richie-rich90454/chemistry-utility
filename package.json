@@ -2,7 +2,8 @@
   "name": "chemistry-utility",
   "version": "3.0.0",
   "scripts": {
-    "start": "wails dev",
+    "start:wails": "wails dev",
+    "start:web": "go run ./cmd/server",
     "dev": "cd frontend && npm run dev",
     "build": "wails build",
     "build:server": "go build -o build/bin/server.exe ./cmd/server",
