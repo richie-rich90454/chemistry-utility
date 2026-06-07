@@ -776,6 +776,9 @@ select{
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
     }
+    .skeleton{
+        animation: none;
+    }
 }
 /* ── App View: Single-calculator layout ── */
 .app-view .main-content{

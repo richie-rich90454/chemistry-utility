@@ -3,8 +3,12 @@ import {ScrollTrigger} from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+function prefersReducedMotion():boolean{
+	return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 document.addEventListener("DOMContentLoaded", function(): void{
-	if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+	if (prefersReducedMotion()) return;
 
 	// ── Page load animations ──
 
@@ -146,7 +150,8 @@ document.addEventListener("DOMContentLoaded", function(): void{
 
 	// Result area animation — observe for content changes
 	let resultObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
-		mutations.forEach(function(mutation: MutationRecord): void{
+		if (prefersReducedMotion()) return;
+		mutations.forEach(function(mutation: MutationRecord[]): void{
 			let target=mutation.target as HTMLElement;
 			// Animate when result gets content
 			if (mutation.type==="childList"&&target.classList.contains("result")&&target.textContent&&target.textContent.trim().length>0){
@@ -158,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 					clearProps: "opacity,y"
 				});
 				// Green border flash on success
-				if (!target.classList.contains("error")&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+				if (!target.classList.contains("error")){
 					let computedBorder=getComputedStyle(target).borderLeftColor;
 					gsap.fromTo(target,{borderLeftColor:getComputedStyle(document.documentElement).getPropertyValue("--success").trim()},{
 						borderLeftColor:computedBorder,
@@ -222,6 +227,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	let stoichInputs=document.getElementById("stoich-inputs");
 	if (stoichInputs){
 		let stoichObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
+			if (prefersReducedMotion()) return;
 			mutations.forEach(function(mutation: MutationRecord[]): void{
 				if (mutation.type==="childList"&&stoichInputs.children.length>0){
 					// Animate newly added inputs
@@ -243,6 +249,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	let remainingGroup=document.getElementById("remaining-quantity-group");
 	if (remainingGroup){
 		let remainingObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
+			if (prefersReducedMotion()) return;
 			mutations.forEach(function(mutation: MutationRecord[]): void{
 				if (mutation.type==="attributes"&&mutation.attributeName==="style"){
 					let display=remainingGroup.style.display;
@@ -264,6 +271,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	let scrollTopBtn=document.getElementById("scroll-top") as HTMLElement;
 	if (scrollTopBtn){
 		let scrollObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
+			if (prefersReducedMotion()) return;
 			mutations.forEach(function(mutation: MutationRecord[]): void{
 				if (mutation.type==="attributes"&&mutation.attributeName==="class"){
 					if (scrollTopBtn.classList.contains("visible")){
@@ -284,7 +292,8 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	let sidebarLinks=document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
 	sidebarLinks.forEach(function(link: HTMLElement): void{
 		let linkObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
-			mutations.forEach(function(mutation: MutationRecord[]): void{
+				if (prefersReducedMotion()) return;
+				mutations.forEach(function(mutation: MutationRecord[]): void{
 				if (mutation.type==="attributes"&&mutation.attributeName==="class"){
 					if (link.classList.contains("active")){
 						gsap.fromTo(link, {scale: 0.95}, {
@@ -311,6 +320,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 
 	// ── Calculator view content stagger on switch ──
 	let viewObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
+		if (prefersReducedMotion()) return;
 		mutations.forEach(function(mutation: MutationRecord[]): void{
 			if (mutation.type==="attributes"&&mutation.attributeName==="class"){
 				let target=mutation.target as HTMLElement;
@@ -332,6 +342,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	// ── Button ripple effect ──
 	document.querySelectorAll(".primary-button").forEach(function(btn: Element): void{
 		btn.addEventListener("click", function(e: Event): void{
+			if (prefersReducedMotion()) return;
 			let rect=(btn as HTMLElement).getBoundingClientRect();
 			let x=(e as MouseEvent).clientX-rect.left;
 			let y=(e as MouseEvent).clientY-rect.top;
