@@ -282,4 +282,50 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		});
 		linkObserver.observe(link, {attributes: true, attributeFilter: ["class"]});
 	});
+
+	// ── Welcome card hover lift ──
+	document.querySelectorAll(".welcome-card").forEach(function(card: Element): void{
+		card.addEventListener("mouseenter", function(): void{
+			gsap.to(card, {y: -4, duration: 0.15, ease: "power2.out"});
+		});
+		card.addEventListener("mouseleave", function(): void{
+			gsap.to(card, {y: 0, duration: 0.2, ease: "power2.out"});
+		});
+	});
+
+	// ── Calculator view content stagger on switch ──
+	let viewObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
+		mutations.forEach(function(mutation: MutationRecord[]): void{
+			if (mutation.type==="attributes"&&mutation.attributeName==="class"){
+				let target=mutation.target as HTMLElement;
+				if (target.classList.contains("view-active")&&target.classList.contains("main-groups")){
+					let inputs=target.querySelectorAll("input, select, .input-group");
+					let buttons=target.querySelectorAll(".primary-button");
+					let results=target.querySelectorAll(".result");
+					gsap.from(inputs, {opacity: 0, y: 8, duration: 0.2, stagger: 0.04, ease: "power2.out"});
+					gsap.from(buttons, {opacity: 0, scale: 0.95, duration: 0.2, delay: 0.1, ease: "power2.out"});
+					gsap.from(results, {opacity: 0, duration: 0.2, delay: 0.15, ease: "power2.out"});
+				}
+			}
+		});
+	});
+	document.querySelectorAll(".main-groups.card").forEach(function(el: Element): void{
+		viewObserver.observe(el, {attributes: true, attributeFilter: ["class"]});
+	});
+
+	// ── Button ripple effect ──
+	document.querySelectorAll(".primary-button").forEach(function(btn: Element): void{
+		btn.addEventListener("click", function(e: Event): void{
+			let rect=(btn as HTMLElement).getBoundingClientRect();
+			let x=(e as MouseEvent).clientX-rect.left;
+			let y=(e as MouseEvent).clientY-rect.top;
+			let ripple=document.createElement("span");
+			ripple.style.cssText="position:absolute;border-radius:50%;background:rgba(255,255,255,0.3);pointer-events:none;transform:scale(0);";
+			ripple.style.left=x+"px";
+			ripple.style.top=y+"px";
+			ripple.style.width=ripple.style.height="20px";
+			(btn as HTMLElement).appendChild(ripple);
+			gsap.to(ripple, {scale: 4, opacity: 0, duration: 0.5, ease: "power2.out", onComplete: function(): void{ripple.remove();}});
+		});
+	});
 });

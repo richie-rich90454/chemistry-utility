@@ -74,6 +74,24 @@
     --shadow-3: 0 4px 8px 3px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.4);
     --shadow-4: 0 6px 10px 4px rgba(0,0,0,.25), 0 2px 3px rgba(0,0,0,.4);
 }
+/* Dark mode: sidebar uses slightly different surface */
+.dark .sidebar{
+    background: #242424;
+    border-right-color: #333;
+}
+.dark .bottom-tabs{
+    background: #242424;
+    border-top-color: #333;
+}
+.dark .nav-sheet{
+    background: #292929;
+}
+.dark .welcome-card{
+    background: #292929;
+}
+.dark .welcome-card:hover{
+    background: #333;
+}
 @media (prefers-color-scheme: dark){
     :root:not(.light){
         --primary: #8ab4f8;
@@ -466,9 +484,10 @@ select{
     padding: var(--spacing-md) var(--spacing-lg);
     background: var(--surface-alt);
     border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
     border-radius: var(--radius-sm);
     font-family: "EB Garamond", serif;
-    font-size: 1rem;
+    font-size: 1.0625rem;
     overflow-wrap: break-word;
     line-height: 1.6;
 }
@@ -487,6 +506,7 @@ select{
 }
 .result.error{
     border-color: color-mix(in srgb, var(--error) 40%, transparent);
+    border-left-color: var(--error);
     background: color-mix(in srgb, var(--error) 6%, var(--surface-alt));
 }
 /* ── Copy Button ── */
@@ -504,7 +524,7 @@ select{
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
+    opacity: 0.3;
 }
 .result:hover .copy-button{opacity:1}
 .copy-button:hover{
