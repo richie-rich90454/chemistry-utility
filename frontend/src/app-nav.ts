@@ -623,9 +623,15 @@ export function initializeAppNav():void{
 	// Handle initial hash
 	let hash=window.location.hash.slice(1);
 	if (hash&&document.getElementById(hash)){
-		switchView(hash,false);
+		switchView(hash,"none",false);
 	}else{
-		showWelcome();
+		// If no hash, try restoring most recent calculator
+		let recent=getRecent();
+		if (recent.length>0&&document.getElementById(recent[0])){
+			switchView(recent[0],"none",false);
+		}else{
+			showWelcome();
+		}
 	}
 
 	// Handle browser back/forward
