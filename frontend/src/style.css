@@ -569,6 +569,10 @@ input, select, textarea{
     padding: 10px var(--md-space-3);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
+    /* Force light color-scheme on form elements so browser doesn't
+       override our colors with its internal dark-mode form styling.
+       Our CSS variables handle the actual colors. */
+    color-scheme: light !important;
     background: var(--md-input-bg) !important;
     color: var(--md-input-text) !important;
     border: 1px solid var(--md-input-border);
@@ -628,7 +632,9 @@ select option{
     background: var(--md-input-bg) !important;
     color: var(--md-input-text) !important;
 }
-.dark select{
+/* Dark mode: use lighter arrow stroke since background is dark */
+.dark select,
+:root:not(.light) select{
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23938f99' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme: dark){

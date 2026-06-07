@@ -73,32 +73,40 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	// Card scroll-triggered entrances — MD3 fade through
 	let cards=document.querySelectorAll(".main-groups.card") as NodeListOf<HTMLElement>;
 	cards.forEach(function(card: HTMLElement): void{
-		gsap.from(card, {
+		gsap.fromTo(card, {
 			scrollTrigger: {
 				trigger: card,
 				start: "top 92%",
 				toggleActions: "play none none none"
 			},
 			opacity: 0,
-			y: 12,
+			y: 12
+		}, {
+			opacity: 1,
+			y: 0,
 			duration: 0.3,
-			ease: "power2.out"
+			ease: "power2.out",
+			clearProps: "all"
 		});
 	});
 
 	// Intro card entrance (now at bottom)
 	let intro=document.querySelector(".intro") as HTMLElement;
 	if (intro){
-		gsap.from(intro, {
+		gsap.fromTo(intro, {
 			scrollTrigger: {
 				trigger: intro,
 				start: "top 90%",
 				toggleActions: "play none none none"
 			},
 			opacity: 0,
-			y: 20,
+			y: 20
+		}, {
+			opacity: 1,
+			y: 0,
 			duration: 0.5,
-			ease: "power2.out"
+			ease: "power2.out",
+			clearProps: "all"
 		});
 	}
 
@@ -110,10 +118,10 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			gsap.to(btn, {scale: 0.96, duration: 0.08, ease: "power2.out"});
 		});
 		btn.addEventListener("mouseup", function(): void{
-			gsap.to(btn, {scale: 1, duration: 0.2, ease: "elastic.out(1, 0.5)"});
+			gsap.to(btn, {scale: 1, duration: 0.2, ease: "elastic.out(1, 0.5)", clearProps: "scale"});
 		});
 		btn.addEventListener("mouseleave", function(): void{
-			gsap.to(btn, {scale: 1, duration: 0.15, ease: "power2.out"});
+			gsap.to(btn, {scale: 1, duration: 0.15, ease: "power2.out", clearProps: "scale"});
 		});
 	});
 
@@ -198,12 +206,13 @@ document.addEventListener("DOMContentLoaded", function(): void{
 				if (mutation.type==="childList"&&stoichInputs.children.length>0){
 					// Animate newly added inputs
 					let newChildren=Array.from(stoichInputs.children) as HTMLElement[];
-					gsap.from(newChildren, {
-						opacity: 0,
-						y: 10,
+					gsap.fromTo(newChildren, {opacity: 0, y: 10}, {
+						opacity: 1,
+						y: 0,
 						duration: 0.25,
 						stagger: 0.05,
-						ease: "power2.out"
+						ease: "power2.out",
+						clearProps: "all"
 					});
 				}
 			});
@@ -220,11 +229,12 @@ document.addEventListener("DOMContentLoaded", function(): void{
 				if (mutation.type==="attributes"&&mutation.attributeName==="style"){
 					let display=remainingGroup.style.display;
 					if (display!=="none"){
-						gsap.from(remainingGroup, {
-							opacity: 0,
-							height: 0,
+						gsap.fromTo(remainingGroup, {opacity: 0, height: 0}, {
+							opacity: 1,
+							height: "auto",
 							duration: 0.25,
-							ease: "power2.out"
+							ease: "power2.out",
+							clearProps: "all"
 						});
 					}
 				}
@@ -241,11 +251,12 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			mutations.forEach(function(mutation: MutationRecord[]): void{
 				if (mutation.type==="attributes"&&mutation.attributeName==="class"){
 					if (scrollTopBtn.classList.contains("visible")){
-						gsap.from(scrollTopBtn, {
-							scale: 0.5,
-							opacity: 0,
+						gsap.fromTo(scrollTopBtn, {scale: 0.5, opacity: 0}, {
+							scale: 1,
+							opacity: 1,
 							duration: 0.25,
-							ease: "back.out(2)"
+							ease: "back.out(2)",
+							clearProps: "all"
 						});
 					}
 				}
@@ -280,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			gsap.to(card, {y: -4, duration: 0.15, ease: "power2.out"});
 		});
 		card.addEventListener("mouseleave", function(): void{
-			gsap.to(card, {y: 0, duration: 0.2, ease: "power2.out"});
+			gsap.to(card, {y: 0, duration: 0.2, ease: "power2.out", clearProps: "y"});
 		});
 	});
 
@@ -294,9 +305,9 @@ document.addEventListener("DOMContentLoaded", function(): void{
 					let inputs=target.querySelectorAll("input, select, .input-group");
 					let buttons=target.querySelectorAll(".primary-button");
 					let results=target.querySelectorAll(".result");
-					gsap.from(inputs, {opacity: 0, y: 8, duration: 0.2, stagger: 0.04, ease: "power2.out"});
-					gsap.from(buttons, {opacity: 0, scale: 0.95, duration: 0.2, delay: 0.1, ease: "power2.out"});
-					gsap.from(results, {opacity: 0, duration: 0.2, delay: 0.15, ease: "power2.out"});
+					gsap.fromTo(inputs, {opacity: 0, y: 8}, {opacity: 1, y: 0, duration: 0.2, stagger: 0.04, ease: "power2.out", clearProps: "all"});
+					gsap.fromTo(buttons, {opacity: 0, scale: 0.95}, {opacity: 1, scale: 1, duration: 0.2, delay: 0.1, ease: "power2.out", clearProps: "all"});
+					gsap.fromTo(results, {opacity: 0}, {opacity: 1, duration: 0.2, delay: 0.15, ease: "power2.out", clearProps: "all"});
 				}
 			}
 		});
