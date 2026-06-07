@@ -1,202 +1,44 @@
 package main
 
-import(
-	"context"
+import (
+	"embed"
 	"log"
-	"net"
-	"os"
-	"os/signal"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"syscall"
-	"time"
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/compress"
-	"github.com/gofiber/fiber/v2/middleware/recover"
+
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
 )
-const PORT=6005
-var (
-	ptableData []byte
-	ptableErr  error
-	htmlCache  = make(map[string][]byte)
-)
-func main(){
-	dir, err:=os.Getwd()
-	if err!=nil{
-		log.Fatal("Failed to get working directory:", err)
-	}
-	distPath:=filepath.Join(dir, "dist")
-	ptablePath:=filepath.Join(distPath, "ptable.json")
-	ptableData, ptableErr=os.ReadFile(ptablePath)
-	if ptableErr!=nil{
-		log.Printf("Warning: could not pre-load ptable.json: %v", ptableErr)
-	}
-	err=preloadHTMLFiles(distPath)
-	if err!=nil{
-		log.Printf("Warning: could not preload HTML files: %v", err)
-	}
-	app:=setupApp(distPath)
-	go func(){
-		log.Printf("Server running on port %d (IPv4 and IPv6)", PORT)
-		log.Printf("Serving static files from: %s", distPath)
-		if os.Getenv("PREFORK")=="true"{
-			log.Printf("Prefork mode enabled")
-		}
-		if err:=startDualStackServer(app, PORT); err!=nil{
-			log.Fatal("Failed to start server:", err)
-		}
-	}()
-	gracefulShutdown(app)
-}
-func setupApp(distPath string) *fiber.App{
-	app:=fiber.New(fiber.Config{
-		Prefork: os.Getenv("PREFORK")=="true",
-		Concurrency: 256*1024,
-		DisableStartupMessage: false,
-		ErrorHandler: func(c *fiber.Ctx, err error) error{
-			errStr:=err.Error()
-			if strings.Contains(errStr, "invalid header name")||
-				strings.Contains(errStr, "malformed")||
-				strings.Contains(errStr, "EOF"){
-				return c.Status(fiber.StatusBadRequest).SendString("Bad Request")
-			}
-			log.Printf("Unexpected error: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Internal Server Error",
-			})
+
+//go:embed all:frontend/dist
+var assets embed.FS
+
+func main() {
+	app := NewApp()
+
+	err := wails.Run(&options.App{
+		Title:  "Chemistry Utility",
+		Width:  800,
+		Height: 600,
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
+		OnStartup:  app.startup,
+		OnShutdown: app.shutdown,
+		Bind: []interface{}{
+			app,
+		},
+		Windows: &windows.Options{
+			WebviewIsTransparent: false,
+			WindowIsTranslucent:  false,
 		},
 	})
-	app.Use(func(c *fiber.Ctx) error{
-		err:=c.Next()
-		c.Response().Header.Del("X-Powered-By")
-		return err
-	})
-	app.Use(recover.New())
-	app.Use(compress.New(compress.Config{
-		Level: compress.LevelBestSpeed,
-		Next: func(c *fiber.Ctx) bool{
-			path:=c.Path()
-			return isImageOrFont(path)||strings.HasSuffix(path, ".pdf")||strings.HasSuffix(path, ".zip")||strings.HasSuffix(path, ".wasm")
-		},
-	}))
-	app.Use(func(c *fiber.Ctx) error{
-		if strings.Contains(c.OriginalURL(), "://")&&!strings.HasPrefix(c.OriginalURL(), "/"){
-			return c.Status(fiber.StatusBadRequest).SendString("Bad Request")
-		}
-		return c.Next()
-	})
-	app.Get("/api/ptable", func(c *fiber.Ctx) error{
-		if c.Get("X-Requested-With")!="XMLHttpRequest"{
-			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-				"error":   "Forbidden",
-				"message": "Direct access to API is not allowed",
-			})
-		}
-		c.Set("X-Content-Type-Options", "nosniff")
-		c.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
-		if ptableErr!=nil{
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error":   "Server Error",
-				"message": "Data file not loaded",
-			})
-		}
-		c.Set("Content-Type", "application/json")
-		return c.Send(ptableData)
-	})
-	app.Get("/ptable.json", func(c *fiber.Ctx) error{
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"error":   "Forbidden",
-			"message": "Direct access to file is not allowed",
-		})
-	})
-	app.Static("/", distPath, fiber.Static{
-		MaxAge: 86400,
-		Index: "",
-	})
-	app.Get("/*", func(c *fiber.Ctx) error{
-		path:=c.Path()
-		if strings.HasPrefix(path, "/api/"){
-			return c.Next()
-		}
-		indexHTML, ok:=htmlCache["index.html"]
-		if !ok{
-			return c.SendFile(filepath.Join(distPath, "index.html"))
-		}
-		c.Set("Cache-Control", "no-store")
-		c.Type("html")
-		return c.Send(indexHTML)
-	})
-	return app
-}
-func preloadHTMLFiles(distPath string) error{
-	return filepath.WalkDir(distPath, func(path string, d os.DirEntry, err error) error{
-		if err!=nil{
-			return err
-		}
-		if d.IsDir(){
-			return nil
-		}
-		if strings.HasSuffix(d.Name(), ".html"){
-			rel, err:=filepath.Rel(distPath, path)
-			if err!=nil{
-				return err
-			}
-			content, err:=os.ReadFile(path)
-			if err!=nil{
-				log.Printf("Failed to read %s: %v", path, err)
-				return nil
-			}
-			htmlCache[rel]=content
-		}
-		return nil
-	})
-}
-func isImageOrFont(path string) bool{
-	ext:=strings.ToLower(filepath.Ext(path))
-	switch ext{
-	case ".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp", ".ico",
-		".woff", ".woff2", ".ttf", ".eot", ".otf":
-		return true
+
+	if err != nil {
+		log.Fatal("Error starting application:", err)
 	}
-	return false
 }
-func startDualStackServer(app *fiber.App, port int) error{
-	portStr:=":"+strconv.Itoa(port)
-	lc:=net.ListenConfig{
-		Control: listenControl,
-	}
-	ln, err:=lc.Listen(context.Background(), "tcp", "[::]"+portStr)
-	if err!=nil{
-		log.Printf("Dual-stack listener failed, falling back to IPv4: %v", err)
-		ln, err=net.Listen("tcp", "0.0.0.0"+portStr)
-		if err!=nil{
-			return err
-		}
-	}
-	return app.Listener(ln)
-}
-func gracefulShutdown(app *fiber.App){
-	sigChan:=make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	sig:=<-sigChan
-	log.Printf("\n%s received. Starting graceful shutdown...", sig)
-	done:=make(chan bool)
-	go func(){
-		shutdownTimeout:=10 * time.Second
-		if err:=app.ShutdownWithTimeout(shutdownTimeout); err!=nil{
-			log.Printf("Error during shutdown: %v", err)
-		}
-		done <- true
-	}()
-	select{
-	case <-done:
-		log.Println("Cleanup completed successfully")
-	case <-time.After(11 * time.Second):
-		log.Println("Forced shutdown due to timeout")
-	}
-	os.Exit(0)
-}
-func init(){
+
+func init() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 }
