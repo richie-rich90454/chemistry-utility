@@ -91,25 +91,25 @@ describe("CSS: Variable Consistency", () => {
     it("root variables cover all required categories", () => {
         const rootVars = extractVariables(extractBlock(":root", css));
 
-        // Check color variables
-        expect(rootVars.has("primary")).toBe(true);
-        expect(rootVars.has("error")).toBe(true);
-        expect(rootVars.has("success")).toBe(true);
+        // Check color variables (MD3 naming)
+        expect(rootVars.has("md-primary")).toBe(true);
+        expect(rootVars.has("md-error")).toBe(true);
+        expect(rootVars.has("md-success")).toBe(true);
 
-        // Check spacing variables
-        expect(rootVars.has("spacing-sm")).toBe(true);
-        expect(rootVars.has("spacing-lg")).toBe(true);
+        // Check spacing variables (MD3 naming)
+        expect(rootVars.has("md-space-2")).toBe(true);
+        expect(rootVars.has("md-space-4")).toBe(true);
 
-        // Check radius variables
-        expect(rootVars.has("radius-sm")).toBe(true);
-        expect(rootVars.has("radius-lg")).toBe(true);
+        // Check radius variables (MD3 naming)
+        expect(rootVars.has("md-shape-sm")).toBe(true);
+        expect(rootVars.has("md-shape-lg")).toBe(true);
 
-        // Check shadow variables
-        expect(rootVars.has("shadow-1")).toBe(true);
-        expect(rootVars.has("shadow-2")).toBe(true);
+        // Check shadow/elevation variables (MD3 naming)
+        expect(rootVars.has("md-elevation-1")).toBe(true);
+        expect(rootVars.has("md-elevation-2")).toBe(true);
 
-        // Check transition variables
-        expect(rootVars.has("transition-fast")).toBe(true);
-        expect(rootVars.has("transition-slow")).toBe(true);
+        // Check motion variables (MD3 naming)
+        expect(rootVars.has("md-motion-duration-short4")).toBe(true);
+        expect(rootVars.has("md-motion-duration-medium2")).toBe(true);
     });
 });

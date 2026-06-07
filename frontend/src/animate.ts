@@ -70,9 +70,9 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		});
 	}
 
-	// Card scroll-triggered entrances with stagger and parallax depth
+	// Card scroll-triggered entrances — MD3 fade through
 	let cards=document.querySelectorAll(".main-groups.card") as NodeListOf<HTMLElement>;
-	cards.forEach(function(card: HTMLElement, index: number): void{
+	cards.forEach(function(card: HTMLElement): void{
 		gsap.from(card, {
 			scrollTrigger: {
 				trigger: card,
@@ -80,9 +80,8 @@ document.addEventListener("DOMContentLoaded", function(): void{
 				toggleActions: "play none none none"
 			},
 			opacity: 0,
-			y: 24 + (index % 3) * 8,
-			x: (index % 2 === 0 ? -8 : 8),
-			duration: 0.5,
+			y: 12,
+			duration: 0.3,
 			ease: "power2.out"
 		});
 	});
@@ -129,24 +128,6 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		});
 	}
 
-	// Input focus glow animation
-	document.querySelectorAll("input, select, textarea").forEach(function(el: Element): void{
-		el.addEventListener("focus", function(): void{
-			gsap.to(el, {
-				scale: 1.01,
-				duration: 0.15,
-				ease: "power2.out"
-			});
-		});
-		el.addEventListener("blur", function(): void{
-			gsap.to(el, {
-				scale: 1,
-				duration: 0.15,
-				ease: "power2.out"
-			});
-		});
-	});
-
 	// ── DOM change observer animations ──
 
 	// Result area animation — observe for content changes
@@ -156,29 +137,13 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			let target=mutation.target as HTMLElement;
 			// Animate when result gets content
 			if (mutation.type==="childList"&&target.classList.contains("result")&&target.textContent&&target.textContent.trim().length>0){
-				gsap.fromTo(target, {opacity: 0, y: 8}, {
+				gsap.fromTo(target, {opacity: 0, y: 4}, {
 					opacity: 1,
 					y: 0,
-					duration: 0.25,
+					duration: 0.2,
 					ease: "power2.out",
 					clearProps: "opacity,y"
 				});
-				// Green border flash on success
-				if (!target.classList.contains("error")){
-					let computedBorder=getComputedStyle(target).borderLeftColor;
-					gsap.fromTo(target,{borderLeftColor:getComputedStyle(document.documentElement).getPropertyValue("--success").trim()},{
-						borderLeftColor:computedBorder,
-						duration:0.6,
-						ease:"power2.out",
-						clearProps:"borderLeftColor"
-					});
-					gsap.fromTo(target,{boxShadow:"0 0 8px color-mix(in srgb, var(--success) 20%, transparent)"},{
-						boxShadow:"0 0 0px transparent",
-						duration:0.5,
-						ease:"power2.out",
-						clearProps:"boxShadow"
-					});
-				}
 			}
 			// Animate when .show class is added
 			if (mutation.type==="attributes"&&mutation.attributeName==="class"){
