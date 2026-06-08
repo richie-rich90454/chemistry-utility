@@ -69,6 +69,26 @@ describe("Molar mass - real world compounds", () => {
     it("calculates CaCO3 molar mass", () => {
         expect(calculateMolarMass("CaCO3", testElements)).toBeCloseTo(100.087, 0);
     });
+
+	it("calculates K2SO4 molar mass", () => {
+		expect(calculateMolarMass("K2SO4", testElements)).toBeCloseTo(174.259, 0);
+	});
+
+	it("calculates Na2SO4 molar mass", () => {
+		expect(calculateMolarMass("Na2SO4", testElements)).toBeCloseTo(142.042, 0);
+	});
+
+	it("calculates FeCl3 molar mass", () => {
+		expect(calculateMolarMass("FeCl3", testElements)).toBeCloseTo(162.204, 0);
+	});
+
+	it("calculates CaCl2 molar mass", () => {
+		expect(calculateMolarMass("CaCl2", testElements)).toBeCloseTo(110.984, 0);
+	});
+
+	it("calculates MgSO4 molar mass", () => {
+		expect(calculateMolarMass("MgSO4", testElements)).toBeCloseTo(120.366, 0);
+	});
 });
 
 describe("formatFormula - real world formulas", () => {
