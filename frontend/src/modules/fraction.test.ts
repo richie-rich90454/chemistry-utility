@@ -97,4 +97,12 @@ describe("balanceEquation", () => {
 	it("should respect maxCoefficient parameter", () => {
 		expect(() => balanceEquation("N2 + H2 -> NH3", 2)).toThrow();
 	});
+
+	it("should balance Fe2O3 + CO -> Fe + CO2", () => {
+		expect(balanceEquation("Fe2O3 + CO -> Fe + CO2")).toBe("Fe2O3 + 3CO -> 2Fe + 3CO2");
+	});
+
+	it("should balance propane combustion", () => {
+		expect(balanceEquation("C3H8 + O2 -> CO2 + H2O")).toBe("C3H8 + 5O2 -> 3CO2 + 4H2O");
+	});
 });
