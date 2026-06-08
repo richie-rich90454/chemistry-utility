@@ -180,5 +180,17 @@ describe("Electrochemistry Edge Cases", () => {
             const html = getResultHTML("electrolysis-result");
             expect(html).toContain("valid positive numbers");
         });
+
+        it("handles very large current in current mode", () => {
+            (document.getElementById("electrolysis-m") as HTMLInputElement).value = "100";
+            (document.getElementById("electrolysis-I") as HTMLInputElement).value = "1000";
+            (document.getElementById("electrolysis-t") as HTMLInputElement).value = "3600";
+            (document.getElementById("electrolysis-z") as HTMLInputElement).value = "1";
+            (document.getElementById("electrolysis-M") as HTMLInputElement).value = "63.546";
+            (document.getElementById("electrolysis-solve-for") as HTMLSelectElement).value = "mass";
+            calculateElectrolysis();
+            const html = getResultHTML("electrolysis-result");
+            expect(html).toContain("mass deposited");
+        });
     });
 });
