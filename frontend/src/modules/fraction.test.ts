@@ -113,4 +113,12 @@ describe("balanceEquation", () => {
 	it("should balance P4 + O2 -> P2O5", () => {
 		expect(balanceEquation("P4 + O2 -> P2O5")).toBe("P4 + 5O2 -> 2P2O5");
 	});
+
+	it("should balance CaCO3 -> CaO + CO2", () => {
+		expect(balanceEquation("CaCO3 -> CaO + CO2")).toBe("CaCO3 -> CaO + CO2");
+	});
+
+	it("should balance K + H2O -> KOH + H2", () => {
+		expect(balanceEquation("K + H2O -> KOH + H2")).toBe("2K + 2H2O -> 2KOH + H2");
+	});
 });
