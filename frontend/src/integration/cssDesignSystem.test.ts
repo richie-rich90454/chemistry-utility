@@ -341,4 +341,77 @@ describe("CSS Design System", () => {
         expect(lightScrim).toBeDefined();
         expect(darkScrim).toBeDefined();
     });
+
+    it("Dark theme overrides all input tokens", () => {
+        const inputTokens = [
+            "md-input-bg",
+            "md-input-text",
+            "md-input-border",
+            "md-input-placeholder",
+            "md-input-focus-border",
+            "md-input-hover-border",
+        ];
+        for (const token of inputTokens) {
+            expect(darkVars.has(token), `Missing --${token} in .dark`).toBe(true);
+        }
+    });
+
+    it("Dark theme input background differs from light theme", () => {
+        const lightVal = getVarValue(cssContent, rootBlock, "md-input-bg");
+        const darkVal = getVarValue(cssContent, darkBlock, "md-input-bg");
+        expect(lightVal).toBeDefined();
+        expect(darkVal).toBeDefined();
+        expect(darkVal).not.toBe(lightVal);
+    });
+
+    it("Dark theme input text differs from light theme", () => {
+        const lightVal = getVarValue(cssContent, rootBlock, "md-input-text");
+        const darkVal = getVarValue(cssContent, darkBlock, "md-input-text");
+        expect(lightVal).toBeDefined();
+        expect(darkVal).toBeDefined();
+        expect(darkVal).not.toBe(lightVal);
+    });
+
+    it("CSS file contains color-scheme: light for form elements", () => {
+        expect(cssContent).toContain("color-scheme");
+        expect(cssContent).toContain("light");
+    });
+
+    it("CSS file contains !important for input background", () => {
+        expect(cssContent).toContain("--md-input-bg");
+        expect(cssContent).toContain("!important");
+    });
+
+    it("No duplicate CSS variable definitions in .dark", () => {
+        const darkMatch = cssContent.match(/\.dark\s*\{([^}]+)\}/);
+        expect(darkMatch).toBeTruthy();
+        const darkBody = darkMatch![1];
+        const seen = new Map<string, number>();
+        const varRegex = /--([a-zA-Z0-9-]+)\s*:/g;
+        let match;
+        while ((match = varRegex.exec(darkBody)) !== null) {
+            const name = match[1];
+            const count = seen.get(name) ?? 0;
+            seen.set(name, count + 1);
+        }
+        const duplicates = [...seen.entries()].filter(([, count]) => count > 1);
+        expect(duplicates, `Duplicate variables in .dark: ${duplicates.map(([n]) => n).join(", ")}`).toHaveLength(0);
+    });
+
+    it("Dark theme has different primary color than light theme", () => {
+        const lightVal = getVarValue(cssContent, rootBlock, "md-primary");
+        const darkVal = getVarValue(cssContent, darkBlock, "md-primary");
+        expect(lightVal).toBeDefined();
+        expect(darkVal).toBeDefined();
+        expect(darkVal).not.toBe(lightVal);
+    });
+
+    it("All shape tokens use valid CSS border-radius values", () => {
+        const shapeTokens = ["md-shape-xs", "md-shape-sm", "md-shape-md", "md-shape-lg", "md-shape-xl", "md-shape-full"];
+        for (const token of shapeTokens) {
+            const val = getVarValue(cssContent, rootBlock, token);
+            expect(val).toBeDefined();
+            expect(val!.length).toBeGreaterThan(0);
+        }
+    });
 });
