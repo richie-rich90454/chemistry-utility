@@ -168,5 +168,17 @@ describe("Electrochemistry Edge Cases", () => {
             const html = getResultHTML("electrolysis-result");
             expect(html).toContain("Please enter valid positive numbers for m, I, z, and M");
         });
+
+        it("handles zero molar mass in mass mode", () => {
+            (document.getElementById("electrolysis-m") as HTMLInputElement).value = "0";
+            (document.getElementById("electrolysis-I") as HTMLInputElement).value = "2";
+            (document.getElementById("electrolysis-t") as HTMLInputElement).value = "3600";
+            (document.getElementById("electrolysis-z") as HTMLInputElement).value = "1";
+            (document.getElementById("electrolysis-M") as HTMLInputElement).value = "0";
+            (document.getElementById("electrolysis-solve-for") as HTMLSelectElement).value = "mass";
+            calculateElectrolysis();
+            const html = getResultHTML("electrolysis-result");
+            expect(html).toContain("valid positive numbers");
+        });
     });
 });
