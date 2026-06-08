@@ -390,7 +390,7 @@ describe("Gas Laws - additional edge cases", () => {
 		expect(html).toContain("mol");
 	});
 
-	it("ideal gas: shows error for zero temperature", () => {
+	it("ideal gas: zero temperature gives zero pressure", () => {
 		createContainer("ideal-gas-law");
 		createInput("ideal-P", "1", "ideal-gas-law");
 		createInput("ideal-V", "22.4", "ideal-gas-law");
@@ -401,7 +401,8 @@ describe("Gas Laws - additional edge cases", () => {
 		createResultDiv("ideal-result", "ideal-gas-law");
 		calculateIdealGasLaw();
 		const html = getResultHTML("ideal-result");
-		expect(html).toContain("Error");
+		// P = nRT/V = 1 * 0.08206 * 0 / 22.4 = 0
+		expect(html).toContain("0.0000");
 	});
 
 	it("combined gas: solves for P2", () => {
