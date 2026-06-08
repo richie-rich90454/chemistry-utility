@@ -448,4 +448,41 @@ describe("initializeAppNav", () => {
         const allCards = document.querySelectorAll(".main-groups.card.view-active");
         expect(allCards.length).toBe(0);
     });
+
+    it("switching views updates view header category", () => {
+        initializeAppNav();
+        const link = document.querySelector('.sidebar-nav a[href="#dilution-calc"]') as HTMLElement;
+        link.click();
+        const category = document.querySelector(".view-category") as HTMLElement;
+        expect(category.textContent).toBe("Solutions");
+    });
+
+    it("switching views updates view header title", () => {
+        initializeAppNav();
+        const link = document.querySelector('.sidebar-nav a[href="#gas-laws"]') as HTMLElement;
+        link.click();
+        const title = document.querySelector(".view-title") as HTMLElement;
+        expect(title.textContent).toBe("Gas Laws");
+    });
+
+    it("command palette ArrowDown moves selection", () => {
+        initializeAppNav();
+        const input = document.querySelector(".palette-input") as HTMLInputElement;
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+        const items = document.querySelectorAll(".palette-item");
+        const selected = document.querySelector(".palette-item.selected");
+        expect(selected).not.toBeNull();
+    });
+
+    it("sidebar search with no matches shows no results", () => {
+        initializeAppNav();
+        const searchInput = document.querySelector(".sidebar-search input") as HTMLInputElement;
+        searchInput.value = "zzzzz";
+        searchInput.dispatchEvent(new Event("input"));
+        const visibleLinks = Array.from(document.querySelectorAll(".sidebar-nav a")).filter(
+            (a) => (a as HTMLElement).style.display !== "none"
+        );
+        expect(visibleLinks.length).toBe(0);
+    });
 });
