@@ -235,4 +235,59 @@ describe("Cross-Calculator Integration", () => {
         const pressure = parseFloat(match![1]);
         expect(pressure).toBeGreaterThan(0);
     });
+
+    it("balances Na + Cl2 -> NaCl, then verifies molar mass of NaCl", () => {
+        const balanced = balanceEquation("Na + Cl2 -> NaCl");
+        expect(balanced).toBe("2Na + Cl2 -> 2NaCl");
+
+        const molarMassNaCl = calculateMolarMass("NaCl", testElements as any);
+        expect(molarMassNaCl).toBeCloseTo(58.443, 1);
+    });
+
+    it("calculates molar mass of Fe2O3, then predicts bond type Fe-O", () => {
+        const molarMass = calculateMolarMass("Fe2O3", testElements as any);
+        expect(molarMass).toBeCloseTo(159.687, 0);
+
+        createContainer("bond-type-predictor");
+        createInput("element1-input", "Fe", "bond-type-predictor", "text");
+        createInput("element2-input", "O", "bond-type-predictor", "text");
+        createResultDiv("bond-type-result", "bond-type-predictor");
+        predictBondType(testElements as any);
+        const result = getResultText("bond-type-result");
+        expect(result).toContain("Ionic");
+    });
+
+    it("dilution: M1=6, V1=0.5, M2=1, solves for V2 = 3L", () => {
+        createContainer("dilution-calc");
+        createSelect("dilution-solve-for", "V2", ["M1", "V1", "M2", "V2"], "dilution-calc");
+        createInput("dilution-M1", "6", "dilution-calc");
+        createInput("dilution-V1", "0.5", "dilution-calc");
+        createInput("dilution-M2", "1", "dilution-calc");
+        createInput("dilution-V2", "", "dilution-calc");
+        createResultDiv("dilution-result", "dilution-calc");
+        calculateDilution();
+        const result = getResultText("dilution-result");
+        expect(result).toContain("3.0000");
+    });
+
+    it("mass percent in ppm: 0.005g solute in 1000g solution", () => {
+        createContainer("mass-percent-calc");
+        createInput("mass-solute", "0.005", "mass-percent-calc");
+        createInput("mass-solution", "1000", "mass-percent-calc");
+        createSelect("concentration-unit", "ppm", ["percent", "ppm", "ppb"], "mass-percent-calc");
+        createResultDiv("mass-percent-result", "mass-percent-calc");
+        calculateMassPercent();
+        const result = getResultText("mass-percent-result");
+        expect(result).toContain("ppm");
+    });
+
+    it("cell potential: E1=1.50, E2=-0.74, verifies E_cell=2.24", () => {
+        createContainer("cell-potential");
+        createInput("E1", "1.50", "cell-potential");
+        createInput("E2", "-0.74", "cell-potential");
+        createResultDiv("cell-potential-result", "cell-potential");
+        calculateCellPotential();
+        const result = getResultText("cell-potential-result");
+        expect(result).toContain("2.240");
+    });
 });
