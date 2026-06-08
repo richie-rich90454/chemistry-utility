@@ -142,4 +142,46 @@ describe("formulaParser edge cases", () => {
     it("calculateMolarMass throws for unmatched opening paren", () => {
         expect(() => calculateMolarMass("(H2O", testElements)).toThrow();
     });
+
+    it("calculateMolarMass with KCl", () => {
+        const mass = calculateMolarMass("KCl", testElements);
+        expect(mass).toBeCloseTo(74.551, 0);
+    });
+
+    it("calculateMolarMass with CH4", () => {
+        const mass = calculateMolarMass("CH4", testElements);
+        expect(mass).toBeCloseTo(16.043, 1);
+    });
+
+    it("calculateMolarMass with Fe2O3", () => {
+        const mass = calculateMolarMass("Fe2O3", testElements);
+        expect(mass).toBeCloseTo(159.687, 0);
+    });
+
+    it("calculateMolarMass with H2SO4", () => {
+        const mass = calculateMolarMass("H2SO4", testElements);
+        expect(mass).toBeCloseTo(98.079, 0);
+    });
+
+    it("calculateMolarMass with Ca(OH)2", () => {
+        const mass = calculateMolarMass("Ca(OH)2", testElements);
+        expect(mass).toBeCloseTo(74.093, 0);
+    });
+
+    it("formatFormula with simple formula H2O", () => {
+        const result = formatFormula("H2O");
+        expect(result).toBe("HOH");
+    });
+
+    it("parseElement with Fe at index 0", () => {
+        const [symbol, newIndex] = parseElement("Fe2O3", 0);
+        expect(symbol).toBe("Fe");
+        expect(newIndex).toBe(2);
+    });
+
+    it("parseNumber with zero returns 0", () => {
+        const [value, newIndex] = parseNumber("0H", 0);
+        expect(value).toBe(0);
+        expect(newIndex).toBe(1);
+    });
 });
