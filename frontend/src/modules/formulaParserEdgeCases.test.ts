@@ -133,4 +133,13 @@ describe("formulaParser edge cases", () => {
         expect(num).toBe(12);
         expect(newIndex).toBe(2);
     });
+
+    it("calculateMolarMass with Na2CO3", () => {
+        const mass = calculateMolarMass("Na2CO3", testElements);
+        expect(mass).toBeCloseTo(105.99, 0);
+    });
+
+    it("calculateMolarMass throws for unmatched opening paren", () => {
+        expect(() => calculateMolarMass("(H2O", testElements)).toThrow();
+    });
 });
