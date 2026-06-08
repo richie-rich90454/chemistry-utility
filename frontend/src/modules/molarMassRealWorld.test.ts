@@ -61,6 +61,14 @@ describe("Molar mass - real world compounds", () => {
     it("calculates H3PO4 molar mass", () => {
         expect(calculateMolarMass("H3PO4", testElements)).toBeCloseTo(97.994, 0);
     });
+
+    it("calculates NaOH molar mass", () => {
+        expect(calculateMolarMass("NaOH", testElements)).toBeCloseTo(39.997, 0);
+    });
+
+    it("calculates CaCO3 molar mass", () => {
+        expect(calculateMolarMass("CaCO3", testElements)).toBeCloseTo(100.087, 0);
+    });
 });
 
 describe("formatFormula - real world formulas", () => {
