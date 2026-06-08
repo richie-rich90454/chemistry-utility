@@ -105,4 +105,12 @@ describe("balanceEquation", () => {
 	it("should balance propane combustion", () => {
 		expect(balanceEquation("C3H8 + O2 -> CO2 + H2O")).toBe("C3H8 + 5O2 -> 3CO2 + 4H2O");
 	});
+
+	it("should balance Al + HCl -> AlCl3 + H2", () => {
+		expect(balanceEquation("Al + HCl -> AlCl3 + H2")).toBe("2Al + 6HCl -> 2AlCl3 + 3H2");
+	});
+
+	it("should balance P4 + O2 -> P2O5", () => {
+		expect(balanceEquation("P4 + O2 -> P2O5")).toBe("P4 + 5O2 -> 2P2O5");
+	});
 });
