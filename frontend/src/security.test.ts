@@ -78,4 +78,16 @@ describe("Input sanitization", () => {
         input.value = "1.5e-10";
         expect(input.value).toBe("1.5e-10");
     });
+
+    it("text input does not interpret HTML", () => {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = "<b>bold</b>";
+        expect(input.value).toBe("<b>bold</b>");
+    });
+
+    it("parseFloat returns NaN for HTML strings", () => {
+        const result = parseFloat("<script>alert(1)</script>");
+        expect(isNaN(result)).toBe(true);
+    });
 });
