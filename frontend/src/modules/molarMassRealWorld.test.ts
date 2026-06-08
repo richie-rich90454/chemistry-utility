@@ -53,6 +53,14 @@ describe("Molar mass - real world compounds", () => {
     it("calculates Mg(OH)2 molar mass", () => {
         expect(calculateMolarMass("Mg(OH)2", testElements)).toBeCloseTo(58.32, 0);
     });
+
+    it("calculates Al2(SO4)3 molar mass", () => {
+        expect(calculateMolarMass("Al2(SO4)3", testElements)).toBeCloseTo(342.15, 0);
+    });
+
+    it("calculates H3PO4 molar mass", () => {
+        expect(calculateMolarMass("H3PO4", testElements)).toBeCloseTo(97.994, 0);
+    });
 });
 
 describe("formatFormula - real world formulas", () => {
