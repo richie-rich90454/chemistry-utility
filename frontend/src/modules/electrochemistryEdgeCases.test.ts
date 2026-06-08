@@ -194,3 +194,68 @@ describe("Electrochemistry Edge Cases", () => {
         });
     });
 });
+
+describe("Electrochemistry - additional edge cases", () => {
+    afterEach(() => {
+        cleanupDOM();
+    });
+
+    it("cell potential with very large E1", () => {
+        createContainer("cell-potential");
+        createInput("E1", "5.0", "cell-potential");
+        createInput("E2", "-3.0", "cell-potential");
+        createResultDiv("cell-potential-result", "cell-potential");
+        calculateCellPotential();
+        const html = getResultHTML("cell-potential-result");
+        expect(html).toContain("8.000");
+    });
+
+    it("Nernst with very large Q", () => {
+        createContainer("nernst-equation");
+        createInput("E-standard", "1.10", "nernst-equation");
+        createInput("temperature", "298", "nernst-equation");
+        createInput("n-electrons", "2", "nernst-equation");
+        createInput("Q-reaction", "1e10", "nernst-equation");
+        createResultDiv("nernst-result", "nernst-equation");
+        calculateNernst();
+        const html = getResultHTML("nernst-result");
+        // With Q >> 1, E should be less than E_standard
+        expect(html).not.toContain("Error");
+    });
+
+    it("Nernst with very small Q (near zero)", () => {
+        createContainer("nernst-equation");
+        createInput("E-standard", "1.10", "nernst-equation");
+        createInput("temperature", "298", "nernst-equation");
+        createInput("n-electrons", "2", "nernst-equation");
+        createInput("Q-reaction", "0.001", "nernst-equation");
+        createResultDiv("nernst-result", "nernst-equation");
+        calculateNernst();
+        const html = getResultHTML("nernst-result");
+        expect(html).not.toContain("Error");
+    });
+
+    it("electrolysis with very small current", () => {
+        createContainer("electrolysis");
+        createInput("electrolysis-m", "0", "electrolysis");
+        createInput("electrolysis-I", "0.001", "electrolysis");
+        createInput("electrolysis-t", "3600", "electrolysis");
+        createInput("electrolysis-z", "1", "electrolysis");
+        createInput("electrolysis-M", "63.546", "electrolysis");
+        createSelect("electrolysis-solve-for", "mass", ["mass", "current", "time"], "electrolysis");
+        createResultDiv("electrolysis-result", "electrolysis");
+        calculateElectrolysis();
+        const html = getResultHTML("electrolysis-result");
+        expect(html).not.toContain("Error");
+    });
+
+    it("cell potential with both zero potentials", () => {
+        createContainer("cell-potential");
+        createInput("E1", "0", "cell-potential");
+        createInput("E2", "0", "cell-potential");
+        createResultDiv("cell-potential-result", "cell-potential");
+        calculateCellPotential();
+        const html = getResultHTML("cell-potential-result");
+        expect(html).toContain("0.000");
+    });
+});
