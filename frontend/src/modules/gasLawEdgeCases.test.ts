@@ -225,6 +225,19 @@ describe("Combined Gas Law - edge cases", () => {
 		expect(match).not.toBeNull();
 		expect(parseFloat(match![1])).toBeCloseTo(1, 2);
 	});
+
+	it("solves for V1 correctly", () => {
+		(document.getElementById("combined-P1") as HTMLInputElement).value = "2";
+		(document.getElementById("combined-V1") as HTMLInputElement).value = "0";
+		(document.getElementById("combined-T1") as HTMLInputElement).value = "300";
+		(document.getElementById("combined-P2") as HTMLInputElement).value = "1";
+		(document.getElementById("combined-V2") as HTMLInputElement).value = "4";
+		(document.getElementById("combined-T2") as HTMLInputElement).value = "300";
+		(document.getElementById("combined-solve-for") as HTMLSelectElement).value = "V1";
+		calculateCombinedGasLaw();
+		const html = getResultHTML("combined-result");
+		expect(html).toContain("Result:");
+	});
 });
 
 describe("Van der Waals - edge cases", () => {
