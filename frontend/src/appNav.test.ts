@@ -511,4 +511,47 @@ describe("initializeAppNav", () => {
         const firstTarget = items[0].getAttribute("data-target");
         expect(firstTarget).toBe("element-lookup");
     });
+
+    it("nav sheet item click switches view", () => {
+        initializeAppNav();
+        const moreBtn = document.querySelector('.tab-item[data-target="more"]') as HTMLElement;
+        moreBtn.click();
+        const sheetItems = document.querySelectorAll(".nav-sheet .sheet-item");
+        (sheetItems[0] as HTMLElement).click();
+        const target = document.getElementById("element-lookup")!;
+        expect(target.classList.contains("view-active")).toBe(true);
+    });
+
+    it("command palette Ctrl+K toggles open/close", () => {
+        initializeAppNav();
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
+        const palette = document.querySelector(".command-palette") as HTMLElement;
+        expect(palette.classList.contains("open")).toBe(true);
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
+        expect(palette.classList.contains("open")).toBe(false);
+    });
+
+    it("sidebar link for electrochemistry shows correct category", () => {
+        initializeAppNav();
+        const link = document.querySelector('.sidebar-nav a[href="#electrochemistry"]') as HTMLElement;
+        link.click();
+        const category = document.querySelector(".view-category") as HTMLElement;
+        expect(category.textContent).toBe("Physical Chemistry");
+    });
+
+    it("sidebar link for stoichiometry shows correct category", () => {
+        initializeAppNav();
+        const link = document.querySelector('.sidebar-nav a[href="#stoichiometry"]') as HTMLElement;
+        link.click();
+        const category = document.querySelector(".view-category") as HTMLElement;
+        expect(category.textContent).toBe("Reactions & Bonds");
+    });
+
+    it("sidebar link for bond-type-predictor shows correct category", () => {
+        initializeAppNav();
+        const link = document.querySelector('.sidebar-nav a[href="#bond-type-predictor"]') as HTMLElement;
+        link.click();
+        const category = document.querySelector(".view-category") as HTMLElement;
+        expect(category.textContent).toBe("Reactions & Bonds");
+    });
 });
