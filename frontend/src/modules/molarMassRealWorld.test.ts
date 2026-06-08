@@ -45,6 +45,14 @@ describe("Molar mass - real world compounds", () => {
     it("calculates CH4 molar mass", () => {
         expect(calculateMolarMass("CH4", testElements)).toBeCloseTo(16.043, 1);
     });
+
+    it("calculates Fe2O3 molar mass", () => {
+        expect(calculateMolarMass("Fe2O3", testElements)).toBeCloseTo(159.687, 0);
+    });
+
+    it("calculates Mg(OH)2 molar mass", () => {
+        expect(calculateMolarMass("Mg(OH)2", testElements)).toBeCloseTo(58.32, 0);
+    });
 });
 
 describe("formatFormula - real world formulas", () => {
