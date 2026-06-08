@@ -370,3 +370,80 @@ describe("Half-life - edge cases", () => {
 		expect(parseFloat(match![1])).toBeCloseTo(5, 0);
 	});
 });
+
+describe("Gas Laws - additional edge cases", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("ideal gas: solves for n with atm-L units", () => {
+		createContainer("ideal-gas-law");
+		createInput("ideal-P", "1", "ideal-gas-law");
+		createInput("ideal-V", "22.4", "ideal-gas-law");
+		createInput("ideal-n", "", "ideal-gas-law");
+		createInput("ideal-T", "273.15", "ideal-gas-law");
+		createSelect("ideal-solve-for", "n", ["P", "V", "n", "T"], "ideal-gas-law");
+		createSelect("ideal-R-units", "atm-L", ["atm-L", "SI"], "ideal-gas-law");
+		createResultDiv("ideal-result", "ideal-gas-law");
+		calculateIdealGasLaw();
+		const html = getResultHTML("ideal-result");
+		expect(html).toContain("mol");
+	});
+
+	it("ideal gas: shows error for zero temperature", () => {
+		createContainer("ideal-gas-law");
+		createInput("ideal-P", "1", "ideal-gas-law");
+		createInput("ideal-V", "22.4", "ideal-gas-law");
+		createInput("ideal-n", "1", "ideal-gas-law");
+		createInput("ideal-T", "0", "ideal-gas-law");
+		createSelect("ideal-solve-for", "P", ["P", "V", "n", "T"], "ideal-gas-law");
+		createSelect("ideal-R-units", "atm-L", ["atm-L", "SI"], "ideal-gas-law");
+		createResultDiv("ideal-result", "ideal-gas-law");
+		calculateIdealGasLaw();
+		const html = getResultHTML("ideal-result");
+		expect(html).toContain("Error");
+	});
+
+	it("combined gas: solves for P2", () => {
+		createContainer("combined-gas-law");
+		createInput("combined-P1", "1", "combined-gas-law");
+		createInput("combined-V1", "2", "combined-gas-law");
+		createInput("combined-T1", "300", "combined-gas-law");
+		createInput("combined-P2", "", "combined-gas-law");
+		createInput("combined-V2", "4", "combined-gas-law");
+		createInput("combined-T2", "600", "combined-gas-law");
+		createSelect("combined-solve-for", "P2", ["P1", "V1", "T1", "P2", "V2", "T2"], "combined-gas-law");
+		createResultDiv("combined-result", "combined-gas-law");
+		calculateCombinedGasLaw();
+		const html = getResultHTML("combined-result");
+		expect(html).toContain("Result:");
+	});
+
+	it("half-life: remaining equals initial when time is zero", () => {
+		createContainer("half-life-calc");
+		createInput("initial-quantity", "100", "half-life-calc");
+		createInput("time-input", "0", "half-life-calc");
+		createInput("half-life-input", "5", "half-life-calc");
+		createInput("remaining-quantity", "", "half-life-calc");
+		createSelect("half-life-solve-for", "remaining", ["remaining", "time", "half-life"], "half-life-calc");
+		createResultDiv("half-life-result", "half-life-calc");
+		calculateHalfLife();
+		const html = getResultHTML("half-life-result");
+		const match = html.match(/Remaining:\s*([\d.]+)/);
+		expect(match).not.toBeNull();
+		expect(parseFloat(match![1])).toBeCloseTo(100, 0);
+	});
+
+	it("Van der Waals: produces result with small n", () => {
+		createContainer("van-der-waals");
+		createInput("vdw-V", "22.4", "van-der-waals");
+		createInput("vdw-n", "0.001", "van-der-waals");
+		createInput("vdw-T", "273", "van-der-waals");
+		createInput("vdw-a", "1.39", "van-der-waals");
+		createInput("vdw-b", "0.0391", "van-der-waals");
+		createResultDiv("vdw-result", "van-der-waals");
+		calculateVanDerWaals();
+		const html = getResultHTML("vdw-result");
+		expect(html).not.toContain("Error");
+	});
+});
