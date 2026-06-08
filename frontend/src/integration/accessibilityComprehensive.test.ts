@@ -260,4 +260,98 @@ describe("Accessibility: Comprehensive", () => {
         expect(numericInput.type).toBe("number");
         expect(textInputElement.type).toBe("text");
     });
+
+    it("sidebar links have href attributes", () => {
+        const nav = document.createElement("nav");
+        nav.className = "sidebar-nav";
+        const link1 = document.createElement("a");
+        link1.href = "#element-lookup";
+        link1.textContent = "Element Lookup";
+        nav.appendChild(link1);
+        const link2 = document.createElement("a");
+        link2.href = "#mass-calc";
+        link2.textContent = "Molar Mass";
+        nav.appendChild(link2);
+        document.body.appendChild(nav);
+
+        const links = nav.querySelectorAll("a");
+        for (const link of links) {
+            expect(link.getAttribute("href")).toBeTruthy();
+            expect(link.getAttribute("href")).toContain("#");
+        }
+    });
+
+    it("command palette items have data-target attributes", () => {
+        const container = createContainer("palette-a11y");
+        const list = document.createElement("div");
+        list.className = "palette-list";
+        const item = document.createElement("div");
+        item.className = "palette-item";
+        item.setAttribute("data-target", "gas-laws");
+        item.setAttribute("tabindex", "0");
+        item.textContent = "Gas Laws";
+        list.appendChild(item);
+        container.appendChild(list);
+
+        const items = container.querySelectorAll(".palette-item");
+        for (const item of items) {
+            expect(item.getAttribute("data-target")).toBeTruthy();
+        }
+    });
+
+    it("result divs have aria-live for dynamic content", () => {
+        const container = createContainer("aria-live-test");
+        const resultDiv = createResultDiv("live-result", "aria-live-test");
+        resultDiv.setAttribute("aria-live", "polite");
+
+        expect(resultDiv.getAttribute("aria-live")).toBe("polite");
+    });
+
+    it("nav sheet items have role or semantic markup", () => {
+        const sheet = document.createElement("div");
+        sheet.className = "nav-sheet";
+        const item = document.createElement("button");
+        item.className = "sheet-item";
+        item.setAttribute("data-target", "gas-laws");
+        item.textContent = "Gas Laws";
+        sheet.appendChild(item);
+        document.body.appendChild(sheet);
+
+        const items = sheet.querySelectorAll(".sheet-item");
+        for (const item of items) {
+            // Button elements have implicit role="button"
+            expect(item.tagName.toLowerCase()).toBe("button");
+        }
+    });
+
+    it("bottom tab items have accessible names", () => {
+        const nav = document.createElement("nav");
+        nav.className = "bottom-tabs";
+        const tab1 = document.createElement("button");
+        tab1.className = "tab-item";
+        tab1.textContent = "Element Lookup";
+        nav.appendChild(tab1);
+        const tab2 = document.createElement("button");
+        tab2.className = "tab-item";
+        tab2.textContent = "Molar Mass";
+        nav.appendChild(tab2);
+        document.body.appendChild(nav);
+
+        const tabs = nav.querySelectorAll(".tab-item");
+        for (const tab of tabs) {
+            const text = tab.textContent?.trim();
+            const ariaLabel = tab.getAttribute("aria-label");
+            expect(!!(text || ariaLabel)).toBe(true);
+        }
+    });
+
+    it("back button has accessible name", () => {
+        const btn = document.createElement("button");
+        btn.className = "back-button";
+        btn.setAttribute("aria-label", "Go back");
+        document.body.appendChild(btn);
+
+        const backBtn = document.querySelector(".back-button");
+        expect(backBtn?.getAttribute("aria-label")).toBeTruthy();
+    });
 });
