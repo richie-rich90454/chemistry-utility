@@ -111,4 +111,26 @@ describe("formulaParser edge cases", () => {
     it("formatFormula throws for empty string", () => {
         expect(() => formatFormula("")).toThrow("Bad formula");
     });
+
+    it("calculateMolarMass with Ca3(PO4)2", () => {
+        const mass = calculateMolarMass("Ca3(PO4)2", testElements);
+        expect(mass).toBeCloseTo(310.18, 0);
+    });
+
+    it("calculateMolarMass with Al2(SO4)3", () => {
+        const mass = calculateMolarMass("Al2(SO4)3", testElements);
+        expect(mass).toBeCloseTo(342.15, 0);
+    });
+
+    it("parseElement advances index correctly", () => {
+        const [symbol, newIndex] = parseElement("NaCl", 0);
+        expect(symbol).toBe("Na");
+        expect(newIndex).toBe(2);
+    });
+
+    it("parseNumber with trailing letters stops at correct position", () => {
+        const [num, newIndex] = parseNumber("12abc", 0);
+        expect(num).toBe(12);
+        expect(newIndex).toBe(2);
+    });
 });
