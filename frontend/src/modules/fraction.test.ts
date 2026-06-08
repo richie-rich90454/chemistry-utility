@@ -121,4 +121,12 @@ describe("balanceEquation", () => {
 	it("should balance K + H2O -> KOH + H2", () => {
 		expect(balanceEquation("K + H2O -> KOH + H2")).toBe("2K + 2H2O -> 2KOH + H2");
 	});
+
+	it("should balance Na2O + H2O -> NaOH", () => {
+		expect(balanceEquation("Na2O + H2O -> NaOH")).toBe("Na2O + H2O -> 2NaOH");
+	});
+
+	it("should balance C2H6 + O2 -> CO2 + H2O", () => {
+		expect(balanceEquation("C2H6 + O2 -> CO2 + H2O")).toBe("2C2H6 + 7O2 -> 4CO2 + 6H2O");
+	});
 });
