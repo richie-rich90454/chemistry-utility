@@ -295,3 +295,59 @@ describe("Stoichiometry", () => {
 		expect(() => calculateStoichiometry("2H2O->2H2+O2")).toThrow("Invalid moles input");
 	});
 });
+
+describe("Solution Calculators - additional edge cases", () => {
+	beforeEach(() => {
+		createContainer("dilution-calc");
+		createInput("dilution-M1", "1", "dilution-calc");
+		createInput("dilution-V1", "1", "dilution-calc");
+		createInput("dilution-M2", "1", "dilution-calc");
+		createInput("dilution-V2", "1", "dilution-calc");
+		createSelect("dilution-solve-for", "V2", ["M1", "V1", "M2", "V2"], "dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
+
+		createContainer("mass-percent-calc");
+		createInput("mass-solute", "10", "mass-percent-calc");
+		createInput("mass-solution", "100", "mass-percent-calc");
+		createSelect("concentration-unit", "percent", ["percent", "ppm", "ppb"], "mass-percent-calc");
+		createResultDiv("mass-percent-result", "mass-percent-calc");
+
+		createContainer("solution-mixing-calc");
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "1", "solution-mixing-calc");
+		createInput("mix-C2", "2", "solution-mixing-calc");
+		createInput("mix-V2", "1", "solution-mixing-calc");
+		createResultDiv("mixing-result", "solution-mixing-calc");
+	});
+	afterEach(() => { cleanupDOM(); });
+
+	it("dilution with very small concentrations", () => {
+		(document.getElementById("dilution-M1") as HTMLInputElement).value = "0.001";
+		(document.getElementById("dilution-V1") as HTMLInputElement).value = "1";
+		(document.getElementById("dilution-M2") as HTMLInputElement).value = "0.0001";
+		(document.getElementById("dilution-V2") as HTMLInputElement).value = "10";
+		(document.getElementById("dilution-solve-for") as HTMLSelectElement).value = "V2";
+		calculateDilution();
+		const html = getResultHTML("dilution-result");
+		expect(html).toContain("Result:");
+	});
+
+	it("mass percent in ppb with trace amounts", () => {
+		(document.getElementById("mass-solute") as HTMLInputElement).value = "0.001";
+		(document.getElementById("mass-solution") as HTMLInputElement).value = "1000";
+		(document.getElementById("concentration-unit") as HTMLSelectElement).value = "ppb";
+		calculateMassPercent();
+		const html = getResultHTML("mass-percent-result");
+		expect(html).toContain("ppb");
+	});
+
+	it("mixing with same concentration returns same value", () => {
+		(document.getElementById("mix-C1") as HTMLInputElement).value = "1.5";
+		(document.getElementById("mix-V1") as HTMLInputElement).value = "2";
+		(document.getElementById("mix-C2") as HTMLInputElement).value = "1.5";
+		(document.getElementById("mix-V2") as HTMLInputElement).value = "3";
+		calculateMixing();
+		const html = getResultHTML("mixing-result");
+		expect(html).toContain("1.5000 M");
+	});
+});
