@@ -485,4 +485,30 @@ describe("initializeAppNav", () => {
         );
         expect(visibleLinks.length).toBe(0);
     });
+
+    it("command palette ArrowUp does not go below zero", () => {
+        initializeAppNav();
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+        const selected = document.querySelector(".palette-item.selected");
+        expect(selected).not.toBeNull();
+    });
+
+    it("command palette filters by description", () => {
+        initializeAppNav();
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
+        const input = document.querySelector(".palette-input") as HTMLInputElement;
+        input.value = "half-life";
+        input.dispatchEvent(new Event("input"));
+        const items = document.querySelectorAll(".palette-item");
+        expect(items.length).toBeGreaterThan(0);
+    });
+
+    it("nav sheet items have correct data-target attributes", () => {
+        initializeAppNav();
+        const items = document.querySelectorAll(".nav-sheet .sheet-item");
+        expect(items.length).toBe(11);
+        const firstTarget = items[0].getAttribute("data-target");
+        expect(firstTarget).toBe("element-lookup");
+    });
 });
