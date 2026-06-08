@@ -351,3 +351,79 @@ describe("Solution Calculators - additional edge cases", () => {
 		expect(html).toContain("1.5000 M");
 	});
 });
+
+describe("Solution Calculators - more edge cases", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("dilution: solves for M1 correctly", () => {
+		createContainer("dilution-calc");
+		createInput("dilution-M1", "", "dilution-calc");
+		createInput("dilution-V1", "1", "dilution-calc");
+		createInput("dilution-M2", "2", "dilution-calc");
+		createInput("dilution-V2", "4", "dilution-calc");
+		createSelect("dilution-solve-for", "M1", ["M1", "V1", "M2", "V2"], "dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
+		calculateDilution();
+		const html = getResultHTML("dilution-result");
+		expect(html).toContain("8.0000 M");
+	});
+
+	it("dilution: solves for V1 correctly", () => {
+		createContainer("dilution-calc");
+		createInput("dilution-M1", "6", "dilution-calc");
+		createInput("dilution-V1", "", "dilution-calc");
+		createInput("dilution-M2", "2", "dilution-calc");
+		createInput("dilution-V2", "3", "dilution-calc");
+		createSelect("dilution-solve-for", "V1", ["M1", "V1", "M2", "V2"], "dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
+		calculateDilution();
+		const html = getResultHTML("dilution-result");
+		expect(html).toContain("1.0000 L");
+	});
+
+	it("mass percent: ppm conversion is correct", () => {
+		createContainer("mass-percent-calc");
+		createInput("mass-solute", "1", "mass-percent-calc");
+		createInput("mass-solution", "1000", "mass-percent-calc");
+		createSelect("concentration-unit", "ppm", ["percent", "ppm", "ppb"], "mass-percent-calc");
+		createResultDiv("mass-percent-result", "mass-percent-calc");
+		calculateMassPercent();
+		const html = getResultHTML("mass-percent-result");
+		expect(html).toContain("1000.0000 ppm");
+	});
+
+	it("mixing: throws error when both volumes are zero", () => {
+		createContainer("solution-mixing-calc");
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "0", "solution-mixing-calc");
+		createInput("mix-C2", "2", "solution-mixing-calc");
+		createInput("mix-V2", "0", "solution-mixing-calc");
+		createResultDiv("mixing-result", "solution-mixing-calc");
+		calculateMixing();
+		const html = getResultHTML("mixing-result");
+		expect(html).toContain("Error");
+	});
+
+	it("bond predictor: shows error for unknown element", () => {
+		createContainer("bond-type-predictor");
+		createInput("element1-input", "Xx", "bond-type-predictor", "text");
+		createInput("element2-input", "O", "bond-type-predictor", "text");
+		createResultDiv("bond-type-result", "bond-type-predictor");
+		predictBondType(testElements);
+		const html = getResultHTML("bond-type-result");
+		expect(html).toContain("not found");
+	});
+
+	it("stoichiometry: parseBalancedEquation handles extra spaces", () => {
+		const result = parseBalancedEquation("  2  H2  +  O2  ->  2  H2O  ");
+		expect(result.reactants).toEqual([
+			{ formula: "H2", coefficient: 2 },
+			{ formula: "O2", coefficient: 1 },
+		]);
+		expect(result.products).toEqual([
+			{ formula: "H2O", coefficient: 2 },
+		]);
+	});
+});
