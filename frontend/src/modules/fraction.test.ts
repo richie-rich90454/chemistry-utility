@@ -129,4 +129,24 @@ describe("balanceEquation", () => {
 	it("should balance C2H6 + O2 -> CO2 + H2O", () => {
 		expect(balanceEquation("C2H6 + O2 -> CO2 + H2O")).toBe("2C2H6 + 7O2 -> 4CO2 + 6H2O");
 	});
+
+	it("should balance HCl + NaOH -> NaCl + H2O", () => {
+		expect(balanceEquation("HCl + NaOH -> NaCl + H2O")).toBe("HCl + NaOH -> NaCl + H2O");
+	});
+
+	it("should balance Fe + O2 -> Fe2O3", () => {
+		expect(balanceEquation("Fe + O2 -> Fe2O3")).toBe("4Fe + 3O2 -> 2Fe2O3");
+	});
+
+	it("should balance NH3 + O2 -> NO + H2O", () => {
+		expect(balanceEquation("NH3 + O2 -> NO + H2O")).toBe("4NH3 + 5O2 -> 4NO + 6H2O");
+	});
+
+	it("should balance C2H4 + O2 -> CO2 + H2O", () => {
+		expect(balanceEquation("C2H4 + O2 -> CO2 + H2O")).toBe("C2H4 + 3O2 -> 2CO2 + 2H2O");
+	});
+
+	it("should balance H2S + O2 -> SO2 + H2O", () => {
+		expect(balanceEquation("H2S + O2 -> SO2 + H2O")).toBe("2H2S + 3O2 -> 2SO2 + 2H2O");
+	});
 });
