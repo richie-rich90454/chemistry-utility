@@ -126,6 +126,18 @@ describe("Ideal Gas Law - SI units", () => {
 		expect(html).toContain("Error");
 		expect(html).toContain("valid numbers");
 	});
+
+	it("handles very large pressure calculation", () => {
+		(document.getElementById("ideal-P") as HTMLInputElement).value = "1000";
+		(document.getElementById("ideal-V") as HTMLInputElement).value = "0.01";
+		(document.getElementById("ideal-n") as HTMLInputElement).value = "1";
+		(document.getElementById("ideal-T") as HTMLInputElement).value = "273.15";
+		(document.getElementById("ideal-solve-for") as HTMLSelectElement).value = "P";
+		(document.getElementById("ideal-R-units") as HTMLSelectElement).value = "atm-L";
+		calculateIdealGasLaw();
+		const html = getResultHTML("ideal-result");
+		expect(html).toContain("atm");
+	});
 });
 
 describe("Combined Gas Law - edge cases", () => {
@@ -197,6 +209,21 @@ describe("Combined Gas Law - edge cases", () => {
 		const result = extractResultNumber(html);
 		expect(result).not.toBeNull();
 		expect(result!).toBeCloseTo(300, 0);
+	});
+
+	it("returns same values when initial equals final conditions", () => {
+		(document.getElementById("combined-P1") as HTMLInputElement).value = "1";
+		(document.getElementById("combined-V1") as HTMLInputElement).value = "1";
+		(document.getElementById("combined-T1") as HTMLInputElement).value = "273";
+		(document.getElementById("combined-P2") as HTMLInputElement).value = "1";
+		(document.getElementById("combined-V2") as HTMLInputElement).value = "1";
+		(document.getElementById("combined-T2") as HTMLInputElement).value = "273";
+		(document.getElementById("combined-solve-for") as HTMLSelectElement).value = "P2";
+		calculateCombinedGasLaw();
+		const html = getResultHTML("combined-result");
+		const match = html.match(/Result:\s*([\d.]+)/);
+		expect(match).not.toBeNull();
+		expect(parseFloat(match![1])).toBeCloseTo(1, 2);
 	});
 });
 
