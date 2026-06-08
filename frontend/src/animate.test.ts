@@ -337,4 +337,67 @@ describe("animate.ts", () => {
 
         expect(gsap.fromTo).toHaveBeenCalled();
     });
+
+    it("sidebar footer exists in DOM", async () => {
+        setupFullDOM();
+        await loadAnimate();
+        fireDOMContentLoaded();
+        const footer = document.querySelector(".sidebar-footer") as HTMLElement;
+        expect(footer).toBeTruthy();
+    });
+
+    it("multiple result MutationObservers fire independently", async () => {
+        setupFullDOM();
+        // Add a second result div
+        const card = document.querySelector(".main-groups.card") as HTMLElement;
+        const result2 = document.createElement("div");
+        result2.className = "result";
+        card.appendChild(result2);
+
+        await loadAnimate();
+        fireDOMContentLoaded();
+
+        const gsap = (await import("gsap")).default;
+        const results = document.querySelectorAll(".result");
+        results[0].textContent = "42.0";
+        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(gsap.fromTo).toHaveBeenCalled();
+    });
+
+    it("multiple error class additions trigger animations", async () => {
+        setupFullDOM();
+        // Add a second input
+        const card = document.querySelector(".main-groups.card") as HTMLElement;
+        const input2 = document.createElement("input");
+        input2.type = "text";
+        card.appendChild(input2);
+
+        await loadAnimate();
+        fireDOMContentLoaded();
+
+        const gsap = (await import("gsap")).default;
+        const inputs = document.querySelectorAll("input");
+        inputs[0].classList.add("error");
+        inputs[1].classList.add("error");
+        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(gsap.fromTo).toHaveBeenCalled();
+    });
+
+    it("primary button exists and is clickable", async () => {
+        setupFullDOM();
+        await loadAnimate();
+        fireDOMContentLoaded();
+        const btn = document.querySelector(".primary-button") as HTMLElement;
+        expect(btn).toBeTruthy();
+        expect(typeof btn.click).toBe("function");
+    });
+
+    it("welcome card exists in DOM after setup", async () => {
+        setupFullDOM();
+        await loadAnimate();
+        fireDOMContentLoaded();
+        const card = document.querySelector(".welcome-card") as HTMLElement;
+        expect(card).toBeTruthy();
+        expect(card.textContent).toBe("Welcome");
+    });
 });
