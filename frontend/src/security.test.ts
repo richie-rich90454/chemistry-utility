@@ -91,3 +91,70 @@ describe("Input sanitization", () => {
         expect(isNaN(result)).toBe(true);
     });
 });
+
+describe("Input boundary validation", () => {
+    it("parseFloat handles very large numbers", () => {
+        const result = parseFloat("1e308");
+        expect(isFinite(result)).toBe(true);
+    });
+
+    it("parseFloat returns Infinity for overflow", () => {
+        const result = parseFloat("1e309");
+        expect(result).toBe(Infinity);
+    });
+
+    it("parseFloat handles negative zero", () => {
+        const result = parseFloat("-0");
+        expect(Object.is(result, -0)).toBe(true);
+    });
+
+    it("parseInt rejects non-numeric strings", () => {
+        const result = parseInt("abc", 10);
+        expect(isNaN(result)).toBe(true);
+    });
+
+    it("parseFloat handles mixed alphanumeric input", () => {
+        const result = parseFloat("3.14abc");
+        expect(result).toBe(3.14);
+    });
+
+    it("DOM textContent prevents script injection via innerHTML", () => {
+        const div = document.createElement("div");
+        const malicious = '<img src=x onerror="alert(1)">';
+        div.textContent = malicious;
+        expect(div.querySelector("img")).toBeNull();
+        expect(div.textContent).toBe(malicious);
+    });
+
+    it("DOM textContent prevents SVG injection", () => {
+        const div = document.createElement("div");
+        const svg = '<svg onload="alert(1)"><circle></circle></svg>';
+        div.textContent = svg;
+        expect(div.querySelector("svg")).toBeNull();
+    });
+});
+
+describe("Output sanitization", () => {
+    it("result div with innerHTML should escape user input", () => {
+        const div = document.createElement("div");
+        const userInput = '<script>document.cookie</script>';
+        const escaped = userInput.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        div.innerHTML = `<p>${escaped}</p>`;
+        expect(div.querySelector("script")).toBeNull();
+    });
+
+    it("result div with textContent is safe from injection", () => {
+        const div = document.createElement("div");
+        const userInput = '"><img src=x onerror=alert(1)>';
+        div.textContent = userInput;
+        expect(div.querySelector("img")).toBeNull();
+    });
+
+    it("number formatting does not introduce HTML", () => {
+        const num = 42.5;
+        const formatted = num.toFixed(2);
+        expect(formatted).toBe("42.50");
+        expect(formatted).not.toContain("<");
+        expect(formatted).not.toContain(">");
+    });
+});
