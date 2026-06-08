@@ -91,4 +91,29 @@ describe("validateInputs - edge cases", () => {
         try { validateInputs([NaN], ["persist-err"]); } catch {}
         expect(input.classList.contains("error")).toBe(true);
     });
+
+    it("handles multiple NaN inputs", () => {
+        const input1 = document.createElement("input");
+        input1.id = "multi-nan-1";
+        input1.type = "number";
+        document.body.appendChild(input1);
+
+        const input2 = document.createElement("input");
+        input2.id = "multi-nan-2";
+        input2.type = "number";
+        document.body.appendChild(input2);
+
+        try { validateInputs([NaN, NaN], ["multi-nan-1", "multi-nan-2"]); } catch {}
+        expect(input1.classList.contains("error")).toBe(true);
+        expect(input2.classList.contains("error")).toBe(true);
+    });
+
+    it("handles undefined values as NaN", () => {
+        const input = document.createElement("input");
+        input.id = "undef-test";
+        input.type = "number";
+        document.body.appendChild(input);
+
+        expect(() => validateInputs([undefined as any], ["undef-test"])).toThrow();
+    });
 });
