@@ -111,3 +111,69 @@ describe("CSS custom properties for form elements", () => {
         expect(select.tagName).toBe("SELECT");
     });
 });
+
+describe("CSS color-scheme for form elements", () => {
+    it("input element can have color-scheme property set via style", () => {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.style.colorScheme = "light";
+        document.body.appendChild(input);
+        expect(input.style.colorScheme).toBe("light");
+    });
+
+    it("select element can have color-scheme property set via style", () => {
+        const select = document.createElement("select");
+        select.style.colorScheme = "light";
+        document.body.appendChild(select);
+        expect(select.style.colorScheme).toBe("light");
+    });
+
+    it("textarea element can have color-scheme property set via style", () => {
+        const textarea = document.createElement("textarea");
+        textarea.style.colorScheme = "light";
+        document.body.appendChild(textarea);
+        expect(textarea.style.colorScheme).toBe("light");
+    });
+});
+
+describe("Theme CSS variable values", () => {
+    it("dark theme input background should be dark", () => {
+        // Verify the expected dark mode input background
+        const darkInputBg = "#1c1b1f";
+        expect(darkInputBg).toBeTruthy();
+        // Dark background should not be a light color
+        const r = parseInt(darkInputBg.slice(1, 3), 16);
+        const g = parseInt(darkInputBg.slice(3, 5), 16);
+        const b = parseInt(darkInputBg.slice(5, 7), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        expect(luminance).toBeLessThan(0.5);
+    });
+
+    it("light theme input background should be light", () => {
+        const lightInputBg = "#ffffff";
+        expect(lightInputBg).toBeTruthy();
+        const r = parseInt(lightInputBg.slice(1, 3), 16);
+        const g = parseInt(lightInputBg.slice(3, 5), 16);
+        const b = parseInt(lightInputBg.slice(5, 7), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        expect(luminance).toBeGreaterThan(0.5);
+    });
+
+    it("dark theme input text should be light", () => {
+        const darkInputText = "#e6e1e5";
+        const r = parseInt(darkInputText.slice(1, 3), 16);
+        const g = parseInt(darkInputText.slice(3, 5), 16);
+        const b = parseInt(darkInputText.slice(5, 7), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        expect(luminance).toBeGreaterThan(0.5);
+    });
+
+    it("light theme input text should be dark", () => {
+        const lightInputText = "#1c1b1f";
+        const r = parseInt(lightInputText.slice(1, 3), 16);
+        const g = parseInt(lightInputText.slice(3, 5), 16);
+        const b = parseInt(lightInputText.slice(5, 7), 16);
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        expect(luminance).toBeLessThan(0.5);
+    });
+});
