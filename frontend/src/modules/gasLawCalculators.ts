@@ -1,208 +1,195 @@
-import {validateInputs} from "./validation.js";
-export function calculateIdealGasLaw(): void{
-	try{
-		let select=document.getElementById("ideal-solve-for") as HTMLSelectElement;
-		let solveFor=select.value;
-		let unitsSelect=document.getElementById("ideal-R-units") as HTMLSelectElement;
-		let units=unitsSelect.value;
-		let R=units=="atm-L"?0.08206:8.314;
-		let P=parseFloat((document.getElementById("ideal-P") as HTMLInputElement).value);
-		let V=parseFloat((document.getElementById("ideal-V") as HTMLInputElement).value);
-		let n=parseFloat((document.getElementById("ideal-n") as HTMLInputElement).value);
-		let T=parseFloat((document.getElementById("ideal-T") as HTMLInputElement).value);
+import { Calculator } from "./calculator.js";
+import { SolveForCalculator } from "./solveForCalculator.js";
+import { InputValidator } from "./validation.js";
+
+/**
+ * Solves the ideal gas law PV = nRT for any one of P, V, n, or T,
+ * determined by the "ideal-solve-for" select element. The gas constant
+ * R is selected from the "ideal-R-units" select (atm-L or SI).
+ */
+export class IdealGasLawCalculator extends SolveForCalculator {
+	constructor() {
+		super("ideal-result", ["ideal-P", "ideal-V", "ideal-n", "ideal-T"], "ideal-solve-for");
+	}
+
+	protected performCalculation(): void {
+		const solveFor = this.getSolveFor();
+		const unitsSelect = document.getElementById("ideal-R-units") as HTMLSelectElement;
+		const units = unitsSelect.value;
+		const R = units === "atm-L" ? 0.08206 : 8.314;
+		const P = this.getInput("ideal-P").getValue();
+		const V = this.getInput("ideal-V").getValue();
+		const n = this.getInput("ideal-n").getValue();
+		const T = this.getInput("ideal-T").getValue();
 		let result: number, formula: string;
-		let inputs=document.querySelectorAll("#ideal-gas-law input") as NodeListOf<HTMLInputElement>;
-		for (let i=0; i<inputs.length; i++){
-			inputs[i].classList.remove("error");
-		}
-		if (solveFor=="P"){
-			validateInputs([V, n, T], ["ideal-V", "ideal-n", "ideal-T"]);
-			result=(n*R*T)/V;
-			formula="P=(nRT)/V";
-		}
-		else if (solveFor=="V"){
-			validateInputs([P, n, T], ["ideal-P", "ideal-n", "ideal-T"]);
-			result=(n*R*T)/P;
-			formula="V=(nRT)/P";
-		}
-		else if (solveFor=="n"){
-			validateInputs([P, V, T], ["ideal-P", "ideal-V", "ideal-T"]);
-			result=(P*V)/(R*T);
-			formula="n=(PV)/(RT)";
-		}
-		else if (solveFor=="T"){
-			validateInputs([P, V, n], ["ideal-P", "ideal-V", "ideal-n"]);
-			result=(P*V)/(n*R);
-			formula="T=(PV)/(nR)";
-		}
-		else{
+		if (solveFor === "P") {
+			InputValidator.validateValues([V, n, T], ["ideal-V", "ideal-n", "ideal-T"]);
+			result = (n * R * T) / V;
+			formula = "P=(nRT)/V";
+		} else if (solveFor === "V") {
+			InputValidator.validateValues([P, n, T], ["ideal-P", "ideal-n", "ideal-T"]);
+			result = (n * R * T) / P;
+			formula = "V=(nRT)/P";
+		} else if (solveFor === "n") {
+			InputValidator.validateValues([P, V, T], ["ideal-P", "ideal-V", "ideal-T"]);
+			result = (P * V) / (R * T);
+			formula = "n=(PV)/(RT)";
+		} else if (solveFor === "T") {
+			InputValidator.validateValues([P, V, n], ["ideal-P", "ideal-V", "ideal-n"]);
+			result = (P * V) / (n * R);
+			formula = "T=(PV)/(nR)";
+		} else {
 			throw new Error("Invalid solveFor");
 		}
 		let unit: string;
-		if (solveFor=="P"){
-			unit=units=="atm-L"?"atm":"Pa";
+		if (solveFor === "P") {
+			unit = units === "atm-L" ? "atm" : "Pa";
+		} else if (solveFor === "V") {
+			unit = units === "atm-L" ? "L" : "m³";
+		} else if (solveFor === "n") {
+			unit = "mol";
+		} else {
+			unit = "K";
 		}
-		else if (solveFor=="V"){
-			unit=units=="atm-L"?"L":"m³";
-		}
-		else if (solveFor=="n"){
-			unit="mol";
-		}
-		else{
-			unit="K";
-		}
-		let resultDiv=document.getElementById("ideal-result") as HTMLElement;
-		resultDiv.innerHTML="<p>"+formula+"</p><p>Result: "+result.toFixed(4)+" "+unit+"</p>";
-		resultDiv.classList.add("show");
-	}
-	catch (error){
-		let resultDiv=document.getElementById("ideal-result") as HTMLElement;
-		resultDiv.innerHTML="<p>Error: "+(error as Error).message+"</p>";
-		resultDiv.classList.add("show");
+		this.resultDisplay.showFormula(formula, result, unit);
 	}
 }
-export function calculateCombinedGasLaw(): void{
-	try{
-		let select=document.getElementById("combined-solve-for") as HTMLSelectElement;
-		let solveFor=select.value;
-		let P1=parseFloat((document.getElementById("combined-P1") as HTMLInputElement).value);
-		let V1=parseFloat((document.getElementById("combined-V1") as HTMLInputElement).value);
-		let T1=parseFloat((document.getElementById("combined-T1") as HTMLInputElement).value);
-		let P2=parseFloat((document.getElementById("combined-P2") as HTMLInputElement).value);
-		let V2=parseFloat((document.getElementById("combined-V2") as HTMLInputElement).value);
-		let T2=parseFloat((document.getElementById("combined-T2") as HTMLInputElement).value);
+
+/**
+ * Solves the combined gas law (P1*V1)/T1 = (P2*V2)/T2 for any one of the
+ * six variables, determined by the "combined-solve-for" select element.
+ */
+export class CombinedGasLawCalculator extends SolveForCalculator {
+	constructor() {
+		super("combined-result", ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"], "combined-solve-for");
+	}
+
+	protected performCalculation(): void {
+		const solveFor = this.getSolveFor();
+		const P1 = this.getInput("combined-P1").getValue();
+		const V1 = this.getInput("combined-V1").getValue();
+		const T1 = this.getInput("combined-T1").getValue();
+		const P2 = this.getInput("combined-P2").getValue();
+		const V2 = this.getInput("combined-V2").getValue();
+		const T2 = this.getInput("combined-T2").getValue();
 		let result: number, formula: string;
-		let inputs=document.querySelectorAll("#combined-gas-law input") as NodeListOf<HTMLInputElement>;
-		for (let i=0; i<inputs.length; i++){
-			inputs[i].classList.remove("error");
-		}
-		if (solveFor=="P1"){
-			validateInputs([V1, T1, P2, V2, T2], ["combined-V1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"]);
-			result=(P2*V2*T1)/(V1*T2);
-			formula="P<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(V<sub>1</sub> T<sub>2</sub>)";
-		}
-		else if (solveFor=="V1"){
-			validateInputs([P1, T1, P2, V2, T2], ["combined-P1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"]);
-			result=(P2*V2*T1)/(P1*T2);
-			formula="V<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> T<sub>2</sub>)";
-		}
-		else if (solveFor=="T1"){
-			validateInputs([P1, V1, P2, V2, T2], ["combined-P1", "combined-V1", "combined-P2", "combined-V2", "combined-T2"]);
-			result=(P1*V1*T2)/(P2*V2);
-			formula="T<sub>1</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> V<sub>2</sub>)";
-		}
-		else if (solveFor=="P2"){
-			validateInputs([P1, V1, T1, V2, T2], ["combined-P1", "combined-V1", "combined-T1", "combined-V2", "combined-T2"]);
-			result=(P1*V1*T2)/(V2*T1);
-			formula="P<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(V<sub>2</sub> T<sub>1</sub>)";
-		}
-		else if (solveFor=="V2"){
-			validateInputs([P1, V1, T1, P2, T2], ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-T2"]);
-			result=(P1*V1*T2)/(P2*T1);
-			formula="V<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> T<sub>1</sub>)";
-		}
-		else if (solveFor=="T2"){
-			validateInputs([P1, V1, T1, P2, V2], ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-V2"]);
-			result=(P2*V2*T1)/(P1*V1);
-			formula="T<sub>2</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> V<sub>1</sub>)";
-		}
-		else{
+		if (solveFor === "P1") {
+			InputValidator.validateValues([V1, T1, P2, V2, T2], ["combined-V1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"]);
+			result = (P2 * V2 * T1) / (V1 * T2);
+			formula = "P<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(V<sub>1</sub> T<sub>2</sub>)";
+		} else if (solveFor === "V1") {
+			InputValidator.validateValues([P1, T1, P2, V2, T2], ["combined-P1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"]);
+			result = (P2 * V2 * T1) / (P1 * T2);
+			formula = "V<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> T<sub>2</sub>)";
+		} else if (solveFor === "T1") {
+			InputValidator.validateValues([P1, V1, P2, V2, T2], ["combined-P1", "combined-V1", "combined-P2", "combined-V2", "combined-T2"]);
+			result = (P1 * V1 * T2) / (P2 * V2);
+			formula = "T<sub>1</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> V<sub>2</sub>)";
+		} else if (solveFor === "P2") {
+			InputValidator.validateValues([P1, V1, T1, V2, T2], ["combined-P1", "combined-V1", "combined-T1", "combined-V2", "combined-T2"]);
+			result = (P1 * V1 * T2) / (V2 * T1);
+			formula = "P<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(V<sub>2</sub> T<sub>1</sub>)";
+		} else if (solveFor === "V2") {
+			InputValidator.validateValues([P1, V1, T1, P2, T2], ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-T2"]);
+			result = (P1 * V1 * T2) / (P2 * T1);
+			formula = "V<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> T<sub>1</sub>)";
+		} else if (solveFor === "T2") {
+			InputValidator.validateValues([P1, V1, T1, P2, V2], ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-V2"]);
+			result = (P2 * V2 * T1) / (P1 * V1);
+			formula = "T<sub>2</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> V<sub>1</sub>)";
+		} else {
 			throw new Error("Invalid solveFor");
 		}
 		let unit: string;
-		if (solveFor.includes("P")){
-			unit="pressure units";
+		if (solveFor.includes("P")) {
+			unit = "pressure units";
+		} else if (solveFor.includes("V")) {
+			unit = "volume units";
+		} else if (solveFor.includes("T")) {
+			unit = "K";
+		} else {
+			unit = "";
 		}
-		else if (solveFor.includes("V")){
-			unit="volume units";
-		}
-		else if (solveFor.includes("T")){
-			unit="K";
-		}
-		else{
-			unit="";
-		}
-		let resultDiv=document.getElementById("combined-result") as HTMLElement;
-		resultDiv.innerHTML="<p>"+formula+"</p><p>Result: "+result.toFixed(4)+" "+unit+"</p>";
-		resultDiv.classList.add("show");
-	}
-	catch (error){
-		let resultDiv=document.getElementById("combined-result") as HTMLElement;
-		resultDiv.innerHTML="<p>Error: "+(error as Error).message+"</p>";
-		resultDiv.classList.add("show");
+		this.resultDisplay.showFormula(formula, result, unit);
 	}
 }
-export function calculateVanDerWaals(): void{
-	try{
-		let V=parseFloat((document.getElementById("vdw-V") as HTMLInputElement).value);
-		let n=parseFloat((document.getElementById("vdw-n") as HTMLInputElement).value);
-		let T=parseFloat((document.getElementById("vdw-T") as HTMLInputElement).value);
-		let a=parseFloat((document.getElementById("vdw-a") as HTMLInputElement).value);
-		let b=parseFloat((document.getElementById("vdw-b") as HTMLInputElement).value);
-		let inputs=document.querySelectorAll("#van-der-waals input") as NodeListOf<HTMLInputElement>;
-		for (let i=0; i<inputs.length; i++){
-			inputs[i].classList.remove("error");
-		}
-		validateInputs([V, n, T, a, b], ["vdw-V", "vdw-n", "vdw-T", "vdw-a", "vdw-b"]);
-		if (V<=0) throw new Error("Volume must be positive");
-		if (V-n*b<=0) throw new Error("Volume is too small for the given amount of gas (V must be greater than n*b)");
-		let R=0.08206;
-		let P=(n*R*T)/(V-n*b)-a*Math.pow(n/V, 2);
-		let resultDiv=document.getElementById("vdw-result") as HTMLElement;
-		resultDiv.innerHTML="<p>P="+P.toFixed(4)+" atm</p>";
-		resultDiv.classList.add("show");
+
+/**
+ * Calculates pressure using the Van der Waals equation of state.
+ */
+export class VanDerWaalsCalculator extends Calculator {
+	constructor() {
+		super("vdw-result", ["vdw-V", "vdw-n", "vdw-T", "vdw-a", "vdw-b"]);
 	}
-	catch (error){
-		let resultDiv=document.getElementById("vdw-result") as HTMLElement;
-		resultDiv.innerHTML="<p>Error: "+(error as Error).message+"</p>";
-		resultDiv.classList.add("show");
+
+	protected performCalculation(): void {
+		const V = this.getInput("vdw-V").getValue();
+		const n = this.getInput("vdw-n").getValue();
+		const T = this.getInput("vdw-T").getValue();
+		const a = this.getInput("vdw-a").getValue();
+		const b = this.getInput("vdw-b").getValue();
+		InputValidator.validateValues([V, n, T, a, b], ["vdw-V", "vdw-n", "vdw-T", "vdw-a", "vdw-b"]);
+		if (V <= 0) throw new Error("Volume must be positive");
+		if (V - n * b <= 0) throw new Error("Volume is too small for the given amount of gas (V must be greater than n*b)");
+		const R = 0.08206;
+		const P = (n * R * T) / (V - n * b) - a * Math.pow(n / V, 2);
+		this.resultDisplay.showResult("<p>P=" + P.toFixed(4) + " atm</p>");
 	}
 }
-export function calculateHalfLife(): void{
-	try{
-		let select=document.getElementById("half-life-solve-for") as HTMLSelectElement;
-		let solveFor=select.value;
-		let N0=parseFloat((document.getElementById("initial-quantity") as HTMLInputElement).value);
-		let t=parseFloat((document.getElementById("time-input") as HTMLInputElement).value);
-		let t_half=parseFloat((document.getElementById("half-life-input") as HTMLInputElement).value);
-		let Nt=parseFloat((document.getElementById("remaining-quantity") as HTMLInputElement).value);
-		let inputs=document.querySelectorAll("#half-life-calc input") as NodeListOf<HTMLInputElement>;
-		for (let i=0; i<inputs.length; i++){
-			inputs[i].classList.remove("error");
-		}
+
+/**
+ * Solves radioactive decay problems for remaining quantity, time elapsed,
+ * or half-life, determined by the "half-life-solve-for" select element.
+ */
+export class HalfLifeCalculator extends SolveForCalculator {
+	constructor() {
+		super("half-life-result", ["initial-quantity", "time-input", "half-life-input", "remaining-quantity"], "half-life-solve-for");
+	}
+
+	protected performCalculation(): void {
+		const solveFor = this.getSolveFor();
+		const N0 = this.getInput("initial-quantity").getValue();
+		const t = this.getInput("time-input").getValue();
+		const t_half = this.getInput("half-life-input").getValue();
+		const Nt = this.getInput("remaining-quantity").getValue();
 		let result: number;
-		if (solveFor=="remaining"){
-			validateInputs([N0, t, t_half], ["initial-quantity", "time-input", "half-life-input"]);
-			if (t_half<=0) throw new Error("Half-life must be positive");
-			if (N0<=0) throw new Error("Initial quantity must be positive");
-			result=N0*Math.pow(0.5, t/t_half);
-			let resultDiv=document.getElementById("half-life-result") as HTMLElement;
-			resultDiv.innerHTML="<p>Remaining: "+result.toFixed(4)+" (after "+t+" units)</p>";
-			resultDiv.classList.add("show");
-		}
-		else if (solveFor=="time"){
-			validateInputs([N0, t_half, Nt], ["initial-quantity", "half-life-input", "remaining-quantity"]);
-			if (t_half<=0) throw new Error("Half-life must be positive");
-			if (N0<=0) throw new Error("Initial quantity must be positive");
-			if (Nt<=0) throw new Error("Remaining quantity must be positive");
-			result=(Math.log(Nt/N0)/Math.log(0.5))*t_half;
-			let resultDiv=document.getElementById("half-life-result") as HTMLElement;
-			resultDiv.innerHTML="<p>Time needed: "+result.toFixed(4)+" units</p>";
-			resultDiv.classList.add("show");
-		}
-		else if (solveFor=="half-life"){
-			validateInputs([N0, t, Nt], ["initial-quantity", "time-input", "remaining-quantity"]);
-			if (N0<=0) throw new Error("Initial quantity must be positive");
-			if (Nt<=0) throw new Error("Remaining quantity must be positive");
-			result=t/(Math.log(Nt/N0)/Math.log(0.5));
-			let resultDiv=document.getElementById("half-life-result") as HTMLElement;
-			resultDiv.innerHTML="<p>Half-life: "+result.toFixed(4)+" units</p>";
-			resultDiv.classList.add("show");
+		if (solveFor === "remaining") {
+			InputValidator.validateValues([N0, t, t_half], ["initial-quantity", "time-input", "half-life-input"]);
+			if (t_half <= 0) throw new Error("Half-life must be positive");
+			if (N0 <= 0) throw new Error("Initial quantity must be positive");
+			result = N0 * Math.pow(0.5, t / t_half);
+			this.resultDisplay.showResult("<p>Remaining: " + result.toFixed(4) + " (after " + t + " units)</p>");
+		} else if (solveFor === "time") {
+			InputValidator.validateValues([N0, t_half, Nt], ["initial-quantity", "half-life-input", "remaining-quantity"]);
+			if (t_half <= 0) throw new Error("Half-life must be positive");
+			if (N0 <= 0) throw new Error("Initial quantity must be positive");
+			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
+			result = (Math.log(Nt / N0) / Math.log(0.5)) * t_half;
+			this.resultDisplay.showResult("<p>Time needed: " + result.toFixed(4) + " units</p>");
+		} else if (solveFor === "half-life") {
+			InputValidator.validateValues([N0, t, Nt], ["initial-quantity", "time-input", "remaining-quantity"]);
+			if (N0 <= 0) throw new Error("Initial quantity must be positive");
+			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
+			result = t / (Math.log(Nt / N0) / Math.log(0.5));
+			this.resultDisplay.showResult("<p>Half-life: " + result.toFixed(4) + " units</p>");
 		}
 	}
-	catch (error){
-		let resultDiv=document.getElementById("half-life-result") as HTMLElement;
-		resultDiv.innerHTML="<p>Error: "+(error as Error).message+"</p>";
-		resultDiv.classList.add("show");
-	}
+}
+
+// Backwards-compatible free function exports. Each instantiates its
+// calculator and runs the template-method calculate() entry point.
+export function calculateIdealGasLaw(): void {
+	new IdealGasLawCalculator().calculate();
+}
+
+export function calculateCombinedGasLaw(): void {
+	new CombinedGasLawCalculator().calculate();
+}
+
+export function calculateVanDerWaals(): void {
+	new VanDerWaalsCalculator().calculate();
+}
+
+export function calculateHalfLife(): void {
+	new HalfLifeCalculator().calculate();
 }
