@@ -1,11 +1,19 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 // Mock the module imports that script.ts uses
+const mockUIHandlerInitialize = vi.fn();
 vi.mock("./modules/uiHandlers.js", () => ({
+    UIHandlerInitializer: vi.fn(function(this: any) {
+        this.initialize = mockUIHandlerInitialize;
+    }),
     initializeUIHandlers: vi.fn(),
 }));
 
+const mockEventListenerInitialize = vi.fn();
 vi.mock("./modules/eventListeners.js", () => ({
+    EventListenerInitializer: vi.fn(function(this: any) {
+        this.initialize = mockEventListenerInitialize;
+    }),
     initializeEventListeners: vi.fn(),
 }));
 
@@ -16,6 +24,8 @@ describe("script.ts", () => {
         document.body.innerHTML = "";
         domContentLoadedCallbacks = [];
         vi.resetModules();
+        mockUIHandlerInitialize.mockClear();
+        mockEventListenerInitialize.mockClear();
 
         // Mock localStorage
         const store: Record<string, string> = {};
@@ -216,15 +226,16 @@ describe("script.ts", () => {
     });
 
     describe("fetch and initialization", () => {
-        it("calls initializeUIHandlers on DOMContentLoaded", async () => {
-            const { initializeUIHandlers } = await import("./modules/uiHandlers.js");
+        it("calls UIHandlerInitializer.initialize on DOMContentLoaded", async () => {
+            const { UIHandlerInitializer } = await import("./modules/uiHandlers.js");
             await initScript();
 
-            expect(initializeUIHandlers).toHaveBeenCalled();
+            expect(UIHandlerInitializer).toHaveBeenCalled();
+            expect(mockUIHandlerInitialize).toHaveBeenCalled();
         });
 
-        it("fetches /api/ptable and calls initializeEventListeners with data", async () => {
-            const { initializeEventListeners } = await import("./modules/eventListeners.js");
+        it("fetches /api/ptable and calls EventListenerInitializer with data", async () => {
+            const { EventListenerInitializer } = await import("./modules/eventListeners.js");
             const mockData = [{ symbol: "H", name: "Hydrogen" }];
             vi.mocked(fetch).mockResolvedValue({
                 ok: true,
@@ -234,7 +245,8 @@ describe("script.ts", () => {
             await initScript();
 
             await vi.waitFor(() => {
-                expect(initializeEventListeners).toHaveBeenCalledWith(mockData);
+                expect(EventListenerInitializer).toHaveBeenCalledWith(mockData);
+                expect(mockEventListenerInitialize).toHaveBeenCalled();
             });
         });
 
