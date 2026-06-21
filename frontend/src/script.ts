@@ -1,8 +1,8 @@
-import {initializeUIHandlers} from "./modules/uiHandlers.js";
-import {initializeEventListeners} from "./modules/eventListeners.js";
+import {UIHandlerInitializer} from "./modules/uiHandlers.js";
+import {EventListenerInitializer} from "./modules/eventListeners.js";
 import {initializeAppNav} from "./app-nav.js";
 document.addEventListener("DOMContentLoaded", function(): void{
-	initializeUIHandlers();
+	new UIHandlerInitializer().initialize();
 	initializeAppNav();
 
 	// Dismiss page load overlay
@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	}
 	loadPTableData()
 	.then(function(elementsData: any): void{
-		initializeEventListeners(elementsData);
+		new EventListenerInitializer(elementsData).initialize();
 	})
 	.catch(function(error: Error): void{
 		console.error("Error fetching data:", error);
