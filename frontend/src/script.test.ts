@@ -118,11 +118,8 @@ describe("script.ts", () => {
 
     describe("theme toggle", () => {
         it("clicking theme-toggle when dark switches to light and saves to localStorage", async () => {
+            vi.mocked(Storage.prototype.getItem).mockReturnValue("dark");
             await initScript();
-
-            // Set initial state to dark
-            document.documentElement.classList.add("dark");
-            document.documentElement.classList.remove("light");
 
             const toggle = document.getElementById("theme-toggle")!;
             toggle.click();
@@ -133,11 +130,8 @@ describe("script.ts", () => {
         });
 
         it("clicking theme-toggle when light switches to dark and saves to localStorage", async () => {
+            vi.mocked(Storage.prototype.getItem).mockReturnValue("light");
             await initScript();
-
-            // Set initial state to light
-            document.documentElement.classList.add("light");
-            document.documentElement.classList.remove("dark");
 
             const toggle = document.getElementById("theme-toggle")!;
             toggle.click();

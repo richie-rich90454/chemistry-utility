@@ -134,4 +134,43 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		});
 		(resultEl as HTMLElement).appendChild(copyBtn);
 	});
+
+	// Register service worker for web version only (not Wails desktop app)
+	if (!("__wails__" in window) && "serviceWorker" in navigator) {
+		navigator.serviceWorker.register("/sw.js").catch(function(err: Error): void {
+			console.warn("SW registration failed:", err);
+		});
+	}
+
+	// PWA install prompt handler
+	let deferredPrompt: BeforeInstallPromptEvent|null = null;
+
+	interface BeforeInstallPromptEvent extends Event {
+		readonly platforms: string[];
+		prompt(): Promise<void>;
+		userChoice: Promise<{outcome: "accepted"|"dismissed"}>;
+	}
+
+	window.addEventListener("beforeinstallprompt", function(e: Event): void {
+		e.preventDefault();
+		deferredPrompt = e as BeforeInstallPromptEvent;
+
+		let sidebarFooter = document.querySelector(".sidebar-footer");
+		if (!sidebarFooter) return;
+
+		let installBtn = document.createElement("button") as HTMLButtonElement;
+		installBtn.id = "pwa-install-btn";
+		installBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Install App';
+		installBtn.addEventListener("click", function(): void {
+			if (!deferredPrompt) return;
+			deferredPrompt.prompt();
+			deferredPrompt.userChoice.then(function(choiceResult: {outcome: string}): void {
+				if (choiceResult.outcome === "accepted") {
+					installBtn.remove();
+				}
+				deferredPrompt = null;
+			});
+		});
+		sidebarFooter.insertBefore(installBtn, sidebarFooter.firstChild);
+	});
 });
