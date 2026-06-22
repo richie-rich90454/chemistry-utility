@@ -1,416 +1,264 @@
 import gsap from "gsap";
+import { NavigationManager, CALCULATORS } from "./modules/navigationManager.js";
+import type { CalculatorInfo } from "./modules/navigationManager.js";
+import { IconRegistry } from "./modules/iconRegistry.js";
 
-interface CalculatorInfo{
-	id: string;
-	name: string;
-	category: string;
-	icon: string;
-	description: string;
+const RECENT_KEY = "chem-utility-recent";
+const COLLAPSED_KEY = "chem-utility-sidebar-collapsed";
+
+let paletteSelectedIndex = 0;
+
+/** Map of icon type keys to sprite sheet symbol ids. */
+const ICON_MAP: Record<string, string> = {
+	element: "element",
+	mass: "molar-mass",
+	balance: "balance",
+	dilution: "dilution",
+	percent: "mass-percent",
+	mixing: "solution-mixing",
+	nuclear: "nuclear",
+	gas: "gas-laws",
+	electro: "electrochemistry",
+	stoich: "stoichiometry",
+	bond: "bond-type",
+	more: "more",
+	clock: "clock",
+	search: "search",
+	collapse: "collapse",
+	expand: "expand"
+};
+
+function getIconSvg(type: string): string {
+	let registry = IconRegistry.getInstance();
+	let iconId = ICON_MAP[type] || "element";
+	return registry.getIconReference(iconId);
 }
 
-const CALCULATORS: CalculatorInfo[]=[
-	{id:"element-lookup",name:"Element Lookup",category:"General",icon:"element",description:"Look up element properties"},
-	{id:"mass-calc",name:"Molar Mass",category:"General",icon:"mass",description:"Calculate molar mass of compounds"},
-	{id:"balancing",name:"Equation Balancer",category:"General",icon:"balance",description:"Balance chemical equations"},
-	{id:"dilution-calc",name:"Dilution",category:"Solutions",icon:"dilution",description:"Molarity and dilution calculations"},
-	{id:"mass-percent-calc",name:"Mass Percent",category:"Solutions",icon:"percent",description:"Concentration and mass percent"},
-	{id:"solution-mixing-calc",name:"Solution Mixing",category:"Solutions",icon:"mixing",description:"Mix solutions of different concentrations"},
-	{id:"nuclear-chemistry",name:"Nuclear",category:"Physical Chemistry",icon:"nuclear",description:"Half-life and nuclear decay"},
-	{id:"gas-laws",name:"Gas Laws",category:"Physical Chemistry",icon:"gas",description:"Ideal, combined, Van der Waals"},
-	{id:"electrochemistry",name:"Electrochemistry",category:"Physical Chemistry",icon:"electro",description:"Cell potential, Nernst, electrolysis"},
-	{id:"stoichiometry",name:"Stoichiometry",category:"Reactions & Bonds",icon:"stoich",description:"Reaction stoichiometry calculations"},
-	{id:"bond-type-predictor",name:"Bond Type",category:"Reactions & Bonds",icon:"bond",description:"Predict ionic, covalent, or metallic"}
-];
-
-const TAB_CALCULATOR_IDS=["element-lookup","mass-calc","balancing","dilution-calc"];
-const RECENT_KEY="chem-utility-recent";
-const COLLAPSED_KEY="chem-utility-sidebar-collapsed";
-const MAX_RECENT=3;
-
-let activeViewId:string|null=null;
-let navHistory:string[]=[];
-
-function getIconSvg(type:string):string{
-	const icons:Record<string,string>={
-		element:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
-		mass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/></svg>',
-		balance:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M12 2v4"/><path d="M12 18v4"/></svg>',
-		dilution:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-1 9H9L8 2z"/><path d="M9 11a3 3 0 0 0 6 0"/><path d="M12 14v8"/></svg>',
-		percent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg>',
-		mixing:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M12 2v5"/><path d="M12 17v5"/><circle cx="12" cy="12" r="4"/></svg>',
-		nuclear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="M4.93 4.93l2.83 2.83"/><path d="M16.24 16.24l2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="M4.93 19.07l2.83-2.83"/><path d="M16.24 7.76l2.83-2.83"/></svg>',
-		gas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>',
-		electro:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
-		stoich:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h6"/><path d="M17 12l5 5-5 5"/></svg>',
-		bond:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/><line x1="8" y1="12" x2="16" y2="12"/></svg>',
-		more:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>',
-		clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-		search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
-		collapse:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>',
-		expand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
-	};
-	return icons[type]||icons.element;
-}
-
-function switchView(targetId:string,direction:"forward"|"back"|"none"="forward",addToHistory:boolean=true):void{
-	if (targetId===activeViewId) return;
-
-	let sections=document.querySelectorAll(".app-view .main-groups.card") as NodeListOf<HTMLElement>;
-	let welcomeScreen=document.querySelector(".app-view .welcome-screen") as HTMLElement;
-
-	// Determine direction from nav history if not explicitly set
-	if (direction==="forward"&&navHistory.indexOf(targetId)!==-1){
-		direction="back";
+// ── Fuzzy search (Levenshtein distance) ──
+function levenshteinDistance(a: string, b: string): number {
+	let m = a.length;
+	let n = b.length;
+	let d: number[][] = [];
+	for (let i = 0; i <= m; i++) {
+		d[i] = [i];
 	}
-
-	// Add to history before switching
-	if (addToHistory&&activeViewId){
-		navHistory.push(activeViewId);
-		if (navHistory.length>20) navHistory.shift();
+	for (let j = 0; j <= n; j++) {
+		d[0][j] = j;
 	}
-
-	// Animate outgoing view
-	let outgoing=document.querySelector(".app-view .main-groups.card.view-active") as HTMLElement;
-	if (outgoing&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-		let outX=direction==="back"?30:-30;
-		gsap.to(outgoing,{opacity:0,x:outX,duration:0.15,ease:"power2.in",onComplete:function():void{
-			outgoing.classList.remove("view-active");
-			outgoing.classList.add("view-hidden");
-			gsap.set(outgoing,{opacity:1,x:0});
-		}});
-	}else{
-		sections.forEach(function(section:HTMLElement):void{
-			section.classList.remove("view-active");
-			section.classList.add("view-hidden");
-		});
-	}
-
-	// Hide welcome screen
-	if (welcomeScreen) welcomeScreen.style.display="none";
-
-	// Show target with directional animation
-	let target=document.getElementById(targetId) as HTMLElement;
-	if (target){
-		target.classList.remove("view-hidden");
-		target.classList.add("view-active");
-		if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-			let inX=direction==="back"?-30:30;
-			gsap.fromTo(target,{opacity:0,x:inX},{opacity:1,x:0,duration:0.2,ease:"power2.out"});
+	for (let i = 1; i <= m; i++) {
+		for (let j = 1; j <= n; j++) {
+			let cost = a.charAt(i - 1) === b.charAt(j - 1) ? 0 : 1;
+			d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
 		}
 	}
-
-	activeViewId=targetId;
-
-	// Update sidebar active state
-	updateSidebarActive(targetId);
-	// Update bottom tab active state
-	updateTabActive(targetId);
-	// Update nav sheet active state
-	updateSheetActive(targetId);
-	// Update view header
-	updateViewHeader(targetId);
-	// Save to recent
-	addRecent(targetId);
-	// Update URL hash
-	history.pushState(null,"","#"+targetId);
+	return d[m][n];
 }
 
-function updateViewHeader(targetId:string):void{
-	let header=document.querySelector(".view-header") as HTMLElement;
-	if (!header) return;
-	let calc=CALCULATORS.find(function(c:CalculatorInfo):boolean{return c.id===targetId});
-	if (!calc){
-		header.style.display="none";
-		return;
-	}
-	header.style.display="flex";
-	let title=header.querySelector(".view-title") as HTMLElement;
-	let category=header.querySelector(".view-category") as HTMLElement;
-	if (title) title.textContent=calc.name;
-	if (category) category.textContent=calc.category;
-	if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-		gsap.fromTo(header,{opacity:0},{opacity:1,duration:0.15,ease:"power2.out",clearProps:"opacity"});
-	}
-}
-
-function goBack():void{
-	if (navHistory.length===0) return;
-	let prevId=navHistory.pop()!;
-	switchView(prevId,"back",false);
-}
-
-function updateSidebarActive(targetId:string):void{
-	let links=document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
-	links.forEach(function(link:HTMLElement):void{
-		if (link.getAttribute("href")==="#"+targetId){
-			link.classList.add("active");
-		}else{
-			link.classList.remove("active");
+function fuzzyMatch(query: string, text: string): boolean {
+	if (text.includes(query)) return true;
+	let words = text.split(/\s+/);
+	for (let i = 0; i < words.length; i++) {
+		let distance = levenshteinDistance(query, words[i]);
+		if (distance <= Math.max(1, Math.floor(query.length * 0.3))) {
+			return true;
 		}
-	});
-}
-
-function updateTabActive(targetId:string):void{
-	let tabs=document.querySelectorAll(".tab-item") as NodeListOf<HTMLElement>;
-	tabs.forEach(function(tab:HTMLElement):void{
-		let tabTarget=tab.getAttribute("data-target");
-		if (tabTarget===targetId){
-			tab.classList.add("active");
-		}else{
-			tab.classList.remove("active");
-		}
-	});
-	// Update tab indicator position
-	updateTabIndicator(targetId);
-}
-
-function updateTabIndicator(targetId:string):void{
-	let indicator=document.querySelector(".tab-indicator") as HTMLElement;
-	let tabContainer=document.querySelector(".bottom-tabs") as HTMLElement;
-	if (!indicator||!tabContainer) return;
-	let activeTab=tabContainer.querySelector('.tab-item[data-target="'+targetId+'"]') as HTMLElement;
-	if (!activeTab||targetId==="more"){
-		indicator.style.width="0";
-		return;
 	}
-	let containerRect=tabContainer.getBoundingClientRect();
-	let tabRect=activeTab.getBoundingClientRect();
-	indicator.style.left=(tabRect.left-containerRect.left+4)+"px";
-	indicator.style.width=(tabRect.width-8)+"px";
+	return false;
 }
 
-function updateSheetActive(targetId:string):void{
-	let items=document.querySelectorAll(".nav-sheet .sheet-item") as NodeListOf<HTMLElement>;
-	items.forEach(function(item:HTMLElement):void{
-		if (item.getAttribute("data-target")===targetId){
-			item.classList.add("active");
-		}else{
-			item.classList.remove("active");
-		}
-	});
-}
+// ── Welcome screen ──
+function showWelcome(): void {
+	let manager = NavigationManager.getInstance();
+	let sections = document.querySelectorAll(".app-view .main-groups.card") as NodeListOf<HTMLElement>;
+	let welcomeScreen = document.querySelector(".app-view .welcome-screen") as HTMLElement;
+	let header = document.querySelector(".view-header") as HTMLElement;
 
-function showWelcome():void{
-	let sections=document.querySelectorAll(".app-view .main-groups.card") as NodeListOf<HTMLElement>;
-	let welcomeScreen=document.querySelector(".app-view .welcome-screen") as HTMLElement;
-	let header=document.querySelector(".view-header") as HTMLElement;
-
-	sections.forEach(function(section:HTMLElement):void{
+	sections.forEach(function (section: HTMLElement): void {
 		section.classList.remove("view-active");
 		section.classList.add("view-hidden");
 	});
 
-	if (welcomeScreen){
-		welcomeScreen.style.display="block";
-		if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-			gsap.fromTo(welcomeScreen,{opacity:0,y:12},{opacity:1,y:0,duration:0.3,ease:"power2.out"});
+	if (welcomeScreen) {
+		welcomeScreen.style.display = "block";
+		if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+			gsap.fromTo(welcomeScreen, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" });
 		}
 	}
 
-	if (header) header.style.display="none";
+	if (header) header.style.display = "none";
 
-	activeViewId=null;
-	updateSidebarActive("");
-	updateTabActive("");
+	manager.setActiveViewId(null);
+
+	let links = document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
+	links.forEach(function (link: HTMLElement): void {
+		link.classList.remove("active");
+	});
+
+	let tabs = document.querySelectorAll(".tab-item") as NodeListOf<HTMLElement>;
+	tabs.forEach(function (tab: HTMLElement): void {
+		tab.classList.remove("active");
+		tab.setAttribute("aria-selected", "false");
+	});
 }
 
 // ── Recent calculators ──
-function getRecent():string[]{
-	try{
-		let stored=localStorage.getItem(RECENT_KEY);
-		return stored?JSON.parse(stored):[];
-	}catch{return[];}
-}
-
-function addRecent(id:string):void{
-	let recent=getRecent().filter(function(r:string):boolean{return r!==id});
-	recent.unshift(id);
-	recent=recent.slice(0,MAX_RECENT);
-	try{localStorage.setItem(RECENT_KEY,JSON.stringify(recent))}catch{}
-	renderRecent();
-}
-
-function renderRecent():void{
-	let container=document.querySelector(".nav-recent");
-	if (!container) return;
-	let recent=getRecent();
-	if (recent.length===0){
-		container.innerHTML="";
-		return;
+function getRecent(): string[] {
+	try {
+		let stored = localStorage.getItem(RECENT_KEY);
+		return stored ? JSON.parse(stored) : [];
+	} catch {
+		return [];
 	}
-	let html='<div class="nav-recent-label">Recent</div>';
-	recent.forEach(function(id:string):void{
-		let calc=CALCULATORS.find(function(c:CalculatorInfo):boolean{return c.id===id});
-		if (calc){
-			html+='<a href="#'+id+'"><svg class="recent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'+calc.name+'</a>';
-		}
-	});
-	container.innerHTML=html;
-
-	// Add click handlers
-	container.querySelectorAll("a").forEach(function(link:HTMLAnchorElement):void{
-		link.addEventListener("click",function(e:MouseEvent):void{
-			e.preventDefault();
-			let targetId=link.getAttribute("href")?.slice(1);
-			if (targetId) switchView(targetId);
-		});
-	});
 }
 
-// ── Sidebar search ──
-function initializeSearch():void{
-	let searchInput=document.querySelector(".sidebar-search input") as HTMLInputElement;
+// ── Sidebar search (with fuzzy matching) ──
+function initializeSearch(): void {
+	let searchInput = document.querySelector(".sidebar-search input") as HTMLInputElement;
 	if (!searchInput) return;
 
-	searchInput.addEventListener("input",function():void{
-		let query=searchInput.value.toLowerCase().trim();
-		let links=document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
-		let categories=document.querySelectorAll(".sidebar-nav .nav-category") as NodeListOf<HTMLElement>;
-		let noResults=document.querySelector(".sidebar-nav .no-results") as HTMLElement;
+	searchInput.addEventListener("input", function (): void {
+		let query = searchInput.value.toLowerCase().trim();
+		let links = document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
+		let categories = document.querySelectorAll(".sidebar-nav .nav-category") as NodeListOf<HTMLElement>;
+		let noResults = document.querySelector(".sidebar-nav .no-results") as HTMLElement;
 
-		if (!query){
-			links.forEach(function(link:HTMLElement):void{link.style.display=""});
-			categories.forEach(function(cat:HTMLElement):void{cat.style.display=""});
-			if (noResults) noResults.style.display="none";
+		if (!query) {
+			links.forEach(function (link: HTMLElement): void { link.style.display = ""; });
+			categories.forEach(function (cat: HTMLElement): void { cat.style.display = ""; });
+			if (noResults) noResults.style.display = "none";
 			return;
 		}
 
-		let visibleCount=0;
-		links.forEach(function(link:HTMLElement):void{
-			let text=link.textContent?.toLowerCase()||"";
-			if (text.includes(query)){
-				link.style.display="";
+		let visibleCount = 0;
+		links.forEach(function (link: HTMLElement): void {
+			let text = (link.textContent || "").toLowerCase();
+			if (fuzzyMatch(query, text)) {
+				link.style.display = "";
 				visibleCount++;
-			}else{
-				link.style.display="none";
+			} else {
+				link.style.display = "none";
 			}
 		});
 
-		// Hide categories with no visible links
-		categories.forEach(function(cat:HTMLElement):void{
-			let nextEl=cat.nextElementSibling;
-			let hasVisible=false;
-			while (nextEl&&!nextEl.classList.contains("nav-category")){
-				if (nextEl.tagName==="A"&&(nextEl as HTMLElement).style.display!=="none"){
-					hasVisible=true;
+		categories.forEach(function (cat: HTMLElement): void {
+			let nextEl = cat.nextElementSibling;
+			let hasVisible = false;
+			while (nextEl && !nextEl.classList.contains("nav-category")) {
+				if (nextEl.tagName === "A" && (nextEl as HTMLElement).style.display !== "none") {
+					hasVisible = true;
 					break;
 				}
-				nextEl=nextEl.nextElementSibling;
+				nextEl = nextEl.nextElementSibling;
 			}
-			cat.style.display=hasVisible?"":"none";
+			cat.style.display = hasVisible ? "" : "none";
 		});
 
-		if (noResults) noResults.style.display=visibleCount===0?"block":"none";
+		if (noResults) noResults.style.display = visibleCount === 0 ? "block" : "none";
 	});
 }
 
 // ── Command Palette ──
-let paletteSelectedIndex=0;
-
-function openPalette():void{
-	let backdrop=document.querySelector(".palette-backdrop") as HTMLElement;
-	let palette=document.querySelector(".command-palette") as HTMLElement;
-	let input=document.querySelector(".palette-input") as HTMLInputElement;
-	if (!backdrop||!palette||!input) return;
+function openPalette(): void {
+	let backdrop = document.querySelector(".palette-backdrop") as HTMLElement;
+	let palette = document.querySelector(".command-palette") as HTMLElement;
+	let input = document.querySelector(".palette-input") as HTMLInputElement;
+	if (!backdrop || !palette || !input) return;
 	backdrop.classList.add("open");
 	palette.classList.add("open");
-	input.value="";
+	input.value = "";
 	input.focus();
-	paletteSelectedIndex=0;
+	paletteSelectedIndex = 0;
 	renderPaletteList("");
 }
 
-function closePalette():void{
-	let backdrop=document.querySelector(".palette-backdrop") as HTMLElement;
-	let palette=document.querySelector(".command-palette") as HTMLElement;
-	if (!backdrop||!palette) return;
+function closePalette(): void {
+	let backdrop = document.querySelector(".palette-backdrop") as HTMLElement;
+	let palette = document.querySelector(".command-palette") as HTMLElement;
+	if (!backdrop || !palette) return;
 	backdrop.classList.remove("open");
 	palette.classList.remove("open");
 }
 
-function renderPaletteList(query:string):void{
-	let list=document.querySelector(".palette-list") as HTMLElement;
+function renderPaletteList(query: string): void {
+	let list = document.querySelector(".palette-list") as HTMLElement;
 	if (!list) return;
-	let q=query.toLowerCase().trim();
-	let filtered=CALCULATORS.filter(function(c:CalculatorInfo):boolean{
+	let q = query.toLowerCase().trim();
+	let filtered = CALCULATORS.filter(function (c: CalculatorInfo): boolean {
 		if (!q) return true;
-		return c.name.toLowerCase().includes(q)||c.category.toLowerCase().includes(q)||c.description.toLowerCase().includes(q);
+		return fuzzyMatch(q, c.name.toLowerCase()) || fuzzyMatch(q, c.category.toLowerCase()) || fuzzyMatch(q, c.description.toLowerCase());
 	});
-	if (filtered.length===0){
-		list.innerHTML='<div class="palette-empty">No calculators found</div>';
+	if (filtered.length === 0) {
+		list.innerHTML = '<div class="palette-empty">No calculators found</div>';
 		return;
 	}
-	let html="";
-	filtered.forEach(function(calc:CalculatorInfo,i:number):void{
-		let shortcut="";
-		if (i<9) shortcut="Alt+"+(i+1);
-		else if (i===9) shortcut="Alt+0";
-		else if (i===10) shortcut="Alt+-";
-		html+='<button class="palette-item'+(i===paletteSelectedIndex?" selected":"")+'" data-target="'+calc.id+'">';
-		html+=getIconSvg(calc.icon);
-		html+='<span class="palette-item-name">'+calc.name+'</span>';
-		html+='<span class="palette-item-category">'+calc.category+'</span>';
-		if (shortcut) html+='<span class="palette-item-shortcut">'+shortcut+'</span>';
-		html+='</button>';
+	let html = "";
+	filtered.forEach(function (calc: CalculatorInfo, i: number): void {
+		let shortcut = "";
+		if (i < 9) shortcut = "Alt+" + (i + 1);
+		else if (i === 9) shortcut = "Alt+0";
+		else if (i === 10) shortcut = "Alt+-";
+		html += '<button class="palette-item' + (i === paletteSelectedIndex ? " selected" : "") + '" data-target="' + calc.id + '">';
+		html += getIconSvg(calc.icon);
+		html += '<span class="palette-item-name">' + calc.name + '</span>';
+		html += '<span class="palette-item-category">' + calc.category + '</span>';
+		if (shortcut) html += '<span class="palette-item-shortcut">' + shortcut + '</span>';
+		html += '</button>';
 	});
-	list.innerHTML=html;
+	list.innerHTML = html;
 
-	// Click handlers
-	list.querySelectorAll(".palette-item").forEach(function(item:HTMLElement):void{
-		item.addEventListener("click",function():void{
-			let targetId=item.getAttribute("data-target");
-			if (targetId){
-				switchView(targetId);
+	list.querySelectorAll(".palette-item").forEach(function (item: HTMLElement): void {
+		item.addEventListener("click", function (): void {
+			let targetId = item.getAttribute("data-target");
+			if (targetId) {
+				NavigationManager.getInstance().navigate(targetId);
 				closePalette();
 			}
 		});
 	});
 }
 
-function initializeCommandPalette():void{
-	let backdrop=document.querySelector(".palette-backdrop") as HTMLElement;
-	let input=document.querySelector(".palette-input") as HTMLInputElement;
-	if (!backdrop||!input) return;
+function initializeCommandPalette(): void {
+	let backdrop = document.querySelector(".palette-backdrop") as HTMLElement;
+	let input = document.querySelector(".palette-input") as HTMLInputElement;
+	if (!backdrop || !input) return;
 
-	// Ctrl+K opens palette (replaces sidebar search shortcut)
-	document.addEventListener("keydown",function(e:KeyboardEvent):void{
-		if ((e.ctrlKey||e.metaKey)&&e.key==="k"){
+	document.addEventListener("keydown", function (e: KeyboardEvent): void {
+		if ((e.ctrlKey || e.metaKey) && e.key === "k") {
 			e.preventDefault();
-			let palette=document.querySelector(".command-palette") as HTMLElement;
-			if (palette&&palette.classList.contains("open")){
+			let palette = document.querySelector(".command-palette") as HTMLElement;
+			if (palette && palette.classList.contains("open")) {
 				closePalette();
-			}else{
+			} else {
 				openPalette();
 			}
 		}
-		if (e.key==="Escape"){
-			let palette=document.querySelector(".command-palette") as HTMLElement;
-			if (palette&&palette.classList.contains("open")){
+		if (e.key === "Escape") {
+			let palette = document.querySelector(".command-palette") as HTMLElement;
+			if (palette && palette.classList.contains("open")) {
 				closePalette();
 			}
 		}
-		// Arrow keys and Enter in palette
-		if (document.querySelector(".command-palette.open")){
-			if (e.key==="ArrowDown"){
+		if (document.querySelector(".command-palette.open")) {
+			if (e.key === "ArrowDown") {
 				e.preventDefault();
-				let items=document.querySelectorAll(".palette-item") as NodeListOf<HTMLElement>;
-				if (items.length>0){
-					paletteSelectedIndex=Math.min(paletteSelectedIndex+1,items.length-1);
+				let items = document.querySelectorAll(".palette-item") as NodeListOf<HTMLElement>;
+				if (items.length > 0) {
+					paletteSelectedIndex = Math.min(paletteSelectedIndex + 1, items.length - 1);
 					renderPaletteList(input.value);
 				}
 			}
-			if (e.key==="ArrowUp"){
+			if (e.key === "ArrowUp") {
 				e.preventDefault();
-				paletteSelectedIndex=Math.max(paletteSelectedIndex-1,0);
+				paletteSelectedIndex = Math.max(paletteSelectedIndex - 1, 0);
 				renderPaletteList(input.value);
 			}
-			if (e.key==="Enter"){
+			if (e.key === "Enter") {
 				e.preventDefault();
-				let items=document.querySelectorAll(".palette-item") as NodeListOf<HTMLElement>;
-				if (items[paletteSelectedIndex]){
-					let targetId=items[paletteSelectedIndex].getAttribute("data-target");
-					if (targetId){
-						switchView(targetId);
+				let items = document.querySelectorAll(".palette-item") as NodeListOf<HTMLElement>;
+				if (items[paletteSelectedIndex]) {
+					let targetId = items[paletteSelectedIndex].getAttribute("data-target");
+					if (targetId) {
+						NavigationManager.getInstance().navigate(targetId);
 						closePalette();
 					}
 				}
@@ -418,86 +266,158 @@ function initializeCommandPalette():void{
 		}
 	});
 
-	// Backdrop click closes
-	backdrop.addEventListener("click",closePalette);
+	backdrop.addEventListener("click", closePalette);
 
-	// Input filters
-	input.addEventListener("input",function():void{
-		paletteSelectedIndex=0;
+	input.addEventListener("input", function (): void {
+		paletteSelectedIndex = 0;
 		renderPaletteList(input.value);
 	});
 }
 
 // ── Keyboard shortcuts ──
-function initializeKeyboardShortcuts():void{
-	document.addEventListener("keydown",function(e:KeyboardEvent):void{
-		if (e.altKey&&e.key>="1"&&e.key<="9"){
+function initializeKeyboardShortcuts(): void {
+	document.addEventListener("keydown", function (e: KeyboardEvent): void {
+		if (e.altKey && e.key >= "1" && e.key <= "9") {
 			e.preventDefault();
-			let index=parseInt(e.key)-1;
-			if (index<CALCULATORS.length){
-				switchView(CALCULATORS[index].id);
+			let index = parseInt(e.key) - 1;
+			if (index < CALCULATORS.length) {
+				NavigationManager.getInstance().navigate(CALCULATORS[index].id);
 			}
 		}
-		if (e.altKey&&e.key==="0"){
+		if (e.altKey && e.key === "0") {
 			e.preventDefault();
-			if (CALCULATORS.length>=10) switchView(CALCULATORS[9].id);
+			if (CALCULATORS.length >= 10) NavigationManager.getInstance().navigate(CALCULATORS[9].id);
 		}
-		if (e.altKey&&e.key==="-"){
+		if (e.altKey && e.key === "-") {
 			e.preventDefault();
-			if (CALCULATORS.length>=11) switchView(CALCULATORS[10].id);
+			if (CALCULATORS.length >= 11) NavigationManager.getInstance().navigate(CALCULATORS[10].id);
 		}
 	});
 }
 
-// ── Sidebar collapse ──
-function initializeSidebarCollapse():void{
-	let sidebar=document.querySelector(".sidebar") as HTMLElement;
-	let toggleBtn=document.querySelector(".sidebar-toggle") as HTMLElement;
-	if (!sidebar||!toggleBtn) return;
+// ── Keyboard shortcut discovery panel ──
+function initializeShortcutPanel(): void {
+	let panel = document.querySelector(".shortcut-panel") as HTMLElement;
+	if (!panel) return;
 
-	// Restore state
-	let collapsed=localStorage.getItem(COLLAPSED_KEY)==="true";
+	let backdrop = panel.querySelector(".shortcut-panel-backdrop") as HTMLElement;
+	let closeBtn = panel.querySelector(".shortcut-panel-close") as HTMLElement;
+
+	function openPanel(): void {
+		panel.classList.add("open");
+		panel.setAttribute("aria-hidden", "false");
+	}
+
+	function closePanel(): void {
+		panel.classList.remove("open");
+		panel.setAttribute("aria-hidden", "true");
+	}
+
+	function togglePanel(): void {
+		if (panel.classList.contains("open")) {
+			closePanel();
+		} else {
+			openPanel();
+		}
+	}
+
+	document.addEventListener("keydown", function (e: KeyboardEvent): void {
+		if (e.key === "?" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+			let target = e.target as HTMLElement;
+			if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+			e.preventDefault();
+			togglePanel();
+		}
+		if (e.key === "Escape" && panel.classList.contains("open")) {
+			closePanel();
+		}
+	});
+
+	if (backdrop) backdrop.addEventListener("click", closePanel);
+	if (closeBtn) closeBtn.addEventListener("click", closePanel);
+}
+
+// ── Swipe gesture support ──
+function initializeSwipeGestures(): void {
+	let main = document.querySelector(".main-content") as HTMLElement;
+	if (!main) return;
+
+	let touchStartX = 0;
+	let touchStartY = 0;
+
+	main.addEventListener("touchstart", function (e: TouchEvent): void {
+		touchStartX = e.changedTouches[0].screenX;
+		touchStartY = e.changedTouches[0].screenY;
+	}, { passive: true });
+
+	main.addEventListener("touchend", function (e: TouchEvent): void {
+		let touchEndX = e.changedTouches[0].screenX;
+		let touchEndY = e.changedTouches[0].screenY;
+		let deltaX = touchEndX - touchStartX;
+		let deltaY = touchEndY - touchStartY;
+		let minSwipeDist = 50;
+
+		if (Math.abs(deltaX) < minSwipeDist) return;
+		if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+
+		if (deltaX > 0) {
+			NavigationManager.getInstance().navigateBack();
+		} else {
+			NavigationManager.getInstance().navigateForward();
+		}
+	}, { passive: true });
+}
+
+// ── Sidebar collapse ──
+function initializeSidebarCollapse(): void {
+	let sidebar = document.querySelector(".sidebar") as HTMLElement;
+	let toggleBtn = document.querySelector(".sidebar-toggle") as HTMLElement;
+	if (!sidebar || !toggleBtn) return;
+
+	let collapsed = localStorage.getItem(COLLAPSED_KEY) === "true";
+	// Auto-collapse sidebar on mobile (< 768px)
+	if (window.innerWidth < 768) {
+		collapsed = true;
+	}
 	if (collapsed) sidebar.classList.add("collapsed");
 
-	toggleBtn.addEventListener("click",function():void{
+	toggleBtn.addEventListener("click", function (): void {
 		sidebar.classList.toggle("collapsed");
-		let isCollapsed=sidebar.classList.contains("collapsed");
-		try{localStorage.setItem(COLLAPSED_KEY,String(isCollapsed))}catch{}
+		let isCollapsed = sidebar.classList.contains("collapsed");
+		try { localStorage.setItem(COLLAPSED_KEY, String(isCollapsed)); } catch {}
 
-		// Update icon
-		let svg=toggleBtn.querySelector("svg");
-		if (svg) svg.innerHTML=isCollapsed?getIconSvg("expand").replace(/<svg[^>]*>|<\/svg>/g,""):getIconSvg("collapse").replace(/<svg[^>]*>|<\/svg>/g,"");
+		let useEl = toggleBtn.querySelector("svg use");
+		if (useEl) useEl.setAttribute("href", isCollapsed ? "#icon-expand" : "#icon-collapse");
 	});
 }
 
 // ── Nav sheet (mobile) ──
-function initializeNavSheet():void{
-	let backdrop=document.querySelector(".nav-sheet-backdrop") as HTMLElement;
-	let sheet=document.querySelector(".nav-sheet") as HTMLElement;
-	let moreBtn=document.querySelector(".tab-item[data-target='more']") as HTMLElement;
-	if (!backdrop||!sheet||!moreBtn) return;
+function initializeNavSheet(): void {
+	let backdrop = document.querySelector(".nav-sheet-backdrop") as HTMLElement;
+	let sheet = document.querySelector(".nav-sheet") as HTMLElement;
+	let moreBtn = document.querySelector(".tab-item[data-target='more']") as HTMLElement;
+	if (!backdrop || !sheet || !moreBtn) return;
 
-	function openSheet():void{
+	function openSheet(): void {
 		backdrop.classList.add("open");
 		sheet.classList.add("open");
 	}
-	function closeSheet():void{
+	function closeSheet(): void {
 		backdrop.classList.remove("open");
 		sheet.classList.remove("open");
 	}
 
-	moreBtn.addEventListener("click",openSheet);
-	backdrop.addEventListener("click",closeSheet);
-	document.addEventListener("keydown",function(e:KeyboardEvent):void{
-		if (e.key==="Escape") closeSheet();
+	moreBtn.addEventListener("click", openSheet);
+	backdrop.addEventListener("click", closeSheet);
+	document.addEventListener("keydown", function (e: KeyboardEvent): void {
+		if (e.key === "Escape") closeSheet();
 	});
 
-	// Sheet item clicks
-	sheet.querySelectorAll(".sheet-item").forEach(function(item:HTMLElement):void{
-		item.addEventListener("click",function():void{
-			let targetId=item.getAttribute("data-target");
-			if (targetId){
-				switchView(targetId);
+	sheet.querySelectorAll(".sheet-item").forEach(function (item: HTMLElement): void {
+		item.addEventListener("click", function (): void {
+			let targetId = item.getAttribute("data-target");
+			if (targetId) {
+				NavigationManager.getInstance().navigate(targetId);
 				closeSheet();
 			}
 		});
@@ -505,147 +425,167 @@ function initializeNavSheet():void{
 }
 
 // ── Bottom tab bar ──
-function initializeBottomTabs():void{
-	let tabs=document.querySelectorAll(".tab-item") as NodeListOf<HTMLElement>;
-	tabs.forEach(function(tab:HTMLElement):void{
-		let target=tab.getAttribute("data-target");
-		if (target&&target!=="more"){
-			tab.addEventListener("click",function():void{
-				switchView(target);
+function initializeBottomTabs(): void {
+	let tabs = document.querySelectorAll(".tab-item") as NodeListOf<HTMLElement>;
+	tabs.forEach(function (tab: HTMLElement): void {
+		let target = tab.getAttribute("data-target");
+		if (target && target !== "more") {
+			tab.addEventListener("click", function (): void {
+				NavigationManager.getInstance().navigate(target);
 			});
 		}
 	});
 }
 
 // ── Welcome screen ──
-function buildWelcomeScreen():void{
-	let container=document.querySelector(".app-view .welcome-screen");
+function buildWelcomeScreen(): void {
+	let container = document.querySelector(".app-view .welcome-screen");
 	if (!container) return;
 
-	let html='<h2>Chemistry Utility</h2><p>Pick a calculator to get started</p><div class="welcome-grid">';
-	CALCULATORS.forEach(function(calc:CalculatorInfo):void{
-		html+='<div class="welcome-card" tabindex="0" data-target="'+calc.id+'">';
-		html+='<div class="welcome-card-icon">'+getIconSvg(calc.icon)+'</div>';
-		html+='<div class="welcome-card-title">'+calc.name+'</div>';
-		html+='<div class="welcome-card-desc">'+calc.description+'</div>';
-		html+='</div>';
+	let html = '<h2>Chemistry Utility</h2><p>Pick a calculator to get started</p><div class="welcome-grid">';
+	CALCULATORS.forEach(function (calc: CalculatorInfo): void {
+		html += '<div class="welcome-card" tabindex="0" data-target="' + calc.id + '">';
+		html += '<div class="welcome-card-icon">' + getIconSvg(calc.icon) + '</div>';
+		html += '<div class="welcome-card-title">' + calc.name + '</div>';
+		html += '<div class="welcome-card-desc">' + calc.description + '</div>';
+		html += '</div>';
 	});
-	html+='</div>';
-	container.innerHTML=html;
+	html += '</div>';
+	container.innerHTML = html;
 
-	// Click handlers
-	container.querySelectorAll(".welcome-card").forEach(function(card:HTMLElement):void{
-		card.addEventListener("click",function():void{
-			let targetId=card.getAttribute("data-target");
-			if (targetId) switchView(targetId);
+	container.querySelectorAll(".welcome-card").forEach(function (card: HTMLElement): void {
+		card.addEventListener("click", function (): void {
+			let targetId = card.getAttribute("data-target");
+			if (targetId) NavigationManager.getInstance().navigate(targetId);
 		});
-		card.addEventListener("keydown",function(e:KeyboardEvent):void{
-			if (e.key==="Enter"){
-				let targetId=card.getAttribute("data-target");
-				if (targetId) switchView(targetId);
+		card.addEventListener("keydown", function (e: KeyboardEvent): void {
+			if (e.key === "Enter") {
+				let targetId = card.getAttribute("data-target");
+				if (targetId) NavigationManager.getInstance().navigate(targetId);
 			}
 		});
 	});
 }
 
 // ── Build nav sheet content ──
-function buildNavSheet():void{
-	let sheet=document.querySelector(".nav-sheet");
+function buildNavSheet(): void {
+	let sheet = document.querySelector(".nav-sheet");
 	if (!sheet) return;
 
-	let html='<div class="sheet-handle"></div>';
-	let currentCategory="";
-	CALCULATORS.forEach(function(calc:CalculatorInfo):void{
-		if (calc.category!==currentCategory){
-			currentCategory=calc.category;
-			html+='<div class="sheet-category">'+currentCategory+'</div>';
+	let html = '<div class="sheet-handle"></div>';
+	let currentCategory = "";
+	CALCULATORS.forEach(function (calc: CalculatorInfo): void {
+		if (calc.category !== currentCategory) {
+			currentCategory = calc.category;
+			html += '<div class="sheet-category">' + currentCategory + '</div>';
 		}
-		html+='<button class="sheet-item" data-target="'+calc.id+'">'+getIconSvg(calc.icon)+'<span>'+calc.name+'</span></button>';
+		html += '<button class="sheet-item" data-target="' + calc.id + '">' + getIconSvg(calc.icon) + '<span>' + calc.name + '</span></button>';
 	});
-	sheet.innerHTML=html;
+	sheet.innerHTML = html;
 }
 
 // ── Add shortcut hints to sidebar ──
-function addShortcutHints():void{
-	let links=document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
-	links.forEach(function(link:HTMLElement,i:number):void{
-		if (i<9){
-			let hint=document.createElement("span");
-			hint.className="shortcut-hint";
-			hint.textContent="Alt+"+(i+1);
+function addShortcutHints(): void {
+	let links = document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
+	links.forEach(function (link: HTMLElement, i: number): void {
+		if (i < 9) {
+			let hint = document.createElement("span");
+			hint.className = "shortcut-hint";
+			hint.textContent = "Alt+" + (i + 1);
 			link.appendChild(hint);
-		}else if (i===9){
-			let hint=document.createElement("span");
-			hint.className="shortcut-hint";
-			hint.textContent="Alt+0";
+		} else if (i === 9) {
+			let hint = document.createElement("span");
+			hint.className = "shortcut-hint";
+			hint.textContent = "Alt+0";
 			link.appendChild(hint);
-		}else if (i===10){
-			let hint=document.createElement("span");
-			hint.className="shortcut-hint";
-			hint.textContent="Alt+-";
+		} else if (i === 10) {
+			let hint = document.createElement("span");
+			hint.className = "shortcut-hint";
+			hint.textContent = "Alt+-";
 			link.appendChild(hint);
 		}
 	});
 }
 
 // ── Main initialization ──
-export function initializeAppNav():void{
-	let isAppView=document.querySelector(".app-view")!==null;
+export function initializeAppNav(): void {
+	let isAppView = document.querySelector(".app-view") !== null;
 	if (!isAppView) return;
+
+	let manager = NavigationManager.getInstance();
+	manager.initialize();
 
 	// Build dynamic content
 	buildWelcomeScreen();
 	buildNavSheet();
-	renderRecent();
 	addShortcutHints();
 
 	// Initialize features
 	initializeSearch();
 	initializeCommandPalette();
 	initializeKeyboardShortcuts();
+	initializeShortcutPanel();
+	initializeSwipeGestures();
 	initializeSidebarCollapse();
 	initializeBottomTabs();
 	initializeNavSheet();
 
+	// Favorites
+	manager.renderFavorites();
+	manager.addFavoriteStarsToSidebar();
+
 	// Back button
-	let backBtn=document.querySelector(".back-button") as HTMLElement;
-	if (backBtn){
-		backBtn.addEventListener("click",goBack);
+	let backBtn = document.querySelector(".back-button") as HTMLElement;
+	if (backBtn) {
+		backBtn.addEventListener("click", function (): void {
+			manager.navigateBack();
+		});
+	}
+
+	// Forward button
+	let forwardBtn = document.querySelector(".forward-button") as HTMLElement;
+	if (forwardBtn) {
+		forwardBtn.addEventListener("click", function (): void {
+			manager.navigateForward();
+		});
 	}
 
 	// Sidebar link click handlers (override scroll behavior)
-	let sidebarLinks=document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
-	sidebarLinks.forEach(function(link:HTMLElement):void{
-		link.addEventListener("click",function(e:MouseEvent):void{
+	let sidebarLinks = document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
+	sidebarLinks.forEach(function (link: HTMLElement): void {
+		link.addEventListener("click", function (e: MouseEvent): void {
 			e.preventDefault();
-			let href=link.getAttribute("href");
-			if (href){
-				let targetId=href.slice(1);
-				switchView(targetId);
+			let href = link.getAttribute("href");
+			if (href) {
+				let targetId = href.charAt(0) === "/" || href.charAt(0) === "#" ? href.slice(1) : href;
+				manager.navigate(targetId);
 			}
 		});
 	});
 
-	// Handle initial hash
-	let hash=window.location.hash.slice(1);
-	if (hash&&document.getElementById(hash)){
-		switchView(hash,"none",false);
-	}else{
-		// If no hash, try restoring most recent calculator
-		let recent=getRecent();
-		if (recent.length>0&&document.getElementById(recent[0])){
-			switchView(recent[0],"none",false);
-		}else{
+	// Handle initial path or hash
+	let path = window.location.pathname.slice(1);
+	let hash = window.location.hash.slice(1);
+	let initialTarget = path || hash;
+	if (initialTarget && document.getElementById(initialTarget)) {
+		manager.navigate(initialTarget);
+	} else {
+		let recent = getRecent();
+		if (recent.length > 0 && document.getElementById(recent[0])) {
+			manager.navigate(recent[0]);
+		} else {
 			showWelcome();
 		}
 	}
 
 	// Handle browser back/forward
-	window.addEventListener("popstate",function():void{
-		let h=window.location.hash.slice(1);
-		if (h&&document.getElementById(h)){
-			switchView(h,"back",false);
-		}else{
+	window.addEventListener("popstate", function (): void {
+		let popPath = window.location.pathname.slice(1);
+		let popHash = window.location.hash.slice(1);
+		let popTarget = popPath || popHash;
+		if (popTarget && document.getElementById(popTarget)) {
+			manager.navigate(popTarget);
+		} else {
 			showWelcome();
 		}
 	});

@@ -180,7 +180,7 @@ describe("initializeAppNav", () => {
         initializeAppNav();
         const link = document.querySelector('.sidebar-nav a[href="#mass-calc"]') as HTMLElement;
         link.click();
-        expect(pushStateSpy).toHaveBeenCalledWith(null, "", "#mass-calc");
+        expect(pushStateSpy).toHaveBeenCalledWith(null, "", "/mass-calc");
         pushStateSpy.mockRestore();
     });
 
@@ -402,7 +402,7 @@ describe("initializeAppNav", () => {
         link.click();
         const recent = document.querySelector(".nav-recent") as HTMLElement;
         expect(recent.innerHTML).toContain("Element Lookup");
-        expect(recent.querySelector('a[href="#element-lookup"]')).not.toBeNull();
+        expect(recent.querySelector('a[href="/element-lookup"]')).not.toBeNull();
     });
 
     it("recent calculators capped at 3", () => {

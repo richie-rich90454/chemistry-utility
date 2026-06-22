@@ -32,10 +32,10 @@ describe("render.ts", () => {
         const sidebarNav = document.createElement("nav");
         sidebarNav.className = "sidebar-nav";
         const link1 = document.createElement("a");
-        link1.href = "#section-1";
+        link1.href = "/section-1";
         link1.textContent = "Section 1";
         const link2 = document.createElement("a");
-        link2.href = "#section-2";
+        link2.href = "/section-2";
         link2.textContent = "Section 2";
         sidebarNav.appendChild(link1);
         sidebarNav.appendChild(link2);
@@ -66,7 +66,7 @@ describe("render.ts", () => {
         it("clicking sidebar link calls scrollTo and pushState", async () => {
             await initRender();
 
-            const link = document.querySelector('.sidebar-nav a[href="#section-1"]') as HTMLAnchorElement;
+            const link = document.querySelector('.sidebar-nav a[href="/section-1"]') as HTMLAnchorElement;
             link.click();
 
             expect(window.scrollTo).toHaveBeenCalled();
@@ -76,8 +76,8 @@ describe("render.ts", () => {
         it("clicking link with non-existent target does not crash", async () => {
             await initRender();
 
-            const link = document.querySelector('.sidebar-nav a[href="#section-1"]') as HTMLAnchorElement;
-            link.setAttribute("href", "#nonexistent");
+            const link = document.querySelector('.sidebar-nav a[href="/section-1"]') as HTMLAnchorElement;
+            link.setAttribute("href", "/nonexistent");
             expect(() => link.click()).not.toThrow();
         });
     });
@@ -92,7 +92,7 @@ describe("render.ts", () => {
             Object.defineProperty(window, "innerHeight", { value: 800, configurable: true });
             window.dispatchEvent(new Event("scroll"));
 
-            const link1 = document.querySelector('.sidebar-nav a[href="#section-1"]') as HTMLAnchorElement;
+            const link1 = document.querySelector('.sidebar-nav a[href="/section-1"]') as HTMLAnchorElement;
             expect(link1.classList.contains("active")).toBe(true);
         });
 
@@ -104,7 +104,7 @@ describe("render.ts", () => {
             Object.defineProperty(window, "innerHeight", { value: 800, configurable: true });
             window.dispatchEvent(new Event("scroll"));
 
-            const link2 = document.querySelector('.sidebar-nav a[href="#section-2"]') as HTMLAnchorElement;
+            const link2 = document.querySelector('.sidebar-nav a[href="/section-2"]') as HTMLAnchorElement;
             expect(link2.classList.contains("active")).toBe(true);
         });
 
