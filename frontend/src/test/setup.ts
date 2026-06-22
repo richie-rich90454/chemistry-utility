@@ -43,3 +43,8 @@ window.scrollTo = vi.fn();
 
 // Mock history.pushState
 window.history.pushState = vi.fn();
+
+// Mock gsap (required by appNavigationStrategy transitively imported via navigationManager)
+vi.mock("gsap", () => ({
+    default: { to: vi.fn(), from: vi.fn(), fromTo: vi.fn(), set: vi.fn() },
+}));

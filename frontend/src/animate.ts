@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
+import {DOMMutationCoordinator} from "./modules/domMutationCoordinator";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -136,154 +137,155 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		});
 	}
 
-	// ── DOM change observer animations ──
+	// ── DOM change observer animations (via DOMMutationCoordinator) ──
+
+	let coordinator=DOMMutationCoordinator.getInstance();
 
 	// Result area animation — observe for content changes
-	let resultObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
+	coordinator.registerHandler(".result", function(mutation: MutationRecord): void{
 		if (prefersReducedMotion()) return;
-		mutations.forEach(function(mutation: MutationRecord[]): void{
-			let target=mutation.target as HTMLElement;
-			// Animate when result gets content
-			if (mutation.type==="childList"&&target.classList.contains("result")&&target.textContent&&target.textContent.trim().length>0){
-				gsap.fromTo(target, {opacity: 0, y: 4}, {
+		let target=mutation.target as HTMLElement;
+		// Animate when result gets content
+		if (mutation.type==="childList"&&target.textContent&&target.textContent.trim().length>0){
+			target.style.willChange="transform, opacity";
+			gsap.fromTo(target, {opacity: 0, y: 4}, {
+				opacity: 1,
+				y: 0,
+				duration: 0.2,
+				ease: "power2.out",
+				clearProps: "opacity,y",
+				onComplete: function(): void{target.style.willChange="";}
+			});
+		}
+		// Animate when .show class is added
+		if (mutation.type==="attributes"&&mutation.attributeName==="class"){
+			if (target.classList.contains("show")){
+				target.style.willChange="transform, opacity";
+				gsap.fromTo(target, {opacity: 0, y: 8}, {
 					opacity: 1,
 					y: 0,
-					duration: 0.2,
+					duration: 0.25,
 					ease: "power2.out",
-					clearProps: "opacity,y"
+					clearProps: "opacity,y",
+					onComplete: function(): void{target.style.willChange="";}
 				});
 			}
-			// Animate when .show class is added
-			if (mutation.type==="attributes"&&mutation.attributeName==="class"){
-				if (target.classList.contains("show")){
-					gsap.fromTo(target, {opacity: 0, y: 8}, {
-						opacity: 1,
-						y: 0,
-						duration: 0.25,
-						ease: "power2.out",
-						clearProps: "opacity,y"
-					});
-				}
+		}
+	});
+
+	// Input error shake animation
+	coordinator.registerHandler("input, select", function(mutation: MutationRecord): void{
+		if (prefersReducedMotion()) return;
+		if (mutation.type==="attributes"&&mutation.attributeName==="class"){
+			let target=mutation.target as HTMLElement;
+			if (target.classList.contains("error")){
+				gsap.fromTo(target, {x: -4}, {
+					x: 0,
+					duration: 0.4,
+					ease: "elastic.out(1, 0.3)",
+					clearProps: "x"
+				});
 			}
-			// Animate when .error class is added to input
-			if (mutation.type==="attributes"&&mutation.attributeName==="class"&&(mutation.target as HTMLElement).tagName==="INPUT"){
-				if ((mutation.target as HTMLElement).classList.contains("error")){
-					gsap.fromTo(mutation.target, {x: -4}, {
-						x: 0,
-						duration: 0.4,
-						ease: "elastic.out(1, 0.3)",
-						clearProps: "x"
-					});
-				}
-			}
-		});
+		}
 	});
 
-	// Observe all result divs for content changes
-	document.querySelectorAll(".result").forEach(function(el: Element): void{
-		resultObserver.observe(el, {
-			childList: true,
-			subtree: true,
-			attributes: true,
-			attributeFilter: ["class"]
-		});
-	});
-
-	// Observe all inputs for error class changes
-	document.querySelectorAll("input, select").forEach(function(el: Element): void{
-		resultObserver.observe(el, {
-			attributes: true,
-			attributeFilter: ["class"]
-		});
-	});
-
-	// Observe #stoich-inputs for dynamic content (stoichiometry calculator)
-	let stoichInputs=document.getElementById("stoich-inputs");
-	if (stoichInputs){
-		let stoichObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
-			if (prefersReducedMotion()) return;
-			mutations.forEach(function(mutation: MutationRecord[]): void{
-				if (mutation.type==="childList"&&stoichInputs.children.length>0){
-					// Animate newly added inputs
-					let newChildren=Array.from(stoichInputs.children) as HTMLElement[];
-					gsap.fromTo(newChildren, {opacity: 0, y: 10}, {
-						opacity: 1,
-						y: 0,
-						duration: 0.25,
-						stagger: 0.05,
-						ease: "power2.out",
-						clearProps: "all"
+	// Stoichiometry calculator dynamic inputs
+	coordinator.registerHandler("#stoich-inputs", function(mutation: MutationRecord): void{
+		if (prefersReducedMotion()) return;
+		let stoichInputs=document.getElementById("stoich-inputs");
+		if (mutation.type==="childList"&&stoichInputs&&stoichInputs.children.length>0){
+			let newChildren=Array.from(stoichInputs.children) as HTMLElement[];
+			newChildren.forEach(function(child: HTMLElement): void{
+				child.style.willChange="transform, opacity";
+			});
+			gsap.fromTo(newChildren, {opacity: 0, y: 10}, {
+				opacity: 1,
+				y: 0,
+				duration: 0.25,
+				stagger: 0.05,
+				ease: "power2.out",
+				clearProps: "all",
+				onComplete: function(): void{
+					newChildren.forEach(function(child: HTMLElement): void{
+						child.style.willChange="";
 					});
 				}
 			});
-		});
-		stoichObserver.observe(stoichInputs, {childList: true, subtree: true});
-	}
+		}
+	});
 
-	// Observe #remaining-quantity-group visibility toggle
-	let remainingGroup=document.getElementById("remaining-quantity-group");
-	if (remainingGroup){
-		let remainingObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
-			if (prefersReducedMotion()) return;
-			mutations.forEach(function(mutation: MutationRecord[]): void{
-				if (mutation.type==="attributes"&&mutation.attributeName==="style"){
-					let display=remainingGroup.style.display;
-					if (display!=="none"){
-						gsap.fromTo(remainingGroup, {opacity: 0, height: 0}, {
-							opacity: 1,
-							height: "auto",
-							duration: 0.25,
-							ease: "power2.out",
-							clearProps: "all"
-						});
-					}
-				}
-			});
-		});
-		remainingObserver.observe(remainingGroup, {attributes: true, attributeFilter: ["style"]});
-	}
+	// Remaining quantity group visibility toggle
+	coordinator.registerHandler("#remaining-quantity-group", function(mutation: MutationRecord): void{
+		if (prefersReducedMotion()) return;
+		let remainingGroup=document.getElementById("remaining-quantity-group");
+		if (mutation.type==="attributes"&&mutation.attributeName==="style"&&remainingGroup){
+			let display=remainingGroup.style.display;
+			if (display!=="none"){
+				remainingGroup.style.willChange="transform, opacity";
+				gsap.fromTo(remainingGroup, {opacity: 0, height: 0}, {
+					opacity: 1,
+					height: "auto",
+					duration: 0.25,
+					ease: "power2.out",
+					clearProps: "all",
+					onComplete: function(): void{remainingGroup.style.willChange="";}
+				});
+			}
+		}
+	});
 
 	// Scroll-to-top button appearance animation
-	let scrollTopBtn=document.getElementById("scroll-top") as HTMLElement;
-	if (scrollTopBtn){
-		let scrollObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
-			if (prefersReducedMotion()) return;
-			mutations.forEach(function(mutation: MutationRecord[]): void{
-				if (mutation.type==="attributes"&&mutation.attributeName==="class"){
-					if (scrollTopBtn.classList.contains("visible")){
-						gsap.fromTo(scrollTopBtn, {scale: 0.5, opacity: 0}, {
-							scale: 1,
-							opacity: 1,
-							duration: 0.25,
-							ease: "back.out(2)",
-							clearProps: "all"
-						});
-					}
-				}
-			});
-		});
-		scrollObserver.observe(scrollTopBtn, {attributes: true, attributeFilter: ["class"]});
-	}
+	coordinator.registerHandler("#scroll-top", function(mutation: MutationRecord): void{
+		if (prefersReducedMotion()) return;
+		if (mutation.type==="attributes"&&mutation.attributeName==="class"){
+			let scrollTopBtn=document.getElementById("scroll-top") as HTMLElement;
+			if (scrollTopBtn&&scrollTopBtn.classList.contains("visible")){
+				scrollTopBtn.style.willChange="transform, opacity";
+				gsap.fromTo(scrollTopBtn, {scale: 0.5, opacity: 0}, {
+					scale: 1,
+					opacity: 1,
+					duration: 0.25,
+					ease: "back.out(2)",
+					clearProps: "all",
+					onComplete: function(): void{scrollTopBtn.style.willChange="";}
+				});
+			}
+		}
+	});
 
 	// Sidebar active link transition
-	let sidebarLinks=document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
-	sidebarLinks.forEach(function(link: HTMLElement): void{
-		let linkObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
-				if (prefersReducedMotion()) return;
-				mutations.forEach(function(mutation: MutationRecord[]): void{
-				if (mutation.type==="attributes"&&mutation.attributeName==="class"){
-					if (link.classList.contains("active")){
-						gsap.fromTo(link, {scale: 0.95}, {
-							scale: 1,
-							duration: 0.2,
-							ease: "back.out(2)"
-						});
-					}
-				}
-			});
-		});
-		linkObserver.observe(link, {attributes: true, attributeFilter: ["class"]});
+	coordinator.registerHandler(".sidebar-nav a", function(mutation: MutationRecord): void{
+		if (prefersReducedMotion()) return;
+		if (mutation.type==="attributes"&&mutation.attributeName==="class"){
+			let target=mutation.target as HTMLElement;
+			if (target.classList.contains("active")){
+				gsap.fromTo(target, {scale: 0.95}, {
+					scale: 1,
+					duration: 0.2,
+					ease: "back.out(2)"
+				});
+			}
+		}
 	});
+
+	// Calculator view content stagger on switch
+	coordinator.registerHandler(".main-groups.card", function(mutation: MutationRecord): void{
+		if (prefersReducedMotion()) return;
+		if (mutation.type==="attributes"&&mutation.attributeName==="class"){
+			let target=mutation.target as HTMLElement;
+			if (target.classList.contains("view-active")&&target.classList.contains("main-groups")){
+				let inputs=target.querySelectorAll("input, select, .input-group");
+				let buttons=target.querySelectorAll(".primary-button");
+				let results=target.querySelectorAll(".result");
+				gsap.fromTo(inputs, {opacity: 0, y: 8}, {opacity: 1, y: 0, duration: 0.2, stagger: 0.04, ease: "power2.out", clearProps: "all"});
+				gsap.fromTo(buttons, {opacity: 0, scale: 0.95}, {opacity: 1, scale: 1, duration: 0.2, delay: 0.1, ease: "power2.out", clearProps: "all"});
+				gsap.fromTo(results, {opacity: 0}, {opacity: 1, duration: 0.2, delay: 0.15, ease: "power2.out", clearProps: "all"});
+			}
+		}
+	});
+
+	// Start the single consolidated observer
+	coordinator.observe();
 
 	// ── Welcome card hover lift ──
 	document.querySelectorAll(".welcome-card").forEach(function(card: Element): void{
@@ -293,27 +295,6 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		card.addEventListener("mouseleave", function(): void{
 			gsap.to(card, {y: 0, duration: 0.2, ease: "power2.out", clearProps: "y"});
 		});
-	});
-
-	// ── Calculator view content stagger on switch ──
-	let viewObserver=new MutationObserver(function(mutations: MutationRecord[]): void{
-		if (prefersReducedMotion()) return;
-		mutations.forEach(function(mutation: MutationRecord[]): void{
-			if (mutation.type==="attributes"&&mutation.attributeName==="class"){
-				let target=mutation.target as HTMLElement;
-				if (target.classList.contains("view-active")&&target.classList.contains("main-groups")){
-					let inputs=target.querySelectorAll("input, select, .input-group");
-					let buttons=target.querySelectorAll(".primary-button");
-					let results=target.querySelectorAll(".result");
-					gsap.fromTo(inputs, {opacity: 0, y: 8}, {opacity: 1, y: 0, duration: 0.2, stagger: 0.04, ease: "power2.out", clearProps: "all"});
-					gsap.fromTo(buttons, {opacity: 0, scale: 0.95}, {opacity: 1, scale: 1, duration: 0.2, delay: 0.1, ease: "power2.out", clearProps: "all"});
-					gsap.fromTo(results, {opacity: 0}, {opacity: 1, duration: 0.2, delay: 0.15, ease: "power2.out", clearProps: "all"});
-				}
-			}
-		});
-	});
-	document.querySelectorAll(".main-groups.card").forEach(function(el: Element): void{
-		viewObserver.observe(el, {attributes: true, attributeFilter: ["class"]});
 	});
 
 	// ── Button ripple effect ──
