@@ -21,7 +21,7 @@ export class CellPotentialCalculator extends Calculator {
 		const E_cathode = Math.max(E1, E2);
 		const E_anode = Math.min(E1, E2);
 		const E_cell = E_cathode - E_anode;
-		const html = "<p>The half-reaction with E&deg;=" + E_cathode + " V is the cathode, and the one with E&deg;=" + E_anode + " V is the anode.</p>" + "<p>The standard cell potential E&deg;_cell=" + E_cell.toFixed(3) + " V</p>";
+		const html = "<p>The half-reaction with E&deg;=" + E_cathode + " V is the cathode, and the one with E&deg;=" + E_anode + " V is the anode.</p>" + "<p>The standard cell potential E&deg;_cell=" + this.numberFormatter.format(E_cell, 3) + " V</p>";
 		this.resultDisplay.showResult(html);
 	}
 }
@@ -50,7 +50,7 @@ export class NernstCalculator extends Calculator {
 		const gasConstant = 8.314;
 		const faradayConstant = 96485;
 		const E = E_standard - ((gasConstant * T) / (n * faradayConstant)) * Math.log(Q);
-		this.resultDisplay.showResult("<p>The cell potential E=" + E.toFixed(3) + " V</p>");
+		this.resultDisplay.showResult("<p>The cell potential E=" + this.numberFormatter.format(E, 3) + " V</p>");
 	}
 }
 
@@ -81,7 +81,7 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 			}
 			const n = (I * t) / (faradayConstant * z);
 			const mass = n * M;
-			this.resultDisplay.showResult("<p>The mass deposited m=" + mass.toFixed(3) + " g</p>");
+			this.resultDisplay.showResult("<p>The mass deposited m=" + this.numberFormatter.format(mass, 3) + " g</p>");
 		} else if (solveFor === "current") {
 			if (isNaN(m) || isNaN(t) || isNaN(z) || isNaN(M) || m <= 0 || t <= 0 || z <= 0 || M <= 0) {
 				this.getInput("electrolysis-m").markError();
@@ -92,7 +92,7 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 			}
 			const n = m / M;
 			const current = (n * faradayConstant * z) / t;
-			this.resultDisplay.showResult("<p>The current I=" + current.toFixed(3) + " A</p>");
+			this.resultDisplay.showResult("<p>The current I=" + this.numberFormatter.format(current, 3) + " A</p>");
 		} else if (solveFor === "time") {
 			if (isNaN(m) || isNaN(I) || isNaN(z) || isNaN(M) || m <= 0 || I <= 0 || z <= 0 || M <= 0) {
 				this.getInput("electrolysis-m").markError();
@@ -103,7 +103,7 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 			}
 			const n = m / M;
 			const time = (n * faradayConstant * z) / I;
-			this.resultDisplay.showResult("<p>The time t=" + time.toFixed(3) + " s</p>");
+			this.resultDisplay.showResult("<p>The time t=" + this.numberFormatter.format(time, 3) + " s</p>");
 		}
 	}
 }

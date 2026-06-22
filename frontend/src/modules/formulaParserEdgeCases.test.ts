@@ -7,22 +7,27 @@ interface ChemicalElement {
     atomicMass: number;
     type: string;
     electronegativity: number | null;
+    atomicNumber: number;
+    valenceElectrons: number;
+    totalElectrons: number;
+    group: number;
+    period: number;
 }
 
 const testElements: ChemicalElement[] = [
-    { symbol: "H", name: "Hydrogen", atomicMass: 1.008, type: "non-metal", electronegativity: 2.20 },
-    { symbol: "C", name: "Carbon", atomicMass: 12.011, type: "non-metal", electronegativity: 2.55 },
-    { symbol: "O", name: "Oxygen", atomicMass: 15.999, type: "non-metal", electronegativity: 3.44 },
-    { symbol: "N", name: "Nitrogen", atomicMass: 14.007, type: "non-metal", electronegativity: 3.04 },
-    { symbol: "Na", name: "Sodium", atomicMass: 22.990, type: "alkali metal", electronegativity: 0.93 },
-    { symbol: "Cl", name: "Chlorine", atomicMass: 35.453, type: "non-metal", electronegativity: 3.16 },
-    { symbol: "Ca", name: "Calcium", atomicMass: 40.078, type: "alkaline earth metal", electronegativity: 1.00 },
-    { symbol: "Fe", name: "Iron", atomicMass: 55.845, type: "transition metal", electronegativity: 1.83 },
-    { symbol: "S", name: "Sulfur", atomicMass: 32.06, type: "non-metal", electronegativity: 2.58 },
-    { symbol: "Mg", name: "Magnesium", atomicMass: 24.305, type: "alkaline earth metal", electronegativity: 1.31 },
-    { symbol: "Al", name: "Aluminum", atomicMass: 26.982, type: "metal", electronegativity: 1.61 },
-    { symbol: "K", name: "Potassium", atomicMass: 39.098, type: "alkali metal", electronegativity: 0.82 },
-    { symbol: "P", name: "Phosphorus", atomicMass: 30.974, type: "non-metal", electronegativity: 2.19 },
+    { symbol: "H", name: "Hydrogen", atomicMass: 1.008, type: "non-metal", electronegativity: 2.20, atomicNumber: 1, valenceElectrons: 1, totalElectrons: 1, group: 1, period: 1 },
+    { symbol: "C", name: "Carbon", atomicMass: 12.011, type: "non-metal", electronegativity: 2.55, atomicNumber: 6, valenceElectrons: 4, totalElectrons: 6, group: 14, period: 2 },
+    { symbol: "O", name: "Oxygen", atomicMass: 15.999, type: "non-metal", electronegativity: 3.44, atomicNumber: 8, valenceElectrons: 6, totalElectrons: 8, group: 16, period: 2 },
+    { symbol: "N", name: "Nitrogen", atomicMass: 14.007, type: "non-metal", electronegativity: 3.04, atomicNumber: 7, valenceElectrons: 5, totalElectrons: 7, group: 15, period: 2 },
+    { symbol: "Na", name: "Sodium", atomicMass: 22.990, type: "alkali metal", electronegativity: 0.93, atomicNumber: 11, valenceElectrons: 1, totalElectrons: 11, group: 1, period: 3 },
+    { symbol: "Cl", name: "Chlorine", atomicMass: 35.453, type: "non-metal", electronegativity: 3.16, atomicNumber: 17, valenceElectrons: 7, totalElectrons: 17, group: 17, period: 3 },
+    { symbol: "Ca", name: "Calcium", atomicMass: 40.078, type: "alkaline earth metal", electronegativity: 1.00, atomicNumber: 20, valenceElectrons: 2, totalElectrons: 20, group: 2, period: 4 },
+    { symbol: "Fe", name: "Iron", atomicMass: 55.845, type: "transition metal", electronegativity: 1.83, atomicNumber: 26, valenceElectrons: 2, totalElectrons: 26, group: 8, period: 4 },
+    { symbol: "S", name: "Sulfur", atomicMass: 32.06, type: "non-metal", electronegativity: 2.58, atomicNumber: 16, valenceElectrons: 6, totalElectrons: 16, group: 16, period: 3 },
+    { symbol: "Mg", name: "Magnesium", atomicMass: 24.305, type: "alkaline earth metal", electronegativity: 1.31, atomicNumber: 12, valenceElectrons: 2, totalElectrons: 12, group: 2, period: 3 },
+    { symbol: "Al", name: "Aluminum", atomicMass: 26.982, type: "metal", electronegativity: 1.61, atomicNumber: 13, valenceElectrons: 3, totalElectrons: 13, group: 13, period: 3 },
+    { symbol: "K", name: "Potassium", atomicMass: 39.098, type: "alkali metal", electronegativity: 0.82, atomicNumber: 19, valenceElectrons: 1, totalElectrons: 19, group: 1, period: 4 },
+    { symbol: "P", name: "Phosphorus", atomicMass: 30.974, type: "non-metal", electronegativity: 2.19, atomicNumber: 15, valenceElectrons: 5, totalElectrons: 15, group: 15, period: 3 },
 ];
 
 describe("formulaParser edge cases", () => {

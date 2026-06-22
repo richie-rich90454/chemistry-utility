@@ -80,7 +80,7 @@ export class MassPercentCalculator extends Calculator {
 		} else {
 			throw new Error("Invalid unit");
 		}
-		this.resultDisplay.showResult("<p>Concentration: " + result.toFixed(4) + " " + unitText + "</p>");
+		this.resultDisplay.showResult("<p>Concentration: " + this.numberFormatter.format(result, 4) + " " + unitText + "</p>");
 	}
 }
 
@@ -109,7 +109,7 @@ export class MixingCalculator extends Calculator {
 		const totalMoles = (C1 * V1) + (C2 * V2);
 		const totalVolume = V1 + V2;
 		const finalConcentration = totalMoles / totalVolume;
-		this.resultDisplay.showResult("<p>Final Concentration: " + finalConcentration.toFixed(4) + " M</p><p>Total Volume: " + totalVolume.toFixed(4) + " L</p>");
+		this.resultDisplay.showResult("<p>Final Concentration: " + this.numberFormatter.format(finalConcentration, 4) + " M</p><p>Total Volume: " + this.numberFormatter.format(totalVolume, 4) + " L</p>");
 	}
 }
 

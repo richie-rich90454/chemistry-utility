@@ -133,7 +133,7 @@ export class VanDerWaalsCalculator extends Calculator {
 		if (V - n * b <= 0) throw new Error("Volume is too small for the given amount of gas (V must be greater than n*b)");
 		const R = 0.08206;
 		const P = (n * R * T) / (V - n * b) - a * Math.pow(n / V, 2);
-		this.resultDisplay.showResult("<p>P=" + P.toFixed(4) + " atm</p>");
+		this.resultDisplay.showResult("<p>P=" + this.numberFormatter.format(P, 4) + " atm</p>");
 	}
 }
 
@@ -158,20 +158,20 @@ export class HalfLifeCalculator extends SolveForCalculator {
 			if (t_half <= 0) throw new Error("Half-life must be positive");
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
 			result = N0 * Math.pow(0.5, t / t_half);
-			this.resultDisplay.showResult("<p>Remaining: " + result.toFixed(4) + " (after " + t + " units)</p>");
+			this.resultDisplay.showResult("<p>Remaining: " + this.numberFormatter.format(result, 4) + " (after " + t + " units)</p>");
 		} else if (solveFor === "time") {
 			InputValidator.validateValues([N0, t_half, Nt], ["initial-quantity", "half-life-input", "remaining-quantity"]);
 			if (t_half <= 0) throw new Error("Half-life must be positive");
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
 			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
 			result = (Math.log(Nt / N0) / Math.log(0.5)) * t_half;
-			this.resultDisplay.showResult("<p>Time needed: " + result.toFixed(4) + " units</p>");
+			this.resultDisplay.showResult("<p>Time needed: " + this.numberFormatter.format(result, 4) + " units</p>");
 		} else if (solveFor === "half-life") {
 			InputValidator.validateValues([N0, t, Nt], ["initial-quantity", "time-input", "remaining-quantity"]);
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
 			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
 			result = t / (Math.log(Nt / N0) / Math.log(0.5));
-			this.resultDisplay.showResult("<p>Half-life: " + result.toFixed(4) + " units</p>");
+			this.resultDisplay.showResult("<p>Half-life: " + this.numberFormatter.format(result, 4) + " units</p>");
 		}
 	}
 }

@@ -51,7 +51,7 @@ export class BondTypePredictor extends Calculator {
 			this.resultDisplay.showResult("<p>Bond prediction not possible due to unavailable electronegativity data</p>");
 			return;
 		}
-		let deltaEN = Math.abs(en1 - en2).toFixed(2);
+		let deltaEN = this.numberFormatter.format(Math.abs(en1 - en2), 2);
 		let type1 = element1.type.toLowerCase();
 		let type2 = element2.type.toLowerCase();
 		let isMetal1 = (type1 == "lanthanide" || type1 == "actinide" || (type1.indexOf("metal") != -1 && type1 != "metalloid" && type1 != "non-metal"));

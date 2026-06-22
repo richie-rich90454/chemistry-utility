@@ -1,4 +1,5 @@
 import { Calculator } from "./calculator.js";
+import { NumberFormatter } from "./i18n/numberFormatter.js";
 
 /**
  * Represents a single term in a chemical equation (e.g., "2H2O").
@@ -185,7 +186,7 @@ export class StoichiometryCalculator extends Calculator {
                 throw new Error("Selected compound not found");
             }
             let molesProduct = (molesReactant / reactant.getCoefficient()) * product.getCoefficient();
-            this.resultDisplay.showResult("<p>Moles of " + productFormula + ": " + molesProduct.toFixed(2) + "</p>");
+            this.resultDisplay.showResult("<p>Moles of " + productFormula + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
         }
         else if (type == "reactant-from-product") {
             let productSelect = document.getElementById("product-select") as HTMLSelectElement;
@@ -218,7 +219,7 @@ export class StoichiometryCalculator extends Calculator {
                 throw new Error("Selected compound not found");
             }
             let molesReactant = (molesProduct / product.getCoefficient()) * reactant.getCoefficient();
-            this.resultDisplay.showResult("<p>Moles of " + reactantFormula + ": " + molesReactant.toFixed(2) + "</p>");
+            this.resultDisplay.showResult("<p>Moles of " + reactantFormula + ": " + this.numberFormatter.format(molesReactant, 2) + "</p>");
         }
         else if (type == "limiting-reactant") {
             let reactantMoles: Record<string, number> = {};
@@ -257,7 +258,7 @@ export class StoichiometryCalculator extends Calculator {
                 }
             }
             let molesProduct = minRatio * product.getCoefficient();
-            this.resultDisplay.showResult("<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + molesProduct.toFixed(2) + "</p>");
+            this.resultDisplay.showResult("<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
         }
     }
 }
@@ -330,7 +331,7 @@ export function calculateStoichiometry(equation: string): void {
             throw new Error("Selected compound not found");
         }
         let molesProduct = (molesReactant / reactant.coefficient) * product.coefficient;
-        resultDiv.innerHTML = "<p>Moles of " + productFormula + ": " + molesProduct.toFixed(2) + "</p>";
+        resultDiv.innerHTML = "<p>Moles of " + productFormula + ": " + NumberFormatter.createFromCurrentLocale().format(molesProduct, 2) + "</p>";
         resultDiv.classList.add("show");
     }
     else if (type == "reactant-from-product") {
@@ -364,7 +365,7 @@ export function calculateStoichiometry(equation: string): void {
             throw new Error("Selected compound not found");
         }
         let molesReactant = (molesProduct / product.coefficient) * reactant.coefficient;
-        resultDiv.innerHTML = "<p>Moles of " + reactantFormula + ": " + molesReactant.toFixed(2) + "</p>";
+        resultDiv.innerHTML = "<p>Moles of " + reactantFormula + ": " + NumberFormatter.createFromCurrentLocale().format(molesReactant, 2) + "</p>";
         resultDiv.classList.add("show");
     }
     else if (type == "limiting-reactant") {
@@ -404,7 +405,7 @@ export function calculateStoichiometry(equation: string): void {
             }
         }
         let molesProduct = minRatio * product.coefficient;
-        resultDiv.innerHTML = "<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + molesProduct.toFixed(2) + "</p>";
+        resultDiv.innerHTML = "<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + NumberFormatter.createFromCurrentLocale().format(molesProduct, 2) + "</p>";
         resultDiv.classList.add("show");
     }
 }

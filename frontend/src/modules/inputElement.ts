@@ -5,8 +5,8 @@
 export class InputElement {
 	private element: HTMLInputElement | HTMLSelectElement;
 
-	constructor(elementId: string) {
-		this.element = document.getElementById(elementId) as HTMLInputElement | HTMLSelectElement;
+	constructor(elementId: string, element?: HTMLInputElement | HTMLSelectElement) {
+		this.element = element !== undefined ? element : document.getElementById(elementId) as HTMLInputElement | HTMLSelectElement;
 	}
 
 	/** Returns the parsed numeric value of the element (NaN if empty or invalid). */

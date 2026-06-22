@@ -1,4 +1,5 @@
 import { Calculator } from "./calculator.js";
+import { InputElement } from "./inputElement.js";
 
 /**
  * Abstract base class for calculators that solve for a chosen variable. In
@@ -6,15 +7,15 @@ import { Calculator } from "./calculator.js";
  * whose value determines which variable the subclass should compute.
  */
 export abstract class SolveForCalculator extends Calculator {
-	protected solveForElement: HTMLSelectElement;
+	protected solveForElement: InputElement;
 
 	constructor(resultElementId: string, inputElementIds: string[], solveForElementId: string) {
 		super(resultElementId, inputElementIds);
-		this.solveForElement = document.getElementById(solveForElementId) as HTMLSelectElement;
+		this.solveForElement = new InputElement(solveForElementId);
 	}
 
 	/** Returns the current value of the "solve for" select element. */
 	public getSolveFor(): string {
-		return this.solveForElement.value;
+		return (this.solveForElement.getElement() as HTMLSelectElement).value;
 	}
 }

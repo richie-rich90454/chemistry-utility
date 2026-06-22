@@ -35,4 +35,9 @@ export class CalculatorRegistry {
 	public getAll(): Map<string, Calculator> {
 		return this.calculators;
 	}
+
+	/** Removes all registered calculators. Useful for test teardown. */
+	public clear(): void {
+		this.calculators.clear();
+	}
 }

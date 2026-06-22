@@ -1,12 +1,16 @@
+import { NumberFormatter } from "./i18n/numberFormatter.js";
+
 /**
  * Wraps a result display DOM element by ID, providing helpers to render
  * calculation results, errors, and formula output with consistent styling.
  */
 export class ResultDisplay {
 	private element: HTMLElement;
+	private numberFormatter: NumberFormatter;
 
 	constructor(resultElementId: string) {
 		this.element = document.getElementById(resultElementId) as HTMLElement;
+		this.numberFormatter = NumberFormatter.createFromCurrentLocale();
 	}
 
 	/** Sets the inner HTML and makes the result visible. */
@@ -24,7 +28,7 @@ export class ResultDisplay {
 	/** Renders a formula and its numeric result with a unit, then makes it visible. */
 	public showFormula(formula: string, result: number, unit: string): void {
 		this.element.innerHTML =
-			"<p>" + formula + "</p><p>Result: " + result.toFixed(4) + " " + unit + "</p>";
+			"<p>" + formula + "</p><p>Result: " + this.numberFormatter.format(result, 4) + " " + unit + "</p>";
 		this.element.classList.add("show");
 	}
 

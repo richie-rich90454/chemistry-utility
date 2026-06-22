@@ -1,5 +1,6 @@
 import { InputElement } from "./inputElement.js";
 import { ResultDisplay } from "./resultDisplay.js";
+import { NumberFormatter } from "./i18n/numberFormatter.js";
 
 /**
  * Abstract base class implementing the template method pattern for chemistry
@@ -13,10 +14,12 @@ import { ResultDisplay } from "./resultDisplay.js";
 export abstract class Calculator {
 	protected resultDisplay: ResultDisplay;
 	protected inputElements: InputElement[];
+	protected numberFormatter: NumberFormatter;
 
 	constructor(resultElementId: string, inputElementIds: string[]) {
 		this.resultDisplay = new ResultDisplay(resultElementId);
 		this.inputElements = inputElementIds.map((id) => new InputElement(id));
+		this.numberFormatter = NumberFormatter.createFromCurrentLocale();
 	}
 
 	/**
