@@ -1,6 +1,6 @@
 @font-face{
     font-family: "Noto Sans";
-    src: url("/NotoSans-VariableFont_wdth,wght.ttf") format("truetype-variations");
+    src: url("/NotoSans-VariableFont_wdth,wght.woff2") format("woff2-variations");
     font-weight: 100 900;
     font-stretch: 75% 125%;
     font-style: normal;
@@ -8,7 +8,7 @@
 }
 @font-face{
     font-family: "EB Garamond";
-    src: url("/EBGaramond-VariableFont_wght.ttf") format("truetype-variations");
+    src: url("/EBGaramond-VariableFont_wght.woff2") format("woff2-variations");
     font-weight: 400 800;
     font-style: normal;
     font-display: swap;

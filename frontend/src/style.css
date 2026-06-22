@@ -176,6 +176,69 @@
     --md-state-dragged: rgba(230,225,229,0.16);
 }
 
+/* ── MD3 AMOLED Black Theme Tokens ── */
+.amoled{
+    color-scheme: dark;
+    --md-primary: #a8c7fa;
+    --md-on-primary: #062e6f;
+    --md-primary-container: #0842a0;
+    --md-on-primary-container: #d3e3fd;
+    --md-secondary: #c4c6d0;
+    --md-on-secondary: #2e3038;
+    --md-secondary-container: #1a1a1a;
+    --md-on-secondary-container: #e0e1ec;
+    --md-tertiary: #82d5c6;
+    --md-on-tertiary: #003731;
+    --md-tertiary-container: #004f48;
+    --md-on-tertiary-container: #9ef2e2;
+    --md-error: #f2b8b5;
+    --md-on-error: #601410;
+    --md-error-container: #8c1d18;
+    --md-on-error-container: #f9dedc;
+    --md-success: #81c995;
+    --md-on-success: #003d17;
+    --md-success-container: #005224;
+    --md-on-success-container: #a4f5b2;
+    --md-warning: #fdd663;
+    --md-on-warning: #3e2e00;
+    --md-warning-container: #4a3d00;
+    --md-on-warning-container: #fdd663;
+    --md-surface: #000000;
+    --md-surface-dim: #000000;
+    --md-surface-bright: #1a1a1a;
+    --md-surface-container-lowest: #000000;
+    --md-surface-container-low: #000000;
+    --md-surface-container: #0a0a0a;
+    --md-surface-container-high: #141414;
+    --md-surface-container-highest: #1e1e1e;
+    --md-on-surface: #e6e1e5;
+    --md-on-surface-variant: #cac4d0;
+    --md-surface-variant: #49454f;
+    --md-inverse-surface: #e6e1e5;
+    --md-inverse-on-surface: #313033;
+    --md-outline: #938f99;
+    --md-outline-variant: #49454f;
+    --md-background: #000000;
+    --md-on-background: #e6e1e5;
+    /* Form element overrides — AMOLED black colors */
+    --md-input-bg: #000000;
+    --md-input-text: #e6e1e5;
+    --md-input-border: #938f99;
+    --md-input-placeholder: #cac4d0;
+    --md-input-focus-border: #a8c7fa;
+    --md-input-hover-border: #e6e1e5;
+    --md-scrim: rgba(0,0,0,0.8);
+    --md-elevation-1: 0 1px 3px rgba(0,0,0,.7), 0 1px 2px rgba(0,0,0,.6);
+    --md-elevation-2: 0 2px 6px rgba(0,0,0,.7), 0 1px 2px rgba(0,0,0,.6);
+    --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,.6), 0 1px 3px rgba(0,0,0,.7);
+    --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,.6), 0 2px 3px rgba(0,0,0,.7);
+    --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,.6), 0 4px 4px rgba(0,0,0,.7);
+    --md-state-hover: rgba(230,225,229,0.08);
+    --md-state-focus: rgba(230,225,229,0.12);
+    --md-state-pressed: rgba(230,225,229,0.12);
+    --md-state-dragged: rgba(230,225,229,0.16);
+}
+
 /* Explicit light mode class */
 .light{
     color-scheme: light;
@@ -267,8 +330,8 @@ body{
     line-height: 1.5;
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                color var(--md-motion-duration-medium2) var(--md-motion-easing-standard);
+    transition: background-color 300ms ease,
+                color 300ms ease;
 }
 
 /* ── Global scrollbar ── */
@@ -309,7 +372,9 @@ body{
     overflow-x: hidden;
     z-index: 10;
     flex-shrink: 0;
-    transition: width var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate);
+    transition: width var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate),
+                background-color 300ms ease,
+                color 300ms ease;
 }
 
 /* Drawer Headline */
@@ -447,6 +512,7 @@ body{
     margin: 0 auto;
     width: 100%;
     min-width: 0;
+    transition: background-color 300ms ease, color 300ms ease;
 }
 
 /* ── Intro Card (bottom) ── */
@@ -482,6 +548,13 @@ body{
     overflow: hidden;
     box-shadow: none;
     transition: box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+}
+/* App-view cards are always visible — skip content-visibility optimization */
+.app-view .card{
+    content-visibility: visible;
+    contain-intrinsic-size: none;
 }
 .card:hover{
     box-shadow: var(--md-elevation-1);
@@ -634,6 +707,7 @@ select option{
 }
 /* Dark mode: use lighter arrow stroke since background is dark */
 .dark select,
+.amoled select,
 :root:not(.light) select{
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23938f99' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
@@ -707,8 +781,8 @@ button{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--md-shape-full);
     border: none;
     background: transparent;
@@ -729,13 +803,23 @@ button{
     height: 20px;
     pointer-events: none;
 }
+/* SVG sprite icon references */
+svg.icon{
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 /* Sidebar Toggle — same as icon-button but specific */
 .sidebar-toggle{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: var(--md-shape-full);
     border: none;
     background: transparent;
@@ -814,6 +898,8 @@ button{
     align-items: center;
     justify-content: center;
     opacity: 0.6;
+    min-width: 44px;
+    min-height: 44px;
 }
 .result:hover .copy-button{opacity:1}
 .copy-button:hover{
@@ -917,6 +1003,13 @@ button{
         z-index: 50;
         padding-top: env(safe-area-inset-top, 0px);
     }
+    /* Auto-collapsed sidebar on mobile: hide nav items */
+    .sidebar.collapsed .sidebar-nav{
+        display: none;
+    }
+    .sidebar.collapsed .sidebar-header{
+        padding: var(--md-space-2) var(--md-space-3);
+    }
     .sidebar-nav{
         padding: 0 var(--md-space-2);
     }
@@ -951,6 +1044,27 @@ button{
     }
     .primary-button{
         width: 100%;
+        min-height: 44px;
+    }
+    /* Mobile input and button sizes */
+    input, select, textarea{
+        min-height: 48px;
+        font-size: 1rem;
+    }
+    button{
+        min-height: 44px;
+    }
+    /* Touch-friendly spacing between interactive elements */
+    .card button, .main-groups button{
+        margin-top: var(--md-space-3);
+        margin-bottom: var(--md-space-3);
+    }
+    .card{
+        margin-bottom: var(--md-space-5);
+        padding-bottom: var(--md-space-2);
+    }
+    .input-group{
+        gap: var(--md-space-3);
     }
     .card h2, .main-groups h2{
         font-size: 1rem;
@@ -1072,8 +1186,8 @@ button{
     border: none;
     cursor: pointer;
     color: var(--md-on-surface-variant);
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1251,7 +1365,7 @@ button{
 .sidebar-search input{
     width: 100%;
     padding-left: 32px;
-    min-height: 40px;
+    min-height: 44px;
     font-size: 0.8125rem;
     border-radius: var(--md-shape-full);
     background: var(--md-surface-container-high);
@@ -1327,7 +1441,7 @@ button{
     justify-content: center;
     padding: 0;
     width: 56px;
-    height: 32px;
+    height: 44px;
     border-radius: var(--md-shape-full);
     margin: 0 auto;
     gap: 0;
@@ -1529,7 +1643,7 @@ button{
     align-items: center;
     gap: var(--md-space-2);
     padding: 0 var(--md-space-4);
-    height: 32px;
+    height: 44px;
     color: var(--md-on-surface-variant);
     text-decoration: none;
     font-size: 0.8125rem;
@@ -1775,3 +1889,203 @@ button{
 
 /* ── Links ── */
 a{color:var(--md-primary)}
+
+/* ═══════════════════════════════════════════════════════════════
+   RTL (Right-to-Left) Layout Support
+   ═══════════════════════════════════════════════════════════════ */
+[dir="rtl"] .sidebar{
+    border-right: none;
+    border-left: 1px solid var(--md-outline-variant);
+}
+[dir="rtl"] .app-layout{
+    flex-direction: row-reverse;
+}
+[dir="rtl"] .sidebar-nav a{
+    flex-direction: row-reverse;
+    text-align: right;
+}
+[dir="rtl"] .nav-icon{
+    margin-left: var(--md-space-3);
+    margin-right: 0;
+}
+[dir="rtl"] .input-group{
+    flex-direction: row-reverse;
+}
+[dir="rtl"] .result{
+    text-align: right;
+}
+[dir="rtl"] .tool-container{
+    text-align: right;
+}
+[dir="rtl"] .primary-button{
+    text-align: center;
+}
+[dir="rtl"] .search-icon{
+    left: var(--md-space-3);
+    right: auto;
+}
+[dir="rtl"] .sidebar-search input{
+    padding-left: var(--md-space-8);
+    padding-right: var(--md-space-3);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Print Stylesheet
+   ═══════════════════════════════════════════════════════════════ */
+@media print{
+    /* ── 16.1 Hide non-essential UI elements ── */
+    .sidebar,
+    .bottom-tabs,
+    .nav-sheet-backdrop,
+    .nav-sheet,
+    .command-palette,
+    .palette-backdrop,
+    #scroll-top,
+    .theme-toggle,
+    .sidebar-toggle,
+    .back-button,
+    .view-header,
+    .page-overlay,
+    .skip-link,
+    .intro,
+    .sidebar-search,
+    .sidebar-footer,
+    .nav-recent,
+    .nav-favorites,
+    .shortcut-panel,
+    .shortcut-panel-backdrop,
+    #breadcrumb-list,
+    .copy-button{
+        display: none !important;
+    }
+
+    /* ── 16.2 Show only active calculator in print ── */
+    /* App mode: only the view-active card prints */
+    .app-view .main-groups.card.view-hidden{
+        display: none !important;
+    }
+    .app-view .main-groups.card.view-active{
+        display: block !important;
+    }
+    .app-view .welcome-screen{
+        display: none !important;
+    }
+    /* Scroll mode: all cards are visible for printing */
+    .main-content:not(.app-view) .main-groups.card{
+        display: block !important;
+    }
+
+    /* ── 16.3 Print-friendly result formatting ── */
+    *{
+        color: #000 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    html, body{
+        background: #fff !important;
+        color: #000 !important;
+    }
+    .card, .main-groups.card{
+        border: 1px solid #ccc !important;
+        border-radius: 0 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+    }
+    .result{
+        border: 1px solid #999 !important;
+        border-left: 3px solid #333 !important;
+        border-radius: 0 !important;
+        background: #fff !important;
+        color: #000 !important;
+    }
+    .result.error{
+        border-color: #999 !important;
+        border-left-color: #333 !important;
+        background: #fff !important;
+    }
+    .result.error p{
+        color: #000 !important;
+    }
+    .result p{
+        color: #000 !important;
+    }
+    .card h2, .main-groups h2{
+        color: #000 !important;
+    }
+    .card h2::before, .main-groups h2::before{
+        background: #333 !important;
+    }
+    .card h3, .main-groups h3{
+        color: #000 !important;
+    }
+    .card p, .main-groups p,
+    .card label, .main-groups label{
+        color: #333 !important;
+    }
+    input, select, textarea{
+        border: 1px solid #999 !important;
+        border-radius: 0 !important;
+        background: #fff !important;
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+    .primary-button{
+        border: 1px solid #333 !important;
+        border-radius: 0 !important;
+        background: #eee !important;
+        color: #000 !important;
+    }
+    .sub-group{
+        border-bottom: 1px solid #ccc !important;
+    }
+    .main-content:not(.app-view) .main-groups h2{
+        position: static !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-bottom: 1px solid #ccc !important;
+    }
+    .welcome-card{
+        border: 1px solid #ccc !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    /* ── 16.4 Print header ── */
+    .app-view .calculator-view::before{
+        content: "Chemistry Utility — " attr(data-print-title);
+        display: block;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #000 !important;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid #000;
+    }
+    .main-content:not(.app-view)::before{
+        content: "Chemistry Utility";
+        display: block;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #000 !important;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid #000;
+    }
+
+    /* Layout adjustments for print */
+    .app-layout{
+        display: block !important;
+    }
+    .main-content{
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .app-view .main-content{
+        display: block !important;
+    }
+    .app-view .calculator-view{
+        max-width: 100% !important;
+    }
+}
