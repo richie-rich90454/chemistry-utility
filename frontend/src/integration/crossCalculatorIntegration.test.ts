@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM, getResultText } from "../test/helpers.js";
 import { balanceEquation } from "../modules/equationBalancer.js";
 import { calculateMolarMass } from "../modules/formulaParser.js";

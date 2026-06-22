@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM, getResultHTML, getResultText } from "./test/helpers.js";
 
 describe("Calculator UI Helpers", () => {
@@ -75,14 +75,14 @@ describe("Calculator UI Helpers", () => {
 
     it("input value can be changed after creation", () => {
         createContainer("change-test");
-        const input = createInput("change-input", "10", "change-test");
+        void createInput("change-input", "10", "change-test");
         (document.getElementById("change-input") as HTMLInputElement).value = "20";
         expect((document.getElementById("change-input") as HTMLInputElement).value).toBe("20");
     });
 
     it("select value can be changed after creation", () => {
         createContainer("sel-change-test");
-        const select = createSelect("change-select", "A", ["A", "B", "C"], "sel-change-test");
+        void createSelect("change-select", "A", ["A", "B", "C"], "sel-change-test");
         (document.getElementById("change-select") as HTMLSelectElement).value = "C";
         expect((document.getElementById("change-select") as HTMLSelectElement).value).toBe("C");
     });

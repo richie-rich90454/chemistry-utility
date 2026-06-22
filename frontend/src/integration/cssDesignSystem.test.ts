@@ -22,7 +22,7 @@ function getDarkVars(css: string): Set<string> {
     return vars;
 }
 
-function getVarValue(css: string, block: string, varName: string): string | undefined {
+function getVarValue(_css: string, block: string, varName: string): string | undefined {
     const regex = new RegExp(`--${varName}\\s*:\\s*([^;]+)`, "g");
     const match = regex.exec(block);
     return match ? match[1].trim() : undefined;

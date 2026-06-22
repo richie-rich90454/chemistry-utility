@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM, getResultHTML, getResultText } from "../test/helpers.js";
+import { describe, it, expect, afterEach } from "vitest";
+import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM } from "../test/helpers.js";
 
 describe("Accessibility: Comprehensive", () => {
     afterEach(() => {
@@ -18,7 +18,7 @@ describe("Accessibility: Comprehensive", () => {
         label.setAttribute("for", "input-with-label");
         label.textContent = "Value 2";
         container.appendChild(label);
-        const input2 = createInput("input-with-label", "20", "test-form");
+        void createInput("input-with-label", "20", "test-form");
 
         const inputs = container.querySelectorAll("input");
         for (const input of inputs) {
@@ -47,7 +47,7 @@ describe("Accessibility: Comprehensive", () => {
         label.setAttribute("for", "select-with-label");
         label.textContent = "Unit";
         container.appendChild(label);
-        const select2 = createSelect("select-with-label", "percent", ["percent", "ppm"], "test-selects");
+        void createSelect("select-with-label", "percent", ["percent", "ppm"], "test-selects");
 
         const selects = container.querySelectorAll("select");
         for (const select of selects) {
@@ -231,7 +231,7 @@ describe("Accessibility: Comprehensive", () => {
     });
 
     it("result divs use semantic markup (not just div with text)", () => {
-        const container = createContainer("result-test");
+        void createContainer("result-test");
         const resultDiv = createResultDiv("calc-result", "result-test");
 
         // Simulate what calculator functions produce: <p> elements inside result div
@@ -249,9 +249,9 @@ describe("Accessibility: Comprehensive", () => {
         const container = createContainer("form-types");
 
         // Numeric inputs should use type="number"
-        const numInput = createInput("numeric-field", "10", "form-types", "number");
+        void createInput("numeric-field", "10", "form-types", "number");
         // Text inputs for non-numeric data
-        const textInput = createInput("text-field", "Na", "form-types", "text");
+        void createInput("text-field", "Na", "form-types", "text");
 
         const inputs = container.querySelectorAll("input");
         const numericInput = inputs[0] as HTMLInputElement;
@@ -300,7 +300,7 @@ describe("Accessibility: Comprehensive", () => {
     });
 
     it("result divs have aria-live for dynamic content", () => {
-        const container = createContainer("aria-live-test");
+        void createContainer("aria-live-test");
         const resultDiv = createResultDiv("live-result", "aria-live-test");
         resultDiv.setAttribute("aria-live", "polite");
 
