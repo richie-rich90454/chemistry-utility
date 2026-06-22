@@ -24,6 +24,9 @@ export default defineConfig(({mode})=>({
 						if (id.includes("katex")){
 							return "vendor-katex";
 						}
+						if (id.includes("gsap")){
+							return "vendor-gsap";
+						}
 						return "vendor";
 					}
 				},

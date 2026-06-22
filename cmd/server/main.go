@@ -23,8 +23,12 @@ func main() {
 
 	// Serve all static files from dist directory
 	r.Static("/assets", filepath.Join(distDir, "assets"))
+	r.Static("/src", filepath.Join(distDir, "src"))
+	r.Static("/wailsjs", filepath.Join(distDir, "wailsjs"))
 	r.StaticFile("/favicon.ico", filepath.Join(distDir, "favicon.ico"))
 	r.StaticFile("/favicon.png", filepath.Join(distDir, "favicon.png"))
+	r.StaticFile("/manifest.webmanifest", filepath.Join(distDir, "manifest.webmanifest"))
+	r.StaticFile("/robots.txt", filepath.Join(distDir, "robots.txt"))
 	r.StaticFile("/sitemap.xml", filepath.Join(distDir, "sitemap.xml"))
 	r.StaticFile("/NotoSans-VariableFont_wdth,wght.ttf", filepath.Join(distDir, "NotoSans-VariableFont_wdth,wght.ttf"))
 	r.StaticFile("/EBGaramond-VariableFont_wght.ttf", filepath.Join(distDir, "EBGaramond-VariableFont_wght.ttf"))
