@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "check-bundle-size": "node scripts/check-bundle-size.mjs"
   },
   "dependencies": {
     "gsap": "^3.15.0",

@@ -1,13 +1,50 @@
 package main
 
 import (
+	"compress/gzip"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+// gzipMiddleware compresses responses with gzip when the client
+// accepts it (Accept-Encoding contains "gzip") and the content
+// type is compressible (text/*, application/json, application/javascript, etc.).
+func gzipMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
+			c.Next()
+			return
+		}
+
+		// Wrap the ResponseWriter with a gzip writer
+		gz := gzip.NewWriter(c.Writer)
+		defer gz.Close()
+
+		c.Header("Content-Encoding", "gzip")
+		c.Header("Vary", "Accept-Encoding")
+		c.Writer = &gzipResponseWriter{Writer: gz, ResponseWriter: c.Writer}
+		c.Next()
+	}
+}
+
+// gzipResponseWriter wraps gin.ResponseWriter with a gzip.Writer.
+type gzipResponseWriter struct {
+	gin.ResponseWriter
+	Writer *gzip.Writer
+}
+
+func (w *gzipResponseWriter) Write(data []byte) (int, error) {
+	return w.Writer.Write(data)
+}
+
+func (w *gzipResponseWriter) WriteString(s string) (int, error) {
+	return w.Writer.Write([]byte(s))
+}
 
 func main() {
 	port := os.Getenv("PORT")
@@ -20,6 +57,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(gzipMiddleware())
 
 	// Serve all static files from dist directory
 	r.Static("/assets", filepath.Join(distDir, "assets"))
