@@ -8,8 +8,27 @@ import { InputValidator } from "./validation.js";
  * R is selected from the "ideal-R-units" select (atm-L or SI).
  */
 export class IdealGasLawCalculator extends SolveForCalculator {
+	private static defaultsApplied: boolean = false;
+
 	constructor() {
 		super("ideal-result", ["ideal-P", "ideal-V", "ideal-n", "ideal-T"], "ideal-solve-for");
+	}
+
+	/**
+	 * Pre-fills temperature with 298.15 K and pressure with 1 atm
+	 * when the ideal gas law calculator view is first shown.
+	 */
+	public static applyDefaults(): void {
+		if (IdealGasLawCalculator.defaultsApplied) return;
+		IdealGasLawCalculator.defaultsApplied = true;
+		let tempInput = document.getElementById("ideal-T") as HTMLInputElement;
+		let pressureInput = document.getElementById("ideal-P") as HTMLInputElement;
+		if (tempInput && tempInput.value === "") {
+			tempInput.value = "298.15";
+		}
+		if (pressureInput && pressureInput.value === "") {
+			pressureInput.value = "1";
+		}
 	}
 
 	protected performCalculation(): void {

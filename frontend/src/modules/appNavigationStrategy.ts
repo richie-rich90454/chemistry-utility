@@ -1,6 +1,10 @@
 import gsap from "gsap";
 import type { NavigationStrategy } from "./navigationManager.js";
 import { NavigationManager, CALCULATORS } from "./navigationManager.js";
+import { IdealGasLawCalculator } from "./gasLawCalculators.js";
+import { InputPersistence } from "./inputPersistence.js";
+import { UrlStateManager } from "./urlStateManager.js";
+import { ExportManager } from "./exportManager.js";
 
 const RECENT_KEY = "chem-utility-recent";
 const MAX_RECENT = 3;
@@ -57,6 +61,14 @@ export class AppNavigationStrategy implements NavigationStrategy {
 
 		manager.setActiveViewId(targetId);
 
+		// Apply smart defaults for gas law calculator
+		if (targetId === "gas-laws") {
+			IdealGasLawCalculator.applyDefaults();
+		}
+
+		// Restore persisted input values
+		this.restoreInputs(targetId);
+
 		this.updateSidebarActive(targetId);
 		this.updateTabActive(targetId);
 		this.updateSheetActive(targetId);
@@ -82,9 +94,47 @@ export class AppNavigationStrategy implements NavigationStrategy {
 		if (category) category.textContent = calc.category;
 		let calculatorView = document.querySelector(".calculator-view") as HTMLElement;
 		if (calculatorView) calculatorView.setAttribute("data-print-title", calc.name);
+
+		// Add export/share buttons if not already present
+		this.ensureExportButtons(header, targetId);
+
 		if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
 			gsap.fromTo(header, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "power2.out", clearProps: "opacity" });
 		}
+	}
+
+	private ensureExportButtons(header: HTMLElement, targetId: string): void {
+		let existing = header.querySelector(".export-actions");
+		if (existing) {
+			// Update data-target for the share button
+			let shareBtn = existing.querySelector(".share-button") as HTMLElement;
+			if (shareBtn) shareBtn.setAttribute("data-target", targetId);
+			return;
+		}
+
+		let actions = document.createElement("div");
+		actions.className = "export-actions";
+
+		let shareBtn = document.createElement("button");
+		shareBtn.className = "icon-button share-button";
+		shareBtn.setAttribute("aria-label", "Share via URL");
+		shareBtn.setAttribute("data-target", targetId);
+		shareBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
+		shareBtn.addEventListener("click", function (): void {
+			ExportManager.getInstance().shareViaUrl(targetId);
+		});
+
+		let exportBtn = document.createElement("button");
+		exportBtn.className = "icon-button";
+		exportBtn.setAttribute("aria-label", "Export history as CSV");
+		exportBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+		exportBtn.addEventListener("click", function (): void {
+			ExportManager.getInstance().exportCsv();
+		});
+
+		actions.appendChild(shareBtn);
+		actions.appendChild(exportBtn);
+		header.appendChild(actions);
 	}
 
 	private updateSidebarActive(targetId: string): void {
@@ -184,5 +234,27 @@ export class AppNavigationStrategy implements NavigationStrategy {
 				}
 			});
 		});
+	}
+
+	/**
+	 * Restores persisted input values for the given calculator view.
+	 * First checks URL params (for shared links), then falls back to localStorage.
+	 */
+	private restoreInputs(targetId: string): void {
+		let urlManager = UrlStateManager.getInstance();
+		let persistence = InputPersistence.getInstance();
+
+		// URL params take priority (for shared links)
+		let urlValues = urlManager.restoreState(targetId);
+		if (urlValues) {
+			urlManager.fillInputs(targetId, urlValues);
+			return;
+		}
+
+		// Fall back to localStorage persistence
+		let savedValues = persistence.restore(targetId);
+		if (savedValues) {
+			urlManager.fillInputs(targetId, savedValues);
+		}
 	}
 }
