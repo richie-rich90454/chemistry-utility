@@ -1,6 +1,8 @@
 import {calculateMolarMass} from "./formulaParser.js";
 import {balanceEquation} from "./equationBalancer.js";
 import {UrlStateManager} from "./urlStateManager.js";
+import {InputPersistence} from "./inputPersistence.js";
+import {ExamplePrefillManager} from "./examplePrefillManager.js";
 import {ChemicalElement} from "../types.js";
 import {NumberFormatter} from "./i18n/numberFormatter.js";
 
@@ -21,6 +23,15 @@ export class EventListenerInitializer {
 	}
 
 	public initialize(): void {
+		// Input masking for chemical formula inputs — strip invalid characters
+		this.initializeFormulaInputMasking();
+
+		// Contextual help tooltips
+		this.initializeContextualHelp();
+
+		// Worked example pre-fill click handlers
+		ExamplePrefillManager.getInstance().initialize();
+
 		// Element lookup — always available
 		(document.getElementById("element-input") as HTMLInputElement).addEventListener("keyup", () => {
 			this.lookUpElement();
@@ -252,6 +263,7 @@ export class EventListenerInitializer {
 	 */
 	private initializeUrlStateListeners(): void {
 		let urlManager = UrlStateManager.getInstance();
+		let persistence = InputPersistence.getInstance();
 		let entries = Object.entries(EventListenerInitializer.inputToViewId);
 		for (let i = 0; i < entries.length; i++) {
 			let inputId = entries[i][0];
@@ -262,7 +274,61 @@ export class EventListenerInitializer {
 			el.addEventListener(eventType, function(): void {
 				let inputs = urlManager.readInputsFromDom(viewId);
 				urlManager.updateUrl(viewId, inputs);
+				persistence.save(viewId, inputs);
 			});
+		}
+	}
+
+	/**
+	 * Adds input masking to chemical formula inputs that strips invalid characters.
+	 * Allows only: letters (a-z, A-Z), digits (0-9), parentheses, +, -, ., >, spaces.
+	 */
+	private initializeFormulaInputMasking(): void {
+		let formulaInputIds = ["element-input", "formula-input"];
+		for (let i = 0; i < formulaInputIds.length; i++) {
+			let input = document.getElementById(formulaInputIds[i]) as HTMLInputElement;
+			if (input) {
+				input.addEventListener("input", function(): void {
+					input.value = input.value.replace(/[^a-zA-Z0-9()\+\-\.\s>]/g, "");
+				});
+			}
+		}
+	}
+
+	/**
+	 * Adds contextual help tooltips (title attributes) to calculator inputs
+	 * with brief explanations of what to enter.
+	 */
+	private initializeContextualHelp(): void {
+		let tooltips: Record<string, string> = {
+			"element-input": "Enter a chemical element symbol or name, like H or Hydrogen",
+			"formula-input": "Enter a chemical formula like H2O or NaCl",
+			"equation-input": "Enter a chemical equation like H2+O2->H2O",
+			"stoich-equation-input": "Enter a balanced chemical equation like 2H2+O2->2H2O",
+			"element1-input": "Enter the first element symbol, like Na",
+			"element2-input": "Enter the second element symbol, like Cl",
+			"ideal-P": "Pressure in atm or Pa (depending on R units)",
+			"ideal-V": "Volume in L or m³ (depending on R units)",
+			"ideal-n": "Amount of gas in moles (mol)",
+			"ideal-T": "Temperature in Kelvin (K)",
+			"vdw-V": "Volume in liters (L)",
+			"vdw-n": "Amount of gas in moles (mol)",
+			"vdw-T": "Temperature in Kelvin (K)",
+			"vdw-a": "Van der Waals constant a (L² atm mol⁻²)",
+			"vdw-b": "Van der Waals constant b (L mol⁻¹)",
+			"E1": "First half-reaction reduction potential in volts (V)",
+			"E2": "Second half-reaction reduction potential in volts (V)",
+			"E-standard": "Standard cell potential in volts (V)",
+			"temperature": "Temperature in Kelvin (K)",
+			"n-electrons": "Number of moles of electrons transferred",
+			"Q-reaction": "Reaction quotient (dimensionless)"
+		};
+		let ids = Object.keys(tooltips);
+		for (let i = 0; i < ids.length; i++) {
+			let el = document.getElementById(ids[i]) as HTMLElement;
+			if (el) {
+				el.setAttribute("title", tooltips[ids[i]]);
+			}
 		}
 	}
 

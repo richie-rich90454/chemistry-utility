@@ -1,9 +1,15 @@
 import {UIHandlerInitializer} from "./modules/uiHandlers.js";
 import {EventListenerInitializer} from "./modules/eventListeners.js";
 import {initializeAppNav} from "./app-nav.js";
+import {DataCache} from "./modules/dataCache.js";
+import {PerformanceMonitor} from "./modules/performanceMonitor.js";
+import {DebugLogger} from "./modules/debugLogger.js";
+import {ValidationUIManager} from "./modules/validationUIManager.js";
+import {ScreenReaderAnnouncer} from "./modules/screenReaderAnnouncer.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	new UIHandlerInitializer().initialize();
 	initializeAppNav();
+	ValidationUIManager.getInstance().attachBlurValidators();
 
 	// Dismiss page load overlay
 	let overlay=document.querySelector(".page-overlay") as HTMLElement;
@@ -13,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			setTimeout(function():void{overlay.remove()},500);
 		},300);
 	}
-	// Load periodic table data — use Wails bindings in desktop mode, direct JSON fetch in web mode
+	// Load periodic table data — use Wails bindings in desktop mode, cache + fetch in web mode
 	async function loadPTableData(): Promise<any[]>{
 		// Check if running in Wails desktop mode
 		if (typeof window!=="undefined"&&"__wails__" in window){
@@ -21,12 +27,25 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			const data=await GetPTableData();
 			return JSON.parse(data);
 		}
-		// Direct JSON file fetch for web mode (no API server needed)
+		// Web mode: try cache first, fall back to fetch
+		let cache=DataCache.getInstance();
+		let cacheKey="ptable";
+		let cached=await cache.get(cacheKey);
+		if (cached){
+			try{
+				return JSON.parse(cached);
+			} catch{
+				// Corrupt cache — fall through to fetch
+			}
+		}
 		const response=await fetch("/ptable.json");
 		if (!response.ok){
 			throw new Error("HTTP error! status: "+response.status);
 		}
-		return response.json();
+		let data=await response.json();
+		// Cache for offline access
+		await cache.set(cacheKey, JSON.stringify(data));
+		return data;
 	}
 	loadPTableData()
 	.then(function(elementsData: any): void{
@@ -172,5 +191,39 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			});
 		});
 		sidebarFooter.insertBefore(installBtn, sidebarFooter.firstChild);
+	});
+
+	// Performance monitoring — development mode only
+	if (typeof process !== "undefined" && process.env && process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
+		try {
+			let monitor = PerformanceMonitor.getInstance();
+			monitor.measure();
+			let logger = DebugLogger.getInstance();
+			logger.info("Performance metrics", monitor.report());
+		} catch {
+			// Performance monitoring not available
+		}
+	}
+
+	// Screen reader announcements for calculation results
+	let announcer = ScreenReaderAnnouncer.getInstance();
+	let resultElements = document.querySelectorAll(".result");
+	resultElements.forEach(function(resultEl: Element): void {
+		let observer = new MutationObserver(function(): void {
+			let text = (resultEl as HTMLElement).textContent || "";
+			let trimmed = text.trim();
+			if (trimmed) {
+				// Find the calculator name from the parent card
+				let card = resultEl.closest(".main-groups.card") as HTMLElement;
+				let calcName = "";
+				if (card) {
+					let heading = card.querySelector("h2");
+					if (heading) calcName = heading.textContent || "";
+				}
+				let announcement = calcName ? calcName + " result: " + trimmed : "Result: " + trimmed;
+				announcer.announce(announcement);
+			}
+		});
+		observer.observe(resultEl, { childList: true, characterData: true, subtree: true });
 	});
 });

@@ -2,9 +2,12 @@ import gsap from "gsap";
 import { NavigationManager, CALCULATORS } from "./modules/navigationManager.js";
 import type { CalculatorInfo } from "./modules/navigationManager.js";
 import { IconRegistry } from "./modules/iconRegistry.js";
+import { ExportManager } from "./modules/exportManager.js";
+import { OnboardingManager } from "./modules/onboardingManager.js";
 
 const RECENT_KEY = "chem-utility-recent";
 const COLLAPSED_KEY = "chem-utility-sidebar-collapsed";
+const CUSTOM_SHORTCUTS_KEY = "custom-shortcuts";
 
 let paletteSelectedIndex = 0;
 
@@ -181,6 +184,7 @@ function closePalette(): void {
 
 function renderPaletteList(query: string): void {
 	let list = document.querySelector(".palette-list") as HTMLElement;
+	let input = document.querySelector(".palette-input") as HTMLInputElement;
 	if (!list) return;
 	let q = query.toLowerCase().trim();
 	let filtered = CALCULATORS.filter(function (c: CalculatorInfo): boolean {
@@ -189,6 +193,7 @@ function renderPaletteList(query: string): void {
 	});
 	if (filtered.length === 0) {
 		list.innerHTML = '<div class="palette-empty">No calculators found</div>';
+		if (input) input.removeAttribute("aria-activedescendant");
 		return;
 	}
 	let html = "";
@@ -197,7 +202,7 @@ function renderPaletteList(query: string): void {
 		if (i < 9) shortcut = "Alt+" + (i + 1);
 		else if (i === 9) shortcut = "Alt+0";
 		else if (i === 10) shortcut = "Alt+-";
-		html += '<button class="palette-item' + (i === paletteSelectedIndex ? " selected" : "") + '" data-target="' + calc.id + '">';
+		html += '<button class="palette-item' + (i === paletteSelectedIndex ? " selected" : "") + '" id="palette-item-' + i + '" data-target="' + calc.id + '" role="option">';
 		html += getIconSvg(calc.icon);
 		html += '<span class="palette-item-name">' + calc.name + '</span>';
 		html += '<span class="palette-item-category">' + calc.category + '</span>';
@@ -205,6 +210,11 @@ function renderPaletteList(query: string): void {
 		html += '</button>';
 	});
 	list.innerHTML = html;
+
+	// Set aria-activedescendant on the input to the currently selected item
+	if (input) {
+		input.setAttribute("aria-activedescendant", "palette-item-" + paletteSelectedIndex);
+	}
 
 	list.querySelectorAll(".palette-item").forEach(function (item: HTMLElement): void {
 		item.addEventListener("click", function (): void {
@@ -263,6 +273,48 @@ function initializeCommandPalette(): void {
 					}
 				}
 			}
+			// Focus trap: Tab/Shift+Tab cycle within palette
+			if (e.key === "Tab") {
+				e.preventDefault();
+				let items = document.querySelectorAll(".palette-item") as NodeListOf<HTMLElement>;
+				if (items.length === 0) {
+					input.focus();
+					return;
+				}
+				if (e.shiftKey) {
+					// Shift+Tab: if on input, go to last item; if on item, go to previous or input
+					let focusedEl = document.activeElement;
+					if (focusedEl === input) {
+						items[items.length - 1].focus();
+					} else {
+						let focusedIndex = -1;
+						items.forEach(function (item: HTMLElement, idx: number): void {
+							if (item === focusedEl) focusedIndex = idx;
+						});
+						if (focusedIndex <= 0) {
+							input.focus();
+						} else {
+							items[focusedIndex - 1].focus();
+						}
+					}
+				} else {
+					// Tab: if on input, go to first item; if on last item, go to input
+					let focusedEl = document.activeElement;
+					if (focusedEl === input) {
+						items[0].focus();
+					} else {
+						let focusedIndex = -1;
+						items.forEach(function (item: HTMLElement, idx: number): void {
+							if (item === focusedEl) focusedIndex = idx;
+						});
+						if (focusedIndex === items.length - 1 || focusedIndex === -1) {
+							input.focus();
+						} else {
+							items[focusedIndex + 1].focus();
+						}
+					}
+				}
+			}
 		}
 	});
 
@@ -275,22 +327,56 @@ function initializeCommandPalette(): void {
 }
 
 // ── Keyboard shortcuts ──
+function getCustomShortcuts(): Record<string, string> {
+	try {
+		let stored = localStorage.getItem(CUSTOM_SHORTCUTS_KEY);
+		return stored ? JSON.parse(stored) : {};
+	} catch {
+		return {};
+	}
+}
+
+function saveCustomShortcuts(shortcuts: Record<string, string>): void {
+	try {
+		localStorage.setItem(CUSTOM_SHORTCUTS_KEY, JSON.stringify(shortcuts));
+	} catch {}
+}
+
 function initializeKeyboardShortcuts(): void {
 	document.addEventListener("keydown", function (e: KeyboardEvent): void {
 		if (e.altKey && e.key >= "1" && e.key <= "9") {
 			e.preventDefault();
-			let index = parseInt(e.key) - 1;
-			if (index < CALCULATORS.length) {
-				NavigationManager.getInstance().navigate(CALCULATORS[index].id);
+			let customShortcuts = getCustomShortcuts();
+			let shortcutKey = "Alt+" + e.key;
+			let targetId = customShortcuts[shortcutKey];
+			if (targetId) {
+				NavigationManager.getInstance().navigate(targetId);
+			} else {
+				let index = parseInt(e.key) - 1;
+				if (index < CALCULATORS.length) {
+					NavigationManager.getInstance().navigate(CALCULATORS[index].id);
+				}
 			}
 		}
 		if (e.altKey && e.key === "0") {
 			e.preventDefault();
-			if (CALCULATORS.length >= 10) NavigationManager.getInstance().navigate(CALCULATORS[9].id);
+			let customShortcuts = getCustomShortcuts();
+			let targetId = customShortcuts["Alt+0"];
+			if (targetId) {
+				NavigationManager.getInstance().navigate(targetId);
+			} else {
+				if (CALCULATORS.length >= 10) NavigationManager.getInstance().navigate(CALCULATORS[9].id);
+			}
 		}
 		if (e.altKey && e.key === "-") {
 			e.preventDefault();
-			if (CALCULATORS.length >= 11) NavigationManager.getInstance().navigate(CALCULATORS[10].id);
+			let customShortcuts = getCustomShortcuts();
+			let targetId = customShortcuts["Alt+-"];
+			if (targetId) {
+				NavigationManager.getInstance().navigate(targetId);
+			} else {
+				if (CALCULATORS.length >= 11) NavigationManager.getInstance().navigate(CALCULATORS[10].id);
+			}
 		}
 	});
 }
@@ -401,6 +487,11 @@ function initializeNavSheet(): void {
 	function openSheet(): void {
 		backdrop.classList.add("open");
 		sheet.classList.add("open");
+		// Focus the first sheet item when opening
+		let firstItem = sheet.querySelector(".sheet-item") as HTMLElement;
+		if (firstItem) {
+			setTimeout(function (): void { firstItem.focus(); }, 100);
+		}
 	}
 	function closeSheet(): void {
 		backdrop.classList.remove("open");
@@ -411,6 +502,31 @@ function initializeNavSheet(): void {
 	backdrop.addEventListener("click", closeSheet);
 	document.addEventListener("keydown", function (e: KeyboardEvent): void {
 		if (e.key === "Escape") closeSheet();
+
+		// Focus trap: Tab/Shift+Tab cycle within sheet
+		if (e.key === "Tab" && sheet.classList.contains("open")) {
+			let items = sheet.querySelectorAll(".sheet-item") as NodeListOf<HTMLElement>;
+			if (items.length === 0) return;
+			e.preventDefault();
+			let focusedEl = document.activeElement;
+			let focusedIndex = -1;
+			items.forEach(function (item: HTMLElement, idx: number): void {
+				if (item === focusedEl) focusedIndex = idx;
+			});
+			if (e.shiftKey) {
+				if (focusedIndex <= 0) {
+					items[items.length - 1].focus();
+				} else {
+					items[focusedIndex - 1].focus();
+				}
+			} else {
+				if (focusedIndex === items.length - 1 || focusedIndex === -1) {
+					items[0].focus();
+				} else {
+					items[focusedIndex + 1].focus();
+				}
+			}
+		}
 	});
 
 	sheet.querySelectorAll(".sheet-item").forEach(function (item: HTMLElement): void {
@@ -507,6 +623,129 @@ function addShortcutHints(): void {
 	});
 }
 
+// ── Customizable shortcuts settings panel ──
+function initializeShortcutsSettings(): void {
+	let sidebarFooter = document.querySelector(".sidebar-footer") as HTMLElement;
+	if (!sidebarFooter) return;
+
+	let settingsBtn = document.createElement("button");
+	settingsBtn.className = "icon-button";
+	settingsBtn.setAttribute("aria-label", "Customize shortcuts");
+	settingsBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+
+	let panel: HTMLElement | null = null;
+
+	function openSettings(): void {
+		if (panel) {
+			panel.remove();
+			panel = null;
+			return;
+		}
+		panel = document.createElement("div");
+		panel.className = "shortcuts-settings-panel";
+		panel.setAttribute("role", "dialog");
+		panel.setAttribute("aria-label", "Customize keyboard shortcuts");
+
+		let customShortcuts = getCustomShortcuts();
+		let html = '<div class="shortcuts-settings-header"><span>Customize Shortcuts</span><button class="shortcuts-settings-close" aria-label="Close">&times;</button></div>';
+		html += '<div class="shortcuts-settings-body">';
+		for (let i = 1; i <= 9; i++) {
+			let key = "Alt+" + i;
+			let currentTarget = customShortcuts[key] || (i <= CALCULATORS.length ? CALCULATORS[i - 1].id : "");
+			let calcName = "";
+			for (let j = 0; j < CALCULATORS.length; j++) {
+				if (CALCULATORS[j].id === currentTarget) {
+					calcName = CALCULATORS[j].name;
+					break;
+				}
+			}
+			html += '<div class="shortcuts-settings-row">';
+			html += '<span class="shortcuts-settings-key">' + key + '</span>';
+			html += '<select class="shortcuts-settings-select" data-shortcut-key="' + key + '">';
+			html += '<option value="">Default</option>';
+			for (let j = 0; j < CALCULATORS.length; j++) {
+				let selected = CALCULATORS[j].id === currentTarget ? " selected" : "";
+				html += '<option value="' + CALCULATORS[j].id + '"' + selected + '>' + CALCULATORS[j].name + '</option>';
+			}
+			html += '</select>';
+			html += '</div>';
+		}
+		html += '</div>';
+		html += '<div class="shortcuts-settings-footer"><button class="primary-button shortcuts-settings-save">Save</button></div>';
+		panel.innerHTML = html;
+		sidebarFooter.appendChild(panel);
+
+		let closeBtn = panel.querySelector(".shortcuts-settings-close") as HTMLElement;
+		if (closeBtn) {
+			closeBtn.addEventListener("click", function (): void {
+				if (panel) { panel.remove(); panel = null; }
+			});
+		}
+
+		let saveBtn = panel.querySelector(".shortcuts-settings-save") as HTMLElement;
+		if (saveBtn) {
+			saveBtn.addEventListener("click", function (): void {
+				let newShortcuts: Record<string, string> = {};
+				let selects = panel!.querySelectorAll(".shortcuts-settings-select") as NodeListOf<HTMLSelectElement>;
+				selects.forEach(function (sel: HTMLSelectElement): void {
+					let shortcutKey = sel.getAttribute("data-shortcut-key") || "";
+					let value = sel.value;
+					if (value) {
+						newShortcuts[shortcutKey] = value;
+					}
+				});
+				saveCustomShortcuts(newShortcuts);
+				if (panel) { panel.remove(); panel = null; }
+			});
+		}
+	}
+
+	settingsBtn.addEventListener("click", openSettings);
+	sidebarFooter.insertBefore(settingsBtn, sidebarFooter.firstChild);
+}
+
+// ── Dynamic prefetching of adjacent calculator modules ──
+const prefetchedModules = new Set<string>();
+
+/** Maps calculator IDs to their dynamic import modules for prefetching. */
+const CALCULATOR_MODULES: Record<string, () => Promise<any>> = {
+	"dilution-calc": () => import("./modules/solutionCalculators.js"),
+	"mass-percent-calc": () => import("./modules/solutionCalculators.js"),
+	"solution-mixing-calc": () => import("./modules/solutionCalculators.js"),
+	"gas-laws": () => import("./modules/gasLawCalculators.js"),
+	"nuclear-chemistry": () => import("./modules/gasLawCalculators.js"),
+	"electrochemistry": () => import("./modules/electrochemistryCalculators.js"),
+	"stoichiometry": () => import("./modules/stoichiometryCalculator.js"),
+	"bond-type-predictor": () => import("./modules/bondPredictor.js"),
+};
+
+function prefetchAdjacentCalculators(currentId: string): void {
+	let currentIndex = -1;
+	for (let i = 0; i < CALCULATORS.length; i++) {
+		if (CALCULATORS[i].id === currentId) {
+			currentIndex = i;
+			break;
+		}
+	}
+	if (currentIndex === -1) return;
+
+	// Prefetch previous and next calculator modules
+	let adjacentIndices = [currentIndex - 1, currentIndex + 1];
+	for (let i = 0; i < adjacentIndices.length; i++) {
+		let idx = adjacentIndices[i];
+		if (idx >= 0 && idx < CALCULATORS.length) {
+			let adjacentId = CALCULATORS[idx].id;
+			if (!prefetchedModules.has(adjacentId) && CALCULATOR_MODULES[adjacentId]) {
+				prefetchedModules.add(adjacentId);
+				// Fire and forget — the import will be cached for later use
+				CALCULATOR_MODULES[adjacentId]().catch(function (): void {
+					// Prefetch failed — non-critical, ignore
+				});
+			}
+		}
+	}
+}
+
 // ── Main initialization ──
 export function initializeAppNav(): void {
 	let isAppView = document.querySelector(".app-view") !== null;
@@ -529,6 +768,7 @@ export function initializeAppNav(): void {
 	initializeSidebarCollapse();
 	initializeBottomTabs();
 	initializeNavSheet();
+	initializeShortcutsSettings();
 
 	// Favorites
 	manager.renderFavorites();
@@ -552,13 +792,54 @@ export function initializeAppNav(): void {
 
 	// Sidebar link click handlers (override scroll behavior)
 	let sidebarLinks = document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
-	sidebarLinks.forEach(function (link: HTMLElement): void {
+	sidebarLinks.forEach(function (link: HTMLElement, index: number): void {
+		// Roving tabindex: only the first link has tabindex="0", all others have tabindex="-1"
+		link.setAttribute("tabindex", index === 0 ? "0" : "-1");
+
 		link.addEventListener("click", function (e: MouseEvent): void {
 			e.preventDefault();
 			let href = link.getAttribute("href");
 			if (href) {
 				let targetId = href.charAt(0) === "/" || href.charAt(0) === "#" ? href.slice(1) : href;
 				manager.navigate(targetId);
+				prefetchAdjacentCalculators(targetId);
+			}
+		});
+
+		// Roving tabindex: Arrow Up/Down moves focus between links
+		link.addEventListener("keydown", function (e: KeyboardEvent): void {
+			let links = document.querySelectorAll(".sidebar-nav a") as NodeListOf<HTMLElement>;
+			let currentIdx = -1;
+			links.forEach(function (l: HTMLElement, i: number): void {
+				if (l === link) currentIdx = i;
+			});
+
+			if (e.key === "ArrowDown") {
+				e.preventDefault();
+				let nextIdx = currentIdx + 1;
+				if (nextIdx < links.length) {
+					link.setAttribute("tabindex", "-1");
+					links[nextIdx].setAttribute("tabindex", "0");
+					links[nextIdx].focus();
+				}
+			} else if (e.key === "ArrowUp") {
+				e.preventDefault();
+				let prevIdx = currentIdx - 1;
+				if (prevIdx >= 0) {
+					link.setAttribute("tabindex", "-1");
+					links[prevIdx].setAttribute("tabindex", "0");
+					links[prevIdx].focus();
+				}
+			} else if (e.key === "Home") {
+				e.preventDefault();
+				link.setAttribute("tabindex", "-1");
+				links[0].setAttribute("tabindex", "0");
+				links[0].focus();
+			} else if (e.key === "End") {
+				e.preventDefault();
+				link.setAttribute("tabindex", "-1");
+				links[links.length - 1].setAttribute("tabindex", "0");
+				links[links.length - 1].focus();
 			}
 		});
 	});
@@ -589,4 +870,12 @@ export function initializeAppNav(): void {
 			showWelcome();
 		}
 	});
+
+	// First-run onboarding tour
+	let onboarding = OnboardingManager.getInstance();
+	if (onboarding.isFirstRun()) {
+		setTimeout(function (): void {
+			onboarding.startTour();
+		}, 1000);
+	}
 }
