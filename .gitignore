@@ -189,6 +189,11 @@ go.work.sum
 
 # env file
 
+# Playwright browsers
+.playwright-browsers/
+playwright-report/
+test-results/
+
 # Editor/IDE
 .idea/
 .vscode/

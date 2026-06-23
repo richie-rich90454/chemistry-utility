@@ -23,6 +23,10 @@ jobs:
         run: cd frontend && npm install
       - name: Run frontend tests
         run: cd frontend && npm test
+      - name: Install Playwright browsers
+        run: cd frontend && npx playwright install chromium
+      - name: Run Playwright E2E tests
+        run: cd frontend && npx playwright test
       - name: Build frontend
         run: cd frontend && npm run build
       - name: Run Go tests
