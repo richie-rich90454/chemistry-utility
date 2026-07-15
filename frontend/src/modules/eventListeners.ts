@@ -209,24 +209,24 @@ export class EventListenerInitializer {
 			case "dilution":
 			case "mass-percent":
 			case "mixing": {
-				return import("./solutionCalculators.js");
+				return import("./solutionCalculators.js") as Promise<unknown> as Promise<CalculatorModule>;
 			}
 			case "ideal-gas":
 			case "combined-gas":
 			case "vdw":
 			case "half-life": {
-				return Promise.resolve(gasLawCalculators);
+				return Promise.resolve(gasLawCalculators as unknown as CalculatorModule);
 			}
 			case "cell-potential":
 			case "nernst":
 			case "electrolysis": {
-				return import("./electrochemistryCalculators.js");
+				return import("./electrochemistryCalculators.js") as Promise<unknown> as Promise<CalculatorModule>;
 			}
 			case "bond-type": {
-				return import("./bondPredictor.js");
+				return import("./bondPredictor.js") as Promise<unknown> as Promise<CalculatorModule>;
 			}
 			case "stoichiometry": {
-				return import("./stoichiometryCalculator.js");
+				return import("./stoichiometryCalculator.js") as Promise<unknown> as Promise<CalculatorModule>;
 			}
 			default:
 				throw new Error("Unknown calculator: " + calculatorId);
