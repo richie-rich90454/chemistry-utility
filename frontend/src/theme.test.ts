@@ -162,7 +162,7 @@ describe("CSS custom properties for form elements", () => {
         const input = document.createElement("input");
         input.type = "text";
         document.body.appendChild(input);
-        const cs = window.getComputedStyle(input);
+        const _cs = window.getComputedStyle(input);
         // In jsdom, computed style may not reflect CSS file values
         // but we can verify the element was created
         expect(input.tagName).toBe("INPUT");

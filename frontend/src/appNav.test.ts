@@ -467,10 +467,10 @@ describe("initializeAppNav", () => {
 
     it("command palette ArrowDown moves selection", () => {
         initializeAppNav();
-        const input = document.querySelector(".palette-input") as HTMLInputElement;
+        const _input = document.querySelector(".palette-input") as HTMLInputElement;
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true }));
         document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
-        const items = document.querySelectorAll(".palette-item");
+        const _items = document.querySelectorAll(".palette-item");
         const selected = document.querySelector(".palette-item.selected");
         expect(selected).not.toBeNull();
     });
