@@ -29,6 +29,11 @@ type CalculatorModule = {
 	calculateHeatCapacity(): void;
 	calculateBondEnthalpy(): void;
 	calculateBornHaberCycle(): void;
+	calculateArrhenius(): void;
+	calculateRateLaw(): void;
+	calculateIntegratedRateLaw(): void;
+	calculateReactionOrder(): void;
+	calculateCollisionTheory(): void;
 };
 
 /**
@@ -168,6 +173,22 @@ export class EventListenerInitializer {
 		(document.getElementById("calculate-born-haber") as HTMLButtonElement).addEventListener("click", () => {
 			this.ensureCalculator("born-haber").then((mod) => { mod.calculateBornHaberCycle(); });
 		});
+		// Kinetics calculators — lazy
+		(document.getElementById("calculate-arrhenius") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("arrhenius").then((mod) => { mod.calculateArrhenius(); });
+		});
+		(document.getElementById("calculate-rate-law") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("rate-law").then((mod) => { mod.calculateRateLaw(); });
+		});
+		(document.getElementById("calculate-integrated-rate-law") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("integrated-rate-law").then((mod) => { mod.calculateIntegratedRateLaw(); });
+		});
+		(document.getElementById("calculate-reaction-order") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("reaction-order").then((mod) => { mod.calculateReactionOrder(); });
+		});
+		(document.getElementById("calculate-collision-theory") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("collision-theory").then((mod) => { mod.calculateCollisionTheory(); });
+		});
 		// Enter key support for calculator inputs — lazy
 		this.addLazyEnterListener("dilution-M1", "dilution", (mod) => { mod.calculateDilution(); });
 		this.addLazyEnterListener("dilution-V1", "dilution", (mod) => { mod.calculateDilution(); });
@@ -227,6 +248,27 @@ export class EventListenerInitializer {
 		this.addLazyEnterListener("born-haber-IE", "born-haber", (mod) => { mod.calculateBornHaberCycle(); });
 		this.addLazyEnterListener("born-haber-dHdiss", "born-haber", (mod) => { mod.calculateBornHaberCycle(); });
 		this.addLazyEnterListener("born-haber-EA", "born-haber", (mod) => { mod.calculateBornHaberCycle(); });
+
+		// Kinetics enter key support
+		this.addLazyEnterListener("arrhenius-A", "arrhenius", (mod) => { mod.calculateArrhenius(); });
+		this.addLazyEnterListener("arrhenius-Ea", "arrhenius", (mod) => { mod.calculateArrhenius(); });
+		this.addLazyEnterListener("arrhenius-T", "arrhenius", (mod) => { mod.calculateArrhenius(); });
+		this.addLazyEnterListener("arrhenius-k", "arrhenius", (mod) => { mod.calculateArrhenius(); });
+		this.addLazyEnterListener("ratelaw-A1", "rate-law", (mod) => { mod.calculateRateLaw(); });
+		this.addLazyEnterListener("ratelaw-B1", "rate-law", (mod) => { mod.calculateRateLaw(); });
+		this.addLazyEnterListener("ratelaw-rate1", "rate-law", (mod) => { mod.calculateRateLaw(); });
+		this.addLazyEnterListener("ratelaw-A2", "rate-law", (mod) => { mod.calculateRateLaw(); });
+		this.addLazyEnterListener("ratelaw-B2", "rate-law", (mod) => { mod.calculateRateLaw(); });
+		this.addLazyEnterListener("ratelaw-rate2", "rate-law", (mod) => { mod.calculateRateLaw(); });
+		this.addLazyEnterListener("irl-A0", "integrated-rate-law", (mod) => { mod.calculateIntegratedRateLaw(); });
+		this.addLazyEnterListener("irl-k", "integrated-rate-law", (mod) => { mod.calculateIntegratedRateLaw(); });
+		this.addLazyEnterListener("irl-t", "integrated-rate-law", (mod) => { mod.calculateIntegratedRateLaw(); });
+		this.addLazyEnterListener("irl-A", "integrated-rate-law", (mod) => { mod.calculateIntegratedRateLaw(); });
+		this.addLazyEnterListener("collision-Ea", "collision-theory", (mod) => { mod.calculateCollisionTheory(); });
+		this.addLazyEnterListener("collision-T", "collision-theory", (mod) => { mod.calculateCollisionTheory(); });
+		this.addLazyEnterListener("collision-Z", "collision-theory", (mod) => { mod.calculateCollisionTheory(); });
+		this.addLazyEnterListener("collision-p", "collision-theory", (mod) => { mod.calculateCollisionTheory(); });
+		this.addLazyEnterListener("collision-k", "collision-theory", (mod) => { mod.calculateCollisionTheory(); });
 
 		// URL state management — attach input/change listeners for debounced URL updates
 		this.initializeUrlStateListeners();
@@ -291,6 +333,21 @@ export class EventListenerInitializer {
 					return mod as CalculatorModule;
 				}) as Promise<unknown> as Promise<CalculatorModule>;
 			}
+			case "arrhenius":
+			case "rate-law":
+			case "integrated-rate-law":
+			case "reaction-order":
+			case "collision-theory": {
+				return import("./kineticsCalculators.js").then(function(mod: any): CalculatorModule {
+					let registry = CalculatorRegistry.getInstance();
+					registry.register("arrhenius", new mod.ArrheniusCalculator());
+					registry.register("rate-law", new mod.RateLawCalculator());
+					registry.register("integrated-rate-law", new mod.IntegratedRateLawCalculator());
+					registry.register("reaction-order", new mod.ReactionOrderCalculator());
+					registry.register("collision-theory", new mod.CollisionTheoryCalculator());
+					return mod as CalculatorModule;
+				}) as Promise<unknown> as Promise<CalculatorModule>;
+			}
 			default:
 				throw new Error("Unknown calculator: " + calculatorId);
 		}
@@ -347,6 +404,16 @@ export class EventListenerInitializer {
 		"born-haber-dHf": "thermodynamics", "born-haber-dHsub": "thermodynamics",
 		"born-haber-IE": "thermodynamics", "born-haber-dHdiss": "thermodynamics",
 		"born-haber-EA": "thermodynamics",
+		"arrhenius-solve-for": "kinetics", "arrhenius-A": "kinetics",
+		"arrhenius-Ea": "kinetics", "arrhenius-T": "kinetics", "arrhenius-k": "kinetics",
+		"ratelaw-A1": "kinetics", "ratelaw-B1": "kinetics", "ratelaw-rate1": "kinetics",
+		"ratelaw-A2": "kinetics", "ratelaw-B2": "kinetics", "ratelaw-rate2": "kinetics",
+		"irl-solve-for": "kinetics", "irl-order": "kinetics",
+		"irl-A0": "kinetics", "irl-k": "kinetics", "irl-t": "kinetics", "irl-A": "kinetics",
+		"reaction-order-data": "kinetics",
+		"collision-solve-for": "kinetics", "collision-Ea": "kinetics",
+		"collision-T": "kinetics", "collision-Z": "kinetics",
+		"collision-p": "kinetics", "collision-k": "kinetics",
 	};
 
 	/**

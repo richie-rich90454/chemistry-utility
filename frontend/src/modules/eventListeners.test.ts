@@ -39,6 +39,34 @@ vi.mock("./bondPredictor", () => ({
 	predictBondType: vi.fn(),
 }));
 
+vi.mock("./thermodynamicsCalculators", () => ({
+	calculateGibbsFreeEnergy: vi.fn(),
+	calculateHessLaw: vi.fn(),
+	calculateEntropy: vi.fn(),
+	calculateHeatCapacity: vi.fn(),
+	calculateBondEnthalpy: vi.fn(),
+	calculateBornHaberCycle: vi.fn(),
+	GibbsFreeEnergyCalculator: vi.fn(),
+	HessLawCalculator: vi.fn(),
+	EntropyCalculator: vi.fn(),
+	HeatCapacityCalculator: vi.fn(),
+	BondEnthalpyCalculator: vi.fn(),
+	BornHaberCycleCalculator: vi.fn(),
+}));
+
+vi.mock("./kineticsCalculators", () => ({
+	calculateArrhenius: vi.fn(),
+	calculateRateLaw: vi.fn(),
+	calculateIntegratedRateLaw: vi.fn(),
+	calculateReactionOrder: vi.fn(),
+	calculateCollisionTheory: vi.fn(),
+	ArrheniusCalculator: vi.fn(),
+	RateLawCalculator: vi.fn(),
+	IntegratedRateLawCalculator: vi.fn(),
+	ReactionOrderCalculator: vi.fn(),
+	CollisionTheoryCalculator: vi.fn(),
+}));
+
 vi.mock("./urlStateManager", () => ({
 	UrlStateManager: {
 		getInstance: vi.fn(() => ({
@@ -137,6 +165,21 @@ function setupFullDOM(): void {
 	createElement("button", { id: "calculate-bond-type" });
 	createElement("div", { id: "bond-result" });
 
+	// Thermodynamics
+	createElement("button", { id: "calculate-gibbs" });
+	createElement("button", { id: "calculate-hess" });
+	createElement("button", { id: "calculate-entropy" });
+	createElement("button", { id: "calculate-heat-capacity" });
+	createElement("button", { id: "calculate-bond-enthalpy" });
+	createElement("button", { id: "calculate-born-haber" });
+
+	// Kinetics
+	createElement("button", { id: "calculate-arrhenius" });
+	createElement("button", { id: "calculate-rate-law" });
+	createElement("button", { id: "calculate-integrated-rate-law" });
+	createElement("button", { id: "calculate-reaction-order" });
+	createElement("button", { id: "calculate-collision-theory" });
+
 	// Enter key inputs - dilution
 	for (const id of ["dilution-M1", "dilution-V1", "dilution-M2", "dilution-V2"]) {
 		createElement("input", { id });
@@ -175,6 +218,37 @@ function setupFullDOM(): void {
 	}
 	// Bond predictor inputs
 	for (const id of ["element1-input", "element2-input"]) {
+		createElement("input", { id });
+	}
+	// Thermodynamics enter key inputs
+	for (const id of ["gibbs-deltaH", "gibbs-deltaS", "gibbs-T"]) {
+		createElement("input", { id });
+	}
+	createElement("input", { id: "hess-steps" });
+	for (const id of ["entropy-products", "entropy-reactants"]) {
+		createElement("input", { id });
+	}
+	for (const id of ["heat-cap-mass", "heat-cap-specific-heat", "heat-cap-initial-temp", "heat-cap-final-temp", "heat-cap-heat"]) {
+		createElement("input", { id });
+	}
+	for (const id of ["bond-enthalpy-broken", "bond-enthalpy-formed"]) {
+		createElement("input", { id });
+	}
+	for (const id of ["born-haber-dHf", "born-haber-dHsub", "born-haber-IE", "born-haber-dHdiss", "born-haber-EA"]) {
+		createElement("input", { id });
+	}
+	// Kinetics enter key inputs
+	for (const id of ["arrhenius-A", "arrhenius-Ea", "arrhenius-T", "arrhenius-k"]) {
+		createElement("input", { id });
+	}
+	for (const id of ["ratelaw-A1", "ratelaw-B1", "ratelaw-rate1", "ratelaw-A2", "ratelaw-B2", "ratelaw-rate2"]) {
+		createElement("input", { id });
+	}
+	for (const id of ["irl-A0", "irl-k", "irl-t", "irl-A"]) {
+		createElement("input", { id });
+	}
+	createElement("input", { id: "reaction-order-data" });
+	for (const id of ["collision-Ea", "collision-T", "collision-Z", "collision-p", "collision-k"]) {
 		createElement("input", { id });
 	}
 }
