@@ -74,6 +74,6 @@ export class ScreenReaderAnnouncer {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		ScreenReaderAnnouncer.instance = null as any;
+		ScreenReaderAnnouncer.instance = null as unknown as ScreenReaderAnnouncer;
 	}
 }
