@@ -6,6 +6,23 @@ import {ExamplePrefillManager} from "./examplePrefillManager.js";
 import {ChemicalElement} from "../types.js";
 import {NumberFormatter} from "./i18n/numberFormatter.js";
 
+/** Shape of a dynamically-imported calculator module. */
+type CalculatorModule = {
+	calculateDilution?(): void;
+	calculateMassPercent?(): void;
+	calculateMixing?(): void;
+	calculateIdealGasLaw?(): void;
+	calculateCombinedGasLaw?(): void;
+	calculateVanDerWaals?(): void;
+	calculateHalfLife?(): void;
+	calculateCellPotential?(): void;
+	calculateNernst?(): void;
+	calculateElectrolysis?(): void;
+	predictBondType?(elementsData: ChemicalElement[]): void;
+	getCalculationType?(equation: string): void;
+	calculateStoichiometry?(equation: string): void;
+};
+
 /**
  * Encapsulates all DOM event listener wiring for the chemistry utility
  * calculators. Uses dynamic {@link import()} to load calculator modules
@@ -16,7 +33,7 @@ export class EventListenerInitializer {
 	private elementsData: ChemicalElement[];
 
 	/** Cache of pending dynamic-import promises keyed by calculator group. */
-	private moduleCache: Map<string, Promise<void>> = new Map();
+	private moduleCache: Map<string, Promise<CalculatorModule>> = new Map();
 
 	constructor(elementsData: ChemicalElement[]) {
 		this.elementsData = elementsData;
@@ -58,9 +75,9 @@ export class EventListenerInitializer {
 			this.ensureCalculator("stoichiometry").then((mod) => {
 				try {
 					mod.calculateStoichiometry(equation);
-				} catch (e: any) {
+				} catch (e: unknown) {
 					let result = document.getElementById("stoichiometry-result") as HTMLElement;
-					if (result) result.textContent = e.message || "An error occurred";
+					if (result) result.textContent = (e instanceof Error ? e.message : "An error occurred");
 				}
 			});
 		});
@@ -118,9 +135,9 @@ export class EventListenerInitializer {
 			this.ensureCalculator("bond-type").then((mod) => {
 				try {
 					mod.predictBondType(this.elementsData);
-				} catch (e: any) {
+				} catch (e: unknown) {
 					let result = document.getElementById("bond-result") as HTMLElement;
-					if (result) result.textContent = e.message || "An error occurred";
+					if (result) result.textContent = (e instanceof Error ? e.message : "An error occurred");
 				}
 			});
 		});
@@ -173,7 +190,7 @@ export class EventListenerInitializer {
 	 * Uses dynamic {@link import()} on first access and caches the result
 	 * so subsequent calls resolve immediately.
 	 */
-	private async ensureCalculator(calculatorId: string): Promise<any> {
+	private async ensureCalculator(calculatorId: string): Promise<CalculatorModule> {
 		let pending = this.moduleCache.get(calculatorId);
 		if (pending) return pending;
 
@@ -186,7 +203,7 @@ export class EventListenerInitializer {
 	 * Dynamically imports the calculator module for the given id.
 	 * Returns the module exports so callers can invoke calculator functions.
 	 */
-	private async loadCalculatorModule(calculatorId: string): Promise<any> {
+	private async loadCalculatorModule(calculatorId: string): Promise<CalculatorModule> {
 		switch (calculatorId) {
 			case "dilution":
 			case "mass-percent":
@@ -215,7 +232,7 @@ export class EventListenerInitializer {
 		}
 	}
 
-	private addLazyEnterListener(id: string, calculatorId: string, handler: (mod: any) => void): void {
+	private addLazyEnterListener(id: string, calculatorId: string, handler: (mod: CalculatorModule) => void): void {
 		let el = document.getElementById(id) as HTMLInputElement;
 		if (el) el.addEventListener("keyup", (e: KeyboardEvent) => {
 			if (e.key === "Enter") {
