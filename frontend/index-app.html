@@ -29,6 +29,7 @@
             <symbol id="icon-scroll-top" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></symbol>
             <symbol id="icon-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></symbol>
             <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+            <symbol id="icon-thermodynamics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M9 9h6"/><path d="M9 12h6"/><path d="M9 15h6"/><circle cx="12" cy="19" r="3"/><path d="M10 5h4"/><path d="M10 7h4"/></symbol>
         </svg>
         <div class="page-overlay"><div class="loader"></div></div>
         <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -52,6 +53,7 @@
                     <span class="search-icon"><svg aria-hidden="true" focusable="false"><use href="#icon-search"></use></svg></span>
                     <input type="text" placeholder="Search calculators..." aria-label="Search calculators">
                 </div>
+                <div id="sidebar-auth-section"></div>
                 <div class="nav-recent"></div>
                 <nav class="sidebar-nav">
                     <ul>
@@ -67,6 +69,8 @@
                         <li><a href="#nuclear-chemistry"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-nuclear"></use></svg><span class="nav-label">Nuclear</span></a></li>
                         <li><a href="#gas-laws"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-gas-laws"></use></svg><span class="nav-label">Gas Laws</span></a></li>
                         <li><a href="#electrochemistry"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-electrochemistry"></use></svg><span class="nav-label">Electrochemistry</span></a></li>
+                        <li class="nav-category">Thermodynamics</li>
+                        <li><a href="#thermodynamics"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-thermodynamics"></use></svg><span class="nav-label">Thermodynamics</span></a></li>
                         <li class="nav-category">Reactions &amp; Bonds</li>
                         <li><a href="#stoichiometry"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-stoichiometry"></use></svg><span class="nav-label">Stoichiometry</span></a></li>
                         <li><a href="#bond-type-predictor"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-bond-type"></use></svg><span class="nav-label">Bond Type</span></a></li>
@@ -336,6 +340,104 @@
                             </details>
                         </div>
                     </div>
+                    <div id="thermodynamics" class="main-groups card view-hidden">
+                        <h2>Thermodynamics</h2>
+                        <div id="gibbs-free-energy">
+                            <h3>Gibbs Free Energy Calculator</h3>
+                            <p>Calculate Gibbs free energy and determine reaction spontaneity.</p>
+                            <label>Gibbs free energy parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="gibbs-deltaH" placeholder="ΔH (kJ/mol)" step="any" aria-label="Enthalpy change">
+                                <input type="number" id="gibbs-deltaS" placeholder="ΔS (J/(mol·K))" step="any" aria-label="Entropy change">
+                                <input type="number" id="gibbs-T" placeholder="T (K)" step="any" aria-label="Temperature">
+                            </div>
+                            <button id="calculate-gibbs" class="primary-button">Calculate ΔG</button>
+                            <div id="gibbs-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Try ΔH=-100 kJ/mol, ΔS=200 J/(mol·K), T=298 K. ΔG = -159.6 kJ/mol (Spontaneous).</p>
+                            </details>
+                        </div>
+                        <div id="hess-law">
+                            <h3>Hess's Law Calculator</h3>
+                            <p>Calculate total ΔH from multiple reaction steps (2-10 values).</p>
+                            <label for="hess-steps">ΔH values (comma-separated, kJ/mol)</label>
+                            <input type="text" id="hess-steps" placeholder="E.g., -100, 50, -200" aria-label="Enthalpy steps">
+                            <button id="calculate-hess" class="primary-button">Calculate Total ΔH</button>
+                            <div id="hess-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Try entering -100, 50, -200 to get total ΔH = -250 kJ/mol.</p>
+                            </details>
+                        </div>
+                        <div id="entropy-change">
+                            <h3>Entropy Change Calculator</h3>
+                            <p>Calculate the standard entropy change of a reaction.</p>
+                            <label>Entropy values</label>
+                            <div class="input-group">
+                                <input type="text" id="entropy-products" placeholder="Products S° (comma-separated, J/(mol·K))" aria-label="Product entropies">
+                                <input type="text" id="entropy-reactants" placeholder="Reactants S° (comma-separated, J/(mol·K))" aria-label="Reactant entropies">
+                            </div>
+                            <button id="calculate-entropy" class="primary-button">Calculate ΔS°</button>
+                            <div id="entropy-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Try products: 188.8, reactants: 130.7, 205.2 to get ΔS° = -147.1 J/(mol·K).</p>
+                            </details>
+                        </div>
+                        <div id="heat-capacity">
+                            <h3>Heat Capacity Calculator</h3>
+                            <p>Solve for:</p>
+                            <label for="heat-cap-solve-for">Solve for</label>
+                            <select id="heat-cap-solve-for" aria-label="Select heat capacity parameter to solve for">
+                                <option value="q">Heat (q)</option>
+                                <option value="c">Specific Heat (c)</option>
+                                <option value="deltaT">Temperature Change (ΔT)</option>
+                                <option value="Tfinal">Final Temperature (T<sub>final</sub>)</option>
+                            </select>
+                            <label>Heat capacity parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="heat-cap-mass" placeholder="Mass (g)" step="any" aria-label="Mass">
+                                <input type="number" id="heat-cap-specific-heat" placeholder="Specific heat (J/(g·K))" step="any" aria-label="Specific heat">
+                                <input type="number" id="heat-cap-initial-temp" placeholder="Initial temp (K)" step="any" aria-label="Initial temperature">
+                                <input type="number" id="heat-cap-final-temp" placeholder="Final temp (K)" step="any" aria-label="Final temperature">
+                                <input type="number" id="heat-cap-heat" placeholder="Heat (J)" step="any" aria-label="Heat">
+                            </div>
+                            <button id="calculate-heat-capacity" class="primary-button">Calculate</button>
+                            <div id="heat-capacity-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Try solving for q: mass=100 g, specific heat=4.184 J/(g·K), initial temp=25 K, final temp=75 K. Result: q=20920 J.</p>
+                            </details>
+                        </div>
+                        <div id="bond-enthalpy">
+                            <h3>Bond Enthalpy Calculator</h3>
+                            <p>Estimate reaction enthalpy from bond energies.</p>
+                            <label>Bond information</label>
+                            <div class="input-group">
+                                <input type="text" id="bond-enthalpy-broken" placeholder="Bonds broken (e.g., C-H:4,H-H)" aria-label="Bonds broken">
+                                <input type="text" id="bond-enthalpy-formed" placeholder="Bonds formed (e.g., C-C:2,O-H:2)" aria-label="Bonds formed">
+                            </div>
+                            <button id="calculate-bond-enthalpy" class="primary-button">Calculate ΔH</button>
+                            <div id="bond-enthalpy-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Try broken: H-H:1,O=O:1 and formed: O-H:2. Use bond:type format for counts.</p>
+                            </details>
+                        </div>
+                        <div id="born-haber">
+                            <h3>Born-Haber Cycle Calculator</h3>
+                            <p>Calculate lattice energy from the Born-Haber cycle.</p>
+                            <label>Born-Haber cycle parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="born-haber-dHf" placeholder="ΔHf (kJ/mol)" step="any" aria-label="Enthalpy of formation">
+                                <input type="number" id="born-haber-dHsub" placeholder="ΔHsub (kJ/mol)" step="any" aria-label="Enthalpy of sublimation">
+                                <input type="number" id="born-haber-IE" placeholder="IE (kJ/mol)" step="any" aria-label="Ionization energy">
+                                <input type="number" id="born-haber-dHdiss" placeholder="ΔHdiss (kJ/mol)" step="any" aria-label="Enthalpy of dissociation">
+                                <input type="number" id="born-haber-EA" placeholder="EA (kJ/mol)" step="any" aria-label="Electron affinity">
+                            </div>
+                            <button id="calculate-born-haber" class="primary-button">Calculate Lattice Energy</button>
+                            <div id="born-haber-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Try NaCl: ΔHf=-411, ΔHsub=108, IE=496, ΔHdiss=244, EA=-349. Lattice energy U ≈ -787 kJ/mol.</p>
+                            </details>
+                        </div>
+                    </div>
                     <div id="stoichiometry" class="main-groups card view-hidden">
                         <h2>Stoichiometry Calculator</h2>
                         <p>Enter the balanced chemical equation:</p>
@@ -414,6 +516,7 @@
             </div>
             <div class="palette-list" id="palette-list" role="listbox"></div>
         </div>
+        <div id="auth-modal-container"></div>
         <script type="module" src="/src/script.ts"></script>
         <script type="module" src="/src/render.ts" defer></script>
         <script type="module" src="/src/animate.ts" defer></script>
