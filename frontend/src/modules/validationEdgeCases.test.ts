@@ -114,7 +114,7 @@ describe("validateInputs - edge cases", () => {
         input.type = "number";
         document.body.appendChild(input);
 
-        expect(() => validateInputs([undefined as any], ["undef-test"])).toThrow();
+        expect(() => validateInputs([undefined as unknown as number], ["undef-test"])).toThrow();
     });
 });
 
