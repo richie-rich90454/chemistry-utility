@@ -165,6 +165,6 @@ export class ExamplePrefillManager {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		ExamplePrefillManager.instance = null as any;
+		ExamplePrefillManager.instance = null as unknown as ExamplePrefillManager;
 	}
 }
