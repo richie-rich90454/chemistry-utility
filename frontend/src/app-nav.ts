@@ -651,13 +651,6 @@ function initializeShortcutsSettings(): void {
 		for (let i = 1; i <= 9; i++) {
 			let key = "Alt+" + i;
 			let currentTarget = customShortcuts[key] || (i <= CALCULATORS.length ? CALCULATORS[i - 1].id : "");
-			let _calcName = "";
-			for (let j = 0; j < CALCULATORS.length; j++) {
-				if (CALCULATORS[j].id === currentTarget) {
-					_calcName = CALCULATORS[j].name;
-					break;
-				}
-			}
 			html += '<div class="shortcuts-settings-row">';
 			html += '<span class="shortcuts-settings-key">' + key + '</span>';
 			html += '<select class="shortcuts-settings-select" data-shortcut-key="' + key + '">';

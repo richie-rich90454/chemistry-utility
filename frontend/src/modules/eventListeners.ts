@@ -9,19 +9,19 @@ import * as gasLawCalculators from "./gasLawCalculators.js";
 
 /** Shape of a dynamically-imported calculator module. */
 type CalculatorModule = {
-	calculateDilution?(): void;
-	calculateMassPercent?(): void;
-	calculateMixing?(): void;
-	calculateIdealGasLaw?(): void;
-	calculateCombinedGasLaw?(): void;
-	calculateVanDerWaals?(): void;
-	calculateHalfLife?(): void;
-	calculateCellPotential?(): void;
-	calculateNernst?(): void;
-	calculateElectrolysis?(): void;
-	predictBondType?(elementsData: ChemicalElement[]): void;
-	getCalculationType?(equation: string): void;
-	calculateStoichiometry?(equation: string): void;
+	calculateDilution(): void;
+	calculateMassPercent(): void;
+	calculateMixing(): void;
+	calculateIdealGasLaw(): void;
+	calculateCombinedGasLaw(): void;
+	calculateVanDerWaals(): void;
+	calculateHalfLife(): void;
+	calculateCellPotential(): void;
+	calculateNernst(): void;
+	calculateElectrolysis(): void;
+	predictBondType(elementsData: ChemicalElement[]): void;
+	getCalculationType(equation: string): void;
+	calculateStoichiometry(equation: string): void;
 };
 
 /**
