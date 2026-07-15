@@ -1,6 +1,7 @@
 import {UIHandlerInitializer} from "./modules/uiHandlers.js";
 import {EventListenerInitializer} from "./modules/eventListeners.js";
 import {initializeAppNav} from "./app-nav.js";
+import {ChemicalElement} from "./types.js";
 import {DataCache} from "./modules/dataCache.js";
 import {PerformanceMonitor} from "./modules/performanceMonitor.js";
 import {DebugLogger} from "./modules/debugLogger.js";
@@ -20,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		},300);
 	}
 	// Load periodic table data — use Wails bindings in desktop mode, cache + fetch in web mode
-	async function loadPTableData(): Promise<any[]>{
+	async function loadPTableData(): Promise<ChemicalElement[]>{
 		// Check if running in Wails desktop mode
 		if (typeof window!=="undefined"&&"__wails__" in window){
 			const {GetPTableData}=await import("../wailsjs/go/main/PTableService.js");
@@ -48,7 +49,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		return data;
 	}
 	loadPTableData()
-	.then(function(elementsData: any): void{
+	.then(function(elementsData: ChemicalElement[]): void{
 		new EventListenerInitializer(elementsData).initialize();
 	})
 	.catch(function(error: Error): void{
