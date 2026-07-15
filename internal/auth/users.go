@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
+
 	"chemistry-utility/internal/db"
 	"github.com/google/uuid"
 )
@@ -12,6 +14,32 @@ type UserService struct {
 	store         *db.UserStore
 	jwtCfg        JWTConfig
 	oauthProviders OAuthProviders
+}
+
+// PublicUser is a user representation safe for API responses (no password hash).
+type PublicUser struct {
+	ID            uuid.UUID `json:"id"`
+	Email         string    `json:"email"`
+	Name          string    `json:"name"`
+	Role          string    `json:"role"`
+	EmailVerified bool      `json:"email_verified"`
+	OAuthProvider string    `json:"oauth_provider,omitempty"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
+
+// ToPublicUser converts a db.User to a PublicUser, omitting sensitive fields.
+func ToPublicUser(u db.User) PublicUser {
+	return PublicUser{
+		ID:            u.ID,
+		Email:         u.Email,
+		Name:          u.Name,
+		Role:          u.Role,
+		EmailVerified: u.EmailVerified,
+		OAuthProvider: u.OAuthProvider,
+		CreatedAt:     u.CreatedAt,
+		UpdatedAt:     u.UpdatedAt,
+	}
 }
 
 func NewUserService(store *db.UserStore, jwtCfg JWTConfig, oauthProviders OAuthProviders) *UserService {
