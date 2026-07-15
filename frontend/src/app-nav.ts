@@ -2,7 +2,6 @@ import gsap from "gsap";
 import { NavigationManager, CALCULATORS } from "./modules/navigationManager.js";
 import type { CalculatorInfo } from "./modules/navigationManager.js";
 import { IconRegistry } from "./modules/iconRegistry.js";
-import { ExportManager } from "./modules/exportManager.js";
 import { OnboardingManager } from "./modules/onboardingManager.js";
 
 const RECENT_KEY = "chem-utility-recent";
@@ -216,7 +215,7 @@ function renderPaletteList(query: string): void {
 		input.setAttribute("aria-activedescendant", "palette-item-" + paletteSelectedIndex);
 	}
 
-	list.querySelectorAll(".palette-item").forEach(function (item: HTMLElement): void {
+	(list.querySelectorAll(".palette-item") as NodeListOf<HTMLElement>).forEach(function (item: HTMLElement): void {
 		item.addEventListener("click", function (): void {
 			let targetId = item.getAttribute("data-target");
 			if (targetId) {
@@ -529,7 +528,7 @@ function initializeNavSheet(): void {
 		}
 	});
 
-	sheet.querySelectorAll(".sheet-item").forEach(function (item: HTMLElement): void {
+	(sheet.querySelectorAll(".sheet-item") as NodeListOf<HTMLElement>).forEach(function (item: HTMLElement): void {
 		item.addEventListener("click", function (): void {
 			let targetId = item.getAttribute("data-target");
 			if (targetId) {
@@ -569,7 +568,7 @@ function buildWelcomeScreen(): void {
 	html += '</div>';
 	container.innerHTML = html;
 
-	container.querySelectorAll(".welcome-card").forEach(function (card: HTMLElement): void {
+	(container.querySelectorAll(".welcome-card") as NodeListOf<HTMLElement>).forEach(function (card: HTMLElement): void {
 		card.addEventListener("click", function (): void {
 			let targetId = card.getAttribute("data-target");
 			if (targetId) NavigationManager.getInstance().navigate(targetId);
@@ -652,10 +651,10 @@ function initializeShortcutsSettings(): void {
 		for (let i = 1; i <= 9; i++) {
 			let key = "Alt+" + i;
 			let currentTarget = customShortcuts[key] || (i <= CALCULATORS.length ? CALCULATORS[i - 1].id : "");
-			let calcName = "";
+			let _calcName = "";
 			for (let j = 0; j < CALCULATORS.length; j++) {
 				if (CALCULATORS[j].id === currentTarget) {
-					calcName = CALCULATORS[j].name;
+					_calcName = CALCULATORS[j].name;
 					break;
 				}
 			}
@@ -708,7 +707,7 @@ function initializeShortcutsSettings(): void {
 const prefetchedModules = new Set<string>();
 
 /** Maps calculator IDs to their dynamic import modules for prefetching. */
-const CALCULATOR_MODULES: Record<string, () => Promise<any>> = {
+const CALCULATOR_MODULES: Record<string, () => Promise<Record<string, unknown>>> = {
 	"dilution-calc": () => import("./modules/solutionCalculators.js"),
 	"mass-percent-calc": () => import("./modules/solutionCalculators.js"),
 	"solution-mixing-calc": () => import("./modules/solutionCalculators.js"),
