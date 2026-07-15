@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 // Mock the module imports that script.ts uses
 const mockUIHandlerInitialize = vi.fn();
 vi.mock("./modules/uiHandlers.js", () => ({
-    UIHandlerInitializer: vi.fn(function(this: any) {
+    UIHandlerInitializer: vi.fn(function(this: Record<string, unknown>) {
         this.initialize = mockUIHandlerInitialize;
     }),
     initializeUIHandlers: vi.fn(),
@@ -11,7 +11,7 @@ vi.mock("./modules/uiHandlers.js", () => ({
 
 const mockEventListenerInitialize = vi.fn();
 vi.mock("./modules/eventListeners.js", () => ({
-    EventListenerInitializer: vi.fn(function(this: any) {
+    EventListenerInitializer: vi.fn(function(this: Record<string, unknown>) {
         this.initialize = mockEventListenerInitialize;
     }),
     initializeEventListeners: vi.fn(),
