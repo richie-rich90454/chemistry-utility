@@ -56,6 +56,6 @@ export class InputPersistence {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		InputPersistence.instance = null as any;
+		InputPersistence.instance = null as unknown as InputPersistence;
 	}
 }
