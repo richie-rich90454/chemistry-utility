@@ -30,6 +30,7 @@
             <symbol id="icon-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></symbol>
             <symbol id="icon-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
             <symbol id="icon-thermodynamics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M9 9h6"/><path d="M9 12h6"/><path d="M9 15h6"/><circle cx="12" cy="19" r="3"/><path d="M10 5h4"/><path d="M10 7h4"/></symbol>
+            <symbol id="icon-kinetics" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
         </svg>
         <div class="page-overlay"><div class="loader"></div></div>
         <a href="#main-content" class="skip-link">Skip to main content</a>
@@ -71,6 +72,7 @@
                         <li><a href="#electrochemistry"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-electrochemistry"></use></svg><span class="nav-label">Electrochemistry</span></a></li>
                         <li class="nav-category">Thermodynamics</li>
                         <li><a href="#thermodynamics"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-thermodynamics"></use></svg><span class="nav-label">Thermodynamics</span></a></li>
+                        <li><a href="#kinetics"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-kinetics"></use></svg><span class="nav-label">Kinetics</span></a></li>
                         <li class="nav-category">Reactions &amp; Bonds</li>
                         <li><a href="#stoichiometry"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-stoichiometry"></use></svg><span class="nav-label">Stoichiometry</span></a></li>
                         <li><a href="#bond-type-predictor"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-bond-type"></use></svg><span class="nav-label">Bond Type</span></a></li>
@@ -435,6 +437,117 @@
                             <div id="born-haber-result" class="result"></div>
                             <details class="example-details"><summary>Show Example</summary>
                             <p>Try NaCl: ΔHf=-411, ΔHsub=108, IE=496, ΔHdiss=244, EA=-349. Lattice energy U ≈ -787 kJ/mol.</p>
+                            </details>
+                        </div>
+                    </div>
+                    <div id="kinetics" class="main-groups card view-hidden">
+                        <h2>Kinetics</h2>
+                        <div class="tool-container">
+                            <p class="tool-description">Calculate reaction rates, rate laws, and activation energies using the Arrhenius equation, integrated rate laws, and collision theory. Determine reaction orders from initial rates or concentration-time data.</p>
+                        </div>
+                        <div id="arrhenius-calc">
+                            <h3>Arrhenius Equation Calculator</h3>
+                            <p>Solve for:</p>
+                            <label for="arrhenius-solve-for">Solve for</label>
+                            <select id="arrhenius-solve-for" aria-label="Select Arrhenius parameter to solve for">
+                                <option value="k">Rate constant (k)</option>
+                                <option value="Ea">Activation energy (Ea)</option>
+                                <option value="T">Temperature (T)</option>
+                                <option value="A">Frequency factor (A)</option>
+                            </select>
+                            <label>Arrhenius parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="arrhenius-A" placeholder="A (s⁻¹)" step="any" aria-label="Frequency factor">
+                                <input type="number" id="arrhenius-Ea" placeholder="Ea (kJ/mol)" step="any" aria-label="Activation energy">
+                                <input type="number" id="arrhenius-T" placeholder="T (K)" step="any" aria-label="Temperature">
+                                <input type="number" id="arrhenius-k" placeholder="k (s⁻¹)" step="any" aria-label="Rate constant">
+                            </div>
+                            <button id="calculate-arrhenius" class="primary-button">Calculate</button>
+                            <div id="arrhenius-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Try A=1e13, Ea=75, T=298 to get k. Or solve for Ea with A=1e13, k=0.03, T=298.</p>
+                            </details>
+                        </div>
+                        <div id="rate-law-calc">
+                            <h3>Rate Law Calculator</h3>
+                            <p>Determine the rate law from two experiments with initial rates data.</p>
+                            <label>Experiment 1</label>
+                            <div class="input-group">
+                                <input type="number" id="ratelaw-A1" placeholder="[A]₁ (M)" step="any" aria-label="Experiment 1 concentration A">
+                                <input type="number" id="ratelaw-B1" placeholder="[B]₁ (M)" step="any" aria-label="Experiment 1 concentration B">
+                                <input type="number" id="ratelaw-rate1" placeholder="Rate₁ (M/s)" step="any" aria-label="Experiment 1 rate">
+                            </div>
+                            <label>Experiment 2</label>
+                            <div class="input-group">
+                                <input type="number" id="ratelaw-A2" placeholder="[A]₂ (M)" step="any" aria-label="Experiment 2 concentration A">
+                                <input type="number" id="ratelaw-B2" placeholder="[B]₂ (M)" step="any" aria-label="Experiment 2 concentration B">
+                                <input type="number" id="ratelaw-rate2" placeholder="Rate₂ (M/s)" step="any" aria-label="Experiment 2 rate">
+                            </div>
+                            <button id="calculate-rate-law" class="primary-button">Determine Rate Law</button>
+                            <div id="rate-law-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Experiment 1: [A]=0.1, [B]=0.2, rate=0.004. Experiment 2: [A]=0.2, [B]=0.2, rate=0.008. Order m=1 in A, n=0 in B.</p>
+                            </details>
+                        </div>
+                        <div id="integrated-rate-law-calc">
+                            <h3>Integrated Rate Law Calculator</h3>
+                            <p>Solve for:</p>
+                            <label for="irl-solve-for">Solve for</label>
+                            <select id="irl-solve-for" aria-label="Select integrated rate law parameter to solve for">
+                                <option value="concentration">Concentration [A]</option>
+                                <option value="time">Time (t)</option>
+                            </select>
+                            <label for="irl-order">Reaction order</label>
+                            <select id="irl-order" aria-label="Select reaction order">
+                                <option value="0">Zero order</option>
+                                <option value="1" selected>First order</option>
+                                <option value="2">Second order</option>
+                            </select>
+                            <label>Integrated rate law parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="irl-A0" placeholder="[A]₀ (M)" step="any" aria-label="Initial concentration">
+                                <input type="number" id="irl-k" placeholder="k" step="any" aria-label="Rate constant">
+                                <input type="number" id="irl-t" placeholder="Time (s)" step="any" aria-label="Time">
+                                <input type="number" id="irl-A" placeholder="[A] (M)" step="any" aria-label="Concentration">
+                            </div>
+                            <button id="calculate-integrated-rate-law" class="primary-button">Calculate</button>
+                            <div id="integrated-rate-law-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>First order: [A]₀=1 M, k=0.05 s⁻¹, t=10 s → [A]≈0.607 M.</p>
+                            </details>
+                        </div>
+                        <div id="reaction-order-calc">
+                            <h3>Reaction Order Determination</h3>
+                            <p>Enter time-concentration data to determine the reaction order.</p>
+                            <label for="reaction-order-data">Data (t,c format, semicolon-separated)</label>
+                            <input type="text" id="reaction-order-data" placeholder="E.g., 0,1.0; 100,0.5; 200,0.25; 300,0.125" aria-label="Time-concentration data">
+                            <button id="calculate-reaction-order" class="primary-button">Determine Order</button>
+                            <div id="reaction-order-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Enter: 0,1.0; 100,0.5; 200,0.25; 300,0.125 — first-order decay gives R²≈1.0 for ln[A] vs t.</p>
+                            </details>
+                        </div>
+                        <div id="collision-theory-calc">
+                            <h3>Collision Theory Calculator</h3>
+                            <p>Solve for:</p>
+                            <label for="collision-solve-for">Solve for</label>
+                            <select id="collision-solve-for" aria-label="Select collision theory parameter to solve for">
+                                <option value="k">Rate constant (k)</option>
+                                <option value="Z">Collision frequency (Z)</option>
+                                <option value="p">Steric factor (p)</option>
+                            </select>
+                            <label>Collision theory parameters</label>
+                            <div class="input-group">
+                                <input type="number" id="collision-Ea" placeholder="Ea (kJ/mol)" step="any" aria-label="Activation energy">
+                                <input type="number" id="collision-T" placeholder="T (K)" step="any" aria-label="Temperature">
+                                <input type="number" id="collision-Z" placeholder="Z (s⁻¹)" step="any" aria-label="Collision frequency">
+                                <input type="number" id="collision-p" placeholder="p (steric factor)" step="any" aria-label="Steric factor">
+                                <input type="number" id="collision-k" placeholder="k (s⁻¹)" step="any" aria-label="Rate constant">
+                            </div>
+                            <button id="calculate-collision-theory" class="primary-button">Calculate</button>
+                            <div id="collision-theory-result" class="result"></div>
+                            <details class="example-details"><summary>Show Example</summary>
+                            <p>Try Ea=50 kJ/mol, T=298 K, Z=1e11 s⁻¹, p=0.01 to get k.</p>
                             </details>
                         </div>
                     </div>

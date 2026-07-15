@@ -6,6 +6,7 @@ import {ExamplePrefillManager} from "./examplePrefillManager.js";
 import {ChemicalElement} from "../types.js";
 import {NumberFormatter} from "./i18n/numberFormatter.js";
 import * as gasLawCalculators from "./gasLawCalculators.js";
+import {CalculatorRegistry} from "./calculatorRegistry.js";
 
 /** Shape of a dynamically-imported calculator module. */
 type CalculatorModule = {
@@ -22,6 +23,12 @@ type CalculatorModule = {
 	predictBondType(elementsData: ChemicalElement[]): void;
 	getCalculationType(equation: string): void;
 	calculateStoichiometry(equation: string): void;
+	calculateGibbsFreeEnergy(): void;
+	calculateHessLaw(): void;
+	calculateEntropy(): void;
+	calculateHeatCapacity(): void;
+	calculateBondEnthalpy(): void;
+	calculateBornHaberCycle(): void;
 };
 
 /**
@@ -142,6 +149,25 @@ export class EventListenerInitializer {
 				}
 			});
 		});
+		// Thermodynamics calculators — lazy
+		(document.getElementById("calculate-gibbs") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("gibbs").then((mod) => { mod.calculateGibbsFreeEnergy(); });
+		});
+		(document.getElementById("calculate-hess") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("hess").then((mod) => { mod.calculateHessLaw(); });
+		});
+		(document.getElementById("calculate-entropy") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("entropy").then((mod) => { mod.calculateEntropy(); });
+		});
+		(document.getElementById("calculate-heat-capacity") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("heat-capacity").then((mod) => { mod.calculateHeatCapacity(); });
+		});
+		(document.getElementById("calculate-bond-enthalpy") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("bond-enthalpy").then((mod) => { mod.calculateBondEnthalpy(); });
+		});
+		(document.getElementById("calculate-born-haber") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("born-haber").then((mod) => { mod.calculateBornHaberCycle(); });
+		});
 		// Enter key support for calculator inputs — lazy
 		this.addLazyEnterListener("dilution-M1", "dilution", (mod) => { mod.calculateDilution(); });
 		this.addLazyEnterListener("dilution-V1", "dilution", (mod) => { mod.calculateDilution(); });
@@ -181,6 +207,26 @@ export class EventListenerInitializer {
 		this.addLazyEnterListener("electrolysis-M", "electrolysis", (mod) => { mod.calculateElectrolysis(); });
 		this.addLazyEnterListener("element1-input", "bond-type", (mod) => { mod.predictBondType(this.elementsData); });
 		this.addLazyEnterListener("element2-input", "bond-type", (mod) => { mod.predictBondType(this.elementsData); });
+
+		// Thermodynamics enter key support
+		this.addLazyEnterListener("gibbs-deltaH", "gibbs", (mod) => { mod.calculateGibbsFreeEnergy(); });
+		this.addLazyEnterListener("gibbs-deltaS", "gibbs", (mod) => { mod.calculateGibbsFreeEnergy(); });
+		this.addLazyEnterListener("gibbs-T", "gibbs", (mod) => { mod.calculateGibbsFreeEnergy(); });
+		this.addLazyEnterListener("hess-steps", "hess", (mod) => { mod.calculateHessLaw(); });
+		this.addLazyEnterListener("entropy-products", "entropy", (mod) => { mod.calculateEntropy(); });
+		this.addLazyEnterListener("entropy-reactants", "entropy", (mod) => { mod.calculateEntropy(); });
+		this.addLazyEnterListener("heat-cap-mass", "heat-capacity", (mod) => { mod.calculateHeatCapacity(); });
+		this.addLazyEnterListener("heat-cap-specific-heat", "heat-capacity", (mod) => { mod.calculateHeatCapacity(); });
+		this.addLazyEnterListener("heat-cap-initial-temp", "heat-capacity", (mod) => { mod.calculateHeatCapacity(); });
+		this.addLazyEnterListener("heat-cap-final-temp", "heat-capacity", (mod) => { mod.calculateHeatCapacity(); });
+		this.addLazyEnterListener("heat-cap-heat", "heat-capacity", (mod) => { mod.calculateHeatCapacity(); });
+		this.addLazyEnterListener("bond-enthalpy-broken", "bond-enthalpy", (mod) => { mod.calculateBondEnthalpy(); });
+		this.addLazyEnterListener("bond-enthalpy-formed", "bond-enthalpy", (mod) => { mod.calculateBondEnthalpy(); });
+		this.addLazyEnterListener("born-haber-dHf", "born-haber", (mod) => { mod.calculateBornHaberCycle(); });
+		this.addLazyEnterListener("born-haber-dHsub", "born-haber", (mod) => { mod.calculateBornHaberCycle(); });
+		this.addLazyEnterListener("born-haber-IE", "born-haber", (mod) => { mod.calculateBornHaberCycle(); });
+		this.addLazyEnterListener("born-haber-dHdiss", "born-haber", (mod) => { mod.calculateBornHaberCycle(); });
+		this.addLazyEnterListener("born-haber-EA", "born-haber", (mod) => { mod.calculateBornHaberCycle(); });
 
 		// URL state management — attach input/change listeners for debounced URL updates
 		this.initializeUrlStateListeners();
@@ -228,6 +274,23 @@ export class EventListenerInitializer {
 			case "stoichiometry": {
 				return import("./stoichiometryCalculator.js") as Promise<unknown> as Promise<CalculatorModule>;
 			}
+			case "gibbs":
+			case "hess":
+			case "entropy":
+			case "heat-capacity":
+			case "bond-enthalpy":
+			case "born-haber": {
+				return import("./thermodynamicsCalculators.js").then(function(mod: any): CalculatorModule {
+					let registry = CalculatorRegistry.getInstance();
+					registry.register("gibbs-free-energy", new mod.GibbsFreeEnergyCalculator());
+					registry.register("hess-law", new mod.HessLawCalculator());
+					registry.register("entropy", new mod.EntropyCalculator());
+					registry.register("heat-capacity", new mod.HeatCapacityCalculator());
+					registry.register("bond-enthalpy", new mod.BondEnthalpyCalculator());
+					registry.register("born-haber", new mod.BornHaberCycleCalculator());
+					return mod as CalculatorModule;
+				}) as Promise<unknown> as Promise<CalculatorModule>;
+			}
 			default:
 				throw new Error("Unknown calculator: " + calculatorId);
 		}
@@ -273,6 +336,17 @@ export class EventListenerInitializer {
 		"electrolysis-M": "electrochemistry",
 		"stoich-equation-input": "stoichiometry", "calculation-type": "stoichiometry",
 		"element1-input": "bond-type-predictor", "element2-input": "bond-type-predictor",
+		"gibbs-deltaH": "thermodynamics", "gibbs-deltaS": "thermodynamics", "gibbs-T": "thermodynamics",
+		"hess-steps": "thermodynamics",
+		"entropy-products": "thermodynamics", "entropy-reactants": "thermodynamics",
+		"heat-cap-solve-for": "thermodynamics",
+		"heat-cap-mass": "thermodynamics", "heat-cap-specific-heat": "thermodynamics",
+		"heat-cap-initial-temp": "thermodynamics", "heat-cap-final-temp": "thermodynamics",
+		"heat-cap-heat": "thermodynamics",
+		"bond-enthalpy-broken": "thermodynamics", "bond-enthalpy-formed": "thermodynamics",
+		"born-haber-dHf": "thermodynamics", "born-haber-dHsub": "thermodynamics",
+		"born-haber-IE": "thermodynamics", "born-haber-dHdiss": "thermodynamics",
+		"born-haber-EA": "thermodynamics",
 	};
 
 	/**
