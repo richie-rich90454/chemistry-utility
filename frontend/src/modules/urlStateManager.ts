@@ -255,6 +255,6 @@ export class UrlStateManager {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		UrlStateManager.instance = null as any;
+		UrlStateManager.instance = null as unknown as UrlStateManager;
 	}
 }
