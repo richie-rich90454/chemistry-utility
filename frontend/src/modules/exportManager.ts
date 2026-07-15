@@ -146,6 +146,6 @@ export class ExportManager {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		ExportManager.instance = null as any;
+		ExportManager.instance = null as unknown as ExportManager;
 	}
 }
