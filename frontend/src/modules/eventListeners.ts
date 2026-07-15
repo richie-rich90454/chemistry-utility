@@ -5,6 +5,7 @@ import {InputPersistence} from "./inputPersistence.js";
 import {ExamplePrefillManager} from "./examplePrefillManager.js";
 import {ChemicalElement} from "../types.js";
 import {NumberFormatter} from "./i18n/numberFormatter.js";
+import * as gasLawCalculators from "./gasLawCalculators.js";
 
 /** Shape of a dynamically-imported calculator module. */
 type CalculatorModule = {
@@ -214,7 +215,7 @@ export class EventListenerInitializer {
 			case "combined-gas":
 			case "vdw":
 			case "half-life": {
-				return import("./gasLawCalculators.js");
+				return Promise.resolve(gasLawCalculators);
 			}
 			case "cell-potential":
 			case "nernst":
