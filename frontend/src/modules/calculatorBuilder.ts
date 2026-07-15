@@ -75,6 +75,7 @@ export class CalculatorBuilder {
  */
 export class BuiltCalculator extends Calculator {
 	private solveForElement: HTMLSelectElement | null;
+	private inputProvider: InputProvider;
 	private calculationFn: (calc: BuiltCalculator) => void;
 
 	constructor(
@@ -84,7 +85,8 @@ export class BuiltCalculator extends Calculator {
 		inputProvider: InputProvider,
 		calculationFn: (calc: BuiltCalculator) => void
 	) {
-		super(resultElementId, inputElementIds, inputProvider);
+		super(resultElementId, inputElementIds);
+		this.inputProvider = inputProvider;
 		if (solveForElementId !== null) {
 			this.solveForElement = this.inputProvider.getElement(solveForElementId) as HTMLSelectElement;
 		} else {
