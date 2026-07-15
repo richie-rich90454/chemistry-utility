@@ -20,6 +20,20 @@ vi.mock("./solutionCalculators", () => ({
 	calculateDilution: vi.fn(),
 	calculateMassPercent: vi.fn(),
 	calculateMixing: vi.fn(),
+	calculateBufferSolution: vi.fn(),
+	calculatePKaPKb: vi.fn(),
+	calculateKsp: vi.fn(),
+	calculateColligativeProperties: vi.fn(),
+	calculateTitrationCurve: vi.fn(),
+	calculateDebyeHuckel: vi.fn(),
+	calculateCommonIonEffect: vi.fn(),
+	BufferSolutionCalculator: vi.fn(),
+	PKaPKbCalculator: vi.fn(),
+	KspCalculator: vi.fn(),
+	ColligativePropertiesCalculator: vi.fn(),
+	TitrationCurveCalculator: vi.fn(),
+	DebyeHuckelCalculator: vi.fn(),
+	CommonIonEffectCalculator: vi.fn(),
 }));
 
 vi.mock("./gasLawCalculators", () => ({
@@ -65,6 +79,21 @@ vi.mock("./kineticsCalculators", () => ({
 	IntegratedRateLawCalculator: vi.fn(),
 	ReactionOrderCalculator: vi.fn(),
 	CollisionTheoryCalculator: vi.fn(),
+}));
+
+vi.mock("./quantumCalculators", () => ({
+	calculateQuantumNumbers: vi.fn(),
+	calculateElectronConfiguration: vi.fn(),
+	calculateRydberg: vi.fn(),
+	calculateDeBroglie: vi.fn(),
+	calculatePhotoelectricEffect: vi.fn(),
+	calculateHeisenbergUncertainty: vi.fn(),
+	QuantumNumbersValidator: vi.fn(),
+	ElectronConfigurationGenerator: vi.fn(),
+	RydbergCalculator: vi.fn(),
+	DeBroglieWavelengthCalculator: vi.fn(),
+	PhotoelectricEffectCalculator: vi.fn(),
+	HeisenbergUncertaintyCalculator: vi.fn(),
 }));
 
 vi.mock("./urlStateManager", () => ({
@@ -136,6 +165,13 @@ function setupFullDOM(): void {
 	createElement("button", { id: "calculate-dilution" });
 	createElement("button", { id: "calculate-mass-percent" });
 	createElement("button", { id: "calculate-mixing" });
+	createElement("button", { id: "calculate-buffer" });
+	createElement("button", { id: "calculate-pka-pkb" });
+	createElement("button", { id: "calculate-ksp" });
+	createElement("button", { id: "calculate-colligative" });
+	createElement("button", { id: "calculate-titration" });
+	createElement("button", { id: "calculate-debye-huckel" });
+	createElement("button", { id: "calculate-common-ion" });
 
 	// Ideal gas law
 	createElement("button", { id: "calculate-ideal" });
@@ -180,6 +216,14 @@ function setupFullDOM(): void {
 	createElement("button", { id: "calculate-reaction-order" });
 	createElement("button", { id: "calculate-collision-theory" });
 
+	// Quantum & Atomic
+	createElement("button", { id: "calculate-quantum-numbers" });
+	createElement("button", { id: "calculate-electron-config" });
+	createElement("button", { id: "calculate-rydberg" });
+	createElement("button", { id: "calculate-debroglie" });
+	createElement("button", { id: "calculate-photoelectric" });
+	createElement("button", { id: "calculate-heisenberg" });
+
 	// Enter key inputs - dilution
 	for (const id of ["dilution-M1", "dilution-V1", "dilution-M2", "dilution-V2"]) {
 		createElement("input", { id });
@@ -190,6 +234,32 @@ function setupFullDOM(): void {
 	}
 	// Mixing
 	for (const id of ["mix-C1", "mix-V1", "mix-C2", "mix-V2"]) {
+		createElement("input", { id });
+	}
+	// Buffer solution
+	for (const id of ["buffer-pKa", "buffer-HA", "buffer-Aminus", "buffer-pH", "buffer-ratio"]) {
+		createElement("input", { id });
+	}
+	// pKa/pKb
+	createElement("input", { id: "pka-pkb-input-value" });
+	// Ksp
+	for (const id of ["ksp-value", "ksp-molar-solubility"]) {
+		createElement("input", { id });
+	}
+	// Colligative properties
+	for (const id of ["collig-solute-mass", "collig-molar-mass", "collig-solvent-mass", "collig-vanthoff", "collig-Kb", "collig-Kf", "collig-solvent-bp", "collig-solvent-fp", "collig-Psolvent"]) {
+		createElement("input", { id });
+	}
+	// Titration curve
+	for (const id of ["titration-acid-conc", "titration-acid-vol", "titration-base-conc", "titration-max-vol", "titration-Ka"]) {
+		createElement("input", { id });
+	}
+	// Debye-Hückel
+	for (const id of ["dh-zplus", "dh-zminus", "dh-concentration", "dh-ion-size"]) {
+		createElement("input", { id });
+	}
+	// Common ion effect
+	for (const id of ["common-ion-Ksp", "common-ion-concentration"]) {
 		createElement("input", { id });
 	}
 	// Ideal gas (ideal-P and ideal-V already created)
@@ -249,6 +319,23 @@ function setupFullDOM(): void {
 	}
 	createElement("input", { id: "reaction-order-data" });
 	for (const id of ["collision-Ea", "collision-T", "collision-Z", "collision-p", "collision-k"]) {
+		createElement("input", { id });
+	}
+	// Quantum & Atomic enter key inputs
+	for (const id of ["qn-n", "qn-l", "qn-ml", "qn-ms"]) {
+		createElement("input", { id });
+	}
+	createElement("input", { id: "ec-atomic-number" });
+	for (const id of ["rydberg-n1", "rydberg-n2"]) {
+		createElement("input", { id });
+	}
+	for (const id of ["db-mass", "db-velocity"]) {
+		createElement("input", { id });
+	}
+	for (const id of ["pe-wavelength", "pe-frequency", "pe-work-function", "pe-ke"]) {
+		createElement("input", { id });
+	}
+	for (const id of ["heis-delta-x", "heis-delta-p", "heis-mass"]) {
 		createElement("input", { id });
 	}
 }

@@ -34,6 +34,19 @@ type CalculatorModule = {
 	calculateIntegratedRateLaw(): void;
 	calculateReactionOrder(): void;
 	calculateCollisionTheory(): void;
+	calculateBufferSolution(): void;
+	calculatePKaPKb(): void;
+	calculateKsp(): void;
+	calculateColligativeProperties(): void;
+	calculateTitrationCurve(): void;
+	calculateDebyeHuckel(): void;
+	calculateCommonIonEffect(): void;
+	calculateQuantumNumbers(): void;
+	calculateElectronConfiguration(): void;
+	calculateRydberg(): void;
+	calculateDeBroglie(): void;
+	calculatePhotoelectricEffect(): void;
+	calculateHeisenbergUncertainty(): void;
 };
 
 /**
@@ -103,6 +116,28 @@ export class EventListenerInitializer {
 		});
 		(document.getElementById("calculate-mixing") as HTMLButtonElement).addEventListener("click", () => {
 			this.ensureCalculator("mixing").then((mod) => { mod.calculateMixing(); });
+		});
+		// New solution calculators
+		(document.getElementById("calculate-buffer") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("buffer").then((mod) => { mod.calculateBufferSolution(); });
+		});
+		(document.getElementById("calculate-pka-pkb") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("pka-pkb").then((mod) => { mod.calculatePKaPKb(); });
+		});
+		(document.getElementById("calculate-ksp") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("ksp").then((mod) => { mod.calculateKsp(); });
+		});
+		(document.getElementById("calculate-colligative") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("colligative").then((mod) => { mod.calculateColligativeProperties(); });
+		});
+		(document.getElementById("calculate-titration") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("titration").then((mod) => { mod.calculateTitrationCurve(); });
+		});
+		(document.getElementById("calculate-debye-huckel") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("debye-huckel").then((mod) => { mod.calculateDebyeHuckel(); });
+		});
+		(document.getElementById("calculate-common-ion") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("common-ion").then((mod) => { mod.calculateCommonIonEffect(); });
 		});
 		// Gas law calculators — lazy
 		(document.getElementById("calculate-ideal") as HTMLButtonElement).addEventListener("click", () => {
@@ -189,6 +224,25 @@ export class EventListenerInitializer {
 		(document.getElementById("calculate-collision-theory") as HTMLButtonElement).addEventListener("click", () => {
 			this.ensureCalculator("collision-theory").then((mod) => { mod.calculateCollisionTheory(); });
 		});
+		// Quantum & Atomic calculators — lazy
+		(document.getElementById("calculate-quantum-numbers") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("quantum-numbers").then((mod) => { mod.calculateQuantumNumbers(); });
+		});
+		(document.getElementById("calculate-electron-config") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("electron-config").then((mod) => { mod.calculateElectronConfiguration(); });
+		});
+		(document.getElementById("calculate-rydberg") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("rydberg").then((mod) => { mod.calculateRydberg(); });
+		});
+		(document.getElementById("calculate-debroglie") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("debroglie").then((mod) => { mod.calculateDeBroglie(); });
+		});
+		(document.getElementById("calculate-photoelectric") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("photoelectric").then((mod) => { mod.calculatePhotoelectricEffect(); });
+		});
+		(document.getElementById("calculate-heisenberg") as HTMLButtonElement).addEventListener("click", () => {
+			this.ensureCalculator("heisenberg").then((mod) => { mod.calculateHeisenbergUncertainty(); });
+		});
 		// Enter key support for calculator inputs — lazy
 		this.addLazyEnterListener("dilution-M1", "dilution", (mod) => { mod.calculateDilution(); });
 		this.addLazyEnterListener("dilution-V1", "dilution", (mod) => { mod.calculateDilution(); });
@@ -200,6 +254,35 @@ export class EventListenerInitializer {
 		this.addLazyEnterListener("mix-V1", "mixing", (mod) => { mod.calculateMixing(); });
 		this.addLazyEnterListener("mix-C2", "mixing", (mod) => { mod.calculateMixing(); });
 		this.addLazyEnterListener("mix-V2", "mixing", (mod) => { mod.calculateMixing(); });
+		// New solution calculators enter key support
+		this.addLazyEnterListener("buffer-pKa", "buffer", (mod) => { mod.calculateBufferSolution(); });
+		this.addLazyEnterListener("buffer-HA", "buffer", (mod) => { mod.calculateBufferSolution(); });
+		this.addLazyEnterListener("buffer-Aminus", "buffer", (mod) => { mod.calculateBufferSolution(); });
+		this.addLazyEnterListener("buffer-pH", "buffer", (mod) => { mod.calculateBufferSolution(); });
+		this.addLazyEnterListener("buffer-ratio", "buffer", (mod) => { mod.calculateBufferSolution(); });
+		this.addLazyEnterListener("pka-pkb-input-value", "pka-pkb", (mod) => { mod.calculatePKaPKb(); });
+		this.addLazyEnterListener("ksp-value", "ksp", (mod) => { mod.calculateKsp(); });
+		this.addLazyEnterListener("ksp-molar-solubility", "ksp", (mod) => { mod.calculateKsp(); });
+		this.addLazyEnterListener("collig-solute-mass", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("collig-molar-mass", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("collig-solvent-mass", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("collig-vanthoff", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("collig-Kb", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("collig-Kf", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("collig-solvent-bp", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("collig-solvent-fp", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("collig-Psolvent", "colligative", (mod) => { mod.calculateColligativeProperties(); });
+		this.addLazyEnterListener("titration-acid-conc", "titration", (mod) => { mod.calculateTitrationCurve(); });
+		this.addLazyEnterListener("titration-acid-vol", "titration", (mod) => { mod.calculateTitrationCurve(); });
+		this.addLazyEnterListener("titration-base-conc", "titration", (mod) => { mod.calculateTitrationCurve(); });
+		this.addLazyEnterListener("titration-max-vol", "titration", (mod) => { mod.calculateTitrationCurve(); });
+		this.addLazyEnterListener("titration-Ka", "titration", (mod) => { mod.calculateTitrationCurve(); });
+		this.addLazyEnterListener("dh-zplus", "debye-huckel", (mod) => { mod.calculateDebyeHuckel(); });
+		this.addLazyEnterListener("dh-zminus", "debye-huckel", (mod) => { mod.calculateDebyeHuckel(); });
+		this.addLazyEnterListener("dh-concentration", "debye-huckel", (mod) => { mod.calculateDebyeHuckel(); });
+		this.addLazyEnterListener("dh-ion-size", "debye-huckel", (mod) => { mod.calculateDebyeHuckel(); });
+		this.addLazyEnterListener("common-ion-Ksp", "common-ion", (mod) => { mod.calculateCommonIonEffect(); });
+		this.addLazyEnterListener("common-ion-concentration", "common-ion", (mod) => { mod.calculateCommonIonEffect(); });
 		this.addLazyEnterListener("ideal-P", "ideal-gas", (mod) => { mod.calculateIdealGasLaw(); });
 		this.addLazyEnterListener("ideal-V", "ideal-gas", (mod) => { mod.calculateIdealGasLaw(); });
 		this.addLazyEnterListener("ideal-n", "ideal-gas", (mod) => { mod.calculateIdealGasLaw(); });
@@ -270,6 +353,24 @@ export class EventListenerInitializer {
 		this.addLazyEnterListener("collision-p", "collision-theory", (mod) => { mod.calculateCollisionTheory(); });
 		this.addLazyEnterListener("collision-k", "collision-theory", (mod) => { mod.calculateCollisionTheory(); });
 
+		// Quantum & Atomic enter key support
+		this.addLazyEnterListener("qn-n", "quantum-numbers", (mod) => { mod.calculateQuantumNumbers(); });
+		this.addLazyEnterListener("qn-l", "quantum-numbers", (mod) => { mod.calculateQuantumNumbers(); });
+		this.addLazyEnterListener("qn-ml", "quantum-numbers", (mod) => { mod.calculateQuantumNumbers(); });
+		this.addLazyEnterListener("qn-ms", "quantum-numbers", (mod) => { mod.calculateQuantumNumbers(); });
+		this.addLazyEnterListener("ec-atomic-number", "electron-config", (mod) => { mod.calculateElectronConfiguration(); });
+		this.addLazyEnterListener("rydberg-n1", "rydberg", (mod) => { mod.calculateRydberg(); });
+		this.addLazyEnterListener("rydberg-n2", "rydberg", (mod) => { mod.calculateRydberg(); });
+		this.addLazyEnterListener("db-mass", "debroglie", (mod) => { mod.calculateDeBroglie(); });
+		this.addLazyEnterListener("db-velocity", "debroglie", (mod) => { mod.calculateDeBroglie(); });
+		this.addLazyEnterListener("pe-wavelength", "photoelectric", (mod) => { mod.calculatePhotoelectricEffect(); });
+		this.addLazyEnterListener("pe-frequency", "photoelectric", (mod) => { mod.calculatePhotoelectricEffect(); });
+		this.addLazyEnterListener("pe-work-function", "photoelectric", (mod) => { mod.calculatePhotoelectricEffect(); });
+		this.addLazyEnterListener("pe-ke", "photoelectric", (mod) => { mod.calculatePhotoelectricEffect(); });
+		this.addLazyEnterListener("heis-delta-x", "heisenberg", (mod) => { mod.calculateHeisenbergUncertainty(); });
+		this.addLazyEnterListener("heis-delta-p", "heisenberg", (mod) => { mod.calculateHeisenbergUncertainty(); });
+		this.addLazyEnterListener("heis-mass", "heisenberg", (mod) => { mod.calculateHeisenbergUncertainty(); });
+
 		// URL state management — attach input/change listeners for debounced URL updates
 		this.initializeUrlStateListeners();
 	}
@@ -296,8 +397,25 @@ export class EventListenerInitializer {
 		switch (calculatorId) {
 			case "dilution":
 			case "mass-percent":
-			case "mixing": {
-				return import("./solutionCalculators.js") as Promise<unknown> as Promise<CalculatorModule>;
+			case "mixing":
+			case "buffer":
+			case "pka-pkb":
+			case "ksp":
+			case "colligative":
+			case "titration":
+			case "debye-huckel":
+			case "common-ion": {
+				return import("./solutionCalculators.js").then(function(mod: any): CalculatorModule {
+					let registry = CalculatorRegistry.getInstance();
+					registry.register("buffer", new mod.BufferSolutionCalculator());
+					registry.register("pka-pkb", new mod.PKaPKbCalculator());
+					registry.register("ksp", new mod.KspCalculator());
+					registry.register("colligative", new mod.ColligativePropertiesCalculator());
+					registry.register("titration", new mod.TitrationCurveCalculator());
+					registry.register("debye-huckel", new mod.DebyeHuckelCalculator());
+					registry.register("common-ion", new mod.CommonIonEffectCalculator());
+					return mod as CalculatorModule;
+				}) as Promise<unknown> as Promise<CalculatorModule>;
 			}
 			case "ideal-gas":
 			case "combined-gas":
@@ -348,6 +466,23 @@ export class EventListenerInitializer {
 					return mod as CalculatorModule;
 				}) as Promise<unknown> as Promise<CalculatorModule>;
 			}
+			case "quantum-numbers":
+			case "electron-config":
+			case "rydberg":
+			case "debroglie":
+			case "photoelectric":
+			case "heisenberg": {
+				return import("./quantumCalculators.js").then(function(mod: any): CalculatorModule {
+					let registry = CalculatorRegistry.getInstance();
+					registry.register("quantum-numbers", new mod.QuantumNumbersValidator());
+					registry.register("electron-config", new mod.ElectronConfigurationGenerator());
+					registry.register("rydberg", new mod.RydbergCalculator());
+					registry.register("debroglie", new mod.DeBroglieWavelengthCalculator());
+					registry.register("photoelectric", new mod.PhotoelectricEffectCalculator());
+					registry.register("heisenberg", new mod.HeisenbergUncertaintyCalculator());
+					return mod as CalculatorModule;
+				}) as Promise<unknown> as Promise<CalculatorModule>;
+			}
 			default:
 				throw new Error("Unknown calculator: " + calculatorId);
 		}
@@ -374,6 +509,26 @@ export class EventListenerInitializer {
 		"concentration-unit": "mass-percent-calc",
 		"mix-C1": "solution-mixing-calc", "mix-V1": "solution-mixing-calc",
 		"mix-C2": "solution-mixing-calc", "mix-V2": "solution-mixing-calc",
+		"buffer-solve-for": "buffer-calc",
+		"buffer-pKa": "buffer-calc", "buffer-HA": "buffer-calc",
+		"buffer-Aminus": "buffer-calc", "buffer-pH": "buffer-calc",
+		"buffer-ratio": "buffer-calc",
+		"pka-pkb-input-type": "pka-pkb-calc", "pka-pkb-input-value": "pka-pkb-calc",
+		"ksp-solve-for": "ksp-calc", "ksp-salt-type": "ksp-calc",
+		"ksp-value": "ksp-calc", "ksp-molar-solubility": "ksp-calc",
+		"collig-solute-mass": "colligative-calc", "collig-molar-mass": "colligative-calc",
+		"collig-solvent-mass": "colligative-calc", "collig-vanthoff": "colligative-calc",
+		"collig-Kb": "colligative-calc", "collig-Kf": "colligative-calc",
+		"collig-solvent-bp": "colligative-calc", "collig-solvent-fp": "colligative-calc",
+		"collig-Psolvent": "colligative-calc",
+		"titration-acid-type": "titration-calc",
+		"titration-acid-conc": "titration-calc", "titration-acid-vol": "titration-calc",
+		"titration-base-conc": "titration-calc", "titration-max-vol": "titration-calc",
+		"titration-Ka": "titration-calc",
+		"dh-zplus": "debye-huckel-calc", "dh-zminus": "debye-huckel-calc",
+		"dh-concentration": "debye-huckel-calc", "dh-ion-size": "debye-huckel-calc",
+		"common-ion-salt-type": "common-ion-calc",
+		"common-ion-Ksp": "common-ion-calc", "common-ion-concentration": "common-ion-calc",
 		"half-life-solve-for": "nuclear-chemistry",
 		"initial-quantity": "nuclear-chemistry", "time-input": "nuclear-chemistry",
 		"half-life-input": "nuclear-chemistry", "remaining-quantity": "nuclear-chemistry",
@@ -414,6 +569,15 @@ export class EventListenerInitializer {
 		"collision-solve-for": "kinetics", "collision-Ea": "kinetics",
 		"collision-T": "kinetics", "collision-Z": "kinetics",
 		"collision-p": "kinetics", "collision-k": "kinetics",
+		"qn-n": "quantum-atomic", "qn-l": "quantum-atomic",
+		"qn-ml": "quantum-atomic", "qn-ms": "quantum-atomic",
+		"ec-atomic-number": "quantum-atomic",
+		"rydberg-n1": "quantum-atomic", "rydberg-n2": "quantum-atomic",
+		"db-mass": "quantum-atomic", "db-velocity": "quantum-atomic", "db-mass-unit": "quantum-atomic",
+		"pe-solve-for": "quantum-atomic", "pe-wavelength": "quantum-atomic",
+		"pe-frequency": "quantum-atomic", "pe-work-function": "quantum-atomic", "pe-ke": "quantum-atomic",
+		"heis-solve-for": "quantum-atomic", "heis-delta-x": "quantum-atomic",
+		"heis-delta-p": "quantum-atomic", "heis-mass": "quantum-atomic",
 	};
 
 	/**
