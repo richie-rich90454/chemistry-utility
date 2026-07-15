@@ -1,5 +1,3 @@
-import { InputValidator } from "./validation.js";
-
 /**
  * Singleton class that manages inline form validation UI.
  * Provides visual feedback (error/valid states) on calculator inputs
@@ -137,6 +135,6 @@ export class ValidationUIManager {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		ValidationUIManager.instance = null as any;
+		ValidationUIManager.instance = null as unknown as ValidationUIManager;
 	}
 }
