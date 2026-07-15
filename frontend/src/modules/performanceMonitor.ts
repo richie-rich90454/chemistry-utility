@@ -88,7 +88,7 @@ export class PerformanceMonitor {
 			let observer = new PerformanceObserver(function (this: PerformanceMonitor, entryList: PerformanceObserverEntryList): void {
 				let entries = entryList.getEntries();
 				for (let i = 0; i < entries.length; i++) {
-					let entry = entries[i] as any;
+					let entry = entries[i] as PerformanceEntry & { hadRecentInput: boolean; value: number };
 					if (!entry.hadRecentInput) {
 						clsValue += entry.value;
 					}
@@ -108,7 +108,7 @@ export class PerformanceMonitor {
 			let observer = new PerformanceObserver(function (this: PerformanceMonitor, entryList: PerformanceObserverEntryList): void {
 				let entries = entryList.getEntries();
 				for (let i = 0; i < entries.length; i++) {
-					let entry = entries[i] as any;
+					let entry = entries[i] as PerformanceEntry & { duration: number };
 					if (entry.duration > maxDuration) {
 						maxDuration = entry.duration;
 					}
@@ -123,6 +123,6 @@ export class PerformanceMonitor {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		PerformanceMonitor.instance = null as any;
+		PerformanceMonitor.instance = null as unknown as PerformanceMonitor;
 	}
 }
