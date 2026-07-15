@@ -170,6 +170,6 @@ export class OnboardingManager {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		OnboardingManager.instance = null as any;
+		OnboardingManager.instance = null as unknown as OnboardingManager;
 	}
 }
