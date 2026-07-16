@@ -325,7 +325,11 @@ describe("DashboardManager", function () {
             let activity: HTMLElement | null = document.querySelector(".dashboard-activity");
             expect(activity).not.toBeNull();
             if (activity) {
-                expect(activity.querySelectorAll(".dashboard-bar-wrap").length).toBe(7);
+                // Chart.js renders the seven daily bars onto a canvas element.
+                // Verify the canvas was created and the chart did not fall back
+                // to the error message.
+                expect(activity.querySelectorAll("canvas#dashboard-activity-chart").length).toBe(1);
+                expect(activity.querySelectorAll(".dashboard-empty").length).toBe(0);
             }
         });
 
@@ -475,12 +479,16 @@ describe("DashboardManager", function () {
             }
         });
 
-        it("renderWeeklyActivity renders seven bar wraps", function () {
+        it("renderWeeklyActivity renders weekly activity chart", function () {
             manager.renderWeeklyActivity([]);
             let activity: HTMLElement | null = document.querySelector(".dashboard-activity");
             expect(activity).not.toBeNull();
             if (activity) {
-                expect(activity.querySelectorAll(".dashboard-bar-wrap").length).toBe(7);
+                // Chart.js renders the seven daily bars onto a canvas element.
+                // Verify the canvas was created and the chart did not fall back
+                // to the error message.
+                expect(activity.querySelectorAll("canvas#dashboard-activity-chart").length).toBe(1);
+                expect(activity.querySelectorAll(".dashboard-empty").length).toBe(0);
             }
         });
 

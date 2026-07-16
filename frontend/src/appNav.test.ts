@@ -148,13 +148,13 @@ describe("initializeAppNav", () => {
     it("creates welcome screen cards", () => {
         initializeAppNav();
         const cards = document.querySelectorAll(".welcome-card");
-        expect(cards.length).toBe(11);
+        expect(cards.length).toBe(12);
     });
 
     it("creates nav sheet items", () => {
         initializeAppNav();
         const items = document.querySelectorAll(".nav-sheet .sheet-item");
-        expect(items.length).toBe(11);
+        expect(items.length).toBe(12);
     });
 
     it("adds shortcut hints to sidebar links", () => {
@@ -507,7 +507,7 @@ describe("initializeAppNav", () => {
     it("nav sheet items have correct data-target attributes", () => {
         initializeAppNav();
         const items = document.querySelectorAll(".nav-sheet .sheet-item");
-        expect(items.length).toBe(11);
+        expect(items.length).toBe(12);
         const firstTarget = items[0].getAttribute("data-target");
         expect(firstTarget).toBe("element-lookup");
     });

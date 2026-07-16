@@ -18,17 +18,17 @@ vi.mock("./modules/eventListeners.js", () => ({
 }));
 
 const mockPTableInit = vi.fn();
-vi.mock("./modules/interactivePTable.js", () => ({
-    InteractivePTable: vi.fn(function(this: Record<string, unknown>) {
-        this.getInstance = vi.fn(function(this: Record<string, unknown>) {
-            this.init = mockPTableInit;
-            this.isInitialized = vi.fn(() => true);
-            this.destroy = vi.fn();
-            return this;
-        });
-        this.resetInstance = vi.fn();
-    }),
-}));
+vi.mock("./modules/interactivePTable.js", () => {
+    const mockInstance = {
+        init: mockPTableInit,
+        isInitialized: vi.fn(() => true),
+        destroy: vi.fn(),
+    };
+    const InteractivePTable = vi.fn();
+    (InteractivePTable as unknown as { getInstance: () => typeof mockInstance }).getInstance = vi.fn(() => mockInstance);
+    (InteractivePTable as unknown as { resetInstance: () => void }).resetInstance = vi.fn();
+    return { InteractivePTable };
+});
 
 describe("script.ts", () => {
     let domContentLoadedCallbacks: Array<() => void>;
