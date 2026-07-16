@@ -3132,6 +3132,128 @@ a{color:var(--md-primary)}
     outline: 2px solid var(--md-primary);
     outline-offset: 2px;
 }
+.annotation-ui{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--md-outline-variant);
+}
+.annotation-star-button{
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--md-on-surface-variant);
+    border-radius: 50%;
+}
+.annotation-star-button:hover{
+    background-color: var(--md-surface-container-high);
+}
+.annotation-star-button[aria-pressed="true"]{
+    color: var(--md-warning);
+}
+.annotation-input{
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--md-outline);
+    border-radius: 8px;
+    background-color: var(--md-surface-container-low);
+    color: var(--md-on-surface);
+    font-size: 0.875rem;
+}
+.annotation-input:focus{
+    outline: 2px solid var(--md-primary);
+    outline-offset: -1px;
+    border-color: var(--md-primary);
+}
+.comparison-modal{
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.comparison-modal-content{
+    background-color: var(--md-surface);
+    color: var(--md-on-surface);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow: auto;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+.comparison-close{
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--md-on-surface-variant);
+    line-height: 1;
+    user-select: none;
+}
+.comparison-close:hover{
+    color: var(--md-on-surface);
+}
+.comparison-empty{
+    color: var(--md-on-surface-variant);
+    margin: 0 0 12px 0;
+}
+.comparison-column{
+    margin-top: 8px;
+}
+.comparison-field-list{
+    margin: 0;
+}
+.comparison-field-list dt{
+    font-weight: 600;
+    color: var(--md-on-surface-variant);
+    margin-top: 8px;
+}
+.comparison-field-list dd{
+    margin: 0 0 0 0;
+}
+.comparison-table{
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+.comparison-table th,
+.comparison-table td{
+    border: 1px solid var(--md-outline-variant);
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.875rem;
+}
+.comparison-table th{
+    background-color: var(--md-surface-container-high);
+    font-weight: 600;
+}
+.comparison-field-label{
+    font-weight: 600;
+    color: var(--md-on-surface-variant);
+}
+.comparison-same{
+    color: var(--md-on-surface);
+    background-color: var(--md-surface-container-low);
+}
+.comparison-different{
+    color: var(--md-error);
+    background-color: var(--md-error-container);
+    font-weight: 600;
+}
 
 /* Responsive scaling �� smaller cells on narrow screens. */
 @media (max-width: 768px){
