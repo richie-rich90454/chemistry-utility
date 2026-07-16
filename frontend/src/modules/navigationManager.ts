@@ -15,6 +15,7 @@ interface CalculatorInfo {
 
 const CALCULATORS: CalculatorInfo[] = [
 	{ id: "element-lookup", name: "Element Lookup", category: "General", icon: "element", description: "Look up element properties" },
+	{ id: "ptable-view", name: "Periodic Table", category: "General", icon: "element", description: "Interactive periodic table with heatmap mode" },
 	{ id: "mass-calc", name: "Molar Mass", category: "General", icon: "mass", description: "Calculate molar mass of compounds" },
 	{ id: "balancing", name: "Equation Balancer", category: "General", icon: "balance", description: "Balance chemical equations" },
 	{ id: "dilution-calc", name: "Dilution", category: "Solutions", icon: "dilution", description: "Molarity and dilution calculations" },
@@ -29,6 +30,7 @@ const CALCULATORS: CalculatorInfo[] = [
 
 const BREADCRUMB_CATEGORIES: Record<string, string> = {
 	"element-lookup": "Reference",
+	"ptable-view": "Reference",
 	"mass-calc": "Reference",
 	"balancing": "Reactions",
 	"dilution-calc": "Solutions",

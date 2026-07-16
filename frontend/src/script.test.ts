@@ -17,6 +17,19 @@ vi.mock("./modules/eventListeners.js", () => ({
     initializeEventListeners: vi.fn(),
 }));
 
+const mockPTableInit = vi.fn();
+vi.mock("./modules/interactivePTable.js", () => ({
+    InteractivePTable: vi.fn(function(this: Record<string, unknown>) {
+        this.getInstance = vi.fn(function(this: Record<string, unknown>) {
+            this.init = mockPTableInit;
+            this.isInitialized = vi.fn(() => true);
+            this.destroy = vi.fn();
+            return this;
+        });
+        this.resetInstance = vi.fn();
+    }),
+}));
+
 describe("script.ts", () => {
     let domContentLoadedCallbacks: Array<() => void>;
 
@@ -26,6 +39,7 @@ describe("script.ts", () => {
         vi.resetModules();
         mockUIHandlerInitialize.mockClear();
         mockEventListenerInitialize.mockClear();
+        mockPTableInit.mockClear();
 
         // Mock localStorage
         const store: Record<string, string> = {};
@@ -63,6 +77,10 @@ describe("script.ts", () => {
         const elementInfo = document.createElement("div");
         elementInfo.id = "element-info";
         document.body.appendChild(elementInfo);
+
+        const ptableContainer = document.createElement("div");
+        ptableContainer.id = "ptable-container";
+        document.body.appendChild(ptableContainer);
 
         // Add a .result element for copy-to-clipboard
         const result = document.createElement("div");
@@ -266,6 +284,20 @@ describe("script.ts", () => {
             await vi.waitFor(() => {
                 const elementInfo = document.getElementById("element-info")!;
                 expect(elementInfo.innerHTML).toContain("Error loading element data table");
+            });
+        });
+
+        it("initializes InteractivePTable with the loaded elements when ptable-container exists", async () => {
+            const mockData = [{ symbol: "H", name: "Hydrogen" }];
+            vi.mocked(fetch).mockResolvedValue({
+                ok: true,
+                json: () => Promise.resolve(mockData),
+            } as Response);
+
+            await initScript();
+
+            await vi.waitFor(() => {
+                expect(mockPTableInit).toHaveBeenCalledWith("ptable-container", mockData);
             });
         });
     });

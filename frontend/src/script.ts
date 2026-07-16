@@ -7,6 +7,7 @@ import {PerformanceMonitor} from "./modules/performanceMonitor.js";
 import {DebugLogger} from "./modules/debugLogger.js";
 import {ValidationUIManager} from "./modules/validationUIManager.js";
 import {ScreenReaderAnnouncer} from "./modules/screenReaderAnnouncer.js";
+import {InteractivePTable} from "./modules/interactivePTable.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	new UIHandlerInitializer().initialize();
 	initializeAppNav();
@@ -51,6 +52,10 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	loadPTableData()
 	.then(function(elementsData: ChemicalElement[]): void{
 		new EventListenerInitializer(elementsData).initialize();
+		let ptableContainer=document.getElementById("ptable-container");
+		if (ptableContainer){
+			InteractivePTable.getInstance().init("ptable-container", elementsData);
+		}
 	})
 	.catch(function(error: Error): void{
 		console.error("Error fetching data:", error);
