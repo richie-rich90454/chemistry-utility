@@ -91,6 +91,7 @@
                         <li class="nav-category">Reactions &amp; Bonds</li>
                         <li><a href="#stoichiometry"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-stoichiometry"></use></svg><span class="nav-label">Stoichiometry</span></a></li>
                         <li><a href="#bond-type-predictor"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-bond-type"></use></svg><span class="nav-label">Bond Type</span></a></li>
+                        <li><a href="#molecular-viewer"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-bond-type"></use></svg><span class="nav-label">Molecular Viewer</span></a></li>
                     </ul>
                     <div class="no-results" style="display:none">No calculators found</div>
                 </nav>
@@ -899,6 +900,91 @@
                         <details class="example-details"><summary>Show Example</summary>
                         <p>Try <strong>Na</strong> and <strong>Cl</strong> for an ionic bond, or <strong>H</strong> and <strong>O</strong> for a polar covalent bond.</p>
                         </details>
+                    </div>
+                    <div id="molecular-viewer" class="main-groups card view-hidden">
+                        <h2>Molecular Structure Viewer</h2>
+                        <p>Enter a SMILES string to render a 2D molecular structure, or pick a preset:</p>
+                        <label for="molecular-viewer-smiles">SMILES string</label>
+                        <input type="text" id="molecular-viewer-smiles" placeholder="e.g., CCO for ethanol" aria-label="SMILES string">
+                        <label for="molecular-viewer-preset">Preset molecules</label>
+                        <select id="molecular-viewer-preset" aria-label="Preset molecules">
+                            <option value="">Select a preset...</option>
+                            <option value="CC(=O)OC1=CC=CC=C1C(=O)O">Aspirin</option>
+                            <option value="CN1C=NC2=C1C(=O)N(C(=O)N2C)C">Caffeine</option>
+                            <option value="OC[C@H]1OC(O)[C@H](O)[C@@H](O)[C@@H]1O">Glucose</option>
+                            <option value="CCO">Ethanol</option>
+                            <option value="c1ccccc1">Benzene</option>
+                            <option value="C">Methane</option>
+                        </select>
+                        <button id="molecular-viewer-render" class="primary-button">Render Molecule</button>
+                        <div class="molecular-viewer-controls">
+                            <button id="molecular-viewer-zoom-in" type="button" aria-label="Zoom in">+</button>
+                            <button id="molecular-viewer-zoom-out" type="button" aria-label="Zoom out">-</button>
+                            <button id="molecular-viewer-reset" type="button" aria-label="Reset view">Reset</button>
+                        </div>
+                        <div class="molecular-viewer-canvas-container">
+                            <canvas id="molecular-viewer-canvas" width="400" height="300"></canvas>
+                        </div>
+                        <details class="example-details"><summary>Show Example</summary>
+                        <p>Try <strong>CCO</strong> for ethanol, <strong>c1ccccc1</strong> for benzene, or select a preset from the dropdown above.</p>
+                        </details>
+                    </div>
+                    <div id="batch-calc" class="main-groups card view-hidden">
+                        <h2>Batch Calculation</h2>
+                        <p>Upload a CSV file to run the same calculator across many rows of inputs at once.
+                            The first row must contain headers matching the calculator's input field names.</p>
+                        <div id="batch-unauthorized" class="batch-unauthorized" style="display:none" role="alert">
+                            <p>Batch calculation requires researcher or admin role. Sign in or upgrade your account to
+                                continue.</p>
+                            <a href="#" id="batch-upgrade-link" class="batch-upgrade-link primary-button">Sign in / Upgrade</a>
+                        </div>
+                        <div id="batch-authorized" class="batch-authorized">
+                            <label for="batch-calculator-type">Calculator type</label>
+                            <select id="batch-calculator-type" aria-label="Select calculator type for batch processing">
+                                <option value="molar-mass">Molar Mass</option>
+                                <option value="dilution">Dilution</option>
+                                <option value="mass-percent">Mass Percent</option>
+                                <option value="solution-mixing">Solution Mixing</option>
+                                <option value="ideal-gas">Ideal Gas Law</option>
+                                <option value="combined-gas">Combined Gas Law</option>
+                                <option value="van-der-waals">Van der Waals</option>
+                                <option value="half-life">Half-Life</option>
+                                <option value="cell-potential">Cell Potential</option>
+                                <option value="nernst">Nernst Equation</option>
+                                <option value="electrolysis">Electrolysis</option>
+                                <option value="bond-type">Bond Type</option>
+                                <option value="gibbs-free-energy">Gibbs Free Energy</option>
+                                <option value="hess-law">Hess's Law</option>
+                                <option value="entropy">Entropy</option>
+                                <option value="heat-capacity">Heat Capacity</option>
+                                <option value="arrhenius">Arrhenius</option>
+                                <option value="rate-law">Rate Law</option>
+                                <option value="integrated-rate-law">Integrated Rate Law</option>
+                                <option value="buffer-solution">Buffer Solution</option>
+                                <option value="pka-pkb">pKa / pkb</option>
+                                <option value="ksp">Ksp</option>
+                                <option value="colligative-properties">Colligative Properties</option>
+                                <option value="titration-curve">Titration Curve</option>
+                                <option value="quantum-numbers">Quantum Numbers</option>
+                                <option value="electron-configuration">Electron Configuration</option>
+                                <option value="debroglie-wavelength">De Broglie Wavelength</option>
+                                <option value="photoelectric-effect">Photoelectric Effect</option>
+                                <option value="heisenberg-uncertainty">Heisenberg Uncertainty</option>
+                            </select>
+                            <label for="batch-file-input">CSV file</label>
+                            <input type="file" id="batch-file-input" accept=".csv" aria-label="Choose CSV file">
+                            <button id="batch-process-btn" class="primary-button" disabled>Process</button>
+                            <div id="batch-progress-container" class="batch-progress-container" style="display:none">
+                                <progress id="batch-progress-bar" max="1" value="0" aria-label="Batch processing progress"></progress>
+                                <span id="batch-progress-text">0 / 0</span>
+                            </div>
+                            <button id="batch-download-btn" class="primary-button" style="display:none">Download Results</button>
+                            <div id="batch-error" class="result" role="alert" style="display:none"></div>
+                            <div id="batch-preview-container" class="batch-preview-container" style="display:none">
+                                <h3>Results Preview (first 10 rows)</h3>
+                                <div id="batch-preview-table" class="batch-preview-table"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <section id="dashboard-view" class="app-view dashboard-view" style="display:none" aria-label="User dashboard">

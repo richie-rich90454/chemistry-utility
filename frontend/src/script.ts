@@ -8,10 +8,12 @@ import {DebugLogger} from "./modules/debugLogger.js";
 import {ValidationUIManager} from "./modules/validationUIManager.js";
 import {ScreenReaderAnnouncer} from "./modules/screenReaderAnnouncer.js";
 import {InteractivePTable} from "./modules/interactivePTable.js";
+import {BatchCalculator} from "./modules/batchCalculator.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	new UIHandlerInitializer().initialize();
 	initializeAppNav();
 	ValidationUIManager.getInstance().attachBlurValidators();
+	BatchCalculator.getInstance().init();
 
 	// Dismiss page load overlay
 	let overlay=document.querySelector(".page-overlay") as HTMLElement;
