@@ -167,6 +167,7 @@
             <symbol id="icon-moon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></symbol>
             <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
             <symbol id="icon-element" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+            <symbol id="icon-dashboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></symbol>
             <symbol id="icon-molar-mass" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="9"/></symbol>
             <symbol id="icon-balance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h5"/><path d="M17 12h5"/><path d="M7 12a5 5 0 0 1 10 0"/><path d="M12 2v4"/><path d="M12 18v4"/></symbol>
             <symbol id="icon-dilution" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l-1 9H9L8 2z"/><path d="M9 11a3 3 0 0 0 6 0"/><path d="M12 14v8"/></symbol>
@@ -212,8 +213,10 @@
                 <div class="nav-recent"></div>
                 <nav class="sidebar-nav">
                     <ul>
+                        <li><a href="#dashboard-view"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-dashboard"></use></svg><span class="nav-label">Dashboard</span></a></li>
                         <li class="nav-category">General</li>
                         <li><a href="#element-lookup"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-element"></use></svg><span class="nav-label">Element Lookup</span></a></li>
+                        <li><a href="#ptable-view"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-element"></use></svg><span class="nav-label">Periodic Table</span></a></li>
                         <li><a href="#mass-calc"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-molar-mass"></use></svg><span class="nav-label">Molar Mass</span></a></li>
                         <li><a href="#balancing"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-balance"></use></svg><span class="nav-label">Equation Balancer</span></a></li>
                         <li><a href="#unit-converter"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-unit-converter"></use></svg><span class="nav-label">Unit Converter</span></a></li>
@@ -277,6 +280,16 @@
                         <p>To compute masses using this elemental data, try the <a href="#mass-calc">Molar Mass Calculator</a>.
                         </p>
                     </div>
+                    <section id="ptable-view" class="main-groups card view-hidden">
+                        <h2>Interactive Periodic Table - Element Properties, Heatmaps, and Details</h2>
+                        <div class="tool-container">
+                            <p class="tool-description">Explore an interactive periodic table of all 118 elements with color-coded
+                                categories, hover tooltips, and a click-to-open detail panel. Switch to heatmap mode to visualize
+                                trends in electronegativity, atomic radius, ionization energy, or atomic mass using a
+                                blue-to-red gradient scale.</p>
+                        </div>
+                        <div id="ptable-container"></div>
+                    </section>
                     <div id="mass-calc" class="main-groups card view-hidden">
                         <h2>Molar Mass Calculator - Calculate Molecule/Compound Molar Mass Instantly</h2>
                         <p>Enter the formula here: </p>
@@ -516,6 +529,9 @@
                         </div>
                         <button id="calculate-titration" class="primary-button">Calculate</button>
                         <div id="titration-result" class="result"></div>
+                        <div class="chart-container" aria-label="Titration curve chart">
+                            <canvas id="titration-chart"></canvas>
+                        </div>
                         <details class="example-details"><summary>Show Example</summary>
                         <p>Try strong acid: conc=0.1 M, vol=25 mL, base conc=0.1 M, max vol=50 mL. Equivalence at 25 mL.</p>
                         </details>
@@ -932,6 +948,9 @@
                             </div>
                             <button id="calculate-integrated-rate-law" class="primary-button">Calculate</button>
                             <div id="integrated-rate-law-result" class="result"></div>
+                            <div class="chart-container" aria-label="Concentration vs time chart">
+                                <canvas id="integrated-rate-law-chart"></canvas>
+                            </div>
                             <details class="example-details"><summary>Show Example</summary>
                             <p>First order: [A]₀=1 M, k=0.05 s⁻¹, t=10 s → [A]≈0.607 M. Or solve for time with [A]=0.5 M → t≈13.86 s.</p>
                             </details>
@@ -1131,6 +1150,19 @@
                         </details>
                     </div>
                 </div>
+                <section id="dashboard-view" class="app-view dashboard-view" style="display:none" aria-label="User dashboard">
+                    <div class="dashboard-container">
+                        <h2>Dashboard</h2>
+                        <div class="dashboard-loading" style="display:none">Loading dashboard...</div>
+                        <div class="dashboard-error" role="alert" style="display:none"></div>
+                        <div class="dashboard-signin-prompt" style="display:none"></div>
+                        <div class="dashboard-stats"></div>
+                        <div class="dashboard-recent"></div>
+                        <div class="dashboard-activity"></div>
+                        <div class="dashboard-favorites"></div>
+                        <div class="dashboard-admin" style="display:none"></div>
+                    </div>
+                </section>
                 <section class="intro card" style="display:none">
                     <p>This Chemistry Utility is a free online chemistry toolkit offering molar mass calculation, chemical
                         equation balancing, stoichiometry solving, gas law calculations, dilution formulas, and more.</p>

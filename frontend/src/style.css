@@ -2595,3 +2595,608 @@ a{color:var(--md-primary)}
         display: none !important;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   User Dashboard — MD3
+   ═══════════════════════════════════════════════════════════════ */
+.dashboard-view{
+    padding: var(--md-space-6);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.dashboard-container{
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-6);
+}
+.dashboard-container h2{
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--md-on-surface);
+    letter-spacing: 0;
+}
+.dashboard-loading{
+    padding: var(--md-space-6);
+    text-align: center;
+    color: var(--md-on-surface-variant);
+    font-size: 0.875rem;
+    background: var(--md-surface-container);
+    border-radius: var(--md-shape-md);
+    box-shadow: var(--md-elevation-1);
+}
+.dashboard-error{
+    padding: var(--md-space-4);
+    color: var(--md-on-error-container);
+    background: var(--md-error-container);
+    border-radius: var(--md-shape-md);
+    font-size: 0.875rem;
+}
+.dashboard-signin-prompt{
+    padding: var(--md-space-8);
+    text-align: center;
+    color: var(--md-on-surface-variant);
+    background: var(--md-surface-container);
+    border-radius: var(--md-shape-md);
+    box-shadow: var(--md-elevation-1);
+}
+.dashboard-signin-prompt h3{
+    margin: 0 0 var(--md-space-2) 0;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--md-on-surface);
+}
+.dashboard-signin-prompt p{
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+.dashboard-stats{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--md-space-4);
+}
+.dashboard-stat-card{
+    background: var(--md-surface-container);
+    border-radius: var(--md-shape-md);
+    box-shadow: var(--md-elevation-1);
+    padding: var(--md-space-4) var(--md-space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-1);
+    min-height: 80px;
+}
+.dashboard-stat-label{
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--md-on-surface-variant);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+.dashboard-stat-value{
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--md-primary);
+    line-height: 1.2;
+}
+.dashboard-recent,
+.dashboard-activity,
+.dashboard-favorites,
+.dashboard-admin{
+    background: var(--md-surface-container-low);
+    border-radius: var(--md-shape-md);
+    box-shadow: var(--md-elevation-1);
+    padding: var(--md-space-5);
+}
+.dashboard-recent h3,
+.dashboard-activity h3,
+.dashboard-favorites h3,
+.dashboard-admin h3,
+.dashboard-admin h4{
+    margin: 0 0 var(--md-space-4) 0;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: var(--md-on-surface);
+}
+.dashboard-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-2);
+}
+.dashboard-list-item{
+    display: grid;
+    grid-template-columns: minmax(120px, 200px) 1fr auto;
+    gap: var(--md-space-4);
+    align-items: center;
+    padding: var(--md-space-3) var(--md-space-4);
+    background: var(--md-surface-container);
+    border-radius: var(--md-shape-sm);
+    font-size: 0.875rem;
+}
+.dashboard-list-type{
+    font-weight: 500;
+    color: var(--md-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dashboard-list-preview{
+    color: var(--md-on-surface-variant);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.dashboard-list-date{
+    color: var(--md-on-surface-variant);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+.dashboard-empty{
+    margin: 0;
+    padding: var(--md-space-4);
+    color: var(--md-on-surface-variant);
+    font-size: 0.875rem;
+    text-align: center;
+}
+.dashboard-bar-chart{
+    display: flex;
+    align-items: flex-end;
+    gap: var(--md-space-2);
+    height: 160px;
+    padding-top: var(--md-space-4);
+}
+.dashboard-bar-wrap{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    gap: var(--md-space-1);
+}
+.dashboard-bar{
+    width: 100%;
+    max-width: 40px;
+    background: var(--md-primary);
+    border-radius: var(--md-shape-xs) var(--md-shape-xs) 0 0;
+    min-height: 4px;
+    transition: height var(--md-motion-duration-medium2) var(--md-motion-easing-standard);
+}
+.dashboard-bar-label{
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+    font-weight: 500;
+}
+.dashboard-admin-cards{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--md-space-4);
+    margin-bottom: var(--md-space-5);
+}
+.dashboard-admin-chart{
+    margin-top: var(--md-space-4);
+}
+.dashboard-admin-popular{
+    margin-top: var(--md-space-4);
+}
+@media (max-width: 768px){
+    .dashboard-view{
+        padding: var(--md-space-4);
+    }
+    .dashboard-list-item{
+        grid-template-columns: 1fr;
+        gap: var(--md-space-1);
+    }
+    .dashboard-bar-chart{
+        height: 120px;
+    }
+}
+@media print{
+    .dashboard-view{
+        display: none !important;
+    }
+}
+
+/* �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T
+   Interactive Periodic Table (Task 20)
+   �T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T�T */
+
+/* Wrapper that constrains the table width inside the card view. */
+.ptable-wrapper{
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-3);
+    width: 100%;
+}
+.app-view .main-groups.card #ptable-container,
+#ptable-container{
+    width: 100%;
+}
+
+/* Heatmap control bar �� small inline label + select. */
+.ptable-controls{
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-2);
+    flex-wrap: wrap;
+    font-size: 0.8125rem;
+    color: var(--md-on-surface-variant);
+}
+.ptable-controls label{
+    font-weight: 500;
+    color: var(--md-on-surface);
+}
+.ptable-controls select{
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.8125rem;
+    padding: var(--md-space-1) var(--md-space-3);
+    background: var(--md-input-bg);
+    color: var(--md-input-text);
+    border: 1px solid var(--md-input-border);
+    border-radius: var(--md-shape-sm);
+    cursor: pointer;
+}
+.ptable-controls select:focus-visible{
+    outline: 2px solid var(--md-input-focus-border);
+    outline-offset: 1px;
+}
+
+/* Main periodic table grid: 18 columns, 10 rows (7 main + spacer + 2 f-block). */
+.ptable-grid{
+    display: grid;
+    grid-template-columns: repeat(18, minmax(0, 1fr));
+    grid-template-rows: repeat(7, auto) var(--md-space-3) repeat(2, auto);
+    gap: 3px;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: var(--md-space-2);
+}
+
+/* Element cell. */
+.ptable-cell{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 2px;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-xs);
+    background: var(--md-surface-container);
+    color: var(--md-on-surface);
+    font-family: "Noto Sans", sans-serif;
+    cursor: pointer;
+    transition: transform var(--md-motion-duration-short3) var(--md-motion-easing-standard),
+                box-shadow var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+    user-select: none;
+}
+.ptable-cell:hover{
+    transform: scale(1.08);
+    z-index: 5;
+    box-shadow: var(--md-elevation-2);
+}
+.ptable-cell:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 1px;
+    z-index: 5;
+}
+.ptable-cell-number{
+    font-size: 0.625rem;
+    line-height: 1;
+    opacity: 0.75;
+}
+.ptable-cell-symbol{
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.1;
+}
+.ptable-cell-mass{
+    font-size: 0.55rem;
+    line-height: 1;
+    opacity: 0.7;
+}
+
+/* Category color coding using MD3 design tokens. */
+.ptable-cat-alkali-metal{ background: var(--md-primary-container); color: var(--md-on-primary-container); }
+.ptable-cat-alkaline-earth{ background: var(--md-tertiary-container); color: var(--md-on-tertiary-container); }
+.ptable-cat-transition-metal{ background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
+.ptable-cat-post-transition{ background: var(--md-surface-container-high); color: var(--md-on-surface); }
+.ptable-cat-metalloid{ background: var(--md-warning-container); color: var(--md-on-warning-container); }
+.ptable-cat-nonmetal{ background: var(--md-success-container); color: var(--md-on-success-container); }
+.ptable-cat-halogen{ background: var(--md-error-container); color: var(--md-on-error-container); }
+.ptable-cat-noble-gas{ background: var(--md-primary); color: var(--md-on-primary); }
+.ptable-cat-lanthanide{ background: var(--md-tertiary); color: var(--md-on-tertiary); }
+.ptable-cat-actinide{ background: var(--md-secondary); color: var(--md-on-secondary); }
+.ptable-cat-unknown{ background: var(--md-surface-container-highest); color: var(--md-on-surface); }
+
+/* Heatmap mode overrides the category background with an inline style. */
+.ptable-cell.ptable-heatmap-cell .ptable-cell-symbol,
+.ptable-cell.ptable-heatmap-cell .ptable-cell-number,
+.ptable-cell.ptable-heatmap-cell .ptable-cell-mass{
+    color: #1c1b1f;
+    opacity: 1;
+}
+.dark .ptable-cell.ptable-heatmap-cell .ptable-cell-symbol,
+.dark .ptable-cell.ptable-heatmap-cell .ptable-cell-number,
+.dark .ptable-cell.ptable-heatmap-cell .ptable-cell-mass{
+    color: #ffffff;
+}
+
+/* Hover tooltip �� positioned relative to the cell, appears above. */
+.ptable-tooltip{
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--md-inverse-surface);
+    color: var(--md-inverse-on-surface);
+    padding: var(--md-space-2) var(--md-space-3);
+    border-radius: var(--md-shape-sm);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+    z-index: 20;
+    box-shadow: var(--md-elevation-2);
+    max-width: 240px;
+}
+.ptable-tooltip strong{
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 600;
+}
+.ptable-cell:hover .ptable-tooltip,
+.ptable-cell:focus-visible .ptable-tooltip{
+    opacity: 1;
+}
+
+/* Color legend (categories + heatmap gradient). */
+.ptable-legend{
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--md-space-2) var(--md-space-3);
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+    padding-top: var(--md-space-2);
+    border-top: 1px solid var(--md-outline-variant);
+}
+.ptable-legend-item{
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-1);
+}
+.ptable-legend-swatch{
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: var(--md-shape-xs);
+    border: 1px solid var(--md-outline-variant);
+}
+
+/* Heatmap gradient bar �� hidden until a heatmap property is active. */
+.ptable-heatmap-legend{
+    display: none;
+    align-items: center;
+    gap: var(--md-space-2);
+    width: 100%;
+    margin-top: var(--md-space-1);
+}
+.ptable-heatmap-gradient{
+    flex: 1;
+    height: 12px;
+    border-radius: var(--md-shape-xs);
+    border: 1px solid var(--md-outline-variant);
+    background: linear-gradient(to right,
+        rgb(0, 0, 255) 0%,
+        rgb(0, 255, 0) 33%,
+        rgb(255, 255, 0) 66%,
+        rgb(255, 0, 0) 100%);
+}
+.ptable-heatmap-min,
+.ptable-heatmap-max{
+    font-size: 0.7rem;
+    color: var(--md-on-surface-variant);
+    min-width: 32px;
+}
+.ptable-heatmap-max{
+    text-align: right;
+}
+
+/* Element detail panel �� slides in from the right as a side panel. */
+.ptable-detail-panel{
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 420px;
+    height: 100vh;
+    background: var(--md-surface);
+    color: var(--md-on-surface);
+    box-shadow: var(--md-elevation-3);
+    transform: translateX(100%);
+    transition: transform var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate);
+    z-index: 1000;
+    overflow-y: auto;
+    padding: var(--md-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-3);
+}
+.ptable-detail-panel.open{
+    transform: translateX(0);
+}
+.ptable-detail-header{
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-3);
+}
+.ptable-detail-symbol{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--md-shape-md);
+    font-size: 1.5rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    border: 1px solid var(--md-outline-variant);
+}
+.ptable-detail-title{
+    flex: 1;
+    min-width: 0;
+}
+.ptable-detail-title h3{
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+.ptable-detail-title p{
+    margin: 2px 0 0;
+    font-size: 0.8125rem;
+    color: var(--md-on-surface-variant);
+}
+.ptable-detail-close{
+    background: transparent;
+    border: none;
+    color: var(--md-on-surface-variant);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: var(--md-space-1) var(--md-space-2);
+    border-radius: var(--md-shape-full);
+    transition: background var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+}
+.ptable-detail-close:hover{
+    background: var(--md-state-hover);
+}
+.ptable-detail-close:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+.ptable-detail-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--md-space-2) var(--md-space-3);
+    margin: 0;
+}
+.ptable-detail-grid dt{
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.ptable-detail-grid dd{
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--md-on-surface);
+    text-align: right;
+    word-break: break-word;
+}
+.ptable-detail-grid .ptable-detail-row-full{
+    grid-column: 1 / -1;
+}
+.ptable-detail-links{
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-2);
+    margin-top: var(--md-space-2);
+    padding-top: var(--md-space-3);
+    border-top: 1px solid var(--md-outline-variant);
+}
+.ptable-detail-link{
+    display: block;
+    padding: var(--md-space-2) var(--md-space-3);
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+    text-decoration: none;
+    border-radius: var(--md-shape-sm);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-align: center;
+    transition: background var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+}
+.ptable-detail-link:hover{
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+}
+.ptable-detail-link:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* Responsive scaling �� smaller cells on narrow screens. */
+@media (max-width: 768px){
+    .ptable-grid{
+        grid-template-columns: repeat(18, minmax(28px, 1fr));
+        gap: 2px;
+    }
+    .ptable-cell{
+        min-width: 28px;
+        min-height: 36px;
+    }
+    .ptable-cell-symbol{
+        font-size: 0.75rem;
+    }
+    .ptable-cell-number,
+    .ptable-cell-mass{
+        font-size: 0.5rem;
+    }
+    .ptable-detail-panel{
+        max-width: 100%;
+    }
+}
+
+/* Print-friendly: hide interactive chrome, keep the table legible. */
+@media print{
+    .ptable-controls,
+    .ptable-tooltip,
+    .ptable-detail-panel,
+    .ptable-heatmap-legend{
+        display: none !important;
+    }
+    .ptable-cell{
+        border: 1px solid #999;
+        background: #fff !important;
+        color: #000 !important;
+    }
+}
+
+/* Chart container — wraps Chart.js canvases inside calculator cards. */
+.chart-container{
+    position: relative;
+    width: 100%;
+    height: 320px;
+    margin-top: var(--md-space-4);
+    background: var(--md-surface-container-low);
+    border-radius: var(--md-shape-md);
+    padding: var(--md-space-3);
+    box-sizing: border-box;
+}
+.chart-container canvas{
+    width: 100% !important;
+    height: 100% !important;
+}
+.dashboard-activity .chart-container{
+    height: 240px;
+    margin-top: var(--md-space-3);
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+}
+@media (max-width: 768px){
+    .chart-container{
+        height: 260px;
+    }
+    .dashboard-activity .chart-container{
+        height: 200px;
+    }
+}
