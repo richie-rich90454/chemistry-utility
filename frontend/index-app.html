@@ -92,6 +92,8 @@
                         <li><a href="#stoichiometry"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-stoichiometry"></use></svg><span class="nav-label">Stoichiometry</span></a></li>
                         <li><a href="#bond-type-predictor"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-bond-type"></use></svg><span class="nav-label">Bond Type</span></a></li>
                         <li><a href="#molecular-viewer"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-bond-type"></use></svg><span class="nav-label">Molecular Viewer</span></a></li>
+                        <li class="nav-category">Database</li>
+                        <li><a href="#compound-search"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-search"></use></svg><span class="nav-label">Compound Search</span></a></li>
                     </ul>
                     <div class="no-results" style="display:none">No calculators found</div>
                 </nav>
@@ -985,6 +987,30 @@
                                 <div id="batch-preview-table" class="batch-preview-table"></div>
                             </div>
                         </div>
+                    </div>
+                    <div id="compound-search" class="main-groups card view-hidden">
+                        <h2>Compound Database Search - Search Compounds by Name, Formula, CAS, or SMILES</h2>
+                        <p>Search the chemical compound database to find detailed information about compounds:</p>
+                        <div class="tool-container">
+                            <p class="tool-description">Look up chemical compounds by name, molecular formula, CAS number, or SMILES string. View detailed information including molar mass, InChI, and additional properties, then jump directly to the Molar Mass or Stoichiometry calculators with the formula pre-filled.</p>
+                        </div>
+                        <label for="compound-search-type">Search by</label>
+                        <select id="compound-search-type" class="compound-search-type" aria-label="Select compound search type">
+                            <option value="name">Name</option>
+                            <option value="formula">Molecular Formula</option>
+                            <option value="cas">CAS Number</option>
+                            <option value="smiles">SMILES</option>
+                        </select>
+                        <label for="compound-search-input">Search query</label>
+                        <input type="text" id="compound-search-input" class="compound-search-input" placeholder="E.g., water or H2O" aria-label="Compound search query">
+                        <button id="compound-search-button" class="compound-search-button primary-button" type="button">Search Compounds</button>
+                        <div class="compound-search-loading" role="status" style="display:none">Searching compounds...</div>
+                        <div class="compound-search-error" role="alert" style="display:none"></div>
+                        <div class="compound-search-results"></div>
+                        <div class="compound-search-detail" style="display:none"></div>
+                        <details class="example-details"><summary>Show Example</summary>
+                        <p>Try searching by <strong>name</strong> for "water", by <strong>formula</strong> for "H2O", or by <strong>CAS</strong> for "7732-18-5".</p>
+                        </details>
                     </div>
                 </div>
                 <section id="dashboard-view" class="app-view dashboard-view" style="display:none" aria-label="User dashboard">

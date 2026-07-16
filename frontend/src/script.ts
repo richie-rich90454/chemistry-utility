@@ -9,11 +9,15 @@ import {ValidationUIManager} from "./modules/validationUIManager.js";
 import {ScreenReaderAnnouncer} from "./modules/screenReaderAnnouncer.js";
 import {InteractivePTable} from "./modules/interactivePTable.js";
 import {BatchCalculator} from "./modules/batchCalculator.js";
+import {MolecularViewer} from "./modules/molecularViewer.js";
+import {CompoundSearchUI} from "./modules/compoundSearchUI.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	new UIHandlerInitializer().initialize();
 	initializeAppNav();
 	ValidationUIManager.getInstance().attachBlurValidators();
 	BatchCalculator.getInstance().init();
+	MolecularViewer.getInstance().init();
+	CompoundSearchUI.getInstance().init();
 
 	// Dismiss page load overlay
 	let overlay=document.querySelector(".page-overlay") as HTMLElement;
