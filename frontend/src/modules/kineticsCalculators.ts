@@ -1,6 +1,7 @@
 import { Calculator } from "./calculator.js";
 import { SolveForCalculator } from "./solveForCalculator.js";
 import { InputValidator } from "./validation.js";
+import { ChartRenderer, ConcentrationTimePoint } from "./chartRenderer.js";
 
 /**
  * Calculates the rate constant using the Arrhenius equation:
@@ -281,6 +282,43 @@ export class IntegratedRateLawCalculator extends SolveForCalculator {
             throw new Error("Invalid solveFor value");
         }
         this.resultDisplay.showFormula(formula, result, unit);
+        let chartCanvas = document.getElementById("integrated-rate-law-chart");
+        if (chartCanvas) {
+            let endTime: number;
+            if (solveFor === "concentration") {
+                endTime = t;
+            } else {
+                endTime = result;
+            }
+            let points = this.buildConcentrationTimeSeries(order, A0, k, endTime);
+            ChartRenderer.getInstance().renderConcentrationTimeChart("integrated-rate-law-chart", points);
+        }
+    }
+
+    private buildConcentrationTimeSeries(order: number, A0: number, k: number, endTime: number): ConcentrationTimePoint[] {
+        let points: ConcentrationTimePoint[] = [];
+        if (endTime <= 0 || !isFinite(endTime)) {
+            endTime = 10;
+        }
+        let steps = 30;
+        let stepSize = endTime / steps;
+        let i: number;
+        for (i = 0; i <= steps; i++) {
+            let time = i * stepSize;
+            let conc: number;
+            if (order === 0) {
+                conc = A0 - k * time;
+            } else if (order === 1) {
+                conc = A0 * Math.exp(-k * time);
+            } else {
+                conc = A0 / (1 + k * A0 * time);
+            }
+            if (conc < 0) {
+                conc = 0;
+            }
+            points.push({ "time": time, "concentration": conc });
+        }
+        return points;
     }
 }
 

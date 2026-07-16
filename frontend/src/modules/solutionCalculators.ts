@@ -1,6 +1,7 @@
 import { Calculator } from "./calculator.js";
 import { SolveForCalculator } from "./solveForCalculator.js";
 import { InputValidator } from "./validation.js";
+import { ChartRenderer } from "./chartRenderer.js";
 
 /**
  * Solves the dilution equation M1*V1 = M2*V2 for any one of the four
@@ -434,6 +435,10 @@ export class TitrationCurveCalculator extends Calculator {
         }
         html += "</p>";
         this.resultDisplay.showResult(html);
+        let chartCanvas = document.getElementById("titration-chart");
+        if (chartCanvas) {
+            ChartRenderer.getInstance().renderTitrationCurve("titration-chart", dataPoints);
+        }
     }
 }
 

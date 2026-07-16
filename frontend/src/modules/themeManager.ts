@@ -1,4 +1,5 @@
 type Theme = "light" | "dark" | "amoled";
+type ThemeChangeCallback = (theme: Theme) => void;
 
 class ThemeManager {
 	private static instance: ThemeManager;
@@ -6,12 +7,34 @@ class ThemeManager {
 	private mediaQuery: MediaQueryList | null;
 	private autoDarkModeEnabled: boolean;
 	private autoDarkTimerId: number | null;
+	private listeners: ThemeChangeCallback[];
 
 	private constructor() {
 		this.currentTheme = "light";
 		this.mediaQuery = null;
 		this.autoDarkModeEnabled = false;
 		this.autoDarkTimerId = null;
+		this.listeners = [];
+	}
+
+	public subscribe(listener: ThemeChangeCallback): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			if (this.listeners[i] === listener) {
+				return;
+			}
+		}
+		this.listeners.push(listener);
+	}
+
+	public unsubscribe(listener: ThemeChangeCallback): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			if (this.listeners[i] === listener) {
+				this.listeners.splice(i, 1);
+				return;
+			}
+		}
 	}
 
 	public static getInstance(): ThemeManager {
@@ -86,6 +109,14 @@ class ThemeManager {
 		}
 		this.updateThemeColorMeta();
 		this.updateToggleButton();
+		this.notifyListeners();
+	}
+
+	private notifyListeners(): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			this.listeners[i](this.currentTheme);
+		}
 	}
 
 	private applyAutoDarkMode(): void {

@@ -1,5 +1,6 @@
 import { ApiClient, ApiError } from "./apiClient.js";
 import { AuthManager, AuthState } from "./authManager.js";
+import { ChartRenderer, ActivityPoint } from "./chartRenderer.js";
 
 export interface CalculationRecord {
     ID: string;
@@ -453,7 +454,7 @@ export class DashboardManager {
             return;
         }
         container.innerHTML = "<h3>Weekly Activity</h3>";
-        let counts: number[] = [0, 0, 0, 0, 0, 0, 0];
+        let counts: number[] = [0,0,0,0,0,0,0];
         let labels: string[] = this.getDayLabels();
         let startOfToday: Date = new Date();
         startOfToday.setHours(0, 0, 0, 0);
@@ -470,30 +471,27 @@ export class DashboardManager {
                 counts[6 - dayDiff] = counts[6 - dayDiff] + 1;
             }
         }
-        let maxCount: number = 1;
-        for (i = 0; i < counts.length; i++) {
-            if (counts[i] > maxCount) {
-                maxCount = counts[i];
-            }
+        let chartCanvas: HTMLCanvasElement | null = container.querySelector("canvas#dashboard-activity-chart") as HTMLCanvasElement | null;
+        if (!chartCanvas) {
+            let chartWrap: HTMLElement = document.createElement("div");
+            chartWrap.className = "chart-container";
+            chartCanvas = document.createElement("canvas");
+            chartCanvas.id = "dashboard-activity-chart";
+            chartWrap.appendChild(chartCanvas);
+            container.appendChild(chartWrap);
         }
-        let chart: HTMLElement = document.createElement("div");
-        chart.className = "dashboard-bar-chart";
-        for (i = 0; i < counts.length; i++) {
-            let barWrap: HTMLElement = document.createElement("div");
-            barWrap.className = "dashboard-bar-wrap";
-            let bar: HTMLElement = document.createElement("div");
-            bar.className = "dashboard-bar";
-            let heightPct: number = Math.round((counts[i] / maxCount) * 100);
-            bar.style.height = String(heightPct) + "%";
-            bar.setAttribute("title", labels[i] + ": " + String(counts[i]));
-            barWrap.appendChild(bar);
-            let label: HTMLElement = document.createElement("div");
-            label.className = "dashboard-bar-label";
-            label.textContent = labels[i];
-            barWrap.appendChild(label);
-            chart.appendChild(barWrap);
+        let dataPoints: ActivityPoint[] = [];
+        for (i = 0; i < labels.length; i++) {
+            dataPoints.push({ "day": labels[i], "count": counts[i] });
         }
-        container.appendChild(chart);
+        try {
+            ChartRenderer.getInstance().renderActivityChart("dashboard-activity-chart", dataPoints);
+        } catch (e) {
+            let fallback: HTMLElement = document.createElement("p");
+            fallback.className = "dashboard-empty";
+            fallback.textContent = "Weekly activity chart unavailable.";
+            container.appendChild(fallback);
+        }
     }
 
     private getDayLabels(): string[] {

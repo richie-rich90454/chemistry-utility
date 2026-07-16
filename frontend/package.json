@@ -16,11 +16,14 @@
     "check-bundle-size": "node scripts/check-bundle-size.mjs"
   },
   "dependencies": {
+    "chart.js": "^4.5.1",
+    "chartjs-plugin-zoom": "^2.2.0",
     "gsap": "^3.15.0",
     "katex": "^0.17.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "@types/chart.js": "^2.9.41",
     "@types/node": "^26.1.1",
     "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.64.0",
