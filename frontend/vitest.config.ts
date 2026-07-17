@@ -18,10 +18,9 @@ export default defineConfig({
                 "node_modules/**",
                 // Hard-to-test UI modules: these render complex modal/overlay DOM
                 // trees with inline event handlers and cross-component wiring
-                // (AuthManager subscriptions, PluginManager hooks) that require
-                // full DOM interaction testing rather than unit tests.
+                // (PluginManager hooks) that require full DOM interaction
+                // testing rather than unit tests.
                 // Coverage is enforced via integration/E2E tests instead.
-                "src/modules/authModal.ts",
                 "src/modules/pluginManagerUI.ts",
                 // Entry-point bootstrap: wires every subsystem together inside a
                 // DOMContentLoaded handler with async data loading (Wails bindings

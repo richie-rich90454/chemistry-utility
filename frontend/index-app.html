@@ -57,7 +57,6 @@
                     <span class="search-icon"><svg aria-hidden="true" focusable="false"><use href="#icon-search"></use></svg></span>
                     <input type="text" placeholder="Search calculators..." aria-label="Search calculators">
                 </div>
-                <div id="sidebar-auth-section"></div>
                 <section id="sidebar-workspaces" class="sidebar-workspaces" aria-label="Workspaces" style="display:none">
                     <div class="sidebar-workspaces-header">
                         <span class="sidebar-workspaces-title">Workspaces</span>
@@ -942,11 +941,6 @@
                         <h2>Batch Calculation</h2>
                         <p>Upload a CSV file to run the same calculator across many rows of inputs at once.
                             The first row must contain headers matching the calculator's input field names.</p>
-                        <div id="batch-unauthorized" class="batch-unauthorized" style="display:none" role="alert">
-                            <p>Batch calculation requires researcher or admin role. Sign in or upgrade your account to
-                                continue.</p>
-                            <a href="#" id="batch-upgrade-link" class="batch-upgrade-link primary-button">Sign in / Upgrade</a>
-                        </div>
                         <div id="batch-authorized" class="batch-authorized">
                             <label for="batch-calculator-type">Calculator type</label>
                             <select id="batch-calculator-type" aria-label="Select calculator type for batch processing">
@@ -1084,7 +1078,6 @@
                 <div id="comparison-content"></div>
             </div>
         </div>
-        <div id="auth-modal-container"></div>
         <script type="module" src="/src/script.ts"></script>
         <script type="module" src="/src/render.ts" defer></script>
         <script type="module" src="/src/animate.ts" defer></script>
