@@ -34,6 +34,17 @@ export class Fraction{
 	}
 }
 
+export interface BalanceExplanation {
+	method: string;
+	steps: string[];
+	coefficients: number[];
+}
+
+export interface BalanceResult {
+	equation: string;
+	explanation: BalanceExplanation;
+}
+
 export class EquationBalancer {
 	public static gcd(a: number, b: number): number{
 		a=Math.abs(a);
@@ -50,6 +61,23 @@ export class EquationBalancer {
 		return Math.abs(a*b)/EquationBalancer.gcd(a, b);
 	}
 	private static parseFormulaToCounts(formula: string): Record<string, number>{
+		// Hydrate notation: CuSO4·5H2O or CuSO4*5H2O
+		let hydrateParts=formula.split(/[·*]/);
+		if (hydrateParts.length>1){
+			let merged: Record<string, number>={};
+			for (let part of hydrateParts){
+				let trimmed=part.trim();
+				if (trimmed.length===0) continue;
+				let numMatch=trimmed.match(/^\d+/);
+				let mult=numMatch!==null?parseInt(numMatch[0], 10):1;
+				let body=numMatch!==null?trimmed.substring(numMatch[0].length):trimmed;
+				let partCounts=EquationBalancer.parseFormulaToCounts(body);
+				for (let el in partCounts){
+					merged[el]=(merged[el]||0)+partCounts[el]*mult;
+				}
+			}
+			return merged;
+		}
 		let stack: Record<string, number>[]=[{}];
 		let i=0;
 		while (i<formula.length){
@@ -137,7 +165,7 @@ export class EquationBalancer {
 		let free:number[]=[];
 		for (let i=0;i<c;i++) if (!isPivot[i]) free.push(i);
 		if (free.length===0) return null;
-		for (let trial=1;trial<=10;trial++){
+		for (let trial=1;trial<=1000;trial++){
 			let sol=Array.from({ length:c },()=>new Fraction(0));
 			for (let f of free) sol[f]=new Fraction(trial);
 			for (let i=pivotCol.length-1;i>=0;i--){
@@ -158,7 +186,7 @@ export class EquationBalancer {
 		}
 		return null;
 	}
-	public static balanceEquation(equation: string, maxCoefficient: number=4000): string{
+	public static balanceEquation(equation: string, maxCoefficient: number=10000, explain: boolean=false): string|BalanceResult{
 		let { reactants, products }=EquationBalancer.parseEquation(equation);
 		let all=reactants.concat(products);
 		let parsed=all.map(EquationBalancer.parseFormulaToCounts);
@@ -181,13 +209,30 @@ export class EquationBalancer {
 			let c=coeffs[off+i];
 			return (c===1?"":c)+p;
 		}).join(" + ");
-		return fmt(reactants, 0)+" -> "+fmt(products, reactants.length);
+		let balanced=fmt(reactants, 0)+" -> "+fmt(products, reactants.length);
+		if (explain){
+			let stepList: string[]=[];
+			stepList.push("Parsed "+reactants.length+" reactants and "+products.length+" products");
+			stepList.push("Built element matrix ("+elements.length+" elements x "+all.length+" species)");
+			stepList.push("Solved via Gaussian elimination");
+			stepList.push("Coefficients: "+coeffs.join(", "));
+			let explanation: BalanceExplanation={
+				method: "Gaussian elimination over rationals",
+				steps: stepList,
+				coefficients: coeffs
+			};
+			return {
+				equation: balanced,
+				explanation: explanation
+			};
+		}
+		return balanced;
 	}
 }
 
 export function parseEquation(equation: string): { reactants: string[], products: string[] }{
 	return EquationBalancer.parseEquation(equation);
 }
-export function balanceEquation(equation: string, maxCoefficient: number=4000): string{
-	return EquationBalancer.balanceEquation(equation, maxCoefficient);
+export function balanceEquation(equation: string, maxCoefficient: number=10000, explain: boolean=false): string|BalanceResult{
+	return EquationBalancer.balanceEquation(equation, maxCoefficient, explain);
 }
