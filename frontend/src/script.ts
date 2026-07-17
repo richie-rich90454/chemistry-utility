@@ -11,6 +11,8 @@ import {InteractivePTable} from "./modules/interactivePTable.js";
 import {BatchCalculator} from "./modules/batchCalculator.js";
 import {MolecularViewer} from "./modules/molecularViewer.js";
 import {CompoundSearchUI} from "./modules/compoundSearchUI.js";
+import {WorkspaceManager} from "./modules/workspaceManager.js";
+import {ExperimentLogManager} from "./modules/experimentLog.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	new UIHandlerInitializer().initialize();
 	initializeAppNav();
@@ -18,6 +20,16 @@ document.addEventListener("DOMContentLoaded", function(): void{
 	BatchCalculator.getInstance().init();
 	MolecularViewer.getInstance().init();
 	CompoundSearchUI.getInstance().init();
+	try {
+		WorkspaceManager.getInstance().init();
+	} catch (e) {
+		// workspace UI unavailable
+	}
+	try {
+		ExperimentLogManager.getInstance().init();
+	} catch (e) {
+		// experiment log UI unavailable
+	}
 
 	// Dismiss page load overlay
 	let overlay=document.querySelector(".page-overlay") as HTMLElement;
