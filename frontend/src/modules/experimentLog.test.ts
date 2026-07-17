@@ -1,106 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-
-const mockGet = vi.fn();
-const mockPost = vi.fn();
-const mockPatch = vi.fn();
-const mockAuthSubscribe = vi.fn();
-const mockAuthGetState = vi.fn();
-
-vi.mock("./apiClient.js", function () {
-    return {
-        ApiClient: {
-            getInstance: function () {
-                return {
-                    "get": mockGet,
-                    "post": mockPost,
-                    "patch": mockPatch
-                };
-            }
-        },
-        ApiError: function (this: { status: number; type: string; detail: string; name: string; message: string }, status: number, type: string, detail: string) {
-            this.status = status;
-            this.type = type;
-            this.detail = detail;
-            this.name = "ApiError";
-            this.message = detail;
-        }
-    };
-});
-
-vi.mock("./authManager.js", function () {
-    return {
-        AuthManager: {
-            getInstance: function () {
-                return {
-                    "subscribe": mockAuthSubscribe,
-                    "getState": mockAuthGetState
-                };
-            }
-        }
-    };
-});
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { ExperimentLogManager, ExperimentLog, ExperimentStep } from "./experimentLog.js";
-
-function unauthenticatedState(): { isAuthenticated: boolean; user: unknown; accessToken: unknown; refreshToken: unknown } {
-    return {
-        "isAuthenticated": false,
-        "user": null,
-        "accessToken": null,
-        "refreshToken": null
-    };
-}
-
-function authenticatedState(): { isAuthenticated: boolean; user: unknown; accessToken: unknown; refreshToken: unknown } {
-    return {
-        "isAuthenticated": true,
-        "user": {
-            "id": "u1",
-            "email": "a@b.c",
-            "name": "Test User",
-            "role": "user",
-            "emailVerified": true,
-            "createdAt": "2026-01-01T00:00:00Z"
-        },
-        "accessToken": "token",
-        "refreshToken": "refresh"
-    };
-}
-
-function storedCalculation(id: string, calculatorType: string, inputs: string, annotation: string, createdAt: string): unknown {
-    return {
-        "ID": id,
-        "UserID": "u1",
-        "CalculatorType": calculatorType,
-        "Inputs": inputs,
-        "Result": "",
-        "Annotation": annotation,
-        "Starred": false,
-        "WorkspaceID": "ws-1",
-        "CreatedAt": createdAt
-    };
-}
 
 describe("ExperimentLogManager", function () {
     beforeEach(function () {
         document.body.innerHTML = "";
         localStorage.clear();
         ExperimentLogManager.resetInstance();
-        mockGet.mockReset();
-        mockPost.mockReset();
-        mockPatch.mockReset();
-        mockAuthSubscribe.mockReset();
-        mockAuthGetState.mockReset();
-        mockAuthSubscribe.mockReturnValue(function () { return; });
-        mockAuthGetState.mockReturnValue(unauthenticatedState());
-        mockPatch.mockResolvedValue(undefined);
     });
 
     afterEach(function () {
         document.body.innerHTML = "";
         localStorage.clear();
         ExperimentLogManager.resetInstance();
-        vi.restoreAllMocks();
     });
 
     function setupDOM(): void {
@@ -134,58 +46,69 @@ describe("ExperimentLogManager", function () {
             expect(view).not.toBeNull();
         });
 
-        it("should subscribe to AuthManager", function () {
-            setupDOM();
-            let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
-            manager.init();
-            expect(mockAuthSubscribe).toHaveBeenCalled();
-        });
-
         it("should not re-initialize on second call", function () {
             setupDOM();
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
             manager.init();
-            expect(mockAuthSubscribe).toHaveBeenCalledTimes(1);
+            let view: HTMLElement | null = document.getElementById("experiment-log-view");
+            expect(view).not.toBeNull();
         });
 
-        it("should hide the view when not authenticated", function () {
+        it("should load persisted logs from localStorage", function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(unauthenticatedState());
+            let stored: ExperimentLog[] = [
+                { "id": "log-existing", "title": "Existing Log", "workspaceId": "ws-1", "createdAt": "2026-07-10T10:00:00Z" }
+            ];
+            localStorage.setItem("chemutil_experiment_logs", JSON.stringify(stored));
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
-            let view: HTMLElement = document.getElementById("experiment-log-view") as HTMLElement;
-            expect(view.style.display).toBe("none");
+            expect(manager.getLogs().length).toBe(1);
+            expect(manager.getLogs()[0].id).toBe("log-existing");
+        });
+
+        it("should load persisted steps from localStorage", function () {
+            setupDOM();
+            let storedLogs: ExperimentLog[] = [
+                { "id": "log-1", "title": "Log One", "workspaceId": "ws-1", "createdAt": "2026-07-10T10:00:00Z" }
+            ];
+            let storedSteps: ExperimentStep[] = [
+                { "id": "step-1", "logId": "log-1", "title": "Step One", "data": "first", "annotation": "", "createdAt": "2026-07-10T10:05:00Z" }
+            ];
+            localStorage.setItem("chemutil_experiment_logs", JSON.stringify(storedLogs));
+            localStorage.setItem("chemutil_experiment_steps_log-1", JSON.stringify(storedSteps));
+            let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
+            manager.init();
+            expect(manager.getSteps("log-1").length).toBe(1);
+            expect(manager.getSteps("log-1")[0].id).toBe("step-1");
         });
     });
 
     describe("createLog", function () {
-        it("should POST /api/v1/calculations with experiment-log body", async function () {
+        it("should create a log with generated id and persist to localStorage", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
-            mockPost.mockResolvedValue(storedCalculation("log-1", "experiment-log", "My Log", "My Log", "2026-07-10T10:00:00Z"));
             let log: ExperimentLog = await manager.createLog("My Log", "ws-1");
-            expect(mockPost).toHaveBeenCalledWith("/api/v1/calculations", {
-                "calculatorType": "experiment-log",
-                "inputs": "My Log",
-                "annotation": "My Log",
-                "workspaceId": "ws-1"
-            });
-            expect(log.id).toBe("log-1");
             expect(log.title).toBe("My Log");
             expect(log.workspaceId).toBe("ws-1");
+            expect(typeof log.id).toBe("string");
+            expect(log.id.length).toBeGreaterThan(0);
             expect(manager.getLogs().length).toBe(1);
-            expect(manager.getCurrentLogId()).toBe("log-1");
+            expect(manager.getCurrentLogId()).toBe(log.id);
+            let raw: string | null = localStorage.getItem("chemutil_experiment_logs");
+            expect(raw).not.toBeNull();
+            if (raw) {
+                let parsed: ExperimentLog[] = JSON.parse(raw) as ExperimentLog[];
+                expect(parsed.length).toBe(1);
+                expect(parsed[0].title).toBe("My Log");
+            }
         });
 
         it("should render the log header and show the view", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
-            mockPost.mockResolvedValue(storedCalculation("log-1", "experiment-log", "My Log", "My Log", "2026-07-10T10:00:00Z"));
             await manager.createLog("My Log", "ws-1");
             expect(manager.isViewVisible()).toBe(true);
             let view: HTMLElement = document.getElementById("experiment-log-view") as HTMLElement;
@@ -195,63 +118,71 @@ describe("ExperimentLogManager", function () {
     });
 
     describe("addStep", function () {
-        it("should POST /api/v1/calculations with experiment-step body", async function () {
+        it("should add a step to the log and persist to localStorage", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
-            mockPost.mockResolvedValueOnce(storedCalculation("log-1", "experiment-log", "My Log", "My Log", "2026-07-10T10:00:00Z"));
-            await manager.createLog("My Log", "ws-1");
-            mockPost.mockResolvedValueOnce(storedCalculation("step-1", "experiment-step", "Step 1", "", "2026-07-10T10:05:00Z"));
-            let step: ExperimentStep = await manager.addStep("log-1", { "title": "Step 1", "data": "Mixed reagents" });
-            expect(mockPost).toHaveBeenCalledWith("/api/v1/calculations", {
-                "calculatorType": "experiment-step",
-                "inputs": "Step 1",
-                "annotation": "",
-                "workspaceId": "ws-1",
-                "logId": "log-1",
-                "data": "Mixed reagents"
-            });
-            expect(step.id).toBe("step-1");
-            expect(step.logId).toBe("log-1");
+            let log: ExperimentLog = await manager.createLog("My Log", "ws-1");
+            let step: ExperimentStep = await manager.addStep(log.id, { "title": "Step 1", "data": "Mixed reagents" });
+            expect(step.logId).toBe(log.id);
             expect(step.title).toBe("Step 1");
-            expect(manager.getSteps("log-1").length).toBe(1);
+            expect(step.data).toBe("Mixed reagents");
+            expect(manager.getSteps(log.id).length).toBe(1);
+            let raw: string | null = localStorage.getItem("chemutil_experiment_steps_" + log.id);
+            expect(raw).not.toBeNull();
+            if (raw) {
+                let parsed: ExperimentStep[] = JSON.parse(raw) as ExperimentStep[];
+                expect(parsed.length).toBe(1);
+                expect(parsed[0].title).toBe("Step 1");
+            }
         });
     });
 
     describe("annotateStep", function () {
-        it("should PATCH /api/v1/calculations/:id with annotation", async function () {
+        it("should update step annotation in memory and localStorage", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
-            mockPost.mockResolvedValueOnce(storedCalculation("log-1", "experiment-log", "My Log", "My Log", "2026-07-10T10:00:00Z"));
-            await manager.createLog("My Log", "ws-1");
-            mockPost.mockResolvedValueOnce(storedCalculation("step-1", "experiment-step", "Step 1", "", "2026-07-10T10:05:00Z"));
-            await manager.addStep("log-1", { "title": "Step 1", "data": "Mixed reagents" });
-            await manager.annotateStep("step-1", "Observation: color changed");
-            expect(mockPatch).toHaveBeenCalledWith("/api/v1/calculations/step-1", { "annotation": "Observation: color changed" });
-            let steps: ExperimentStep[] = manager.getSteps("log-1");
+            let log: ExperimentLog = await manager.createLog("My Log", "ws-1");
+            let step: ExperimentStep = await manager.addStep(log.id, { "title": "Step 1", "data": "Mixed reagents" });
+            await manager.annotateStep(step.id, "Observation: color changed");
+            let steps: ExperimentStep[] = manager.getSteps(log.id);
             expect(steps[0].annotation).toBe("Observation: color changed");
+            let raw: string | null = localStorage.getItem("chemutil_experiment_steps_" + log.id);
+            expect(raw).not.toBeNull();
+            if (raw) {
+                let parsed: ExperimentStep[] = JSON.parse(raw) as ExperimentStep[];
+                expect(parsed[0].annotation).toBe("Observation: color changed");
+            }
+        });
+
+        it("should be a no-op when step id is unknown", async function () {
+            setupDOM();
+            let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
+            manager.init();
+            await manager.annotateStep("nonexistent", "note");
+            // Should not throw and should not write anything
+            expect(localStorage.getItem("chemutil_experiment_steps_nonexistent")).toBeNull();
         });
     });
 
     describe("viewTimeline", function () {
         it("should return steps sorted by createdAt and render them", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
-            mockPost.mockResolvedValueOnce(storedCalculation("log-1", "experiment-log", "My Log", "My Log", "2026-07-10T10:00:00Z"));
-            await manager.createLog("My Log", "ws-1");
-            mockPost.mockResolvedValueOnce(storedCalculation("step-2", "experiment-step", "Second", "", "2026-07-10T11:00:00Z"));
-            await manager.addStep("log-1", { "title": "Second", "data": "later" });
-            mockPost.mockResolvedValueOnce(storedCalculation("step-1", "experiment-step", "First", "", "2026-07-10T10:05:00Z"));
-            await manager.addStep("log-1", { "title": "First", "data": "earlier" });
-            let timeline: ExperimentStep[] = manager.viewTimeline("log-1");
+            let log: ExperimentLog = await manager.createLog("My Log", "ws-1");
+            let later: ExperimentStep = await manager.addStep(log.id, { "title": "Second", "data": "later" });
+            // Force createdAt ordering by overriding the timestamps in storage
+            let earlier: ExperimentStep = await manager.addStep(log.id, { "title": "First", "data": "earlier" });
+            let steps: ExperimentStep[] = manager.getSteps(log.id);
+            steps[0].createdAt = "2026-07-10T11:00:00Z";
+            steps[1].createdAt = "2026-07-10T10:05:00Z";
+            manager.viewTimeline(log.id);
+            let timeline: ExperimentStep[] = manager.viewTimeline(log.id);
             expect(timeline.length).toBe(2);
-            expect(timeline[0].id).toBe("step-1");
-            expect(timeline[1].id).toBe("step-2");
+            expect(timeline[0].id).toBe(earlier.id);
+            expect(timeline[1].id).toBe(later.id);
             let view: HTMLElement = document.getElementById("experiment-log-view") as HTMLElement;
             expect(view.textContent).toContain("Timeline");
             expect(view.querySelectorAll(".experiment-log-step").length).toBe(2);
@@ -259,7 +190,6 @@ describe("ExperimentLogManager", function () {
 
         it("should render empty state when no steps", function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
             manager.renderLog({ "id": "log-1", "title": "Empty Log", "workspaceId": "ws-1", "createdAt": "2026-07-10T10:00:00Z" });
@@ -273,7 +203,6 @@ describe("ExperimentLogManager", function () {
     describe("renderLog", function () {
         it("should render title, meta, add-step button and export button", function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
             manager.renderLog({ "id": "log-1", "title": "Synthesis", "workspaceId": "ws-1", "createdAt": "2026-07-10T10:00:00Z" });
@@ -287,7 +216,6 @@ describe("ExperimentLogManager", function () {
     describe("renderTimeline", function () {
         it("should render each step with title, data and annotation input", function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
             let steps: ExperimentStep[] = [
@@ -310,47 +238,48 @@ describe("ExperimentLogManager", function () {
     });
 
     describe("loadTimeline", function () {
-        it("should GET /api/v1/calculations and filter steps for the log", async function () {
+        it("should read steps from localStorage and render them", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
-            mockPost.mockResolvedValueOnce(storedCalculation("log-1", "experiment-log", "My Log", "My Log", "2026-07-10T10:00:00Z"));
-            await manager.createLog("My Log", "ws-1");
-            mockGet.mockResolvedValue({
-                "calculations": [
-                    storedCalculation("step-1", "experiment-step", "Step 1", "logId:log-1data:Mixed", "2026-07-10T10:05:00Z"),
-                    storedCalculation("step-2", "experiment-step", "Step 2", "logId:otherdata:Foo", "2026-07-10T10:10:00Z")
-                ]
-            });
+            let storedSteps: ExperimentStep[] = [
+                { "id": "step-1", "logId": "log-1", "title": "Step 1", "data": "Mixed", "annotation": "", "createdAt": "2026-07-10T10:05:00Z" }
+            ];
+            localStorage.setItem("chemutil_experiment_steps_log-1", JSON.stringify(storedSteps));
             let steps: ExperimentStep[] = await manager.loadTimeline("log-1");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/calculations?calculatorType=experiment-step");
             expect(steps.length).toBe(1);
             expect(steps[0].id).toBe("step-1");
             expect(steps[0].data).toBe("Mixed");
         });
-    });
 
-    describe("auth state handling", function () {
-        it("should hide the view when auth state changes to unauthenticated", function () {
+        it("should return empty array when no steps stored", async function () {
             setupDOM();
-            let subscribedCallback: Function | null = null;
-            mockAuthSubscribe.mockImplementation(function (cb: Function): Function {
-                subscribedCallback = cb;
-                return function () { return; };
-            });
-            mockAuthGetState.mockReturnValue(authenticatedState());
             let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
             manager.init();
-            manager.showView();
-            expect(manager.isViewVisible()).toBe(true);
-            expect(subscribedCallback).not.toBeNull();
-            if (!subscribedCallback) {
-                throw new Error("subscribe callback was not registered");
+            let steps: ExperimentStep[] = await manager.loadTimeline("log-none");
+            expect(steps.length).toBe(0);
+        });
+    });
+
+    describe("deleteLog", function () {
+        it("should remove log and its steps from memory and localStorage", async function () {
+            setupDOM();
+            let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
+            manager.init();
+            let log: ExperimentLog = await manager.createLog("To Delete", "ws-1");
+            await manager.addStep(log.id, { "title": "Step 1", "data": "data" });
+            expect(manager.getLogs().length).toBe(1);
+            expect(manager.getSteps(log.id).length).toBe(1);
+            manager.deleteLog(log.id);
+            expect(manager.getLogs().length).toBe(0);
+            expect(manager.getSteps(log.id).length).toBe(0);
+            expect(localStorage.getItem("chemutil_experiment_steps_" + log.id)).toBeNull();
+            let raw: string | null = localStorage.getItem("chemutil_experiment_logs");
+            expect(raw).not.toBeNull();
+            if (raw) {
+                let parsed: ExperimentLog[] = JSON.parse(raw) as ExperimentLog[];
+                expect(parsed.length).toBe(0);
             }
-            let cb: Function = subscribedCallback;
-            cb(unauthenticatedState());
-            expect(manager.isViewVisible()).toBe(false);
         });
     });
 });

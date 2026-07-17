@@ -1,26 +1,23 @@
-import { ApiClient } from "./apiClient.js";
-import { AuthManager, AuthState } from "./authManager.js";
-import { DashboardManager } from "./dashboardManager.js";
-
 interface TrackedElement {
     container: HTMLElement;
     calculationId: string;
 }
 
+const ANNOTATIONS_STORAGE_KEY: string = "chemutil_annotations";
+const STARRED_STORAGE_KEY: string = "chemutil_starred";
+
 /**
  * Manages annotation and star/favorite controls attached to result displays.
- * Persists annotations and star state through the backend calculation API and
- * reacts to authentication state so the controls are hidden for anonymous users.
+ * Persists annotations and star state to localStorage so the data remains
+ * available to local users without any server-side account.
  */
 export class ResultAnnotationManager {
     private static instance: ResultAnnotationManager | null = null;
     private trackedElements: TrackedElement[];
-    private unsubscribe: Function | null;
     private initialized: boolean;
 
     private constructor() {
         this.trackedElements = [];
-        this.unsubscribe = null;
         this.initialized = false;
     }
 
@@ -44,13 +41,6 @@ export class ResultAnnotationManager {
                 this.addAnnotationUI(results[i], id);
             }
         }
-        let auth: AuthManager = AuthManager.getInstance();
-        let self: ResultAnnotationManager = this;
-        this.unsubscribe = auth.subscribe(function (state: AuthState): void {
-            self.handleAuthStateChange(state);
-        });
-        let state: AuthState = auth.getState();
-        this.applyAuthState(state.isAuthenticated);
     }
 
     public addAnnotationUI(resultElement: HTMLElement, calculationId: string): void {
@@ -62,18 +52,20 @@ export class ResultAnnotationManager {
         container.className = "annotation-ui";
         container.setAttribute("data-calculation-id", calculationId);
 
+        let starred: boolean = this.isStarred(calculationId);
         let starButton: HTMLButtonElement = document.createElement("button");
         starButton.type = "button";
         starButton.className = "annotation-star-button";
         starButton.setAttribute("aria-label", "Toggle favorite");
-        starButton.setAttribute("aria-pressed", "false");
-        starButton.appendChild(this.createStarIcon(false));
+        starButton.setAttribute("aria-pressed", starred ? "true" : "false");
+        starButton.appendChild(this.createStarIcon(starred));
 
         let input: HTMLInputElement = document.createElement("input");
         input.type = "text";
         input.className = "annotation-input";
         input.placeholder = "Add a note...";
         input.setAttribute("aria-label", "Annotation note");
+        input.value = this.loadAnnotation(calculationId);
 
         container.appendChild(starButton);
         container.appendChild(input);
@@ -88,10 +80,6 @@ export class ResultAnnotationManager {
         input.addEventListener("blur", function (): void {
             void self.saveAnnotation(calculationId, input.value);
         });
-
-        let auth: AuthManager = AuthManager.getInstance();
-        let state: AuthState = auth.getState();
-        this.applyAuthStateForContainer(container, state.isAuthenticated);
     }
 
     private createStarIcon(filled: boolean): SVGElement {
@@ -126,53 +114,84 @@ export class ResultAnnotationManager {
         starButton.appendChild(this.createStarIcon(starred));
     }
 
-    private async handleStarClick(calculationId: string, starButton: HTMLButtonElement): Promise<void> {
+    private handleStarClick(calculationId: string, starButton: HTMLButtonElement): void {
+        let starred: boolean = this.toggleStar(calculationId);
+        this.setStarState(starButton, starred);
+    }
+
+    public saveAnnotation(calculationId: string, annotation: string): Promise<void> {
+        let annotations: Record<string, string> = this.readAnnotations();
+        annotations[calculationId] = annotation;
+        this.writeAnnotations(annotations);
+        return Promise.resolve();
+    }
+
+    public loadAnnotation(calculationId: string): string {
+        let annotations: Record<string, string> = this.readAnnotations();
+        if (Object.prototype.hasOwnProperty.call(annotations, calculationId)) {
+            return annotations[calculationId];
+        }
+        return "";
+    }
+
+    public toggleStar(calculationId: string): boolean {
+        let starred: Record<string, boolean> = this.readStarred();
+        let current: boolean = false;
+        if (Object.prototype.hasOwnProperty.call(starred, calculationId)) {
+            current = starred[calculationId];
+        }
+        let next: boolean = !current;
+        starred[calculationId] = next;
+        this.writeStarred(starred);
+        return next;
+    }
+
+    public isStarred(calculationId: string): boolean {
+        let starred: Record<string, boolean> = this.readStarred();
+        if (Object.prototype.hasOwnProperty.call(starred, calculationId)) {
+            return starred[calculationId];
+        }
+        return false;
+    }
+
+    private readAnnotations(): Record<string, string> {
+        let raw: string | null = localStorage.getItem(ANNOTATIONS_STORAGE_KEY);
+        if (!raw) {
+            return {};
+        }
         try {
-            let starred: boolean = await this.toggleStar(calculationId);
-            this.setStarState(starButton, starred);
+            let parsed: unknown = JSON.parse(raw);
+            if (parsed && typeof parsed === "object") {
+                return parsed as Record<string, string>;
+            }
         } catch (e) {
-            // star toggle failed; keep current visual state
+            // fall through to empty object
         }
+        return {};
     }
 
-    public async saveAnnotation(calculationId: string, annotation: string): Promise<void> {
-        let client: ApiClient = ApiClient.getInstance();
-        await client.patch("/api/v1/calculations/" + calculationId, { "annotation": annotation });
+    private writeAnnotations(annotations: Record<string, string>): void {
+        localStorage.setItem(ANNOTATIONS_STORAGE_KEY, JSON.stringify(annotations));
     }
 
-    public async toggleStar(calculationId: string): Promise<boolean> {
-        let client: ApiClient = ApiClient.getInstance();
-        let response: { starred: boolean } = await client.post<{ starred: boolean }>(
-            "/api/v1/calculations/" + calculationId + "/star",
-            {}
-        );
-        let starred: boolean = response.starred;
+    private readStarred(): Record<string, boolean> {
+        let raw: string | null = localStorage.getItem(STARRED_STORAGE_KEY);
+        if (!raw) {
+            return {};
+        }
         try {
-            let dashboard: DashboardManager = DashboardManager.getInstance();
-            await dashboard.loadDashboardData();
+            let parsed: unknown = JSON.parse(raw);
+            if (parsed && typeof parsed === "object") {
+                return parsed as Record<string, boolean>;
+            }
         } catch (e) {
-            // dashboard refresh is best-effort
+            // fall through to empty object
         }
-        return starred;
+        return {};
     }
 
-    public handleAuthStateChange(state: AuthState): void {
-        this.applyAuthState(state.isAuthenticated);
-    }
-
-    private applyAuthState(isAuthenticated: boolean): void {
-        let i: number;
-        for (i = 0; i < this.trackedElements.length; i++) {
-            this.applyAuthStateForContainer(this.trackedElements[i].container, isAuthenticated);
-        }
-    }
-
-    private applyAuthStateForContainer(container: HTMLElement, isAuthenticated: boolean): void {
-        if (isAuthenticated) {
-            container.style.display = "";
-        } else {
-            container.style.display = "none";
-        }
+    private writeStarred(starred: Record<string, boolean>): void {
+        localStorage.setItem(STARRED_STORAGE_KEY, JSON.stringify(starred));
     }
 
     public getTrackedCount(): number {
@@ -180,10 +199,6 @@ export class ResultAnnotationManager {
     }
 
     public destroy(): void {
-        if (this.unsubscribe) {
-            this.unsubscribe();
-            this.unsubscribe = null;
-        }
         this.trackedElements = [];
         this.initialized = false;
     }

@@ -1,6 +1,3 @@
-import { ApiClient, ApiError } from "./apiClient.js";
-import { AuthManager, AuthState } from "./authManager.js";
-
 export interface Workspace {
     "id": string;
     "name": string;
@@ -30,29 +27,22 @@ export interface SharedCalculation {
     "CreatedAt": string;
 }
 
-export interface WorkspaceListResponse {
-    "workspaces": Workspace[];
-}
-
-export interface WorkspaceMembersResponse {
-    "members": WorkspaceMember[];
-}
-
-export interface SharedCalculationsResponse {
-    "calculations": SharedCalculation[];
-}
+const WORKSPACES_STORAGE_KEY: string = "chemutil_workspaces";
+const MEMBERS_STORAGE_KEY_PREFIX: string = "chemutil_workspace_members_";
+const CALCULATIONS_STORAGE_KEY_PREFIX: string = "chemutil_workspace_calculations_";
+const LOCAL_OWNER_ID: string = "local-user";
 
 /**
  * Manages workspace collaboration UI: listing, creating, selecting, updating
  * and deleting workspaces, managing members, viewing shared calculations, and
- * attaching share buttons to calculation result areas. Subscribes to AuthManager
- * so the UI reacts to authentication state changes.
+ * attaching share buttons to calculation result areas. All data is persisted
+ * to localStorage so local users can collaborate without any server-side
+ * account.
  */
 export class WorkspaceManager {
     private static instance: WorkspaceManager | null = null;
     private sidebarContainer: HTMLElement | null;
     private detailContainer: HTMLElement | null;
-    private unsubscribe: Function | null;
     private initialized: boolean;
     private currentWorkspace: Workspace | null;
     private currentMembers: WorkspaceMember[];
@@ -61,7 +51,6 @@ export class WorkspaceManager {
     private constructor() {
         this.sidebarContainer = null;
         this.detailContainer = null;
-        this.unsubscribe = null;
         this.initialized = false;
         this.currentWorkspace = null;
         this.currentMembers = [];
@@ -83,13 +72,9 @@ export class WorkspaceManager {
         this.renderSidebarSection();
         this.renderDetailView();
         this.attachShareButtons();
-        let auth: AuthManager = AuthManager.getInstance();
-        let self: WorkspaceManager = this;
-        this.unsubscribe = auth.subscribe(function (state: AuthState): void {
-            self.handleAuthStateChange(state);
-        });
-        let state: AuthState = auth.getState();
-        this.applyAuthState(state);
+        if (this.sidebarContainer) {
+            this.sidebarContainer.style.display = "block";
+        }
     }
 
     private renderSidebarSection(): HTMLElement {
@@ -103,11 +88,10 @@ export class WorkspaceManager {
         section.id = "sidebar-workspaces";
         section.className = "sidebar-workspaces";
         section.setAttribute("aria-label", "Workspaces");
-        section.style.display = "none";
         this.ensureSidebarStructure(section);
-        let authSection: HTMLElement | null = document.getElementById("sidebar-auth-section");
-        if (authSection && authSection.parentNode) {
-            authSection.parentNode.insertBefore(section, authSection.nextSibling);
+        let main: HTMLElement | null = document.getElementById("main-content");
+        if (main && main.parentNode) {
+            main.parentNode.insertBefore(section, main.nextSibling);
         }
         this.sidebarContainer = section;
         return section;
@@ -189,122 +173,147 @@ export class WorkspaceManager {
     }
 
     public async loadWorkspaces(): Promise<Workspace[]> {
-        let client: ApiClient = ApiClient.getInstance();
-        let response: WorkspaceListResponse = await client.get<WorkspaceListResponse>("/api/v1/workspaces");
-        let workspaces: Workspace[] = (response && response.workspaces) || [];
+        let workspaces: Workspace[] = this.readWorkspaces();
         this.renderWorkspaceList(workspaces);
         return workspaces;
     }
 
     public async createWorkspace(name: string, description: string): Promise<Workspace> {
-        let client: ApiClient = ApiClient.getInstance();
-        let workspace: Workspace = await client.post<Workspace>(
-            "/api/v1/workspaces",
-            { "name": name, "description": description }
-        );
-        try {
-            await this.loadWorkspaces();
-        } catch (e) {
-            // best-effort refresh
-        }
+        let now: string = new Date().toISOString();
+        let workspace: Workspace = {
+            "id": this.generateId("ws"),
+            "name": name,
+            "description": description,
+            "ownerId": LOCAL_OWNER_ID,
+            "memberCount": 1,
+            "createdAt": now,
+            "updatedAt": now
+        };
+        let workspaces: Workspace[] = this.readWorkspaces();
+        workspaces.push(workspace);
+        this.writeWorkspaces(workspaces);
+        let self: WorkspaceManager = this;
+        await this.loadWorkspaces().catch(function (): void { return; });
+        void self;
         return workspace;
     }
 
     public async selectWorkspace(id: string): Promise<Workspace> {
-        let client: ApiClient = ApiClient.getInstance();
-        let workspace: Workspace = await client.get<Workspace>("/api/v1/workspaces/" + id);
+        let workspaces: Workspace[] = this.readWorkspaces();
+        let workspace: Workspace | undefined;
+        let i: number;
+        for (i = 0; i < workspaces.length; i++) {
+            if (workspaces[i].id === id) {
+                workspace = workspaces[i];
+                break;
+            }
+        }
+        if (!workspace) {
+            throw new Error("Workspace not found: " + id);
+        }
         this.currentWorkspace = workspace;
         this.renderWorkspaceDetail(workspace);
         this.showDetailView();
-        try {
-            await this.loadMembers(id);
-        } catch (e) {
-            // members best-effort
-        }
-        try {
-            await this.loadWorkspaceCalculations(id);
-        } catch (e) {
-            // calculations best-effort
-        }
+        await this.loadMembers(id).catch(function (): void { return; });
+        await this.loadWorkspaceCalculations(id).catch(function (): void { return; });
         return workspace;
     }
 
     public async updateWorkspace(id: string, name: string, description: string): Promise<Workspace> {
-        let client: ApiClient = ApiClient.getInstance();
-        let workspace: Workspace = await client.patch<Workspace>(
-            "/api/v1/workspaces/" + id,
-            { "name": name, "description": description }
-        );
+        let workspaces: Workspace[] = this.readWorkspaces();
+        let workspace: Workspace | undefined;
+        let i: number;
+        for (i = 0; i < workspaces.length; i++) {
+            if (workspaces[i].id === id) {
+                workspaces[i].name = name;
+                workspaces[i].description = description;
+                workspaces[i].updatedAt = new Date().toISOString();
+                workspace = workspaces[i];
+                break;
+            }
+        }
+        if (!workspace) {
+            throw new Error("Workspace not found: " + id);
+        }
+        this.writeWorkspaces(workspaces);
         this.currentWorkspace = workspace;
         this.renderWorkspaceDetail(workspace);
-        try {
-            await this.loadWorkspaces();
-        } catch (e) {
-            // best-effort refresh
-        }
+        await this.loadWorkspaces().catch(function (): void { return; });
         return workspace;
     }
 
     public async deleteWorkspace(id: string): Promise<void> {
-        let client: ApiClient = ApiClient.getInstance();
-        await client.delete<void>("/api/v1/workspaces/" + id);
+        let workspaces: Workspace[] = this.readWorkspaces();
+        let filtered: Workspace[] = [];
+        let i: number;
+        for (i = 0; i < workspaces.length; i++) {
+            if (workspaces[i].id !== id) {
+                filtered.push(workspaces[i]);
+            }
+        }
+        this.writeWorkspaces(filtered);
+        localStorage.removeItem(MEMBERS_STORAGE_KEY_PREFIX + id);
+        localStorage.removeItem(CALCULATIONS_STORAGE_KEY_PREFIX + id);
         if (this.currentWorkspace && this.currentWorkspace.id === id) {
             this.currentWorkspace = null;
             this.currentMembers = [];
             this.currentCalculations = [];
             this.hideDetailView();
         }
-        try {
-            await this.loadWorkspaces();
-        } catch (e) {
-            // best-effort refresh
-        }
+        await this.loadWorkspaces().catch(function (): void { return; });
     }
 
     public async loadMembers(workspaceId: string): Promise<WorkspaceMember[]> {
-        let client: ApiClient = ApiClient.getInstance();
-        let response: WorkspaceMembersResponse = await client.get<WorkspaceMembersResponse>(
-            "/api/v1/workspaces/" + workspaceId + "/members"
-        );
-        let members: WorkspaceMember[] = (response && response.members) || [];
+        let members: WorkspaceMember[] = this.readMembers(workspaceId);
         this.currentMembers = members;
         this.renderMembers(members);
         return members;
     }
 
     public async addMember(workspaceId: string, userId: string, role: string): Promise<WorkspaceMember> {
-        let client: ApiClient = ApiClient.getInstance();
-        let member: WorkspaceMember = await client.post<WorkspaceMember>(
-            "/api/v1/workspaces/" + workspaceId + "/members",
-            { "userId": userId, "role": role }
-        );
-        try {
-            await this.loadMembers(workspaceId);
-        } catch (e) {
-            // best-effort refresh
-        }
+        let member: WorkspaceMember = {
+            "userId": userId,
+            "email": userId + "@local",
+            "name": userId,
+            "role": role
+        };
+        let members: WorkspaceMember[] = this.readMembers(workspaceId);
+        members.push(member);
+        this.writeMembers(workspaceId, members);
+        this.currentMembers = members;
+        this.renderMembers(members);
         return member;
     }
 
     public async removeMember(workspaceId: string, userId: string): Promise<void> {
-        let client: ApiClient = ApiClient.getInstance();
-        await client.delete<void>("/api/v1/workspaces/" + workspaceId + "/members/" + userId);
-        try {
-            await this.loadMembers(workspaceId);
-        } catch (e) {
-            // best-effort refresh
+        let members: WorkspaceMember[] = this.readMembers(workspaceId);
+        let filtered: WorkspaceMember[] = [];
+        let i: number;
+        for (i = 0; i < members.length; i++) {
+            if (members[i].userId !== userId) {
+                filtered.push(members[i]);
+            }
         }
+        this.writeMembers(workspaceId, filtered);
+        this.currentMembers = filtered;
+        this.renderMembers(filtered);
     }
 
     public async loadWorkspaceCalculations(workspaceId: string): Promise<SharedCalculation[]> {
-        let client: ApiClient = ApiClient.getInstance();
-        let response: SharedCalculationsResponse = await client.get<SharedCalculationsResponse>(
-            "/api/v1/workspaces/" + workspaceId + "/calculations"
-        );
-        let calculations: SharedCalculation[] = (response && response.calculations) || [];
+        let calculations: SharedCalculation[] = this.readCalculations(workspaceId);
         this.currentCalculations = calculations;
         this.renderSharedCalculations(calculations);
         return calculations;
+    }
+
+    public addLocalCalculation(workspaceId: string, calc: SharedCalculation): void {
+        let calculations: SharedCalculation[] = this.readCalculations(workspaceId);
+        calculations.push(calc);
+        this.writeCalculations(workspaceId, calculations);
+        if (this.currentWorkspace && this.currentWorkspace.id === workspaceId) {
+            this.currentCalculations = calculations;
+            this.renderSharedCalculations(calculations);
+        }
     }
 
     public renderWorkspaceList(workspaces: Workspace[]): void {
@@ -372,7 +381,7 @@ export class WorkspaceManager {
             header.appendChild(desc);
             let self: WorkspaceManager = this;
             desc.addEventListener("change", function (): void {
-                void self.updateWorkspace(workspace.id, desc.value, workspace.description);
+                void self.updateWorkspace(workspace.id, workspace.name, desc.value);
             });
         }
         this.renderDetailActions(workspace);
@@ -396,21 +405,17 @@ export class WorkspaceManager {
             self.exportToPDF();
         });
         actions.appendChild(exportBtn);
-        let auth: AuthManager = AuthManager.getInstance();
-        let state: AuthState = auth.getState();
-        let isOwner: boolean = !!(state.user && state.user.id === workspace.ownerId);
-        if (isOwner) {
-            let deleteBtn: HTMLButtonElement = document.createElement("button");
-            deleteBtn.type = "button";
-            deleteBtn.className = "workspace-delete-btn";
-            deleteBtn.textContent = "Delete Workspace";
-            deleteBtn.addEventListener("click", function (): void {
-                if (window.confirm("Delete this workspace? This cannot be undone.")) {
-                    void self.deleteWorkspace(workspace.id);
-                }
-            });
-            actions.appendChild(deleteBtn);
-        }
+        // Local users own every workspace they create, so always show delete.
+        let deleteBtn: HTMLButtonElement = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "workspace-delete-btn";
+        deleteBtn.textContent = "Delete Workspace";
+        deleteBtn.addEventListener("click", function (): void {
+            if (window.confirm("Delete this workspace? This cannot be undone.")) {
+                void self.deleteWorkspace(workspace.id);
+            }
+        });
+        actions.appendChild(deleteBtn);
     }
 
     private renderAddMemberForm(workspace: Workspace): void {
@@ -491,10 +496,8 @@ export class WorkspaceManager {
             role.textContent = m.role;
             item.appendChild(name);
             item.appendChild(role);
-            let auth: AuthManager = AuthManager.getInstance();
-            let state: AuthState = auth.getState();
-            let canRemove: boolean = !!(state.user && (state.user.id === (this.currentWorkspace && this.currentWorkspace.ownerId) || state.user.role === "admin"));
-            if (canRemove && state.user && state.user.id !== m.userId) {
+            // Local user owns everything, so any member can be removed.
+            if (m.userId !== LOCAL_OWNER_ID) {
                 let removeBtn: HTMLButtonElement = document.createElement("button");
                 removeBtn.type = "button";
                 removeBtn.className = "workspace-member-remove";
@@ -606,25 +609,6 @@ export class WorkspaceManager {
         return this.currentCalculations;
     }
 
-    public handleAuthStateChange(state: AuthState): void {
-        this.applyAuthState(state);
-    }
-
-    private applyAuthState(state: AuthState): void {
-        if (this.sidebarContainer) {
-            this.sidebarContainer.style.display = state.isAuthenticated ? "block" : "none";
-        }
-        if (state.isAuthenticated && this.isDetailViewVisible()) {
-            void this.loadWorkspaces().catch(function (): void { return; });
-        }
-        if (!state.isAuthenticated) {
-            this.currentWorkspace = null;
-            this.currentMembers = [];
-            this.currentCalculations = [];
-            this.hideDetailView();
-        }
-    }
-
     public async promptCreateWorkspace(): Promise<Workspace | null> {
         let name: string | null = window.prompt("Workspace name");
         if (!name) {
@@ -725,20 +709,77 @@ export class WorkspaceManager {
     }
 
     private extractMessage(e: unknown, fallback: string): string {
-        if (e instanceof ApiError) {
-            return fallback + ": " + e.detail;
-        }
         if (e instanceof Error) {
             return fallback + ": " + e.message;
         }
         return fallback;
     }
 
-    public destroy(): void {
-        if (this.unsubscribe) {
-            this.unsubscribe();
-            this.unsubscribe = null;
+    private readWorkspaces(): Workspace[] {
+        let raw: string | null = localStorage.getItem(WORKSPACES_STORAGE_KEY);
+        if (!raw) {
+            return [];
         }
+        try {
+            let parsed: unknown = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                return parsed as Workspace[];
+            }
+        } catch (e) {
+            // fall through to empty array
+        }
+        return [];
+    }
+
+    private writeWorkspaces(workspaces: Workspace[]): void {
+        localStorage.setItem(WORKSPACES_STORAGE_KEY, JSON.stringify(workspaces));
+    }
+
+    private readMembers(workspaceId: string): WorkspaceMember[] {
+        let raw: string | null = localStorage.getItem(MEMBERS_STORAGE_KEY_PREFIX + workspaceId);
+        if (!raw) {
+            return [];
+        }
+        try {
+            let parsed: unknown = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                return parsed as WorkspaceMember[];
+            }
+        } catch (e) {
+            // fall through to empty array
+        }
+        return [];
+    }
+
+    private writeMembers(workspaceId: string, members: WorkspaceMember[]): void {
+        localStorage.setItem(MEMBERS_STORAGE_KEY_PREFIX + workspaceId, JSON.stringify(members));
+    }
+
+    private readCalculations(workspaceId: string): SharedCalculation[] {
+        let raw: string | null = localStorage.getItem(CALCULATIONS_STORAGE_KEY_PREFIX + workspaceId);
+        if (!raw) {
+            return [];
+        }
+        try {
+            let parsed: unknown = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                return parsed as SharedCalculation[];
+            }
+        } catch (e) {
+            // fall through to empty array
+        }
+        return [];
+    }
+
+    private writeCalculations(workspaceId: string, calculations: SharedCalculation[]): void {
+        localStorage.setItem(CALCULATIONS_STORAGE_KEY_PREFIX + workspaceId, JSON.stringify(calculations));
+    }
+
+    private generateId(prefix: string): string {
+        return prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).substring(2, 8);
+    }
+
+    public destroy(): void {
         this.sidebarContainer = null;
         this.detailContainer = null;
         this.initialized = false;

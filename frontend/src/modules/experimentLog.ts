@@ -1,6 +1,3 @@
-import { ApiClient, ApiError } from "./apiClient.js";
-import { AuthManager, AuthState } from "./authManager.js";
-
 export interface ExperimentLog {
     "id": string;
     "title": string;
@@ -22,33 +19,18 @@ export interface ExperimentStep {
     "createdAt": string;
 }
 
-interface StoredCalculation {
-    "ID": string;
-    "UserID": string;
-    "CalculatorType": string;
-    "Inputs": string;
-    "Result": string;
-    "Annotation": string;
-    "Starred": boolean;
-    "WorkspaceID": string;
-    "CreatedAt": string;
-}
-
-interface CalculationsListResponse {
-    "calculations": StoredCalculation[];
-}
+const LOGS_STORAGE_KEY: string = "chemutil_experiment_logs";
+const STEPS_STORAGE_KEY_PREFIX: string = "chemutil_experiment_steps_";
 
 /**
  * Manages experiment log entries and their step timelines. Logs and steps are
- * persisted as calculation records via POST /api/v1/calculations (with the
- * experiment title/data carried in the annotation), and annotations are
- * updated via PATCH. The current session also keeps an in-memory timeline so
- * the timeline view can be rendered without an extra round-trip.
+ * persisted to localStorage so local users can record experiments without any
+ * server-side account. The current session also keeps an in-memory timeline so
+ * the timeline view can be rendered without an extra storage read.
  */
 export class ExperimentLogManager {
     private static instance: ExperimentLogManager | null = null;
     private container: HTMLElement | null;
-    private unsubscribe: Function | null;
     private initialized: boolean;
     private logs: ExperimentLog[];
     private stepsByLog: Record<string, ExperimentStep[]>;
@@ -57,7 +39,6 @@ export class ExperimentLogManager {
 
     private constructor() {
         this.container = null;
-        this.unsubscribe = null;
         this.initialized = false;
         this.logs = [];
         this.stepsByLog = {};
@@ -78,13 +59,18 @@ export class ExperimentLogManager {
         }
         this.initialized = true;
         this.renderView();
-        let auth: AuthManager = AuthManager.getInstance();
-        let self: ExperimentLogManager = this;
-        this.unsubscribe = auth.subscribe(function (state: AuthState): void {
-            self.handleAuthStateChange(state);
-        });
-        let state: AuthState = auth.getState();
-        this.applyAuthState(state);
+        this.logs = this.readLogs();
+        let i: number;
+        let logIds: string[] = Object.keys(this.logs);
+        for (i = 0; i < logIds.length; i++) {
+            let logId: string = this.logs[i].id;
+            this.stepsByLog[logId] = this.readSteps(logId);
+            let j: number;
+            let steps: ExperimentStep[] = this.stepsByLog[logId];
+            for (j = 0; j < steps.length; j++) {
+                this.stepById[steps[j].id] = steps[j];
+            }
+        }
     }
 
     private renderView(): HTMLElement {
@@ -131,26 +117,15 @@ export class ExperimentLogManager {
     }
 
     public async createLog(title: string, workspaceId: string): Promise<ExperimentLog> {
-        let client: ApiClient = ApiClient.getInstance();
-        let response: StoredCalculation = await client.post<StoredCalculation>(
-            "/api/v1/calculations",
-            {
-                "calculatorType": "experiment-log",
-                "inputs": title,
-                "annotation": title,
-                "workspaceId": workspaceId
-            }
-        );
         let log: ExperimentLog = {
-            "id": response.ID,
+            "id": this.generateId("log"),
             "title": title,
             "workspaceId": workspaceId,
-            "createdAt": response.CreatedAt
+            "createdAt": new Date().toISOString()
         };
         this.logs.push(log);
-        if (!this.stepsByLog.hasOwnProperty(log.id)) {
-            this.stepsByLog[log.id] = [];
-        }
+        this.stepsByLog[log.id] = [];
+        this.writeLogs(this.logs);
         this.currentLogId = log.id;
         this.renderLog(log);
         this.showView();
@@ -158,42 +133,30 @@ export class ExperimentLogManager {
     }
 
     public async addStep(logId: string, stepData: ExperimentStepData): Promise<ExperimentStep> {
-        let client: ApiClient = ApiClient.getInstance();
-        let workspaceId: string = this.lookupWorkspaceId(logId);
-        let response: StoredCalculation = await client.post<StoredCalculation>(
-            "/api/v1/calculations",
-            {
-                "calculatorType": "experiment-step",
-                "inputs": stepData.title,
-                "annotation": "",
-                "workspaceId": workspaceId,
-                "logId": logId,
-                "data": stepData.data
-            }
-        );
         let step: ExperimentStep = {
-            "id": response.ID,
+            "id": this.generateId("step"),
             "logId": logId,
             "title": stepData.title,
             "data": stepData.data,
             "annotation": "",
-            "createdAt": response.CreatedAt
+            "createdAt": new Date().toISOString()
         };
         if (!this.stepsByLog.hasOwnProperty(logId)) {
             this.stepsByLog[logId] = [];
         }
         this.stepsByLog[logId].push(step);
         this.stepById[step.id] = step;
+        this.writeSteps(logId, this.stepsByLog[logId]);
         return step;
     }
 
     public async annotateStep(stepId: string, annotation: string): Promise<void> {
-        let client: ApiClient = ApiClient.getInstance();
-        await client.patch("/api/v1/calculations/" + stepId, { "annotation": annotation });
         let step: ExperimentStep | undefined = this.stepById[stepId];
-        if (step) {
-            step.annotation = annotation;
+        if (!step) {
+            return;
         }
+        step.annotation = annotation;
+        this.writeSteps(step.logId, this.stepsByLog[step.logId] || []);
     }
 
     public viewTimeline(logId: string): ExperimentStep[] {
@@ -392,80 +355,79 @@ export class ExperimentLogManager {
         window.print();
     }
 
-    public handleAuthStateChange(state: AuthState): void {
-        this.applyAuthState(state);
-    }
-
-    private applyAuthState(state: AuthState): void {
-        if (!state.isAuthenticated) {
-            this.hideView();
-        }
-    }
-
     public async loadTimeline(logId: string): Promise<ExperimentStep[]> {
-        let client: ApiClient = ApiClient.getInstance();
-        let response: CalculationsListResponse = await client.get<CalculationsListResponse>(
-            "/api/v1/calculations?calculatorType=experiment-step"
-        );
-        let records: StoredCalculation[] = (response && response.calculations) || [];
-        let steps: ExperimentStep[] = [];
-        let i: number;
-        for (i = 0; i < records.length; i++) {
-            let record: StoredCalculation = records[i];
-            let parentLogId: string = this.extractLogId(record);
-            if (parentLogId !== logId) {
-                continue;
-            }
-            let step: ExperimentStep = {
-                "id": record.ID,
-                "logId": parentLogId,
-                "title": record.Inputs,
-                "data": this.extractData(record),
-                "annotation": record.Annotation,
-                "createdAt": record.CreatedAt
-            };
-            steps.push(step);
-            this.stepById[step.id] = step;
-        }
+        let steps: ExperimentStep[] = this.readSteps(logId);
         this.stepsByLog[logId] = steps;
+        let i: number;
+        for (i = 0; i < steps.length; i++) {
+            this.stepById[steps[i].id] = steps[i];
+        }
         this.renderTimeline(steps);
         return steps;
     }
 
-    private extractLogId(record: StoredCalculation): string {
-        let annotation: string = record.Annotation || "";
-        let marker: string = "logId:";
-        let index: number = annotation.indexOf(marker);
-        if (index === -1) {
-            return "";
-        }
-        let start: number = index + marker.length;
-        let dataMarker: string = "data:";
-        let dataIndex: number = annotation.indexOf(dataMarker, start);
-        if (dataIndex === -1) {
-            return annotation.substring(start);
-        }
-        return annotation.substring(start, dataIndex);
-    }
-
-    private extractData(record: StoredCalculation): string {
-        let annotation: string = record.Annotation || "";
-        let marker: string = "data:";
-        let index: number = annotation.indexOf(marker);
-        if (index !== -1) {
-            return annotation.substring(index + marker.length);
-        }
-        return "";
-    }
-
-    private lookupWorkspaceId(logId: string): string {
+    public deleteLog(logId: string): void {
         let i: number;
         for (i = 0; i < this.logs.length; i++) {
             if (this.logs[i].id === logId) {
-                return this.logs[i].workspaceId;
+                this.logs.splice(i, 1);
+                break;
             }
         }
-        return "";
+        let steps: ExperimentStep[] = this.stepsByLog[logId] || [];
+        for (i = 0; i < steps.length; i++) {
+            delete this.stepById[steps[i].id];
+        }
+        delete this.stepsByLog[logId];
+        if (this.currentLogId === logId) {
+            this.currentLogId = null;
+        }
+        this.writeLogs(this.logs);
+        localStorage.removeItem(STEPS_STORAGE_KEY_PREFIX + logId);
+    }
+
+    private readLogs(): ExperimentLog[] {
+        let raw: string | null = localStorage.getItem(LOGS_STORAGE_KEY);
+        if (!raw) {
+            return [];
+        }
+        try {
+            let parsed: unknown = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                return parsed as ExperimentLog[];
+            }
+        } catch (e) {
+            // fall through to empty array
+        }
+        return [];
+    }
+
+    private writeLogs(logs: ExperimentLog[]): void {
+        localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+    }
+
+    private readSteps(logId: string): ExperimentStep[] {
+        let raw: string | null = localStorage.getItem(STEPS_STORAGE_KEY_PREFIX + logId);
+        if (!raw) {
+            return [];
+        }
+        try {
+            let parsed: unknown = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                return parsed as ExperimentStep[];
+            }
+        } catch (e) {
+            // fall through to empty array
+        }
+        return [];
+    }
+
+    private writeSteps(logId: string, steps: ExperimentStep[]): void {
+        localStorage.setItem(STEPS_STORAGE_KEY_PREFIX + logId, JSON.stringify(steps));
+    }
+
+    private generateId(prefix: string): string {
+        return prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).substring(2, 8);
     }
 
     private showError(message: string): void {
@@ -499,9 +461,6 @@ export class ExperimentLogManager {
     }
 
     private extractMessage(e: unknown, fallback: string): string {
-        if (e instanceof ApiError) {
-            return fallback + ": " + e.detail;
-        }
         if (e instanceof Error) {
             return fallback + ": " + e.message;
         }
@@ -509,10 +468,6 @@ export class ExperimentLogManager {
     }
 
     public destroy(): void {
-        if (this.unsubscribe) {
-            this.unsubscribe();
-            this.unsubscribe = null;
-        }
         this.container = null;
         this.initialized = false;
         this.logs = [];

@@ -1,5 +1,4 @@
 import { ApiClient } from "./apiClient.js";
-import { AuthManager, AuthState } from "./authManager.js";
 
 /**
  * Result returned by processFile. Contains the generated CSV string plus
@@ -88,8 +87,7 @@ const REQUIRED_HEADERS: Record<string, string[]> = {
 /**
  * Singleton BatchCalculator that reads a CSV of inputs, dispatches each row to
  * the appropriate calculator endpoint via ApiClient, and produces a CSV of
- * results. Access to batch processing is restricted to researcher and admin
- * roles via AuthManager.
+ * results. Access to batch processing is always available to local users.
  */
 export class BatchCalculator {
     private static instance: BatchCalculator | null = null;
@@ -119,20 +117,11 @@ export class BatchCalculator {
     }
 
     /**
-     * Returns true when the current user is authenticated and has the
-     * researcher or admin role required to run batch calculations.
+     * Returns true when batch calculation is available. Local users always
+     * have access since authentication has been removed.
      */
     public isAuthorized(): boolean {
-        let auth: AuthManager = AuthManager.getInstance();
-        let state: AuthState = auth.getState();
-        if (!state.isAuthenticated) {
-            return false;
-        }
-        if (!state.user) {
-            return false;
-        }
-        let role: string = state.user.role;
-        return role === "researcher" || role === "admin";
+        return true;
     }
 
     public setProgressCallback(cb: ProgressCallback): void {
@@ -154,26 +143,12 @@ export class BatchCalculator {
         this.initialized = true;
         this.attachEventListeners();
         this.applyAuthorization();
-        let auth: AuthManager = AuthManager.getInstance();
-        let self: BatchCalculator = this;
-        auth.subscribe(function (state: AuthState): void {
-            self.handleAuthStateChange(state);
-        });
-    }
-
-    private handleAuthStateChange(state: AuthState): void {
-        if (!state.isAuthenticated) {
-            this.applyAuthorization();
-            return;
-        }
-        this.applyAuthorization();
     }
 
     private attachEventListeners(): void {
         let fileInput: HTMLElement | null = document.getElementById("batch-file-input");
         let processBtn: HTMLElement | null = document.getElementById("batch-process-btn");
         let downloadBtn: HTMLElement | null = document.getElementById("batch-download-btn");
-        let upgradeLink: HTMLElement | null = document.getElementById("batch-upgrade-link");
         let self: BatchCalculator = this;
         if (fileInput) {
             fileInput.addEventListener("change", function (): void {
@@ -188,12 +163,6 @@ export class BatchCalculator {
         if (downloadBtn) {
             downloadBtn.addEventListener("click", function (): void {
                 self.handleDownloadClick();
-            });
-        }
-        if (upgradeLink) {
-            upgradeLink.addEventListener("click", function (ev: Event): void {
-                ev.preventDefault();
-                self.openAuthModal();
             });
         }
     }
@@ -251,7 +220,7 @@ export class BatchCalculator {
         }
         if (!this.isAuthorized()) {
             if (errorBox) {
-                errorBox.textContent = "Batch calculation requires researcher or admin role.";
+                errorBox.textContent = "Batch calculation is not available.";
                 errorBox.style.display = "block";
             }
             return;
@@ -287,14 +256,6 @@ export class BatchCalculator {
             return;
         }
         this.downloadResults(this.lastResults, "batch-results.csv");
-    }
-
-    private openAuthModal(): void {
-        let modalEl: HTMLElement | null = document.getElementById("auth-modal-container");
-        if (modalEl) {
-            let event: Event = new CustomEvent("open-auth-modal", { "detail": "signup" });
-            modalEl.dispatchEvent(event);
-        }
     }
 
     private showProgress(show: boolean): void {

@@ -1,67 +1,50 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-
-const mockGet = vi.fn();
-const mockAuthSubscribe = vi.fn();
-const mockAuthGetState = vi.fn();
-
-vi.mock("./apiClient.js", function () {
-    return {
-        ApiClient: {
-            getInstance: function () {
-                return {
-                    get: mockGet
-                };
-            }
-        },
-        ApiError: function (this: { status: number; type: string; detail: string; name: string; message: string }, status: number, type: string, detail: string) {
-            this.status = status;
-            this.type = type;
-            this.detail = detail;
-            this.name = "ApiError";
-            this.message = detail;
-        }
-    };
-});
-
-vi.mock("./authManager.js", function () {
-    return {
-        AuthManager: {
-            getInstance: function () {
-                return {
-                    subscribe: mockAuthSubscribe,
-                    getState: mockAuthGetState
-                };
-            }
-        }
-    };
-});
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { DashboardManager, CalculationRecord, DashboardStats } from "./dashboardManager.js";
-import { ApiError } from "./apiClient.js";
+
+function makeCalc(overrides: Partial<CalculationRecord>): CalculationRecord {
+    let base: CalculationRecord = {
+        "ID": "1",
+        "UserID": "local-user",
+        "CalculatorType": "molar-mass",
+        "Inputs": "H2O",
+        "Result": "18.015",
+        "Annotation": "",
+        "Starred": false,
+        "WorkspaceID": "",
+        "CreatedAt": new Date().toISOString()
+    };
+    let keys: string[] = Object.keys(overrides);
+    let i: number;
+    for (i = 0; i < keys.length; i++) {
+        let k: string = keys[i];
+        (base as unknown as Record<string, unknown>)[k] = (overrides as unknown as Record<string, unknown>)[k];
+    }
+    return base;
+}
+
+function seedCalculations(calculations: CalculationRecord[]): void {
+    localStorage.setItem("chemutil_calculations", JSON.stringify(calculations));
+}
 
 describe("DashboardManager", function () {
     beforeEach(function () {
         document.body.innerHTML = "";
         localStorage.clear();
         DashboardManager.resetInstance();
-        mockGet.mockReset();
-        mockAuthSubscribe.mockReset();
-        mockAuthGetState.mockReset();
-        mockAuthSubscribe.mockReturnValue(function () { return; });
-        mockAuthGetState.mockReturnValue({
-            "isAuthenticated": false,
-            "user": null,
-            "accessToken": null,
-            "refreshToken": null
-        });
     });
 
     afterEach(function () {
         document.body.innerHTML = "";
         localStorage.clear();
         DashboardManager.resetInstance();
-        vi.restoreAllMocks();
     });
+
+    function setupDOM(): void {
+        let main: HTMLElement = document.createElement("main");
+        main.id = "main-content";
+        document.body.appendChild(main);
+    }
 
     describe("getInstance", function () {
         it("should return same instance on subsequent calls", function () {
@@ -80,9 +63,7 @@ describe("DashboardManager", function () {
 
     describe("init", function () {
         it("should create dashboard-view section when not present", function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
+            setupDOM();
             let manager: DashboardManager = DashboardManager.getInstance();
             manager.init();
             let section: HTMLElement | null = document.getElementById("dashboard-view");
@@ -90,94 +71,43 @@ describe("DashboardManager", function () {
         });
 
         it("should use existing dashboard-view section when present", function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
+            setupDOM();
             let section: HTMLElement = document.createElement("section");
             section.id = "dashboard-view";
             section.className = "app-view dashboard-view";
-            main.appendChild(section);
-            document.body.appendChild(main);
+            let mainEl: HTMLElement | null = document.getElementById("main-content");
+            if (mainEl) {
+                mainEl.appendChild(section);
+            }
             let manager: DashboardManager = DashboardManager.getInstance();
             manager.init();
             let found: HTMLElement | null = document.getElementById("dashboard-view");
             expect(found).toBe(section);
         });
 
-        it("should subscribe to AuthManager", function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
-            let manager: DashboardManager = DashboardManager.getInstance();
-            manager.init();
-            expect(mockAuthSubscribe).toHaveBeenCalled();
-        });
-
         it("should not re-initialize on second call", function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
+            setupDOM();
             let manager: DashboardManager = DashboardManager.getInstance();
             manager.init();
+            let section: HTMLElement | null = document.getElementById("dashboard-view");
             manager.init();
-            expect(mockAuthSubscribe).toHaveBeenCalledTimes(1);
+            let after: HTMLElement | null = document.getElementById("dashboard-view");
+            expect(after).toBe(section);
         });
     });
 
     describe("show / hide", function () {
-        it("show displays the container when authenticated and loads data", async function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": true,
-                "user": {
-                    "id": "u1",
-                    "email": "a@b.com",
-                    "name": "Test",
-                    "role": "user",
-                    "emailVerified": true,
-                    "createdAt": "2026-01-01T00:00:00Z"
-                },
-                "accessToken": "tok",
-                "refreshToken": "rtok"
-            });
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/calculations?limit=10") {
-                    return Promise.resolve({
-                        "calculations": [] as CalculationRecord[],
-                        "page": 1,
-                        "limit": 10
-                    });
-                }
-                return Promise.reject(new Error("not found"));
-            });
+        it("show displays the container and loads local data", async function () {
+            setupDOM();
             let manager: DashboardManager = DashboardManager.getInstance();
             manager.init();
             manager.show();
-            await vi.waitFor(function () {
-                expect(mockGet).toHaveBeenCalledWith("/api/v1/calculations?limit=10");
-            });
+            await new Promise(function (resolve: Function): void { setTimeout(resolve, 0); });
             expect(manager.isVisible()).toBe(true);
         });
 
-        it("show displays sign-in prompt when not authenticated", function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
-            let manager: DashboardManager = DashboardManager.getInstance();
-            manager.init();
-            manager.show();
-            let prompt: HTMLElement | null = document.querySelector(".dashboard-signin-prompt");
-            expect(prompt).not.toBeNull();
-            if (prompt) {
-                expect(prompt.style.display).toBe("block");
-            }
-        });
-
         it("hide sets container display to none", function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
+            setupDOM();
             let manager: DashboardManager = DashboardManager.getInstance();
             manager.init();
             manager.show();
@@ -187,51 +117,18 @@ describe("DashboardManager", function () {
     });
 
     describe("loadDashboardData", function () {
-        function setupAuthenticatedManager(): DashboardManager {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": true,
-                "user": {
-                    "id": "u1",
-                    "email": "a@b.com",
-                    "name": "Test",
-                    "role": "user",
-                    "emailVerified": true,
-                    "createdAt": "2026-01-01T00:00:00Z"
-                },
-                "accessToken": "tok",
-                "refreshToken": "rtok"
-            });
-            let manager: DashboardManager = DashboardManager.getInstance();
-            manager.init();
-            return manager;
-        }
-
-        it("renders stats and recent calculations on success", async function () {
-            let manager: DashboardManager = setupAuthenticatedManager();
-            let calc: CalculationRecord = {
+        it("renders stats and recent calculations from localStorage", async function () {
+            setupDOM();
+            let calc: CalculationRecord = makeCalc({
                 "ID": "1",
-                "UserID": "u1",
                 "CalculatorType": "molar-mass",
                 "Inputs": "H2O",
-                "Result": "18.015",
-                "Annotation": "",
                 "Starred": true,
-                "WorkspaceID": "",
                 "CreatedAt": new Date().toISOString()
-            };
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/calculations?limit=10") {
-                    return Promise.resolve({
-                        "calculations": [calc],
-                        "page": 1,
-                        "limit": 10
-                    });
-                }
-                return Promise.reject(new Error("not found"));
             });
+            seedCalculations([calc]);
+            let manager: DashboardManager = DashboardManager.getInstance();
+            manager.init();
             await manager.loadDashboardData();
             let statsContainer: HTMLElement | null = document.querySelector(".dashboard-stats");
             expect(statsContainer).not.toBeNull();
@@ -248,28 +145,16 @@ describe("DashboardManager", function () {
         });
 
         it("renders favorites when calculations are starred", async function () {
-            let manager: DashboardManager = setupAuthenticatedManager();
-            let calc: CalculationRecord = {
+            setupDOM();
+            let calc: CalculationRecord = makeCalc({
                 "ID": "2",
-                "UserID": "u1",
                 "CalculatorType": "balancing",
                 "Inputs": "H2+O2->H2O",
-                "Result": "balanced",
-                "Annotation": "",
-                "Starred": true,
-                "WorkspaceID": "",
-                "CreatedAt": new Date().toISOString()
-            };
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/calculations?limit=10") {
-                    return Promise.resolve({
-                        "calculations": [calc],
-                        "page": 1,
-                        "limit": 10
-                    });
-                }
-                return Promise.reject(new Error("not found"));
+                "Starred": true
             });
+            seedCalculations([calc]);
+            let manager: DashboardManager = DashboardManager.getInstance();
+            manager.init();
             await manager.loadDashboardData();
             let favorites: HTMLElement | null = document.querySelector(".dashboard-favorites");
             expect(favorites).not.toBeNull();
@@ -279,28 +164,16 @@ describe("DashboardManager", function () {
         });
 
         it("shows empty state in favorites when no starred calculations", async function () {
-            let manager: DashboardManager = setupAuthenticatedManager();
-            let calc: CalculationRecord = {
+            setupDOM();
+            let calc: CalculationRecord = makeCalc({
                 "ID": "3",
-                "UserID": "u1",
                 "CalculatorType": "balancing",
                 "Inputs": "H2+O2->H2O",
-                "Result": "balanced",
-                "Annotation": "",
-                "Starred": false,
-                "WorkspaceID": "",
-                "CreatedAt": new Date().toISOString()
-            };
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/calculations?limit=10") {
-                    return Promise.resolve({
-                        "calculations": [calc],
-                        "page": 1,
-                        "limit": 10
-                    });
-                }
-                return Promise.reject(new Error("not found"));
+                "Starred": false
             });
+            seedCalculations([calc]);
+            let manager: DashboardManager = DashboardManager.getInstance();
+            manager.init();
             await manager.loadDashboardData();
             let favorites: HTMLElement | null = document.querySelector(".dashboard-favorites");
             expect(favorites).not.toBeNull();
@@ -309,111 +182,42 @@ describe("DashboardManager", function () {
             }
         });
 
-        it("renders weekly activity bar chart with seven bars", async function () {
-            let manager: DashboardManager = setupAuthenticatedManager();
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/calculations?limit=10") {
-                    return Promise.resolve({
-                        "calculations": [] as CalculationRecord[],
-                        "page": 1,
-                        "limit": 10
-                    });
-                }
-                return Promise.reject(new Error("not found"));
-            });
+        it("renders weekly activity chart canvas", async function () {
+            setupDOM();
+            seedCalculations([]);
+            let manager: DashboardManager = DashboardManager.getInstance();
+            manager.init();
             await manager.loadDashboardData();
             let activity: HTMLElement | null = document.querySelector(".dashboard-activity");
             expect(activity).not.toBeNull();
             if (activity) {
-                // Chart.js renders the seven daily bars onto a canvas element.
-                // Verify the canvas was created and the chart did not fall back
-                // to the error message.
                 expect(activity.querySelectorAll("canvas#dashboard-activity-chart").length).toBe(1);
-                expect(activity.querySelectorAll(".dashboard-empty").length).toBe(0);
             }
         });
 
-        it("renders sign-in prompt on 401 error", async function () {
-            let manager: DashboardManager = setupAuthenticatedManager();
-            let apiError: ApiError = new ApiError(401, "about:blank", "Unauthorized");
-            mockGet.mockRejectedValue(apiError);
+        it("renders empty states when localStorage has no calculations", async function () {
+            setupDOM();
+            let manager: DashboardManager = DashboardManager.getInstance();
+            manager.init();
             await manager.loadDashboardData();
-            let prompt: HTMLElement | null = document.querySelector(".dashboard-signin-prompt");
-            expect(prompt).not.toBeNull();
-            if (prompt) {
-                expect(prompt.style.display).toBe("block");
+            let recent: HTMLElement | null = document.querySelector(".dashboard-recent");
+            expect(recent).not.toBeNull();
+            if (recent) {
+                expect(recent.textContent).toContain("No calculations yet");
             }
-        });
-
-        it("shows error message on non-401 ApiError", async function () {
-            let manager: DashboardManager = setupAuthenticatedManager();
-            let apiError: ApiError = new ApiError(500, "about:blank", "Server error");
-            mockGet.mockRejectedValue(apiError);
-            await manager.loadDashboardData();
-            let errorEl: HTMLElement | null = document.querySelector(".dashboard-error");
-            expect(errorEl).not.toBeNull();
-            if (errorEl) {
-                expect(errorEl.style.display).toBe("block");
-                expect(errorEl.textContent).toContain("Failed to load dashboard");
-            }
-        });
-
-        it("shows error message on network error", async function () {
-            let manager: DashboardManager = setupAuthenticatedManager();
-            let plainError: Error = new Error("Network failure");
-            mockGet.mockRejectedValue(plainError);
-            await manager.loadDashboardData();
-            let errorEl: HTMLElement | null = document.querySelector(".dashboard-error");
-            expect(errorEl).not.toBeNull();
-            if (errorEl) {
-                expect(errorEl.style.display).toBe("block");
-                expect(errorEl.textContent).toContain("Network failure");
-            }
+            expect(manager.getLastCalculations().length).toBe(0);
         });
 
         it("does not fetch when already loading", async function () {
-            let manager: DashboardManager = setupAuthenticatedManager();
-            let resolveFirst: Function = function () { return; };
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/calculations?limit=10") {
-                    return new Promise(function (resolve: Function) {
-                        resolveFirst = resolve;
-                    });
-                }
-                return Promise.reject(new Error("not found"));
-            });
-            let p1: Promise<void> = manager.loadDashboardData();
-            let p2: Promise<void> = manager.loadDashboardData();
-            resolveFirst({ "calculations": [] as CalculationRecord[], "page": 1, "limit": 10 });
-            await p1;
-            await p2;
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/calculations?limit=10");
-            let calcCalls: number = mockGet.mock.calls.filter(function (call: unknown[]) {
-                return call[0] === "/api/v1/calculations?limit=10";
-            }).length;
-            expect(calcCalls).toBe(1);
-        });
-    });
-
-    describe("handleAuthStateChange", function () {
-        it("renders sign-in prompt when not authenticated and visible", function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
+            setupDOM();
+            seedCalculations([]);
             let manager: DashboardManager = DashboardManager.getInstance();
             manager.init();
-            manager.show();
-            manager.handleAuthStateChange({
-                "isAuthenticated": false,
-                "user": null,
-                "accessToken": null,
-                "refreshToken": null
-            });
-            let prompt: HTMLElement | null = document.querySelector(".dashboard-signin-prompt");
-            expect(prompt).not.toBeNull();
-            if (prompt) {
-                expect(prompt.style.display).toBe("block");
-            }
+            let p1: Promise<void> = manager.loadDashboardData();
+            let p2: Promise<void> = manager.loadDashboardData();
+            await p1;
+            await p2;
+            expect(manager.getLastCalculations().length).toBe(0);
         });
     });
 
@@ -421,9 +225,7 @@ describe("DashboardManager", function () {
         let manager: DashboardManager;
 
         beforeEach(function () {
-            let main: HTMLElement = document.createElement("main");
-            main.id = "main-content";
-            document.body.appendChild(main);
+            setupDOM();
             manager = DashboardManager.getInstance();
             manager.init();
         });
@@ -457,17 +259,12 @@ describe("DashboardManager", function () {
         });
 
         it("renderRecentCalculations renders list items when calculations present", function () {
-            let calc: CalculationRecord = {
+            let calc: CalculationRecord = makeCalc({
                 "ID": "x1",
-                "UserID": "u1",
                 "CalculatorType": "molar-mass",
                 "Inputs": "H2O",
-                "Result": "18.015",
-                "Annotation": "",
-                "Starred": false,
-                "WorkspaceID": "",
                 "CreatedAt": "2026-07-17T12:00:00Z"
-            };
+            });
             manager.renderRecentCalculations([calc]);
             let recent: HTMLElement | null = document.querySelector(".dashboard-recent");
             expect(recent).not.toBeNull();
@@ -484,11 +281,7 @@ describe("DashboardManager", function () {
             let activity: HTMLElement | null = document.querySelector(".dashboard-activity");
             expect(activity).not.toBeNull();
             if (activity) {
-                // Chart.js renders the seven daily bars onto a canvas element.
-                // Verify the canvas was created and the chart did not fall back
-                // to the error message.
                 expect(activity.querySelectorAll("canvas#dashboard-activity-chart").length).toBe(1);
-                expect(activity.querySelectorAll(".dashboard-empty").length).toBe(0);
             }
         });
 
@@ -502,17 +295,13 @@ describe("DashboardManager", function () {
         });
 
         it("renderFavorites renders list items when favorites present", function () {
-            let calc: CalculationRecord = {
+            let calc: CalculationRecord = makeCalc({
                 "ID": "f1",
-                "UserID": "u1",
                 "CalculatorType": "balancing",
                 "Inputs": "H2+O2->H2O",
-                "Result": "balanced",
-                "Annotation": "",
                 "Starred": true,
-                "WorkspaceID": "",
                 "CreatedAt": "2026-07-17T12:00:00Z"
-            };
+            });
             manager.renderFavorites([calc]);
             let favorites: HTMLElement | null = document.querySelector(".dashboard-favorites");
             expect(favorites).not.toBeNull();

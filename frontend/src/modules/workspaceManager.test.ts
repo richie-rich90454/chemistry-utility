@@ -1,74 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-
-const mockGet = vi.fn();
-const mockPost = vi.fn();
-const mockPatch = vi.fn();
-const mockDelete = vi.fn();
-const mockAuthSubscribe = vi.fn();
-const mockAuthGetState = vi.fn();
-
-vi.mock("./apiClient.js", function () {
-    return {
-        ApiClient: {
-            getInstance: function () {
-                return {
-                    "get": mockGet,
-                    "post": mockPost,
-                    "patch": mockPatch,
-                    "delete": mockDelete
-                };
-            }
-        },
-        ApiError: function (this: { status: number; type: string; detail: string; name: string; message: string }, status: number, type: string, detail: string) {
-            this.status = status;
-            this.type = type;
-            this.detail = detail;
-            this.name = "ApiError";
-            this.message = detail;
-        }
-    };
-});
-
-vi.mock("./authManager.js", function () {
-    return {
-        AuthManager: {
-            getInstance: function () {
-                return {
-                    "subscribe": mockAuthSubscribe,
-                    "getState": mockAuthGetState
-                };
-            }
-        }
-    };
-});
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
 import { WorkspaceManager, Workspace, WorkspaceMember, SharedCalculation } from "./workspaceManager.js";
-import { ApiError } from "./apiClient.js";
-
-function unauthenticatedState(): { isAuthenticated: boolean; user: unknown; accessToken: unknown; refreshToken: unknown } {
-    return {
-        "isAuthenticated": false,
-        "user": null,
-        "accessToken": null,
-        "refreshToken": null
-    };
-}
-
-function authenticatedState(userId: string): { isAuthenticated: boolean; user: unknown; accessToken: unknown; refreshToken: unknown } {
-    return {
-        "isAuthenticated": true,
-        "user": {
-            "id": userId,
-            "email": "a@b.c",
-            "name": "Test User",
-            "role": "user",
-            "emailVerified": true,
-            "createdAt": "2026-01-01T00:00:00Z"
-        },
-        "accessToken": "token",
-        "refreshToken": "refresh"
-    };
-}
 
 function makeWorkspace(id: string, ownerId: string, memberCount: number): Workspace {
     return {
@@ -105,38 +37,59 @@ function makeCalculation(id: string): SharedCalculation {
     };
 }
 
+function seedWorkspaces(workspaces: Workspace[]): void {
+    localStorage.setItem("chemutil_workspaces", JSON.stringify(workspaces));
+}
+
+function seedMembers(workspaceId: string, members: WorkspaceMember[]): void {
+    localStorage.setItem("chemutil_workspace_members_" + workspaceId, JSON.stringify(members));
+}
+
+function seedCalculations(workspaceId: string, calculations: SharedCalculation[]): void {
+    localStorage.setItem("chemutil_workspace_calculations_" + workspaceId, JSON.stringify(calculations));
+}
+
+function readStoredWorkspaces(): Workspace[] {
+    let raw: string | null = localStorage.getItem("chemutil_workspaces");
+    if (!raw) {
+        return [];
+    }
+    return JSON.parse(raw) as Workspace[];
+}
+
+function readStoredMembers(workspaceId: string): WorkspaceMember[] {
+    let raw: string | null = localStorage.getItem("chemutil_workspace_members_" + workspaceId);
+    if (!raw) {
+        return [];
+    }
+    return JSON.parse(raw) as WorkspaceMember[];
+}
+
+function readStoredCalculations(workspaceId: string): SharedCalculation[] {
+    let raw: string | null = localStorage.getItem("chemutil_workspace_calculations_" + workspaceId);
+    if (!raw) {
+        return [];
+    }
+    return JSON.parse(raw) as SharedCalculation[];
+}
+
 describe("WorkspaceManager", function () {
     beforeEach(function () {
         document.body.innerHTML = "";
         localStorage.clear();
         WorkspaceManager.resetInstance();
-        mockGet.mockReset();
-        mockPost.mockReset();
-        mockPatch.mockReset();
-        mockDelete.mockReset();
-        mockAuthSubscribe.mockReset();
-        mockAuthGetState.mockReset();
-        mockAuthSubscribe.mockReturnValue(function () { return; });
-        mockAuthGetState.mockReturnValue(unauthenticatedState());
     });
 
     afterEach(function () {
         document.body.innerHTML = "";
         localStorage.clear();
         WorkspaceManager.resetInstance();
-        vi.restoreAllMocks();
     });
 
     function setupDOM(): void {
         let main: HTMLElement = document.createElement("main");
         main.id = "main-content";
         main.className = "app-view";
-        let sidebar: HTMLElement = document.createElement("aside");
-        sidebar.className = "sidebar";
-        let authSection: HTMLElement = document.createElement("div");
-        authSection.id = "sidebar-auth-section";
-        sidebar.appendChild(authSection);
-        document.body.appendChild(sidebar);
         document.body.appendChild(main);
     }
 
@@ -170,59 +123,41 @@ describe("WorkspaceManager", function () {
             setupDOM();
             let existing: HTMLElement = document.createElement("section");
             existing.id = "sidebar-workspaces";
-            let authSection: HTMLElement | null = document.getElementById("sidebar-auth-section");
-            if (authSection && authSection.parentNode) {
-                authSection.parentNode.appendChild(existing);
-            }
+            document.body.appendChild(existing);
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
             let found: HTMLElement | null = document.getElementById("sidebar-workspaces");
             expect(found).toBe(existing);
         });
 
-        it("should subscribe to AuthManager", function () {
+        it("should always show sidebar for local users", function () {
             setupDOM();
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            expect(mockAuthSubscribe).toHaveBeenCalled();
+            let sidebar: HTMLElement = document.getElementById("sidebar-workspaces") as HTMLElement;
+            expect(sidebar.style.display).toBe("block");
         });
 
         it("should not re-initialize on second call", function () {
             setupDOM();
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            manager.init();
-            expect(mockAuthSubscribe).toHaveBeenCalledTimes(1);
-        });
-
-        it("should hide sidebar when not authenticated", function () {
-            setupDOM();
-            mockAuthGetState.mockReturnValue(unauthenticatedState());
-            let manager: WorkspaceManager = WorkspaceManager.getInstance();
-            manager.init();
             let sidebar: HTMLElement = document.getElementById("sidebar-workspaces") as HTMLElement;
-            expect(sidebar.style.display).toBe("none");
-        });
-
-        it("should show sidebar when authenticated", function () {
-            setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
-            let manager: WorkspaceManager = WorkspaceManager.getInstance();
+            let original: string = sidebar.id;
             manager.init();
-            let sidebar: HTMLElement = document.getElementById("sidebar-workspaces") as HTMLElement;
-            expect(sidebar.style.display).toBe("block");
+            let after: HTMLElement | null = document.getElementById(original);
+            expect(after).toBe(sidebar);
         });
     });
 
     describe("loadWorkspaces", function () {
-        it("should GET /api/v1/workspaces and render the list", async function () {
+        it("should read workspaces from localStorage and render the list", async function () {
             setupDOM();
+            let workspaces: Workspace[] = [makeWorkspace("ws-1", "local-user", 3), makeWorkspace("ws-2", "local-user", 1)];
+            seedWorkspaces(workspaces);
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let workspaces: Workspace[] = [makeWorkspace("ws-1", "u1", 3), makeWorkspace("ws-2", "u1", 1)];
-            mockGet.mockResolvedValue({ "workspaces": workspaces });
             let result: Workspace[] = await manager.loadWorkspaces();
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces");
             expect(result.length).toBe(2);
             let list: HTMLElement | null = document.querySelector(".workspace-list");
             expect(list).not.toBeNull();
@@ -237,7 +172,6 @@ describe("WorkspaceManager", function () {
             setupDOM();
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            mockGet.mockResolvedValue({ "workspaces": [] });
             await manager.loadWorkspaces();
             let list: HTMLElement | null = document.querySelector(".workspace-list");
             expect(list).not.toBeNull();
@@ -248,63 +182,56 @@ describe("WorkspaceManager", function () {
     });
 
     describe("createWorkspace", function () {
-        it("should POST /api/v1/workspaces and refresh list", async function () {
+        it("should persist workspace to localStorage with local-user owner and refresh list", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let created: Workspace = makeWorkspace("ws-new", "u1", 1);
-            mockPost.mockResolvedValue(created);
-            mockGet.mockResolvedValue({ "workspaces": [created] });
             let result: Workspace = await manager.createWorkspace("New Lab", "description");
-            expect(mockPost).toHaveBeenCalledWith("/api/v1/workspaces", { "name": "New Lab", "description": "description" });
-            expect(result.id).toBe("ws-new");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces");
+            expect(result.name).toBe("New Lab");
+            expect(result.description).toBe("description");
+            expect(result.ownerId).toBe("local-user");
+            expect(typeof result.id).toBe("string");
+            expect(result.id.length).toBeGreaterThan(0);
+            let stored: Workspace[] = readStoredWorkspaces();
+            expect(stored.length).toBe(1);
+            expect(stored[0].name).toBe("New Lab");
+            expect(stored[0].ownerId).toBe("local-user");
+            let list: HTMLElement | null = document.querySelector(".workspace-list");
+            expect(list).not.toBeNull();
+            if (list) {
+                expect(list.textContent).toContain("New Lab");
+            }
         });
 
         it("should still return workspace when list refresh fails", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let created: Workspace = makeWorkspace("ws-new", "u1", 1);
-            mockPost.mockResolvedValue(created);
-            mockGet.mockRejectedValue(new Error("network"));
             let result: Workspace = await manager.createWorkspace("New Lab", "description");
-            expect(result.id).toBe("ws-new");
+            expect(result.id).toBeDefined();
+            expect(result.name).toBe("New Lab");
         });
     });
 
     describe("selectWorkspace", function () {
-        it("should GET workspace, render detail, and load members + calculations", async function () {
+        it("should read workspace from localStorage, render detail, and load members + calculations", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
+            let ws: Workspace = makeWorkspace("ws-1", "local-user", 2);
+            seedWorkspaces([ws]);
+            seedMembers("ws-1", [makeMember("u2", "member")]);
+            seedCalculations("ws-1", [makeCalculation("c1")]);
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let ws: Workspace = makeWorkspace("ws-1", "u1", 2);
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/workspaces/ws-1") {
-                    return Promise.resolve(ws);
-                }
-                if (path === "/api/v1/workspaces/ws-1/members") {
-                    return Promise.resolve({ "members": [makeMember("u2", "member")] });
-                }
-                if (path === "/api/v1/workspaces/ws-1/calculations") {
-                    return Promise.resolve({ "calculations": [makeCalculation("c1")] });
-                }
-                return Promise.reject(new Error("not found"));
-            });
             let result: Workspace = await manager.selectWorkspace("ws-1");
             expect(result.id).toBe("ws-1");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces/ws-1");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces/ws-1/members");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces/ws-1/calculations");
             expect(manager.isDetailViewVisible()).toBe(true);
             let current: Workspace | null = manager.getCurrentWorkspace();
             expect(current).not.toBeNull();
             if (current) {
                 expect(current.id).toBe("ws-1");
             }
+            expect(manager.getCurrentMembers().length).toBe(1);
+            expect(manager.getCurrentCalculations().length).toBe(1);
             let detail: HTMLElement | null = document.getElementById("workspace-view");
             expect(detail).not.toBeNull();
             if (detail) {
@@ -314,146 +241,156 @@ describe("WorkspaceManager", function () {
             }
         });
 
-        it("should still render detail when members fetch fails", async function () {
+        it("should throw when workspace not found in localStorage", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let ws: Workspace = makeWorkspace("ws-1", "u1", 2);
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/workspaces/ws-1") {
-                    return Promise.resolve(ws);
-                }
-                if (path === "/api/v1/workspaces/ws-1/members") {
-                    return Promise.reject(new Error("network"));
-                }
-                if (path === "/api/v1/workspaces/ws-1/calculations") {
-                    return Promise.resolve({ "calculations": [] });
-                }
-                return Promise.reject(new Error("not found"));
-            });
+            await expect(manager.selectWorkspace("missing")).rejects.toThrow();
+        });
+
+        it("should still render detail when members storage empty", async function () {
+            setupDOM();
+            let ws: Workspace = makeWorkspace("ws-1", "local-user", 0);
+            seedWorkspaces([ws]);
+            let manager: WorkspaceManager = WorkspaceManager.getInstance();
+            manager.init();
             await manager.selectWorkspace("ws-1");
             expect(manager.isDetailViewVisible()).toBe(true);
+            expect(manager.getCurrentMembers().length).toBe(0);
         });
     });
 
     describe("updateWorkspace", function () {
-        it("should PATCH the workspace and refresh the list", async function () {
+        it("should update workspace in localStorage and refresh the list", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
+            let ws: Workspace = makeWorkspace("ws-1", "local-user", 2);
+            seedWorkspaces([ws]);
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let updated: Workspace = makeWorkspace("ws-1", "u1", 2);
-            updated.name = "Renamed";
-            mockPatch.mockResolvedValue(updated);
-            mockGet.mockResolvedValue({ "workspaces": [updated] });
-            let result: Workspace = await manager.updateWorkspace("ws-1", "Renamed", "desc");
-            expect(mockPatch).toHaveBeenCalledWith("/api/v1/workspaces/ws-1", { "name": "Renamed", "description": "desc" });
+            let result: Workspace = await manager.updateWorkspace("ws-1", "Renamed", "new desc");
             expect(result.name).toBe("Renamed");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces");
+            expect(result.description).toBe("new desc");
+            let stored: Workspace[] = readStoredWorkspaces();
+            expect(stored[0].name).toBe("Renamed");
+            expect(stored[0].description).toBe("new desc");
+        });
+
+        it("should throw when workspace not found", async function () {
+            setupDOM();
+            let manager: WorkspaceManager = WorkspaceManager.getInstance();
+            manager.init();
+            await expect(manager.updateWorkspace("missing", "n", "d")).rejects.toThrow();
         });
     });
 
     describe("deleteWorkspace", function () {
-        it("should DELETE the workspace and hide detail when current", async function () {
+        it("should remove workspace, members, and calculations from localStorage", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
+            let ws: Workspace = makeWorkspace("ws-1", "local-user", 2);
+            seedWorkspaces([ws]);
+            seedMembers("ws-1", [makeMember("u2", "member")]);
+            seedCalculations("ws-1", [makeCalculation("c1")]);
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let ws: Workspace = makeWorkspace("ws-1", "u1", 2);
-            mockGet.mockImplementation(function (path: string) {
-                if (path === "/api/v1/workspaces/ws-1") {
-                    return Promise.resolve(ws);
-                }
-                if (path === "/api/v1/workspaces/ws-1/members") {
-                    return Promise.resolve({ "members": [] });
-                }
-                if (path === "/api/v1/workspaces/ws-1/calculations") {
-                    return Promise.resolve({ "calculations": [] });
-                }
-                if (path === "/api/v1/workspaces") {
-                    return Promise.resolve({ "workspaces": [] });
-                }
-                return Promise.reject(new Error("not found"));
-            });
-            mockDelete.mockResolvedValue(undefined);
             await manager.selectWorkspace("ws-1");
             expect(manager.isDetailViewVisible()).toBe(true);
             await manager.deleteWorkspace("ws-1");
-            expect(mockDelete).toHaveBeenCalledWith("/api/v1/workspaces/ws-1");
+            expect(readStoredWorkspaces().length).toBe(0);
+            expect(localStorage.getItem("chemutil_workspace_members_ws-1")).toBeNull();
+            expect(localStorage.getItem("chemutil_workspace_calculations_ws-1")).toBeNull();
             expect(manager.isDetailViewVisible()).toBe(false);
             expect(manager.getCurrentWorkspace()).toBeNull();
         });
 
-        it("should still complete when list refresh fails", async function () {
+        it("should complete even when workspace not present", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            mockDelete.mockResolvedValue(undefined);
-            mockGet.mockRejectedValue(new Error("network"));
-            await manager.deleteWorkspace("ws-x");
-            expect(mockDelete).toHaveBeenCalledWith("/api/v1/workspaces/ws-x");
+            await manager.deleteWorkspace("missing");
+            expect(readStoredWorkspaces().length).toBe(0);
         });
     });
 
     describe("loadMembers", function () {
-        it("should GET members and render them", async function () {
+        it("should read members from localStorage and render them", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
+            let members: WorkspaceMember[] = [makeMember("u2", "member"), makeMember("u3", "admin")];
+            seedMembers("ws-1", members);
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let members: WorkspaceMember[] = [makeMember("u2", "member"), makeMember("u3", "admin")];
-            mockGet.mockResolvedValue({ "members": members });
             let result: WorkspaceMember[] = await manager.loadMembers("ws-1");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces/ws-1/members");
             expect(result.length).toBe(2);
             expect(manager.getCurrentMembers().length).toBe(2);
         });
     });
 
     describe("addMember", function () {
-        it("should POST member and refresh member list", async function () {
+        it("should persist member to localStorage and refresh member list", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let added: WorkspaceMember = makeMember("u2", "member");
-            mockPost.mockResolvedValue(added);
-            mockGet.mockResolvedValue({ "members": [added] });
             let result: WorkspaceMember = await manager.addMember("ws-1", "u2", "member");
-            expect(mockPost).toHaveBeenCalledWith("/api/v1/workspaces/ws-1/members", { "userId": "u2", "role": "member" });
             expect(result.userId).toBe("u2");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces/ws-1/members");
+            expect(result.role).toBe("member");
+            expect(result.email).toBe("u2@local");
+            expect(result.name).toBe("u2");
+            let stored: WorkspaceMember[] = readStoredMembers("ws-1");
+            expect(stored.length).toBe(1);
+            expect(stored[0].userId).toBe("u2");
         });
     });
 
     describe("removeMember", function () {
-        it("should DELETE member and refresh member list", async function () {
+        it("should remove member from localStorage and refresh member list", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
+            seedMembers("ws-1", [makeMember("u2", "member"), makeMember("u3", "admin")]);
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            mockDelete.mockResolvedValue(undefined);
-            mockGet.mockResolvedValue({ "members": [] });
             await manager.removeMember("ws-1", "u2");
-            expect(mockDelete).toHaveBeenCalledWith("/api/v1/workspaces/ws-1/members/u2");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces/ws-1/members");
+            let stored: WorkspaceMember[] = readStoredMembers("ws-1");
+            expect(stored.length).toBe(1);
+            expect(stored[0].userId).toBe("u3");
         });
     });
 
     describe("loadWorkspaceCalculations", function () {
-        it("should GET calculations and render them", async function () {
+        it("should read calculations from localStorage and render them", async function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
+            let calcs: SharedCalculation[] = [makeCalculation("c1"), makeCalculation("c2")];
+            seedCalculations("ws-1", calcs);
             let manager: WorkspaceManager = WorkspaceManager.getInstance();
             manager.init();
-            let calcs: SharedCalculation[] = [makeCalculation("c1"), makeCalculation("c2")];
-            mockGet.mockResolvedValue({ "calculations": calcs });
             let result: SharedCalculation[] = await manager.loadWorkspaceCalculations("ws-1");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/workspaces/ws-1/calculations");
             expect(result.length).toBe(2);
             expect(manager.getCurrentCalculations().length).toBe(2);
+        });
+    });
+
+    describe("addLocalCalculation", function () {
+        it("should persist calculation to localStorage and re-render when current workspace matches", function () {
+            setupDOM();
+            let ws: Workspace = makeWorkspace("ws-1", "local-user", 1);
+            seedWorkspaces([ws]);
+            let manager: WorkspaceManager = WorkspaceManager.getInstance();
+            manager.init();
+            void manager.selectWorkspace(ws.id);
+            manager.addLocalCalculation("ws-1", makeCalculation("c9"));
+            let stored: SharedCalculation[] = readStoredCalculations("ws-1");
+            expect(stored.length).toBe(1);
+            expect(stored[0].ID).toBe("c9");
+            expect(manager.getCurrentCalculations().length).toBe(1);
+        });
+
+        it("should persist calculation but not update current when workspace differs", function () {
+            setupDOM();
+            let ws: Workspace = makeWorkspace("ws-1", "local-user", 1);
+            seedWorkspaces([ws]);
+            let manager: WorkspaceManager = WorkspaceManager.getInstance();
+            manager.init();
+            manager.addLocalCalculation("ws-other", makeCalculation("c9"));
+            let stored: SharedCalculation[] = readStoredCalculations("ws-other");
+            expect(stored.length).toBe(1);
+            expect(manager.getCurrentCalculations().length).toBe(0);
         });
     });
 
@@ -462,13 +399,12 @@ describe("WorkspaceManager", function () {
 
         beforeEach(function () {
             setupDOM();
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
             manager = WorkspaceManager.getInstance();
             manager.init();
         });
 
         it("renderWorkspaceList renders clickable items with member count", function () {
-            manager.renderWorkspaceList([makeWorkspace("ws-a", "u1", 5)]);
+            manager.renderWorkspaceList([makeWorkspace("ws-a", "local-user", 5)]);
             let list: HTMLElement | null = document.querySelector(".workspace-list");
             expect(list).not.toBeNull();
             if (list) {
@@ -482,7 +418,7 @@ describe("WorkspaceManager", function () {
         });
 
         it("renderWorkspaceDetail renders name, description input, export button", function () {
-            let ws: Workspace = makeWorkspace("ws-1", "u1", 2);
+            let ws: Workspace = makeWorkspace("ws-1", "local-user", 2);
             manager.renderWorkspaceDetail(ws);
             let detail: HTMLElement = document.getElementById("workspace-view") as HTMLElement;
             expect(detail.textContent).toContain("Workspace ws-1");
@@ -490,27 +426,36 @@ describe("WorkspaceManager", function () {
             expect(detail.querySelector(".workspace-export-pdf-btn")).not.toBeNull();
         });
 
-        it("renderWorkspaceDetail shows delete button only for owner", function () {
-            let ws: Workspace = makeWorkspace("ws-1", "owner-x", 2);
-            manager.renderWorkspaceDetail(ws);
-            let detail: HTMLElement = document.getElementById("workspace-view") as HTMLElement;
-            expect(detail.querySelector(".workspace-delete-btn")).toBeNull();
-        });
-
-        it("renderWorkspaceDetail shows delete button when current user is owner", function () {
-            let ws: Workspace = makeWorkspace("ws-1", "u1", 2);
+        it("renderWorkspaceDetail always shows delete button for local users", function () {
+            let ws: Workspace = makeWorkspace("ws-1", "someone-else", 2);
             manager.renderWorkspaceDetail(ws);
             let detail: HTMLElement = document.getElementById("workspace-view") as HTMLElement;
             expect(detail.querySelector(".workspace-delete-btn")).not.toBeNull();
         });
 
-        it("renderMembers renders member list with roles", function () {
+        it("renderMembers renders member list with roles and remove button for non-local members", function () {
             manager.renderMembers([makeMember("u2", "admin")]);
             let container: HTMLElement | null = document.querySelector(".workspace-members");
             expect(container).not.toBeNull();
             if (container) {
                 expect(container.textContent).toContain("Member u2");
                 expect(container.textContent).toContain("admin");
+                expect(container.querySelectorAll(".workspace-member-remove").length).toBe(1);
+            }
+        });
+
+        it("renderMembers does not show remove button for local-user member", function () {
+            let localMember: WorkspaceMember = {
+                "userId": "local-user",
+                "email": "local@local",
+                "name": "Me",
+                "role": "owner"
+            };
+            manager.renderMembers([localMember]);
+            let container: HTMLElement | null = document.querySelector(".workspace-members");
+            expect(container).not.toBeNull();
+            if (container) {
+                expect(container.querySelectorAll(".workspace-member-remove").length).toBe(0);
             }
         });
 
@@ -559,29 +504,6 @@ describe("WorkspaceManager", function () {
             manager.showDetailView();
             manager.hideDetailView();
             expect(manager.isDetailViewVisible()).toBe(false);
-        });
-    });
-
-    describe("auth state handling", function () {
-        it("should hide sidebar and detail when auth state changes to unauthenticated", function () {
-            setupDOM();
-            let subscribedCallback: Function | null = null;
-            mockAuthSubscribe.mockImplementation(function (cb: Function): Function {
-                subscribedCallback = cb;
-                return function () { return; };
-            });
-            mockAuthGetState.mockReturnValue(authenticatedState("u1"));
-            let manager: WorkspaceManager = WorkspaceManager.getInstance();
-            manager.init();
-            let sidebar: HTMLElement = document.getElementById("sidebar-workspaces") as HTMLElement;
-            expect(sidebar.style.display).toBe("block");
-            expect(subscribedCallback).not.toBeNull();
-            if (!subscribedCallback) {
-                throw new Error("subscribe callback was not registered");
-            }
-            let cb: Function = subscribedCallback;
-            cb(unauthenticatedState());
-            expect(sidebar.style.display).toBe("none");
         });
     });
 
@@ -637,25 +559,13 @@ describe("WorkspaceManager", function () {
             manager.attachShareButton(result, "calc-9");
             let btn: HTMLButtonElement = result.querySelector(".share-button") as HTMLButtonElement;
             btn.click();
-            await vi.waitFor(function () {
-                expect(navigator.clipboard.writeText).toHaveBeenCalled();
-            });
-            let calls: unknown[] = vi.mocked(navigator.clipboard.writeText).mock.calls;
+            await new Promise(function (resolve: Function): void { setTimeout(resolve, 0); });
+            expect(navigator.clipboard.writeText).toHaveBeenCalled();
+            let calls: unknown[] = (navigator.clipboard.writeText as unknown as { mock: { calls: unknown[] } }).mock.calls;
             expect(calls.length).toBeGreaterThan(0);
             let lastCallArgs: unknown = calls[calls.length - 1];
             let lastCall: string = String((lastCallArgs as unknown[])[0]);
             expect(lastCall).toContain("/shared/calc-9");
-        });
-    });
-
-    describe("error handling", function () {
-        it("loadWorkspaces propagates ApiError", async function () {
-            setupDOM();
-            let manager: WorkspaceManager = WorkspaceManager.getInstance();
-            manager.init();
-            let apiError: ApiError = new ApiError(500, "about:blank", "Server error");
-            mockGet.mockRejectedValue(apiError);
-            await expect(manager.loadWorkspaces()).rejects.toThrow();
         });
     });
 });

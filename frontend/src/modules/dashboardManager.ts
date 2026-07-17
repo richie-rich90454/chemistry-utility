@@ -1,5 +1,3 @@
-import { ApiClient, ApiError } from "./apiClient.js";
-import { AuthManager, AuthState } from "./authManager.js";
 import { ChartRenderer, ActivityPoint } from "./chartRenderer.js";
 
 export interface CalculationRecord {
@@ -14,12 +12,6 @@ export interface CalculationRecord {
     CreatedAt: string;
 }
 
-export interface CalculationsResponse {
-    calculations: CalculationRecord[];
-    page: number;
-    limit: number;
-}
-
 export interface DashboardStats {
     totalCalculations: number;
     favoriteCount: number;
@@ -27,32 +19,22 @@ export interface DashboardStats {
     calculatorsUsed: number;
 }
 
-export interface AdminOverview {
-    users: number;
-    calculations: number;
-    workspaces: number;
-    compounds: number;
-}
+const CALCULATIONS_STORAGE_KEY: string = "chemutil_calculations";
 
-export interface AdminOverviewResponse {
-    overview: AdminOverview;
-}
-
-export interface AdminUsageResponse {
-    dau: number;
-}
-
+/**
+ * Renders the local dashboard: usage stats, recent calculations, weekly
+ * activity chart, and favorites. All data is sourced from localStorage so
+ * the dashboard works for local users without any server-side account.
+ */
 export class DashboardManager {
     private static instance: DashboardManager | null = null;
     private container: HTMLElement | null;
-    private unsubscribe: Function | null;
     private initialized: boolean;
     private loading: boolean;
     private lastCalculations: CalculationRecord[];
 
     private constructor() {
         this.container = null;
-        this.unsubscribe = null;
         this.initialized = false;
         this.loading = false;
         this.lastCalculations = [];
@@ -72,11 +54,6 @@ export class DashboardManager {
         this.initialized = true;
         this.render();
         this.attachNavInterception();
-        let auth: AuthManager = AuthManager.getInstance();
-        let self: DashboardManager = this;
-        this.unsubscribe = auth.subscribe(function (state: AuthState): void {
-            self.handleAuthStateChange(state);
-        });
     }
 
     private attachNavInterception(): void {
@@ -102,18 +79,6 @@ export class DashboardManager {
         }
     }
 
-    public handleAuthStateChange(state: AuthState): void {
-        if (!state.isAuthenticated) {
-            if (this.container && this.container.style.display !== "none") {
-                this.renderSignInPrompt();
-            }
-            return;
-        }
-        if (this.container && this.container.style.display !== "none") {
-            this.loadDashboardData();
-        }
-    }
-
     public show(): void {
         if (!this.container) {
             return;
@@ -134,13 +99,7 @@ export class DashboardManager {
             viewHeader.style.display = "none";
         }
         this.container.style.display = "block";
-        let auth: AuthManager = AuthManager.getInstance();
-        let state: AuthState = auth.getState();
-        if (state.isAuthenticated) {
-            this.loadDashboardData();
-        } else {
-            this.renderSignInPrompt();
-        }
+        void this.loadDashboardData();
     }
 
     public hide(): void {
@@ -194,12 +153,10 @@ export class DashboardManager {
         let required: { cls: string; html: string }[] = [
             { "cls": "dashboard-loading", "html": "Loading dashboard..." },
             { "cls": "dashboard-error", "html": "" },
-            { "cls": "dashboard-signin-prompt", "html": "" },
             { "cls": "dashboard-stats", "html": "" },
             { "cls": "dashboard-recent", "html": "" },
             { "cls": "dashboard-activity", "html": "" },
-            { "cls": "dashboard-favorites", "html": "" },
-            { "cls": "dashboard-admin", "html": "" }
+            { "cls": "dashboard-favorites", "html": "" }
         ];
         let i: number;
         for (i = 0; i < required.length; i++) {
@@ -211,7 +168,7 @@ export class DashboardManager {
                 if (entry.html) {
                     child.textContent = entry.html;
                 }
-                if (entry.cls === "dashboard-loading" || entry.cls === "dashboard-signin-prompt" || entry.cls === "dashboard-admin") {
+                if (entry.cls === "dashboard-loading") {
                     child.style.display = "none";
                 }
                 if (entry.cls === "dashboard-error") {
@@ -230,108 +187,20 @@ export class DashboardManager {
         this.loading = true;
         this.showLoading(true);
         this.showError("");
-        let client: ApiClient = ApiClient.getInstance();
-        let auth: AuthManager = AuthManager.getInstance();
-        let state: AuthState = auth.getState();
         try {
-            let calcResponse: CalculationsResponse = await client.get<CalculationsResponse>("/api/v1/calculations?limit=10");
-            let calculations: CalculationRecord[] = calcResponse.calculations || [];
+            let calculations: CalculationRecord[] = this.readCalculations();
             this.lastCalculations = calculations;
-            let stats: DashboardStats;
-            try {
-                let dashStats: DashboardStats = await client.get<DashboardStats>("/api/v1/analytics/dashboard");
-                stats = dashStats;
-            } catch (e) {
-                stats = this.computeStats(calculations);
-            }
+            let stats: DashboardStats = this.computeStats(calculations);
             this.renderUsageStats(stats);
             this.renderRecentCalculations(calculations);
             this.renderWeeklyActivity(calculations);
             this.renderFavorites(calculations);
-            if (state.user && state.user.role === "admin") {
-                await this.loadAdminData();
-            } else {
-                this.hideAdminSection();
-            }
         } catch (e) {
-            if (e instanceof ApiError) {
-                if (e.status === 401) {
-                    this.renderSignInPrompt();
-                } else {
-                    this.showError("Failed to load dashboard: " + e.detail);
-                }
-            } else {
-                let msg: string = e instanceof Error ? e.message : "Unknown error";
-                this.showError("Failed to load dashboard: " + msg);
-            }
+            let msg: string = e instanceof Error ? e.message : "Unknown error";
+            this.showError("Failed to load dashboard: " + msg);
         } finally {
             this.loading = false;
             this.showLoading(false);
-        }
-    }
-
-    private async loadAdminData(): Promise<void> {
-        let adminContainer: HTMLElement | null = this.container
-            ? (this.container.querySelector(".dashboard-admin") as HTMLElement | null)
-            : null;
-        if (!adminContainer) {
-            return;
-        }
-        adminContainer.style.display = "block";
-        adminContainer.innerHTML = "<h3>Admin Overview</h3>";
-        let client: ApiClient = ApiClient.getInstance();
-        let overview: AdminOverview | null = null;
-        let dau: number | null = null;
-        try {
-            let response: AdminOverviewResponse = await client.get<AdminOverviewResponse>("/api/v1/analytics/overview");
-            overview = response.overview;
-        } catch (e) {
-            // ignore - will display N/A
-        }
-        try {
-            let response: AdminUsageResponse = await client.get<AdminUsageResponse>("/api/v1/analytics/usage");
-            dau = response.dau;
-        } catch (e) {
-            // ignore - will display N/A
-        }
-        let cards: HTMLElement = document.createElement("div");
-        cards.className = "dashboard-admin-cards";
-        let totalUsers: number = overview ? overview.users : 0;
-        let totalCalcs: number = overview ? overview.calculations : 0;
-        cards.appendChild(this.buildStatCard("Total Users", String(totalUsers)));
-        cards.appendChild(this.buildStatCard("Daily Active Users", dau !== null ? String(dau) : "N/A"));
-        cards.appendChild(this.buildStatCard("Total Calculations", String(totalCalcs)));
-        cards.appendChild(this.buildStatCard("Error Rate", "N/A"));
-        adminContainer.appendChild(cards);
-        let chartContainer: HTMLElement = document.createElement("div");
-        chartContainer.className = "dashboard-admin-chart";
-        chartContainer.innerHTML = "<h4>Daily Active Users</h4>";
-        let chart: HTMLElement = document.createElement("div");
-        chart.className = "dashboard-bar-chart";
-        let bar: HTMLElement = document.createElement("div");
-        bar.className = "dashboard-bar";
-        bar.style.height = "60%";
-        bar.setAttribute("title", "Today: " + (dau !== null ? String(dau) : "0"));
-        chart.appendChild(bar);
-        let label: HTMLElement = document.createElement("div");
-        label.className = "dashboard-bar-label";
-        label.textContent = "Today";
-        chart.appendChild(label);
-        chartContainer.appendChild(chart);
-        adminContainer.appendChild(chartContainer);
-        let popular: HTMLElement = document.createElement("div");
-        popular.className = "dashboard-admin-popular";
-        popular.innerHTML = "<h4>Popular Calculators</h4><p class=\"dashboard-empty\">Data unavailable.</p>";
-        adminContainer.appendChild(popular);
-    }
-
-    private hideAdminSection(): void {
-        let adminContainer: HTMLElement | null = this.container
-            ? (this.container.querySelector(".dashboard-admin") as HTMLElement | null)
-            : null;
-        if (adminContainer) {
-            adminContainer.style.display = "none";
-            adminContainer.innerHTML = "";
         }
     }
 
@@ -566,52 +435,27 @@ export class DashboardManager {
         }
     }
 
-    public renderSignInPrompt(): void {
-        let promptEl: HTMLElement | null = this.container
-            ? (this.container.querySelector(".dashboard-signin-prompt") as HTMLElement | null)
-            : null;
-        if (!promptEl) {
-            return;
-        }
-        promptEl.innerHTML = "<h3>Please Sign In</h3>" +
-            "<p>Sign in to view your personalized dashboard with recent calculations, usage stats, and favorites.</p>";
-        promptEl.style.display = "block";
-        let stats: HTMLElement | null = this.container
-            ? (this.container.querySelector(".dashboard-stats") as HTMLElement | null)
-            : null;
-        if (stats) {
-            stats.innerHTML = "";
-        }
-        let recent: HTMLElement | null = this.container
-            ? (this.container.querySelector(".dashboard-recent") as HTMLElement | null)
-            : null;
-        if (recent) {
-            recent.innerHTML = "";
-        }
-        let activity: HTMLElement | null = this.container
-            ? (this.container.querySelector(".dashboard-activity") as HTMLElement | null)
-            : null;
-        if (activity) {
-            activity.innerHTML = "";
-        }
-        let favorites: HTMLElement | null = this.container
-            ? (this.container.querySelector(".dashboard-favorites") as HTMLElement | null)
-            : null;
-        if (favorites) {
-            favorites.innerHTML = "";
-        }
-        this.hideAdminSection();
-    }
-
     public getLastCalculations(): CalculationRecord[] {
         return this.lastCalculations;
     }
 
-    public destroy(): void {
-        if (this.unsubscribe) {
-            this.unsubscribe();
-            this.unsubscribe = null;
+    private readCalculations(): CalculationRecord[] {
+        let raw: string | null = localStorage.getItem(CALCULATIONS_STORAGE_KEY);
+        if (!raw) {
+            return [];
         }
+        try {
+            let parsed: unknown = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                return parsed as CalculationRecord[];
+            }
+        } catch (e) {
+            // fall through to empty array
+        }
+        return [];
+    }
+
+    public destroy(): void {
         this.initialized = false;
         this.loading = false;
         this.lastCalculations = [];

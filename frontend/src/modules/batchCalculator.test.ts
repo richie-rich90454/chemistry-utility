@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 const mockPost = vi.fn();
-const mockAuthGetState = vi.fn();
-const mockAuthSubscribe = vi.fn();
 
 vi.mock("./apiClient.js", function () {
     return {
@@ -23,19 +21,6 @@ vi.mock("./apiClient.js", function () {
     };
 });
 
-vi.mock("./authManager.js", function () {
-    return {
-        AuthManager: {
-            getInstance: function () {
-                return {
-                    subscribe: mockAuthSubscribe,
-                    getState: mockAuthGetState
-                };
-            }
-        }
-    };
-});
-
 import { BatchCalculator } from "./batchCalculator.js";
 
 function makeFile(contents: string, name: string): File {
@@ -48,15 +33,6 @@ describe("BatchCalculator", function () {
         localStorage.clear();
         BatchCalculator.resetInstance();
         mockPost.mockReset();
-        mockAuthGetState.mockReset();
-        mockAuthSubscribe.mockReset();
-        mockAuthSubscribe.mockReturnValue(function () { return; });
-        mockAuthGetState.mockReturnValue({
-            "isAuthenticated": false,
-            "user": null,
-            "accessToken": null,
-            "refreshToken": null
-        });
     });
 
     afterEach(function () {
@@ -242,80 +218,9 @@ describe("BatchCalculator", function () {
     });
 
     describe("isAuthorized", function () {
-        it("should return false when not authenticated", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": false,
-                "user": null,
-                "accessToken": null,
-                "refreshToken": null
-            });
-            let calc: BatchCalculator = BatchCalculator.getInstance();
-            expect(calc.isAuthorized()).toBe(false);
-        });
-
-        it("should return false when authenticated but role is student", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": true,
-                "user": {
-                    "id": "u1",
-                    "email": "s@example.com",
-                    "name": "Student",
-                    "role": "student",
-                    "emailVerified": true,
-                    "createdAt": "2026-01-01T00:00:00Z"
-                },
-                "accessToken": "tok",
-                "refreshToken": "ref"
-            });
-            let calc: BatchCalculator = BatchCalculator.getInstance();
-            expect(calc.isAuthorized()).toBe(false);
-        });
-
-        it("should return true when authenticated with researcher role", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": true,
-                "user": {
-                    "id": "u2",
-                    "email": "r@example.com",
-                    "name": "Researcher",
-                    "role": "researcher",
-                    "emailVerified": true,
-                    "createdAt": "2026-01-01T00:00:00Z"
-                },
-                "accessToken": "tok",
-                "refreshToken": "ref"
-            });
+        it("should always return true for local users", function () {
             let calc: BatchCalculator = BatchCalculator.getInstance();
             expect(calc.isAuthorized()).toBe(true);
-        });
-
-        it("should return true when authenticated with admin role", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": true,
-                "user": {
-                    "id": "u3",
-                    "email": "a@example.com",
-                    "name": "Admin",
-                    "role": "admin",
-                    "emailVerified": true,
-                    "createdAt": "2026-01-01T00:00:00Z"
-                },
-                "accessToken": "tok",
-                "refreshToken": "ref"
-            });
-            let calc: BatchCalculator = BatchCalculator.getInstance();
-            expect(calc.isAuthorized()).toBe(true);
-        });
-
-        it("should return false when authenticated but user is null", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": true,
-                "user": null,
-                "accessToken": "tok",
-                "refreshToken": "ref"
-            });
-            let calc: BatchCalculator = BatchCalculator.getInstance();
-            expect(calc.isAuthorized()).toBe(false);
         });
     });
 
@@ -447,13 +352,7 @@ describe("BatchCalculator", function () {
     });
 
     describe("init", function () {
-        it("should hide unauthorized box and disable inputs when unauthenticated", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": false,
-                "user": null,
-                "accessToken": null,
-                "refreshToken": null
-            });
+        it("should show authorized box and enable inputs after init", function () {
             document.body.innerHTML = "<div id=\"batch-authorized\"></div>" +
                 "<div id=\"batch-unauthorized\"></div>" +
                 "<input id=\"batch-file-input\" type=\"file\">" +
@@ -464,62 +363,22 @@ describe("BatchCalculator", function () {
             let unauthorized: HTMLElement = document.getElementById("batch-unauthorized") as HTMLElement;
             let fileInput: HTMLInputElement = document.getElementById("batch-file-input") as HTMLInputElement;
             let processBtn: HTMLButtonElement = document.getElementById("batch-process-btn") as HTMLButtonElement;
-            expect(authorized.style.display).toBe("none");
-            expect(unauthorized.style.display).toBe("block");
-            expect(fileInput.disabled).toBe(true);
-            expect(processBtn.disabled).toBe(true);
-        });
-
-        it("should show authorized box when researcher is logged in", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": true,
-                "user": {
-                    "id": "u1",
-                    "email": "r@example.com",
-                    "name": "Researcher",
-                    "role": "researcher",
-                    "emailVerified": true,
-                    "createdAt": "2026-01-01T00:00:00Z"
-                },
-                "accessToken": "tok",
-                "refreshToken": "ref"
-            });
-            document.body.innerHTML = "<div id=\"batch-authorized\"></div>" +
-                "<div id=\"batch-unauthorized\"></div>" +
-                "<input id=\"batch-file-input\" type=\"file\">" +
-                "<button id=\"batch-process-btn\">Process</button>";
-            let calc: BatchCalculator = BatchCalculator.getInstance();
-            calc.init();
-            let authorized: HTMLElement = document.getElementById("batch-authorized") as HTMLElement;
-            let unauthorized: HTMLElement = document.getElementById("batch-unauthorized") as HTMLElement;
-            let fileInput: HTMLInputElement = document.getElementById("batch-file-input") as HTMLInputElement;
             expect(authorized.style.display).toBe("block");
             expect(unauthorized.style.display).toBe("none");
-            // Process button stays disabled until a file is chosen
             expect(fileInput.disabled).toBe(false);
+            // Process button is enabled when authorized (no file required to enable)
+            expect(processBtn.disabled).toBe(false);
         });
 
-        it("should be idempotent (multiple calls do not re-subscribe)", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": false,
-                "user": null,
-                "accessToken": null,
-                "refreshToken": null
-            });
+        it("should be idempotent (multiple calls do not re-initialize)", function () {
             let calc: BatchCalculator = BatchCalculator.getInstance();
             calc.init();
             calc.init();
-            // subscribe should only be called once
-            expect(mockAuthSubscribe).toHaveBeenCalledTimes(1);
+            // No throw and instance remains valid
+            expect(calc).toBe(BatchCalculator.getInstance());
         });
 
         it("should not throw when DOM elements are missing", function () {
-            mockAuthGetState.mockReturnValue({
-                "isAuthenticated": false,
-                "user": null,
-                "accessToken": null,
-                "refreshToken": null
-            });
             document.body.innerHTML = "";
             let calc: BatchCalculator = BatchCalculator.getInstance();
             expect(function (): void { calc.init(); }).not.toThrow();
