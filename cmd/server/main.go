@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"chemistry-utility/internal/api"
-	"chemistry-utility/internal/auth"
 	"chemistry-utility/internal/compounds"
 	"chemistry-utility/internal/db"
 
@@ -78,10 +77,6 @@ func main() {
 	if dbDSN == "" {
 		dbDSN = "chemistry.db"
 	}
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "change-me-in-production"
-	}
 	distDir := os.Getenv("DIST_DIR")
 	if distDir == "" {
 		distDir = "frontend/dist"
@@ -98,31 +93,17 @@ func main() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	defer database.Close()
-	userStore := &db.UserStore{DB: database, Driver: dbDriver}
-	calcStore := &db.CalculationStore{DB: database, Driver: dbDriver}
-	workspaceStore := &db.WorkspaceStore{DB: database, Driver: dbDriver}
 	compoundStore := &db.CompoundStore{DB: database, Driver: dbDriver}
-	apiKeyStore := &db.APIKeyStore{DB: database, Driver: dbDriver}
 	pluginStore := &db.PluginStore{DB: database, Driver: dbDriver}
-	analyticsStore := &db.AnalyticsStore{DB: database, Driver: dbDriver}
 	pubchemClient := compounds.NewPubChemClient()
 	compoundCache := compounds.NewCompoundCache(compoundStore, pubchemClient)
-	jwtCfg := auth.DefaultJWTConfig(jwtSecret)
-	userService := auth.NewUserService(userStore, jwtCfg, auth.OAuthProviders{})
 	apiCfg := api.Config{
-		JWTSecret:          jwtSecret,
-		OAuthProviders:     auth.OAuthProviders{},
 		RateLimitPerMinute: 100,
 		CORSAllowedOrigins: []string{"*"},
 	}
 	apiInstance := api.New(database, dbDriver, apiCfg)
 	_ = compoundCache
-	_ = userService
-	_ = calcStore
-	_ = workspaceStore
-	_ = apiKeyStore
 	_ = pluginStore
-	_ = analyticsStore
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())

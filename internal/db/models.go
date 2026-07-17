@@ -3,18 +3,6 @@ import (
 	"time"
 	"github.com/google/uuid"
 )
-type User struct {
-	ID            uuid.UUID
-	Email         string
-	PasswordHash  string
-	Name          string
-	Role          string
-	EmailVerified bool
-	OAuthProvider string
-	OAuthID       string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-}
 type Calculation struct {
 	ID             uuid.UUID
 	UserID         uuid.UUID
@@ -25,20 +13,6 @@ type Calculation struct {
 	Starred        bool
 	WorkspaceID    uuid.UUID
 	CreatedAt      time.Time
-}
-type Workspace struct {
-	ID          uuid.UUID
-	Name        string
-	Description string
-	OwnerID     uuid.UUID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}
-type WorkspaceMember struct {
-	WorkspaceID uuid.UUID
-	UserID      uuid.UUID
-	Role        string
-	JoinedAt    time.Time
 }
 type Compound struct {
 	ID         uuid.UUID
@@ -53,14 +27,6 @@ type Compound struct {
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 }
-type APIKey struct {
-	ID         uuid.UUID
-	UserID     uuid.UUID
-	Name       string
-	KeyHash    string
-	LastUsedAt time.Time
-	CreatedAt  time.Time
-}
 type Plugin struct {
 	ID        uuid.UUID
 	Name      string
@@ -68,12 +34,5 @@ type Plugin struct {
 	Author    string
 	Manifest  string
 	Enabled   bool
-	CreatedAt time.Time
-}
-type AnalyticsEvent struct {
-	ID        uuid.UUID
-	UserID    uuid.UUID
-	EventType string
-	EventData string
 	CreatedAt time.Time
 }

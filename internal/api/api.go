@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"chemistry-utility/internal/auth"
 	"chemistry-utility/internal/calculators"
 	dbstore "chemistry-utility/internal/db"
 
@@ -15,26 +14,17 @@ import (
 
 // Config holds API configuration.
 type Config struct {
-	JWTSecret          string
-	OAuthProviders     auth.OAuthProviders
 	RateLimitPerMinute int
 	CORSAllowedOrigins []string
 }
 
 // API is the main API instance holding all stores, services, and configuration.
 type API struct {
-	db             *sql.DB
-	userStore      *dbstore.UserStore
-	calcStore      *dbstore.CalculationStore
-	workspaceStore *dbstore.WorkspaceStore
-	compoundStore  *dbstore.CompoundStore
-	apiKeyStore    *dbstore.APIKeyStore
-	pluginStore    *dbstore.PluginStore
-	analyticsStore *dbstore.AnalyticsStore
-	calcRegistry   *calculators.Registry
-	userService    *auth.UserService
-	cfg            Config
-	jwtCfg         auth.JWTConfig
+	db            *sql.DB
+	compoundStore *dbstore.CompoundStore
+	pluginStore   *dbstore.PluginStore
+	calcRegistry  *calculators.Registry
+	cfg           Config
 }
 
 // New creates a new API instance with all stores and services.
@@ -46,31 +36,16 @@ func New(db *sql.DB, driver string, cfg Config) *API {
 		cfg.CORSAllowedOrigins = []string{"*"}
 	}
 
-	jwtCfg := auth.DefaultJWTConfig(cfg.JWTSecret)
-
-	userStore := &dbstore.UserStore{DB: db, Driver: driver}
-	calcStore := &dbstore.CalculationStore{DB: db, Driver: driver}
-	workspaceStore := &dbstore.WorkspaceStore{DB: db, Driver: driver}
 	compoundStore := &dbstore.CompoundStore{DB: db, Driver: driver}
-	apiKeyStore := &dbstore.APIKeyStore{DB: db, Driver: driver}
 	pluginStore := &dbstore.PluginStore{DB: db, Driver: driver}
-	analyticsStore := &dbstore.AnalyticsStore{DB: db, Driver: driver}
 	calcRegistry := calculators.NewRegistry()
-	userService := auth.NewUserService(userStore, jwtCfg, cfg.OAuthProviders)
 
 	return &API{
-		db:             db,
-		userStore:      userStore,
-		calcStore:      calcStore,
-		workspaceStore: workspaceStore,
-		compoundStore:  compoundStore,
-		apiKeyStore:    apiKeyStore,
-		pluginStore:    pluginStore,
-		analyticsStore: analyticsStore,
-		calcRegistry:   calcRegistry,
-		userService:    userService,
-		cfg:            cfg,
-		jwtCfg:         jwtCfg,
+		db:            db,
+		compoundStore: compoundStore,
+		pluginStore:   pluginStore,
+		calcRegistry:  calcRegistry,
+		cfg:           cfg,
 	}
 }
 
@@ -97,68 +72,12 @@ func (a *API) Router() *gin.Engine {
 		public.POST("/calculators/:type", a.runCalculator)
 		public.GET("/compounds", a.searchCompounds)
 		public.GET("/compounds/:id", a.getCompound)
-	}
 
-	// Auth routes
-	authGroup := v1.Group("/auth")
-	{
-		authGroup.POST("/register", a.register)
-		authGroup.POST("/login", a.login)
-		authGroup.POST("/refresh", a.refreshToken)
-		authGroup.POST("/forgot-password", a.forgotPassword)
-		authGroup.POST("/reset-password", a.resetPassword)
-		authGroup.GET("/github", a.githubOAuth)
-		authGroup.GET("/github/callback", a.githubOAuthCallback)
-		authGroup.GET("/google", a.googleOAuth)
-		authGroup.GET("/google/callback", a.googleOAuthCallback)
-	}
-
-	// Authenticated routes
-	authed := v1.Group("")
-	authed.Use(auth.AuthMiddleware(a.jwtCfg))
-	{
-		authed.GET("/users/me", a.getCurrentUser)
-		authed.PATCH("/users/me", a.updateCurrentUser)
-
-		authed.GET("/calculations", a.listCalculations)
-		authed.GET("/calculations/:id", a.getCalculation)
-		authed.POST("/calculations/:id/annotate", a.annotateCalculation)
-		authed.POST("/calculations/:id/star", a.starCalculation)
-		authed.DELETE("/calculations/:id", a.deleteCalculation)
-
-		authed.POST("/workspaces", a.createWorkspace)
-		authed.GET("/workspaces", a.listWorkspaces)
-		authed.GET("/workspaces/:id", a.getWorkspace)
-		authed.PATCH("/workspaces/:id", a.updateWorkspace)
-		authed.DELETE("/workspaces/:id", a.deleteWorkspace)
-		authed.POST("/workspaces/:id/members", a.addWorkspaceMember)
-		authed.DELETE("/workspaces/:id/members/:userId", a.removeWorkspaceMember)
-		authed.GET("/workspaces/:id/calculations", a.getWorkspaceCalculations)
-	}
-
-	// API key management (researcher+ role)
-	apiKeys := v1.Group("/api-keys")
-	apiKeys.Use(auth.AuthMiddleware(a.jwtCfg))
-	apiKeys.Use(auth.RBACMiddleware("researcher", "educator", "admin"))
-	{
-		apiKeys.POST("", a.createAPIKey)
-		apiKeys.GET("", a.listAPIKeys)
-		apiKeys.DELETE("/:id", a.deleteAPIKey)
-	}
-
-	// Admin-only routes
-	admin := v1.Group("")
-	admin.Use(auth.AuthMiddleware(a.jwtCfg))
-	admin.Use(auth.RBACMiddleware("admin"))
-	{
-		admin.GET("/analytics/overview", a.analyticsOverview)
-		admin.GET("/analytics/usage", a.analyticsUsage)
-
-		admin.GET("/plugins", a.listPlugins)
-		admin.POST("/plugins", a.createPlugin)
-		admin.PATCH("/plugins/:id/enable", a.enablePlugin)
-		admin.PATCH("/plugins/:id/disable", a.disablePlugin)
-		admin.DELETE("/plugins/:id", a.deletePlugin)
+		public.GET("/plugins", a.listPlugins)
+		public.POST("/plugins", a.createPlugin)
+		public.PATCH("/plugins/:id/enable", a.enablePlugin)
+		public.PATCH("/plugins/:id/disable", a.disablePlugin)
+		public.DELETE("/plugins/:id", a.deletePlugin)
 	}
 
 	return r
@@ -166,7 +85,7 @@ func (a *API) Router() *gin.Engine {
 
 // rateLimitEntry tracks request counts per IP for rate limiting.
 type rateLimitEntry struct {
-	count    int
+	count       int
 	windowStart time.Time
 }
 

@@ -7,11 +7,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"chemistry-utility/internal/auth"
 	"chemistry-utility/internal/calculators"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 func init() {
@@ -23,16 +21,13 @@ func init() {
 // and handler wiring. Integration tests requiring a DB should use testcontainers.
 func newTestAPI() *API {
 	cfg := Config{
-		JWTSecret:          "test-secret-key-for-testing-only",
 		RateLimitPerMinute: 100,
 		CORSAllowedOrigins: []string{"*"},
 	}
-	jwtCfg := auth.DefaultJWTConfig(cfg.JWTSecret)
 	calcRegistry := calculators.NewRegistry()
 
 	return &API{
 		cfg:          cfg,
-		jwtCfg:       jwtCfg,
 		calcRegistry: calcRegistry,
 	}
 }
@@ -106,118 +101,6 @@ func TestCalculatorNotFound(t *testing.T) {
 
 	if w.Code != http.StatusNotFound {
 		t.Errorf("expected status 404, got %d", w.Code)
-	}
-}
-
-// TestProtectedEndpointWithoutAuth tests that protected endpoints return 401 without auth.
-func TestProtectedEndpointWithoutAuth(t *testing.T) {
-	a := newTestAPI()
-	router := a.Router()
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/users/me", nil)
-	w := httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusUnauthorized {
-		t.Errorf("expected status 401, got %d", w.Code)
-	}
-}
-
-// TestCalculationsEndpointWithoutAuth tests that calculation history requires auth.
-func TestCalculationsEndpointWithoutAuth(t *testing.T) {
-	a := newTestAPI()
-	router := a.Router()
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/calculations", nil)
-	w := httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusUnauthorized {
-		t.Errorf("expected status 401, got %d", w.Code)
-	}
-}
-
-// TestRBACRestriction tests that a student role cannot access admin endpoints.
-func TestRBACRestriction(t *testing.T) {
-	a := newTestAPI()
-	router := a.Router()
-
-	// Generate a token with student role
-	userID := uuid.New()
-	tokens, err := auth.GenerateTokenPair(userID, "student", a.jwtCfg)
-	if err != nil {
-		t.Fatalf("failed to generate token: %v", err)
-	}
-
-	// Try to access admin-only analytics endpoint
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/analytics/overview", nil)
-	req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
-	w := httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusForbidden {
-		t.Errorf("expected status 403, got %d", w.Code)
-	}
-
-	// Try to access admin-only plugins endpoint
-	req = httptest.NewRequest(http.MethodGet, "/api/v1/plugins", nil)
-	req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
-	w = httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusForbidden {
-		t.Errorf("expected status 403 for plugins, got %d", w.Code)
-	}
-}
-
-// TestAdminCanAccessAdminEndpoints tests that admin role can access admin endpoints.
-func TestAdminCanAccessAdminEndpoints(t *testing.T) {
-	a := newTestAPI()
-	router := a.Router()
-
-	userID := uuid.New()
-	tokens, err := auth.GenerateTokenPair(userID, "admin", a.jwtCfg)
-	if err != nil {
-		t.Fatalf("failed to generate token: %v", err)
-	}
-
-	// Note: this will fail at the DB layer since we have no real DB,
-	// but it should not return 403 (forbidden) - it should get past RBAC.
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/analytics/overview", nil)
-	req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
-	w := httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	// Should not be 403 (forbidden) - could be 500 due to no DB
-	if w.Code == http.StatusForbidden {
-		t.Error("admin should not be forbidden from analytics endpoint")
-	}
-}
-
-// TestAPIKeyEndpointStudentForbidden tests that student role cannot access API key endpoints.
-func TestAPIKeyEndpointStudentForbidden(t *testing.T) {
-	a := newTestAPI()
-	router := a.Router()
-
-	userID := uuid.New()
-	tokens, err := auth.GenerateTokenPair(userID, "student", a.jwtCfg)
-	if err != nil {
-		t.Fatalf("failed to generate token: %v", err)
-	}
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/api-keys", nil)
-	req.Header.Set("Authorization", "Bearer "+tokens.AccessToken)
-	w := httptest.NewRecorder()
-
-	router.ServeHTTP(w, req)
-
-	if w.Code != http.StatusForbidden {
-		t.Errorf("expected status 403, got %d", w.Code)
 	}
 }
 
