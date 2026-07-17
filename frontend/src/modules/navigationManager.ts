@@ -1,5 +1,6 @@
 import { ScrollNavigationStrategy } from "./scrollNavigationStrategy.js";
 import { AppNavigationStrategy } from "./appNavigationStrategy.js";
+import { PluginManager } from "./pluginManager.js";
 
 export interface NavigationStrategy {
 	navigate(targetId: string): void;
@@ -79,6 +80,9 @@ class NavigationManager {
 		if (this.activeViewId) {
 			this.pushHistory(targetId);
 		}
+		let pm: PluginManager = PluginManager.getInstance();
+		let payload: { view: string } = { view: targetId };
+		pm.executeHook("onNavigate", payload);
 		if (this.strategy) {
 			this.strategy.navigate(targetId);
 		}
