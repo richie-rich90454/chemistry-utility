@@ -45,6 +45,31 @@ export interface BalanceResult {
 	explanation: BalanceExplanation;
 }
 
+const POLYATOMIC_IONS: { [key: string]: { charge: number; composition: { [key: string]: number } } } = {
+	"NO3": { charge: -1, composition: { N: 1, O: 3 } },
+	"SO4": { charge: -2, composition: { S: 1, O: 4 } },
+	"PO4": { charge: -3, composition: { P: 1, O: 4 } },
+	"CO3": { charge: -2, composition: { C: 1, O: 3 } },
+	"OH": { charge: -1, composition: { O: 1, H: 1 } },
+	"NH4": { charge: 1, composition: { N: 1, H: 4 } },
+	"CH3COO": { charge: -1, composition: { C: 2, H: 3, O: 2 } },
+	"CrO4": { charge: -2, composition: { Cr: 1, O: 4 } },
+	"Cr2O7": { charge: -2, composition: { Cr: 2, O: 7 } },
+	"MnO4": { charge: -1, composition: { Mn: 1, O: 4 } },
+	"ClO3": { charge: -1, composition: { Cl: 1, O: 3 } },
+	"ClO4": { charge: -1, composition: { Cl: 1, O: 4 } },
+	"IO3": { charge: -1, composition: { I: 1, O: 3 } },
+	"C2O4": { charge: -2, composition: { C: 2, O: 4 } },
+	"CN": { charge: -1, composition: { C: 1, N: 1 } },
+	"SCN": { charge: -1, composition: { S: 1, C: 1, N: 1 } },
+	"HCO3": { charge: -1, composition: { H: 1, C: 1, O: 3 } },
+	"HSO4": { charge: -1, composition: { H: 1, S: 1, O: 4 } },
+	"H2PO4": { charge: -1, composition: { H: 2, P: 1, O: 4 } },
+	"NO2": { charge: -1, composition: { N: 1, O: 2 } },
+	"SO3": { charge: -2, composition: { S: 1, O: 3 } },
+	"S2O3": { charge: -2, composition: { S: 2, O: 3 } }
+};
+
 export class EquationBalancer {
 	public static gcd(a: number, b: number): number{
 		a=Math.abs(a);
@@ -228,6 +253,134 @@ export class EquationBalancer {
 		}
 		return balanced;
 	}
+	private static parseChargeSpec(spec: string): number{
+		let idx=0;
+		let numStr="";
+		while (idx<spec.length && /\d/.test(spec[idx])){
+			numStr+=spec[idx];
+			idx++;
+		}
+		if (idx<spec.length && (spec[idx]==="+" || spec[idx]==="-")){
+			let sign=spec[idx]==="+"?1:-1;
+			let mag=numStr.length>0?parseInt(numStr, 10):1;
+			return sign*mag;
+		}
+		return 0;
+	}
+	private static extractCharge(formula: string): { body: string; charge: number }{
+		let caretIdx=formula.indexOf("^");
+		if (caretIdx!==-1){
+			let body=formula.substring(0, caretIdx);
+			let chargeSpec=formula.substring(caretIdx+1);
+			let charge=EquationBalancer.parseChargeSpec(chargeSpec);
+			return { body: body, charge: charge };
+		}
+		let len=formula.length;
+		if (len===0) return { body: formula, charge: 0 };
+		let last=formula[len-1];
+		if (last!=="+" && last!=="-") return { body: formula, charge: 0 };
+		let sign=last==="+"?1:-1;
+		let j=len-2;
+		while (j>=0 && /\d/.test(formula[j])) j--;
+		let digitsStart=j+1;
+		let digits=formula.substring(digitsStart, len-1);
+		if (digits.length===0) return { body: formula.substring(0, len-1), charge: sign };
+		let charBeforeDigits=digitsStart>0?formula[digitsStart-1]:"";
+		let isPrecededByLetter=digitsStart>0 && /[A-Za-z]/.test(charBeforeDigits);
+		if (isPrecededByLetter){
+			let bodyBeforeDigits=formula.substring(0, digitsStart);
+			let uppercaseCount=0;
+			for (let k=0;k<bodyBeforeDigits.length;k++){
+				if (/[A-Z]/.test(bodyBeforeDigits[k])) uppercaseCount++;
+			}
+			if (uppercaseCount<=1){
+				return { body: bodyBeforeDigits, charge: sign*parseInt(digits, 10) };
+			}
+			return { body: formula.substring(0, len-1), charge: sign };
+		}
+		let isPrecededByCloseBracket=digitsStart>0 && (charBeforeDigits===")" || charBeforeDigits==="]" || charBeforeDigits==="}");
+		if (isPrecededByCloseBracket){
+			return { body: formula.substring(0, len-1), charge: sign };
+		}
+		return { body: formula.substring(0, digitsStart), charge: sign*parseInt(digits, 10) };
+	}
+	private static stripLeadingCoefficient(term: string): string{
+		let m=term.match(/^\d+/);
+		if (m!==null){
+			return term.substring(m[0].length);
+		}
+		return term;
+	}
+	private static parseFormulaWithCharge(formula: string): { counts: Record<string, number>; charge: number }{
+		let stripped=EquationBalancer.stripLeadingCoefficient(formula);
+		let extracted=EquationBalancer.extractCharge(stripped);
+		let body=extracted.body;
+		let charge=extracted.charge;
+		let counts=EquationBalancer.parseFormulaToCounts(body);
+		if (counts["_charge"]!==undefined){
+			charge=charge+counts["_charge"];
+			delete counts["_charge"];
+		}
+		if (charge===0){
+			let ionInfo=POLYATOMIC_IONS[body];
+			if (ionInfo!==undefined){
+				charge=ionInfo.charge;
+			}
+		}
+		return { counts: counts, charge: charge };
+	}
+	public static balanceIonic(equation: string): string{
+		let parsedEquation=EquationBalancer.parseEquation(equation);
+		let reactants=parsedEquation.reactants;
+		let products=parsedEquation.products;
+		let reactantsStripped=reactants.map(EquationBalancer.stripLeadingCoefficient);
+		let productsStripped=products.map(EquationBalancer.stripLeadingCoefficient);
+		let all=reactantsStripped.concat(productsStripped);
+		let parsedAll=all.map(EquationBalancer.parseFormulaWithCharge);
+		let keys=new Set<string>();
+		for (let p of parsedAll){
+			for (let k of Object.keys(p.counts)){
+				if (k!=="_charge") keys.add(k);
+			}
+		}
+		let elements=Array.from(keys);
+		let A: Fraction[][]=[];
+		for (let e=0;e<elements.length;e++){
+			let el=elements[e];
+			let row: Fraction[]=[];
+			for (let i=0;i<all.length;i++){
+				let v=parsedAll[i].counts[el]||0;
+				row.push(new Fraction(i<reactantsStripped.length?v:-v));
+			}
+			A.push(row);
+		}
+		let chargeRow: Fraction[]=[];
+		for (let i=0;i<all.length;i++){
+			let v=parsedAll[i].charge;
+			chargeRow.push(new Fraction(i<reactantsStripped.length?v:-v));
+		}
+		A.push(chargeRow);
+		let sol=EquationBalancer.solveHomogeneous(A);
+		if (!sol) throw new Error("Could not balance ionic equation");
+		let coeffs: number[]=[];
+		for (let i=0;i<sol.length;i++){
+			coeffs.push(sol[i].n);
+		}
+		let maxCoefficient=10000;
+		for (let i=0;i<coeffs.length;i++){
+			if (coeffs[i]<=0 || coeffs[i]>maxCoefficient) throw new Error("Could not balance ionic equation");
+		}
+		let fmt=function(arr: string[], off: number){
+			let parts: string[]=[];
+			for (let i=0;i<arr.length;i++){
+				let c=coeffs[off+i];
+				let prefix=c===1?"":""+c;
+				parts.push(prefix+arr[i]);
+			}
+			return parts.join(" + ");
+		};
+		return fmt(reactantsStripped, 0)+" -> "+fmt(productsStripped, reactantsStripped.length);
+	}
 }
 
 export function parseEquation(equation: string): { reactants: string[], products: string[] }{
@@ -235,4 +388,7 @@ export function parseEquation(equation: string): { reactants: string[], products
 }
 export function balanceEquation(equation: string, maxCoefficient: number=10000, explain: boolean=false): string|BalanceResult{
 	return EquationBalancer.balanceEquation(equation, maxCoefficient, explain);
+}
+export function balanceIonic(equation: string): string{
+	return EquationBalancer.balanceIonic(equation);
 }

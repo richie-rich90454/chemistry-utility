@@ -1,5 +1,5 @@
 import {describe, it, expect} from "vitest";
-import {balanceEquation, BalanceResult} from "./equationBalancer";
+import {balanceEquation, balanceIonic, BalanceResult} from "./equationBalancer";
 
 function countAtomsInFormula(formula: string): Record<string, number>{
 	const hydrateParts: string[] = formula.split(/[·*]/);
@@ -96,6 +96,120 @@ function expectBalancedMax(equation: string, maxCoefficient: number): void{
 	for (const el of allKeys){
 		expect(left[el] || 0).toBe(right[el] || 0);
 	}
+}
+
+function parseChargeSpec(spec: string): number{
+	let idx: number = 0;
+	let numStr: string = "";
+	while (idx < spec.length && /\d/.test(spec[idx])){
+		numStr += spec[idx];
+		idx++;
+	}
+	if (idx < spec.length && (spec[idx] === "+" || spec[idx] === "-")){
+		const sign: number = spec[idx] === "+" ? 1 : -1;
+		const mag: number = numStr.length > 0 ? parseInt(numStr, 10) : 1;
+		return sign * mag;
+	}
+	return 0;
+}
+function extractChargeFromFormula(formula: string): number{
+	const caretIdx: number = formula.indexOf("^");
+	if (caretIdx !== -1){
+		return parseChargeSpec(formula.substring(caretIdx + 1));
+	}
+	const len: number = formula.length;
+	if (len === 0) return 0;
+	const last: string = formula[len - 1];
+	if (last !== "+" && last !== "-") return 0;
+	const sign: number = last === "+" ? 1 : -1;
+	let j: number = len - 2;
+	while (j >= 0 && /\d/.test(formula[j])) j--;
+	const digitsStart: number = j + 1;
+	const digits: string = formula.substring(digitsStart, len - 1);
+	if (digits.length === 0) return sign;
+	const charBefore: string = digitsStart > 0 ? formula[digitsStart - 1] : "";
+	const precededByLetter: boolean = digitsStart > 0 && /[A-Za-z]/.test(charBefore);
+	if (precededByLetter){
+		const body: string = formula.substring(0, digitsStart);
+		let uppercaseCount: number = 0;
+		for (let k: number = 0; k < body.length; k++){
+			if (/[A-Z]/.test(body[k])) uppercaseCount++;
+		}
+		if (uppercaseCount <= 1) return sign * parseInt(digits, 10);
+		return sign;
+	}
+	const precededByCloseBracket: boolean = digitsStart > 0 && (charBefore === ")" || charBefore === "]" || charBefore === "}");
+	if (precededByCloseBracket) return sign;
+	return sign * parseInt(digits, 10);
+}
+function stripChargeFromFormula(formula: string): string{
+	const caretIdx: number = formula.indexOf("^");
+	if (caretIdx !== -1){
+		return formula.substring(0, caretIdx);
+	}
+	const len: number = formula.length;
+	if (len === 0) return formula;
+	const last: string = formula[len - 1];
+	if (last !== "+" && last !== "-") return formula;
+	let j: number = len - 2;
+	while (j >= 0 && /\d/.test(formula[j])) j--;
+	const digitsStart: number = j + 1;
+	const digits: string = formula.substring(digitsStart, len - 1);
+	if (digits.length === 0) return formula.substring(0, len - 1);
+	const charBefore: string = digitsStart > 0 ? formula[digitsStart - 1] : "";
+	const precededByLetter: boolean = digitsStart > 0 && /[A-Za-z]/.test(charBefore);
+	if (precededByLetter){
+		const body: string = formula.substring(0, digitsStart);
+		let uppercaseCount: number = 0;
+		for (let k: number = 0; k < body.length; k++){
+			if (/[A-Z]/.test(body[k])) uppercaseCount++;
+		}
+		if (uppercaseCount <= 1) return body;
+		return formula.substring(0, len - 1);
+	}
+	const precededByCloseBracket: boolean = digitsStart > 0 && (charBefore === ")" || charBefore === "]" || charBefore === "}");
+	if (precededByCloseBracket) return formula.substring(0, len - 1);
+	return formula.substring(0, digitsStart);
+}
+function countAtomsInFormulaIonic(formula: string): Record<string, number>{
+	const body: string = stripChargeFromFormula(formula);
+	return countAtomsInFormula(body);
+}
+function expectIonicBalanced(equation: string): void{
+	const balanced: string = balanceIonic(equation);
+	const sides: string[] = balanced.split(/->|=/);
+	expect(sides.length).toBe(2);
+	const leftTerms: string[] = sides[0].trim().split(/\s+\+\s+/).map(t => t.trim()).filter(t => t.length > 0);
+	const rightTerms: string[] = sides[1].trim().split(/\s+\+\s+/).map(t => t.trim()).filter(t => t.length > 0);
+	const leftAtoms: Record<string, number> = {};
+	const rightAtoms: Record<string, number> = {};
+	let leftCharge: number = 0;
+	let rightCharge: number = 0;
+	for (const term of leftTerms){
+		const m: RegExpMatchArray | null = term.match(/^(\d+)/);
+		const coeff: number = m !== null ? parseInt(m[0], 10) : 1;
+		const formula: string = m !== null ? term.substring(m[0].length) : term;
+		const counts: Record<string, number> = countAtomsInFormulaIonic(formula);
+		for (const el in counts){
+			leftAtoms[el] = (leftAtoms[el] || 0) + counts[el] * coeff;
+		}
+		leftCharge += extractChargeFromFormula(formula) * coeff;
+	}
+	for (const term of rightTerms){
+		const m: RegExpMatchArray | null = term.match(/^(\d+)/);
+		const coeff: number = m !== null ? parseInt(m[0], 10) : 1;
+		const formula: string = m !== null ? term.substring(m[0].length) : term;
+		const counts: Record<string, number> = countAtomsInFormulaIonic(formula);
+		for (const el in counts){
+			rightAtoms[el] = (rightAtoms[el] || 0) + counts[el] * coeff;
+		}
+		rightCharge += extractChargeFromFormula(formula) * coeff;
+	}
+	const allKeys: Set<string> = new Set<string>([...Object.keys(leftAtoms), ...Object.keys(rightAtoms)]);
+	for (const el of allKeys){
+		expect(leftAtoms[el] || 0).toBe(rightAtoms[el] || 0);
+	}
+	expect(leftCharge).toBe(rightCharge);
 }
 
 const largeCoeffEquations: string[] = [
@@ -324,5 +438,84 @@ describe("Step-by-step Explanation", ()=>{
 	it("explain works for hydrate equations", ()=>{
 		const result = balanceEquation("CuSO4·5H2O + BaCl2 -> BaSO4 + CuCl2 + H2O", 10000, true) as BalanceResult;
 		expect(result.explanation.coefficients).toEqual([1, 1, 1, 1, 5]);
+	});
+});
+
+describe("Ionic Equation Balancing (charge-conserving)", ()=>{
+	it("balances Fe2+ + Cl2 -> Fe3+ + Cl- with charge conservation", ()=>{
+		expectIonicBalanced("Fe2+ + Cl2 -> Fe3+ + Cl-");
+	});
+	it("balances H+ + OH- -> H2O", ()=>{
+		expectIonicBalanced("H+ + OH- -> H2O");
+	});
+	it("balances Ag+ + Cl- -> AgCl", ()=>{
+		expectIonicBalanced("Ag+ + Cl- -> AgCl");
+	});
+	it("balances Na+ + OH- + H+ + Cl- -> NaCl + H2O", ()=>{
+		expectIonicBalanced("Na+ + OH- + H+ + Cl- -> NaCl + H2O");
+	});
+});
+
+const ionicEquations: string[] = [
+	"Fe2+ + Cl2 -> Fe3+ + Cl-",
+	"Ag+ + Cl- -> AgCl",
+	"Ba2+ + SO4^2- -> BaSO4",
+	"Pb2+ + 2I- -> PbI2",
+	"Ca2+ + CO3^2- -> CaCO3",
+	"Al3+ + OH- -> Al(OH)3",
+	"NH4+ + OH- -> NH3 + H2O",
+	"H+ + OH- -> H2O",
+	"Na+ + Cl- -> NaCl",
+	"K+ + NO3- -> KNO3",
+	"Cu2+ + S2- -> CuS",
+	"Fe3+ + SCN- -> Fe(SCN)2+",
+	"Zn2+ + OH- -> Zn(OH)2",
+	"Mg2+ + OH- -> Mg(OH)2",
+	"Ca2+ + PO4^3- -> Ca3(PO4)2"
+];
+const polyatomicEquations: string[] = [
+	"NH4NO3 -> N2O + H2O",
+	"NH4Cl + NaOH -> NH3 + H2O + NaCl",
+	"AgNO3 + NaCl -> AgCl + NaNO3",
+	"BaCl2 + Na2SO4 -> BaSO4 + NaCl",
+	"K2Cr2O7 + FeSO4 + H2SO4 -> Cr2(SO4)3 + Fe2(SO4)3 + K2SO4 + H2O",
+	"KMnO4 + HCl -> MnCl2 + Cl2 + KCl + H2O",
+	"Ca(OH)2 + H3PO4 -> Ca3(PO4)2 + H2O",
+	"Na2CO3 + HCl -> NaCl + H2O + CO2",
+	"(NH4)2SO4 + BaCl2 -> BaSO4 + NH4Cl",
+	"CH3COOH + NaOH -> CH3COONa + H2O"
+];
+describe("Ionic Equations", ()=>{
+	for (const eq of ionicEquations){
+		it("balances atoms and charge: "+eq, ()=>{
+			expectIonicBalanced(eq);
+		});
+	}
+});
+describe("Polyatomic Ion Equations", ()=>{
+	for (const eq of polyatomicEquations){
+		it("balances: "+eq, ()=>{
+			expectBalanced(eq);
+		});
+	}
+});
+describe("Ionic Equation Explicit Outputs", ()=>{
+	it("balances Fe2+ + Cl2 -> Fe3+ + Cl- to 2Fe2+ + Cl2 -> 2Fe3+ + 2Cl-", ()=>{
+		expect(balanceIonic("Fe2+ + Cl2 -> Fe3+ + Cl-")).toBe("2Fe2+ + Cl2 -> 2Fe3+ + 2Cl-");
+	});
+	it("balances Pb2+ + 2I- -> PbI2 to Pb2+ + 2I- -> PbI2", ()=>{
+		expect(balanceIonic("Pb2+ + 2I- -> PbI2")).toBe("Pb2+ + 2I- -> PbI2");
+	});
+	it("balances Ca2+ + PO4^3- -> Ca3(PO4)2 to 3Ca2+ + 2PO4^3- -> Ca3(PO4)2", ()=>{
+		expect(balanceIonic("Ca2+ + PO4^3- -> Ca3(PO4)2")).toBe("3Ca2+ + 2PO4^3- -> Ca3(PO4)2");
+	});
+	it("balances Al3+ + OH- -> Al(OH)3 to Al3+ + 3OH- -> Al(OH)3", ()=>{
+		expect(balanceIonic("Al3+ + OH- -> Al(OH)3")).toBe("Al3+ + 3OH- -> Al(OH)3");
+	});
+	it("balances Fe3+ + SCN- -> Fe(SCN)2+ to Fe3+ + 2SCN- -> Fe(SCN)2+", ()=>{
+		expect(balanceIonic("Fe3+ + SCN- -> Fe(SCN)2+")).toBe("Fe3+ + 2SCN- -> Fe(SCN)2+");
+	});
+	it("balances Zn2+ + OH- -> Zn(OH)2 to Zn2+ + 2OH- -> Zn(OH)2", ()=>{
+		expect(balanceIonic("Zn2+ + OH- -> Zn(OH)2")).toBe("Zn2+ + 2OH- -> Zn(OH)2");
 	});
 });
