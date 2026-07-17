@@ -220,6 +220,46 @@ describe("thermodynamicsCalculators", () => {
             // Tfinal = 25 + 20920/(100*4.184) = 25 + 50 = 75
             expect(html).toContain("75");
         });
+
+        it("should show error for invalid solve-for selection", () => {
+            setupHeatCapInputs("invalid", { mass: "100", specificHeat: "4.184", initialTemp: "25", finalTemp: "75" });
+            calculateHeatCapacity();
+            const html = getResultHTML("heat-capacity-result");
+            expect(html).toContain("Error");
+            expect(html).toContain("Invalid solve-for");
+        });
+
+        it("should show error when mass <= 0 solving for q", () => {
+            setupHeatCapInputs("q", { mass: "0", specificHeat: "4.184", initialTemp: "25", finalTemp: "75" });
+            calculateHeatCapacity();
+            const html = getResultHTML("heat-capacity-result");
+            expect(html).toContain("Error");
+            expect(html).toContain("Mass must be positive");
+        });
+
+        it("should show error when specific heat <= 0 solving for q", () => {
+            setupHeatCapInputs("q", { mass: "100", specificHeat: "0", initialTemp: "25", finalTemp: "75" });
+            calculateHeatCapacity();
+            const html = getResultHTML("heat-capacity-result");
+            expect(html).toContain("Error");
+            expect(html).toContain("Specific heat must be positive");
+        });
+
+        it("should show error when mass <= 0 solving for deltaT", () => {
+            setupHeatCapInputs("deltaT", { mass: "0", specificHeat: "4.184", heat: "20920" });
+            calculateHeatCapacity();
+            const html = getResultHTML("heat-capacity-result");
+            expect(html).toContain("Error");
+            expect(html).toContain("Mass must be positive");
+        });
+
+        it("should show error when specific heat <= 0 solving for Tfinal", () => {
+            setupHeatCapInputs("Tfinal", { mass: "100", specificHeat: "0", initialTemp: "25", heat: "20920" });
+            calculateHeatCapacity();
+            const html = getResultHTML("heat-capacity-result");
+            expect(html).toContain("Error");
+            expect(html).toContain("Specific heat must be positive");
+        });
     });
 
     describe("BondEnthalpyCalculator", () => {
@@ -247,6 +287,17 @@ describe("thermodynamicsCalculators", () => {
             expect(html).toContain("Endothermic");
         });
 
+        it("should calculate thermoneutral reaction when deltaH is zero", () => {
+            // Bonds broken: C-H (413) → total = 413
+            // Bonds formed: C-H (413) → total = 413
+            // ΔH = 413 - 413 = 0 (thermoneutral)
+            setOrCreateInput("bond-enthalpy-broken", "C-H", "bond-enthalpy", "text");
+            setOrCreateInput("bond-enthalpy-formed", "C-H", "bond-enthalpy", "text");
+            calculateBondEnthalpy();
+            const html = getResultHTML("bond-enthalpy-result");
+            expect(html).toContain("Thermoneutral");
+        });
+
         it("should show error for unknown bond type", () => {
             setOrCreateInput("bond-enthalpy-broken", "X-Y", "bond-enthalpy", "text");
             setOrCreateInput("bond-enthalpy-formed", "C-H", "bond-enthalpy", "text");
@@ -261,6 +312,42 @@ describe("thermodynamicsCalculators", () => {
             calculateBondEnthalpy();
             const html = getResultHTML("bond-enthalpy-result");
             expect(html).toContain("Error");
+        });
+
+        it("should show error when only formed bonds input is empty", () => {
+            setOrCreateInput("bond-enthalpy-broken", "C-H", "bond-enthalpy", "text");
+            setOrCreateInput("bond-enthalpy-formed", "", "bond-enthalpy", "text");
+            calculateBondEnthalpy();
+            const html = getResultHTML("bond-enthalpy-result");
+            expect(html).toContain("Error");
+            expect(html).toContain("both broken and formed");
+        });
+
+        it("should show error for invalid count in bond entry", () => {
+            setOrCreateInput("bond-enthalpy-broken", "C-H:abc", "bond-enthalpy", "text");
+            setOrCreateInput("bond-enthalpy-formed", "C-H", "bond-enthalpy", "text");
+            calculateBondEnthalpy();
+            const html = getResultHTML("bond-enthalpy-result");
+            expect(html).toContain("Error");
+            expect(html).toContain("Invalid count");
+        });
+
+        it("should handle bond entry without explicit count (defaults to 1)", () => {
+            // C-H without count defaults to 1, so broken = 413, formed = 413
+            setOrCreateInput("bond-enthalpy-broken", "C-H", "bond-enthalpy", "text");
+            setOrCreateInput("bond-enthalpy-formed", "C-H:1", "bond-enthalpy", "text");
+            calculateBondEnthalpy();
+            const html = getResultHTML("bond-enthalpy-result");
+            expect(html).toContain("Thermoneutral");
+        });
+
+        it("should skip empty entries in bond list", () => {
+            // Empty entries between commas should be skipped
+            setOrCreateInput("bond-enthalpy-broken", "C-H,,", "bond-enthalpy", "text");
+            setOrCreateInput("bond-enthalpy-formed", "C-H", "bond-enthalpy", "text");
+            calculateBondEnthalpy();
+            const html = getResultHTML("bond-enthalpy-result");
+            expect(html).toContain("Thermoneutral");
         });
     });
 

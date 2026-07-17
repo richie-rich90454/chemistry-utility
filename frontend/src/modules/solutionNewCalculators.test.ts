@@ -572,4 +572,51 @@ describe("calculateCommonIonEffect", () => {
         const text = getResultText("common-ion-result");
         expect(text).toContain("Error");
     });
+
+    it("should handle A2B salt type", () => {
+        createSelect("common-ion-salt-type", "A2B", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+        createInput("common-ion-Ksp", "0.0000000148", "common-ion-calc");
+        createInput("common-ion-concentration", "0.1", "common-ion-calc");
+
+        calculateCommonIonEffect();
+
+        const text = getResultText("common-ion-result");
+        expect(text).toContain("Molar Solubility");
+        expect(text).not.toContain("Error");
+    });
+
+    it("should handle AB3 salt type", () => {
+        createSelect("common-ion-salt-type", "AB3", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+        createInput("common-ion-Ksp", "0.00000000000148", "common-ion-calc");
+        createInput("common-ion-concentration", "0.05", "common-ion-calc");
+
+        calculateCommonIonEffect();
+
+        const text = getResultText("common-ion-result");
+        expect(text).toContain("Molar Solubility");
+        expect(text).not.toContain("Error");
+    });
+
+    it("should handle A3B salt type", () => {
+        createSelect("common-ion-salt-type", "A3B", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+        createInput("common-ion-Ksp", "0.00000000000148", "common-ion-calc");
+        createInput("common-ion-concentration", "0.05", "common-ion-calc");
+
+        calculateCommonIonEffect();
+
+        const text = getResultText("common-ion-result");
+        expect(text).toContain("Molar Solubility");
+        expect(text).not.toContain("Error");
+    });
+
+    it("should show error for invalid salt type", () => {
+        createSelect("common-ion-salt-type", "XYZ", ["AB", "AB2", "A2B", "AB3", "A3B", "XYZ"], "common-ion-calc");
+        createInput("common-ion-Ksp", "0.00000000018", "common-ion-calc");
+        createInput("common-ion-concentration", "0.1", "common-ion-calc");
+
+        calculateCommonIonEffect();
+
+        const text = getResultText("common-ion-result");
+        expect(text).toContain("Error");
+    });
 });

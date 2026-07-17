@@ -202,6 +202,336 @@ describe("ApiClient", function () {
             expect(callArgs.method).toBe("DELETE");
         });
     });
+    describe("401 refresh flow", function () {
+        it("refreshes token on 401 and retries request successfully", async function () {
+            let fetchSpy = vi.fn();
+            fetchSpy.mockResolvedValueOnce({
+                "ok": false,
+                "status": 401,
+                "json": function () { return Promise.resolve({ "detail": "Unauthorized" }); }
+            });
+            fetchSpy.mockResolvedValueOnce({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "accessToken": "new-jwt", "refreshToken": "new-refresh" }); }
+            });
+            fetchSpy.mockResolvedValueOnce({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "data": "success" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            localStorage.setItem("chemutil_auth", JSON.stringify({ "refreshToken": "old-refresh" }));
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "https://api.example.com", "timeout": 30000 });
+            client.setToken("old-jwt");
+            let result: { data: string } = await client.get<{ data: string }>("/api/v1/protected");
+            expect(result.data).toBe("success");
+            expect(fetchSpy).toHaveBeenCalledTimes(3);
+            expect(client.getToken()).toBe("new-jwt");
+        });
+        it("refreshes token on 401 but retry fails with error", async function () {
+            let fetchSpy = vi.fn();
+            fetchSpy.mockResolvedValueOnce({
+                "ok": false,
+                "status": 401,
+                "json": function () { return Promise.resolve({ "detail": "Unauthorized" }); }
+            });
+            fetchSpy.mockResolvedValueOnce({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "accessToken": "new-jwt", "refreshToken": "new-refresh" }); }
+            });
+            fetchSpy.mockResolvedValueOnce({
+                "ok": false,
+                "status": 500,
+                "json": function () { return Promise.resolve({ "type": "server-error", "detail": "Internal server error" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            localStorage.setItem("chemutil_auth", JSON.stringify({ "refreshToken": "old-refresh" }));
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            client.setToken("old-jwt");
+            try {
+                await client.get("/api/v1/protected");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError).toBeInstanceOf(ApiError);
+                expect(apiError.status).toBe(0);
+                expect(apiError.detail).toBe("Internal server error");
+            }
+        });
+        it("refresh fails when no refresh token in storage", async function () {
+            let fetchSpy = vi.fn();
+            fetchSpy.mockResolvedValueOnce({
+                "ok": false,
+                "status": 401,
+                "json": function () { return Promise.resolve({ "detail": "Unauthorized" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            client.setToken("old-jwt");
+            try {
+                await client.get("/api/v1/protected");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError).toBeInstanceOf(ApiError);
+                expect(apiError.detail).toBe("Unauthorized");
+            }
+            expect(client.getToken()).toBeNull();
+        });
+        it("refresh fails when refresh endpoint returns error", async function () {
+            let fetchSpy = vi.fn();
+            fetchSpy.mockResolvedValueOnce({
+                "ok": false,
+                "status": 401,
+                "json": function () { return Promise.resolve({ "detail": "Unauthorized" }); }
+            });
+            fetchSpy.mockResolvedValueOnce({
+                "ok": false,
+                "status": 401,
+                "json": function () { return Promise.resolve({ "detail": "Refresh token expired" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            localStorage.setItem("chemutil_auth", JSON.stringify({ "refreshToken": "old-refresh" }));
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            client.setToken("old-jwt");
+            try {
+                await client.get("/api/v1/protected");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError).toBeInstanceOf(ApiError);
+            }
+            expect(client.getToken()).toBeNull();
+        });
+        it("does not attempt refresh on 401 when no token is set", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": false,
+                "status": 401,
+                "json": function () { return Promise.resolve({ "detail": "Unauthorized" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            try {
+                await client.get("/api/v1/protected");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError).toBeInstanceOf(ApiError);
+            }
+            expect(fetchSpy).toHaveBeenCalledTimes(1);
+        });
+        it("retry network error throws ApiError with status 0", async function () {
+            let fetchSpy = vi.fn();
+            fetchSpy.mockResolvedValueOnce({
+                "ok": false,
+                "status": 401,
+                "json": function () { return Promise.resolve({ "detail": "Unauthorized" }); }
+            });
+            fetchSpy.mockResolvedValueOnce({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "accessToken": "new-jwt", "refreshToken": "new-refresh" }); }
+            });
+            fetchSpy.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+            vi.stubGlobal("fetch", fetchSpy);
+            localStorage.setItem("chemutil_auth", JSON.stringify({ "refreshToken": "old-refresh" }));
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            client.setToken("old-jwt");
+            try {
+                await client.get("/api/v1/protected");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError).toBeInstanceOf(ApiError);
+                expect(apiError.status).toBe(0);
+                expect(apiError.detail).toBe("Network error");
+            }
+        });
+        it("refresh saves new refresh token to localStorage", async function () {
+            let fetchSpy = vi.fn();
+            fetchSpy.mockResolvedValueOnce({
+                "ok": false,
+                "status": 401,
+                "json": function () { return Promise.resolve({ "detail": "Unauthorized" }); }
+            });
+            fetchSpy.mockResolvedValueOnce({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "accessToken": "new-jwt", "refreshToken": "new-refresh" }); }
+            });
+            fetchSpy.mockResolvedValueOnce({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "data": "ok" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            localStorage.setItem("chemutil_auth", JSON.stringify({ "refreshToken": "old-refresh", "otherKey": "val" }));
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            client.setToken("old-jwt");
+            await client.get("/api/v1/protected");
+            let stored: string | null = localStorage.getItem("chemutil_auth");
+            let parsed: { refreshToken: string; otherKey: string; accessToken: string } = JSON.parse(stored as string);
+            expect(parsed.refreshToken).toBe("new-refresh");
+            expect(parsed.otherKey).toBe("val");
+            expect(parsed.accessToken).toBe("new-jwt");
+        });
+    });
+    describe("error parsing edge cases", function () {
+        it("returns default error values when body is null", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": false,
+                "status": 500,
+                "json": function () { return Promise.resolve(null); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            try {
+                await client.get("/test");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError.status).toBe(0);
+                expect(apiError.type).toBe("about:blank");
+                expect(apiError.detail).toBe("Unknown error");
+            }
+        });
+        it("falls back to title when detail is not provided", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": false,
+                "status": 404,
+                "json": function () { return Promise.resolve({ "title": "Resource not found" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            try {
+                await client.get("/test");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError.detail).toBe("Resource not found");
+            }
+        });
+        it("does not overwrite detail with title when detail is present", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": false,
+                "status": 400,
+                "json": function () { return Promise.resolve({ "title": "Bad Request", "detail": "Missing field" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            try {
+                await client.get("/test");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError.detail).toBe("Missing field");
+            }
+        });
+        it("handles response.json() throwing during error parsing", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": false,
+                "status": 500,
+                "json": function () { throw new Error("Invalid JSON"); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            try {
+                await client.get("/test");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError).toBeInstanceOf(ApiError);
+                expect(apiError.detail).toBe("Unknown error");
+            }
+        });
+        it("handles non-object body in error parsing", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": false,
+                "status": 500,
+                "json": function () { return Promise.resolve("string error"); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            try {
+                await client.get("/test");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                let apiError: ApiError = e as ApiError;
+                expect(apiError.detail).toBe("Unknown error");
+            }
+        });
+    });
+    describe("token storage edge cases", function () {
+        it("setToken preserves existing localStorage data", function () {
+            localStorage.setItem("chemutil_auth", JSON.stringify({ "otherKey": "otherVal" }));
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            client.setToken("my-token");
+            let stored: string | null = localStorage.getItem("chemutil_auth");
+            let parsed: { otherKey: string; accessToken: string } = JSON.parse(stored as string);
+            expect(parsed.otherKey).toBe("otherVal");
+            expect(parsed.accessToken).toBe("my-token");
+        });
+        it("clearToken does not throw when no stored data exists", function () {
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            client.setToken("temp");
+            expect(function (): void {
+                client.clearToken();
+            }).not.toThrow();
+            expect(client.getToken()).toBeNull();
+        });
+        it("clearToken removes tokens but preserves other data", function () {
+            localStorage.setItem("chemutil_auth", JSON.stringify({ "accessToken": "jwt", "refreshToken": "refresh", "userId": 42 }));
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            client.setToken("jwt");
+            client.clearToken();
+            let stored: string | null = localStorage.getItem("chemutil_auth");
+            let parsed: { userId: number; accessToken: string } = JSON.parse(stored as string);
+            expect(parsed.userId).toBe(42);
+            expect(parsed.accessToken).toBeUndefined();
+        });
+        it("loadToken handles corrupt localStorage data", function () {
+            localStorage.setItem("chemutil_auth", "{invalid json}");
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            expect(client.getToken()).toBeNull();
+        });
+        it("loadToken handles stored data without accessToken", function () {
+            localStorage.setItem("chemutil_auth", JSON.stringify({ "refreshToken": "rt" }));
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            expect(client.getToken()).toBeNull();
+        });
+    });
+    describe("request with body", function () {
+        it("PATCH sends JSON body", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "updated": true }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            await client.patch("/items/1", { "name": "updated" });
+            let callArgs: RequestInit = fetchSpy.mock.calls[0][1];
+            expect(callArgs.method).toBe("PATCH");
+            expect(callArgs.body).toBe(JSON.stringify({ "name": "updated" }));
+        });
+        it("GET does not send a body", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "data": "ok" }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            await client.get("/data");
+            let callArgs: RequestInit = fetchSpy.mock.calls[0][1];
+            expect(callArgs.body).toBeUndefined();
+        });
+        it("DELETE does not send a body", async function () {
+            let fetchSpy = vi.fn().mockResolvedValue({
+                "ok": true,
+                "json": function () { return Promise.resolve({ "deleted": true }); }
+            });
+            vi.stubGlobal("fetch", fetchSpy);
+            let client: ApiClient = ApiClient.getInstance({ "baseURL": "", "timeout": 30000 });
+            await client.delete("/items/1");
+            let callArgs: RequestInit = fetchSpy.mock.calls[0][1];
+            expect(callArgs.body).toBeUndefined();
+        });
+    });
 });
 describe("ApiError", function () {
     it("should set all properties correctly", function () {

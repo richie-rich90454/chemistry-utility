@@ -326,6 +326,11 @@ class NavigationManager {
 			}
 		}
 	}
+
+	/** Resets the singleton instance. For testing only. */
+	public static resetInstance(): void {
+		NavigationManager.instance = null as unknown as NavigationManager;
+	}
 }
 
 export { NavigationManager, CALCULATORS, BREADCRUMB_CATEGORIES, FAVORITES_KEY };

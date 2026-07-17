@@ -423,4 +423,138 @@ describe("CollisionTheoryCalculator", () => {
         expect(text).toContain("Error");
         expect(text).toContain("between 0 and 1");
     });
+
+    it("should show error when solving for Z with T<=0", () => {
+        createSelect("collision-solve-for", "Z", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "0", "collision-calc");
+        createInput("collision-Z", "", "collision-calc");
+        createInput("collision-p", "0.01", "collision-calc");
+        createInput("collision-k", "1e5", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("positive");
+    });
+
+    it("should show error when solving for Z with p<=0", () => {
+        createSelect("collision-solve-for", "Z", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "298", "collision-calc");
+        createInput("collision-Z", "", "collision-calc");
+        createInput("collision-p", "0", "collision-calc");
+        createInput("collision-k", "1e5", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("Steric factor must be positive");
+    });
+
+    it("should show error when solving for Z with k<=0", () => {
+        createSelect("collision-solve-for", "Z", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "298", "collision-calc");
+        createInput("collision-Z", "", "collision-calc");
+        createInput("collision-p", "0.01", "collision-calc");
+        createInput("collision-k", "0", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("Rate constant k must be positive");
+    });
+
+    it("should show error when solving for p with T<=0", () => {
+        createSelect("collision-solve-for", "p", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "0", "collision-calc");
+        createInput("collision-Z", "1e11", "collision-calc");
+        createInput("collision-p", "", "collision-calc");
+        createInput("collision-k", "1e5", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("positive");
+    });
+
+    it("should show error when solving for p with Z<=0", () => {
+        createSelect("collision-solve-for", "p", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "298", "collision-calc");
+        createInput("collision-Z", "0", "collision-calc");
+        createInput("collision-p", "", "collision-calc");
+        createInput("collision-k", "1e5", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("Collision frequency must be positive");
+    });
+
+    it("should show error when solving for p with k<=0", () => {
+        createSelect("collision-solve-for", "p", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "298", "collision-calc");
+        createInput("collision-Z", "1e11", "collision-calc");
+        createInput("collision-p", "", "collision-calc");
+        createInput("collision-k", "0", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("Rate constant k must be positive");
+    });
+
+    it("should show error when solving for k with Z<=0", () => {
+        createSelect("collision-solve-for", "k", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "298", "collision-calc");
+        createInput("collision-Z", "0", "collision-calc");
+        createInput("collision-p", "0.01", "collision-calc");
+        createInput("collision-k", "", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("Collision frequency must be positive");
+    });
+
+    it("should show error when solving for k with negative steric factor", () => {
+        createSelect("collision-solve-for", "k", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "298", "collision-calc");
+        createInput("collision-Z", "1e11", "collision-calc");
+        createInput("collision-p", "-0.5", "collision-calc");
+        createInput("collision-k", "", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("between 0 and 1");
+    });
+
+    it("should show error for invalid solveFor value", () => {
+        createSelect("collision-solve-for", "invalid", ["k", "Z", "p", "invalid"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "298", "collision-calc");
+        createInput("collision-Z", "1e11", "collision-calc");
+        createInput("collision-p", "0.01", "collision-calc");
+        createInput("collision-k", "1e5", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("Error");
+    });
 });

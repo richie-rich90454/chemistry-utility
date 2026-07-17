@@ -116,7 +116,18 @@ import { initializeEventListeners } from "./eventListeners";
 import { calculateMolarMass } from "./formulaParser";
 import { balanceEquation } from "./equationBalancer";
 import { getCalculationType, calculateStoichiometry } from "./stoichiometryCalculator";
-import { calculateDilution, calculateMassPercent, calculateMixing } from "./solutionCalculators";
+import {
+	calculateDilution,
+	calculateMassPercent,
+	calculateMixing,
+	calculateBufferSolution,
+	calculatePKaPKb,
+	calculateKsp,
+	calculateColligativeProperties,
+	calculateTitrationCurve,
+	calculateDebyeHuckel,
+	calculateCommonIonEffect,
+} from "./solutionCalculators";
 import {
 	calculateIdealGasLaw,
 	calculateCombinedGasLaw,
@@ -125,6 +136,29 @@ import {
 } from "./gasLawCalculators";
 import { calculateCellPotential, calculateNernst, calculateElectrolysis } from "./electrochemistryCalculators";
 import { predictBondType } from "./bondPredictor";
+import {
+	calculateGibbsFreeEnergy,
+	calculateHessLaw,
+	calculateEntropy,
+	calculateHeatCapacity,
+	calculateBondEnthalpy,
+	calculateBornHaberCycle,
+} from "./thermodynamicsCalculators";
+import {
+	calculateArrhenius,
+	calculateRateLaw,
+	calculateIntegratedRateLaw,
+	calculateReactionOrder,
+	calculateCollisionTheory,
+} from "./kineticsCalculators";
+import {
+	calculateQuantumNumbers,
+	calculateElectronConfiguration,
+	calculateRydberg,
+	calculateDeBroglie,
+	calculatePhotoelectricEffect,
+	calculateHeisenbergUncertainty,
+} from "./quantumCalculators";
 
 /**
  * Flushes all pending microtasks (resolved Promises) so that
@@ -806,6 +840,507 @@ describe("eventListeners", () => {
 			simulateEnterKey("mix-C1");
 			await flushPromises();
 			expect(calculateMixing).toHaveBeenCalled();
+		});
+	});
+
+	describe("solution calculator button wiring", () => {
+		it("clicking calculate-buffer calls calculateBufferSolution", async () => {
+			simulateClick("calculate-buffer");
+			await flushPromises();
+			expect(calculateBufferSolution).toHaveBeenCalled();
+		});
+		it("clicking calculate-pka-pkb calls calculatePKaPKb", async () => {
+			simulateClick("calculate-pka-pkb");
+			await flushPromises();
+			expect(calculatePKaPKb).toHaveBeenCalled();
+		});
+		it("clicking calculate-ksp calls calculateKsp", async () => {
+			simulateClick("calculate-ksp");
+			await flushPromises();
+			expect(calculateKsp).toHaveBeenCalled();
+		});
+		it("clicking calculate-colligative calls calculateColligativeProperties", async () => {
+			simulateClick("calculate-colligative");
+			await flushPromises();
+			expect(calculateColligativeProperties).toHaveBeenCalled();
+		});
+		it("clicking calculate-titration calls calculateTitrationCurve", async () => {
+			simulateClick("calculate-titration");
+			await flushPromises();
+			expect(calculateTitrationCurve).toHaveBeenCalled();
+		});
+		it("clicking calculate-debye-huckel calls calculateDebyeHuckel", async () => {
+			simulateClick("calculate-debye-huckel");
+			await flushPromises();
+			expect(calculateDebyeHuckel).toHaveBeenCalled();
+		});
+		it("clicking calculate-common-ion calls calculateCommonIonEffect", async () => {
+			simulateClick("calculate-common-ion");
+			await flushPromises();
+			expect(calculateCommonIonEffect).toHaveBeenCalled();
+		});
+	});
+
+	describe("thermodynamics calculator button wiring", () => {
+		it("clicking calculate-gibbs calls calculateGibbsFreeEnergy", async () => {
+			simulateClick("calculate-gibbs");
+			await flushPromises();
+			expect(calculateGibbsFreeEnergy).toHaveBeenCalled();
+		});
+		it("clicking calculate-hess calls calculateHessLaw", async () => {
+			simulateClick("calculate-hess");
+			await flushPromises();
+			expect(calculateHessLaw).toHaveBeenCalled();
+		});
+		it("clicking calculate-entropy calls calculateEntropy", async () => {
+			simulateClick("calculate-entropy");
+			await flushPromises();
+			expect(calculateEntropy).toHaveBeenCalled();
+		});
+		it("clicking calculate-heat-capacity calls calculateHeatCapacity", async () => {
+			simulateClick("calculate-heat-capacity");
+			await flushPromises();
+			expect(calculateHeatCapacity).toHaveBeenCalled();
+		});
+		it("clicking calculate-bond-enthalpy calls calculateBondEnthalpy", async () => {
+			simulateClick("calculate-bond-enthalpy");
+			await flushPromises();
+			expect(calculateBondEnthalpy).toHaveBeenCalled();
+		});
+		it("clicking calculate-born-haber calls calculateBornHaberCycle", async () => {
+			simulateClick("calculate-born-haber");
+			await flushPromises();
+			expect(calculateBornHaberCycle).toHaveBeenCalled();
+		});
+	});
+
+	describe("kinetics calculator button wiring", () => {
+		it("clicking calculate-arrhenius calls calculateArrhenius", async () => {
+			simulateClick("calculate-arrhenius");
+			await flushPromises();
+			expect(calculateArrhenius).toHaveBeenCalled();
+		});
+		it("clicking calculate-rate-law calls calculateRateLaw", async () => {
+			simulateClick("calculate-rate-law");
+			await flushPromises();
+			expect(calculateRateLaw).toHaveBeenCalled();
+		});
+		it("clicking calculate-integrated-rate-law calls calculateIntegratedRateLaw", async () => {
+			simulateClick("calculate-integrated-rate-law");
+			await flushPromises();
+			expect(calculateIntegratedRateLaw).toHaveBeenCalled();
+		});
+		it("clicking calculate-reaction-order calls calculateReactionOrder", async () => {
+			simulateClick("calculate-reaction-order");
+			await flushPromises();
+			expect(calculateReactionOrder).toHaveBeenCalled();
+		});
+		it("clicking calculate-collision-theory calls calculateCollisionTheory", async () => {
+			simulateClick("calculate-collision-theory");
+			await flushPromises();
+			expect(calculateCollisionTheory).toHaveBeenCalled();
+		});
+	});
+
+	describe("quantum calculator button wiring", () => {
+		it("clicking calculate-quantum-numbers calls calculateQuantumNumbers", async () => {
+			simulateClick("calculate-quantum-numbers");
+			await flushPromises();
+			expect(calculateQuantumNumbers).toHaveBeenCalled();
+		});
+		it("clicking calculate-electron-config calls calculateElectronConfiguration", async () => {
+			simulateClick("calculate-electron-config");
+			await flushPromises();
+			expect(calculateElectronConfiguration).toHaveBeenCalled();
+		});
+		it("clicking calculate-rydberg calls calculateRydberg", async () => {
+			simulateClick("calculate-rydberg");
+			await flushPromises();
+			expect(calculateRydberg).toHaveBeenCalled();
+		});
+		it("clicking calculate-debroglie calls calculateDeBroglie", async () => {
+			simulateClick("calculate-debroglie");
+			await flushPromises();
+			expect(calculateDeBroglie).toHaveBeenCalled();
+		});
+		it("clicking calculate-photoelectric calls calculatePhotoelectricEffect", async () => {
+			simulateClick("calculate-photoelectric");
+			await flushPromises();
+			expect(calculatePhotoelectricEffect).toHaveBeenCalled();
+		});
+		it("clicking calculate-heisenberg calls calculateHeisenbergUncertainty", async () => {
+			simulateClick("calculate-heisenberg");
+			await flushPromises();
+			expect(calculateHeisenbergUncertainty).toHaveBeenCalled();
+		});
+	});
+
+	describe("additional Enter key support", () => {
+		function simulateEnterKey(elementId: string): void {
+			const el = document.getElementById(elementId) as HTMLInputElement;
+			el.dispatchEvent(new KeyboardEvent("keyup", { key: "Enter" }));
+		}
+
+		it("Enter key on buffer input triggers calculateBufferSolution", async () => {
+			simulateEnterKey("buffer-pKa");
+			await flushPromises();
+			expect(calculateBufferSolution).toHaveBeenCalled();
+		});
+		it("Enter key on pka-pkb input triggers calculatePKaPKb", async () => {
+			simulateEnterKey("pka-pkb-input-value");
+			await flushPromises();
+			expect(calculatePKaPKb).toHaveBeenCalled();
+		});
+		it("Enter key on ksp input triggers calculateKsp", async () => {
+			simulateEnterKey("ksp-value");
+			await flushPromises();
+			expect(calculateKsp).toHaveBeenCalled();
+		});
+		it("Enter key on colligative input triggers calculateColligativeProperties", async () => {
+			simulateEnterKey("collig-solute-mass");
+			await flushPromises();
+			expect(calculateColligativeProperties).toHaveBeenCalled();
+		});
+		it("Enter key on titration input triggers calculateTitrationCurve", async () => {
+			simulateEnterKey("titration-acid-conc");
+			await flushPromises();
+			expect(calculateTitrationCurve).toHaveBeenCalled();
+		});
+		it("Enter key on debye-huckel input triggers calculateDebyeHuckel", async () => {
+			simulateEnterKey("dh-zplus");
+			await flushPromises();
+			expect(calculateDebyeHuckel).toHaveBeenCalled();
+		});
+		it("Enter key on common-ion input triggers calculateCommonIonEffect", async () => {
+			simulateEnterKey("common-ion-Ksp");
+			await flushPromises();
+			expect(calculateCommonIonEffect).toHaveBeenCalled();
+		});
+		it("Enter key on ideal-n triggers calculateIdealGasLaw", async () => {
+			simulateEnterKey("ideal-n");
+			await flushPromises();
+			expect(calculateIdealGasLaw).toHaveBeenCalled();
+		});
+		it("Enter key on ideal-T triggers calculateIdealGasLaw", async () => {
+			simulateEnterKey("ideal-T");
+			await flushPromises();
+			expect(calculateIdealGasLaw).toHaveBeenCalled();
+		});
+		it("Enter key on combined-V1 triggers calculateCombinedGasLaw", async () => {
+			simulateEnterKey("combined-V1");
+			await flushPromises();
+			expect(calculateCombinedGasLaw).toHaveBeenCalled();
+		});
+		it("Enter key on combined-T1 triggers calculateCombinedGasLaw", async () => {
+			simulateEnterKey("combined-T1");
+			await flushPromises();
+			expect(calculateCombinedGasLaw).toHaveBeenCalled();
+		});
+		it("Enter key on vdw-n triggers calculateVanDerWaals", async () => {
+			simulateEnterKey("vdw-n");
+			await flushPromises();
+			expect(calculateVanDerWaals).toHaveBeenCalled();
+		});
+		it("Enter key on vdw-T triggers calculateVanDerWaals", async () => {
+			simulateEnterKey("vdw-T");
+			await flushPromises();
+			expect(calculateVanDerWaals).toHaveBeenCalled();
+		});
+		it("Enter key on E2 triggers calculateCellPotential", async () => {
+			simulateEnterKey("E2");
+			await flushPromises();
+			expect(calculateCellPotential).toHaveBeenCalled();
+		});
+		it("Enter key on temperature triggers calculateNernst", async () => {
+			simulateEnterKey("temperature");
+			await flushPromises();
+			expect(calculateNernst).toHaveBeenCalled();
+		});
+		it("Enter key on n-electrons triggers calculateNernst", async () => {
+			simulateEnterKey("n-electrons");
+			await flushPromises();
+			expect(calculateNernst).toHaveBeenCalled();
+		});
+		it("Enter key on Q-reaction triggers calculateNernst", async () => {
+			simulateEnterKey("Q-reaction");
+			await flushPromises();
+			expect(calculateNernst).toHaveBeenCalled();
+		});
+		it("Enter key on electrolysis-I triggers calculateElectrolysis", async () => {
+			simulateEnterKey("electrolysis-I");
+			await flushPromises();
+			expect(calculateElectrolysis).toHaveBeenCalled();
+		});
+		it("Enter key on electrolysis-t triggers calculateElectrolysis", async () => {
+			simulateEnterKey("electrolysis-t");
+			await flushPromises();
+			expect(calculateElectrolysis).toHaveBeenCalled();
+		});
+		it("Enter key on element2-input triggers predictBondType", async () => {
+			simulateEnterKey("element2-input");
+			await flushPromises();
+			expect(predictBondType).toHaveBeenCalledWith(mockElements);
+		});
+		it("Enter key on gibbs-deltaH triggers calculateGibbsFreeEnergy", async () => {
+			simulateEnterKey("gibbs-deltaH");
+			await flushPromises();
+			expect(calculateGibbsFreeEnergy).toHaveBeenCalled();
+		});
+		it("Enter key on gibbs-deltaS triggers calculateGibbsFreeEnergy", async () => {
+			simulateEnterKey("gibbs-deltaS");
+			await flushPromises();
+			expect(calculateGibbsFreeEnergy).toHaveBeenCalled();
+		});
+		it("Enter key on gibbs-T triggers calculateGibbsFreeEnergy", async () => {
+			simulateEnterKey("gibbs-T");
+			await flushPromises();
+			expect(calculateGibbsFreeEnergy).toHaveBeenCalled();
+		});
+		it("Enter key on hess-steps triggers calculateHessLaw", async () => {
+			simulateEnterKey("hess-steps");
+			await flushPromises();
+			expect(calculateHessLaw).toHaveBeenCalled();
+		});
+		it("Enter key on entropy-products triggers calculateEntropy", async () => {
+			simulateEnterKey("entropy-products");
+			await flushPromises();
+			expect(calculateEntropy).toHaveBeenCalled();
+		});
+		it("Enter key on entropy-reactants triggers calculateEntropy", async () => {
+			simulateEnterKey("entropy-reactants");
+			await flushPromises();
+			expect(calculateEntropy).toHaveBeenCalled();
+		});
+		it("Enter key on heat-cap-mass triggers calculateHeatCapacity", async () => {
+			simulateEnterKey("heat-cap-mass");
+			await flushPromises();
+			expect(calculateHeatCapacity).toHaveBeenCalled();
+		});
+		it("Enter key on heat-cap-specific-heat triggers calculateHeatCapacity", async () => {
+			simulateEnterKey("heat-cap-specific-heat");
+			await flushPromises();
+			expect(calculateHeatCapacity).toHaveBeenCalled();
+		});
+		it("Enter key on heat-cap-initial-temp triggers calculateHeatCapacity", async () => {
+			simulateEnterKey("heat-cap-initial-temp");
+			await flushPromises();
+			expect(calculateHeatCapacity).toHaveBeenCalled();
+		});
+		it("Enter key on heat-cap-final-temp triggers calculateHeatCapacity", async () => {
+			simulateEnterKey("heat-cap-final-temp");
+			await flushPromises();
+			expect(calculateHeatCapacity).toHaveBeenCalled();
+		});
+		it("Enter key on heat-cap-heat triggers calculateHeatCapacity", async () => {
+			simulateEnterKey("heat-cap-heat");
+			await flushPromises();
+			expect(calculateHeatCapacity).toHaveBeenCalled();
+		});
+		it("Enter key on bond-enthalpy-broken triggers calculateBondEnthalpy", async () => {
+			simulateEnterKey("bond-enthalpy-broken");
+			await flushPromises();
+			expect(calculateBondEnthalpy).toHaveBeenCalled();
+		});
+		it("Enter key on bond-enthalpy-formed triggers calculateBondEnthalpy", async () => {
+			simulateEnterKey("bond-enthalpy-formed");
+			await flushPromises();
+			expect(calculateBondEnthalpy).toHaveBeenCalled();
+		});
+		it("Enter key on born-haber-dHf triggers calculateBornHaberCycle", async () => {
+			simulateEnterKey("born-haber-dHf");
+			await flushPromises();
+			expect(calculateBornHaberCycle).toHaveBeenCalled();
+		});
+		it("Enter key on born-haber-dHsub triggers calculateBornHaberCycle", async () => {
+			simulateEnterKey("born-haber-dHsub");
+			await flushPromises();
+			expect(calculateBornHaberCycle).toHaveBeenCalled();
+		});
+		it("Enter key on born-haber-IE triggers calculateBornHaberCycle", async () => {
+			simulateEnterKey("born-haber-IE");
+			await flushPromises();
+			expect(calculateBornHaberCycle).toHaveBeenCalled();
+		});
+		it("Enter key on arrhenius-A triggers calculateArrhenius", async () => {
+			simulateEnterKey("arrhenius-A");
+			await flushPromises();
+			expect(calculateArrhenius).toHaveBeenCalled();
+		});
+		it("Enter key on arrhenius-Ea triggers calculateArrhenius", async () => {
+			simulateEnterKey("arrhenius-Ea");
+			await flushPromises();
+			expect(calculateArrhenius).toHaveBeenCalled();
+		});
+		it("Enter key on arrhenius-T triggers calculateArrhenius", async () => {
+			simulateEnterKey("arrhenius-T");
+			await flushPromises();
+			expect(calculateArrhenius).toHaveBeenCalled();
+		});
+		it("Enter key on arrhenius-k triggers calculateArrhenius", async () => {
+			simulateEnterKey("arrhenius-k");
+			await flushPromises();
+			expect(calculateArrhenius).toHaveBeenCalled();
+		});
+		it("Enter key on ratelaw-A1 triggers calculateRateLaw", async () => {
+			simulateEnterKey("ratelaw-A1");
+			await flushPromises();
+			expect(calculateRateLaw).toHaveBeenCalled();
+		});
+		it("Enter key on ratelaw-B1 triggers calculateRateLaw", async () => {
+			simulateEnterKey("ratelaw-B1");
+			await flushPromises();
+			expect(calculateRateLaw).toHaveBeenCalled();
+		});
+		it("Enter key on ratelaw-rate1 triggers calculateRateLaw", async () => {
+			simulateEnterKey("ratelaw-rate1");
+			await flushPromises();
+			expect(calculateRateLaw).toHaveBeenCalled();
+		});
+		it("Enter key on irl-A0 triggers calculateIntegratedRateLaw", async () => {
+			simulateEnterKey("irl-A0");
+			await flushPromises();
+			expect(calculateIntegratedRateLaw).toHaveBeenCalled();
+		});
+		it("Enter key on irl-k triggers calculateIntegratedRateLaw", async () => {
+			simulateEnterKey("irl-k");
+			await flushPromises();
+			expect(calculateIntegratedRateLaw).toHaveBeenCalled();
+		});
+		it("Enter key on irl-t triggers calculateIntegratedRateLaw", async () => {
+			simulateEnterKey("irl-t");
+			await flushPromises();
+			expect(calculateIntegratedRateLaw).toHaveBeenCalled();
+		});
+		it("Enter key on irl-A triggers calculateIntegratedRateLaw", async () => {
+			simulateEnterKey("irl-A");
+			await flushPromises();
+			expect(calculateIntegratedRateLaw).toHaveBeenCalled();
+		});
+		it("Enter key on collision-Ea triggers calculateCollisionTheory", async () => {
+			simulateEnterKey("collision-Ea");
+			await flushPromises();
+			expect(calculateCollisionTheory).toHaveBeenCalled();
+		});
+		it("Enter key on collision-T triggers calculateCollisionTheory", async () => {
+			simulateEnterKey("collision-T");
+			await flushPromises();
+			expect(calculateCollisionTheory).toHaveBeenCalled();
+		});
+		it("Enter key on collision-Z triggers calculateCollisionTheory", async () => {
+			simulateEnterKey("collision-Z");
+			await flushPromises();
+			expect(calculateCollisionTheory).toHaveBeenCalled();
+		});
+		it("Enter key on collision-p triggers calculateCollisionTheory", async () => {
+			simulateEnterKey("collision-p");
+			await flushPromises();
+			expect(calculateCollisionTheory).toHaveBeenCalled();
+		});
+		it("Enter key on collision-k triggers calculateCollisionTheory", async () => {
+			simulateEnterKey("collision-k");
+			await flushPromises();
+			expect(calculateCollisionTheory).toHaveBeenCalled();
+		});
+		it("Enter key on qn-n triggers calculateQuantumNumbers", async () => {
+			simulateEnterKey("qn-n");
+			await flushPromises();
+			expect(calculateQuantumNumbers).toHaveBeenCalled();
+		});
+		it("Enter key on qn-l triggers calculateQuantumNumbers", async () => {
+			simulateEnterKey("qn-l");
+			await flushPromises();
+			expect(calculateQuantumNumbers).toHaveBeenCalled();
+		});
+		it("Enter key on qn-ml triggers calculateQuantumNumbers", async () => {
+			simulateEnterKey("qn-ml");
+			await flushPromises();
+			expect(calculateQuantumNumbers).toHaveBeenCalled();
+		});
+		it("Enter key on qn-ms triggers calculateQuantumNumbers", async () => {
+			simulateEnterKey("qn-ms");
+			await flushPromises();
+			expect(calculateQuantumNumbers).toHaveBeenCalled();
+		});
+		it("Enter key on ec-atomic-number triggers calculateElectronConfiguration", async () => {
+			simulateEnterKey("ec-atomic-number");
+			await flushPromises();
+			expect(calculateElectronConfiguration).toHaveBeenCalled();
+		});
+		it("Enter key on rydberg-n1 triggers calculateRydberg", async () => {
+			simulateEnterKey("rydberg-n1");
+			await flushPromises();
+			expect(calculateRydberg).toHaveBeenCalled();
+		});
+		it("Enter key on rydberg-n2 triggers calculateRydberg", async () => {
+			simulateEnterKey("rydberg-n2");
+			await flushPromises();
+			expect(calculateRydberg).toHaveBeenCalled();
+		});
+		it("Enter key on db-mass triggers calculateDeBroglie", async () => {
+			simulateEnterKey("db-mass");
+			await flushPromises();
+			expect(calculateDeBroglie).toHaveBeenCalled();
+		});
+		it("Enter key on db-velocity triggers calculateDeBroglie", async () => {
+			simulateEnterKey("db-velocity");
+			await flushPromises();
+			expect(calculateDeBroglie).toHaveBeenCalled();
+		});
+		it("Enter key on pe-wavelength triggers calculatePhotoelectricEffect", async () => {
+			simulateEnterKey("pe-wavelength");
+			await flushPromises();
+			expect(calculatePhotoelectricEffect).toHaveBeenCalled();
+		});
+		it("Enter key on pe-frequency triggers calculatePhotoelectricEffect", async () => {
+			simulateEnterKey("pe-frequency");
+			await flushPromises();
+			expect(calculatePhotoelectricEffect).toHaveBeenCalled();
+		});
+		it("Enter key on pe-work-function triggers calculatePhotoelectricEffect", async () => {
+			simulateEnterKey("pe-work-function");
+			await flushPromises();
+			expect(calculatePhotoelectricEffect).toHaveBeenCalled();
+		});
+		it("Enter key on pe-ke triggers calculatePhotoelectricEffect", async () => {
+			simulateEnterKey("pe-ke");
+			await flushPromises();
+			expect(calculatePhotoelectricEffect).toHaveBeenCalled();
+		});
+		it("Enter key on heis-delta-x triggers calculateHeisenbergUncertainty", async () => {
+			simulateEnterKey("heis-delta-x");
+			await flushPromises();
+			expect(calculateHeisenbergUncertainty).toHaveBeenCalled();
+		});
+		it("Enter key on heis-delta-p triggers calculateHeisenbergUncertainty", async () => {
+			simulateEnterKey("heis-delta-p");
+			await flushPromises();
+			expect(calculateHeisenbergUncertainty).toHaveBeenCalled();
+		});
+		it("Enter key on heis-mass triggers calculateHeisenbergUncertainty", async () => {
+			simulateEnterKey("heis-mass");
+			await flushPromises();
+			expect(calculateHeisenbergUncertainty).toHaveBeenCalled();
+		});
+	});
+
+	describe("formula input masking", () => {
+		it("strips invalid characters from element-input", () => {
+			const input = document.getElementById("element-input") as HTMLInputElement;
+			input.value = "H@2#O$";
+			input.dispatchEvent(new Event("input"));
+			expect(input.value).toBe("H2O");
+		});
+		it("strips invalid characters from formula-input", () => {
+			const input = document.getElementById("formula-input") as HTMLInputElement;
+			input.value = "Na@Cl%";
+			input.dispatchEvent(new Event("input"));
+			expect(input.value).toBe("NaCl");
+		});
+		it("allows valid formula characters including arrows and parentheses", () => {
+			const input = document.getElementById("formula-input") as HTMLInputElement;
+			input.value = "H2+O2->H2O";
+			input.dispatchEvent(new Event("input"));
+			expect(input.value).toBe("H2+O2->H2O");
 		});
 	});
 });
