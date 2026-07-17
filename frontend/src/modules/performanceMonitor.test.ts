@@ -206,4 +206,115 @@ describe("PerformanceMonitor", () => {
             // (navigation entries are empty in this mock, so ttfb is undefined)
         });
     });
+
+    describe("trackCalculation", () => {
+        it("stores calculation duration with calc: prefix in report", () => {
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.trackCalculation("molar-mass", 42);
+            expect(monitor.report()["calc:molar-mass"]).toBe(42);
+        });
+
+        it("overwrites previous value when called with same name", () => {
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.trackCalculation("molar-mass", 42);
+            monitor.trackCalculation("molar-mass", 100);
+            expect(monitor.report()["calc:molar-mass"]).toBe(100);
+        });
+
+        it("does not affect core metrics keys", () => {
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.trackCalculation("molar-mass", 42);
+            expect(monitor.report()["ttfb"]).toBeUndefined();
+            expect(monitor.report()["lcp"]).toBeUndefined();
+        });
+    });
+
+    describe("trackApiCall", () => {
+        it("stores API call duration with api: prefix in report", () => {
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.trackApiCall("/api/v1/compounds", 150);
+            expect(monitor.report()["api:/api/v1/compounds"]).toBe(150);
+        });
+
+        it("overwrites previous value when called with same endpoint", () => {
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.trackApiCall("/api/v1/compounds", 150);
+            monitor.trackApiCall("/api/v1/compounds", 200);
+            expect(monitor.report()["api:/api/v1/compounds"]).toBe(200);
+        });
+
+        it("tracks multiple endpoints independently", () => {
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.trackApiCall("/api/v1/compounds", 150);
+            monitor.trackApiCall("/api/v1/elements", 80);
+            expect(monitor.report()["api:/api/v1/compounds"]).toBe(150);
+            expect(monitor.report()["api:/api/v1/elements"]).toBe(80);
+        });
+    });
+
+    describe("reportToConsole", () => {
+        it("calls console.info with metrics in dev mode", () => {
+            const infoSpy = vi.spyOn(console, "info").mockImplementation(function (): void {});
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.trackCalculation("test-calc", 50);
+            monitor.reportToConsole();
+            expect(infoSpy).toHaveBeenCalled();
+            expect(infoSpy).toHaveBeenCalledWith("[Performance] Metrics:", expect.objectContaining({ "calc:test-calc": 50 }));
+        });
+
+        it("does not call console.info in production mode", () => {
+            const originalNodeEnv = process.env.NODE_ENV;
+            process.env.NODE_ENV = "production";
+            PerformanceMonitor.resetInstance();
+            const infoSpy = vi.spyOn(console, "info").mockImplementation(function (): void {});
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.reportToConsole();
+            expect(infoSpy).not.toHaveBeenCalled();
+            process.env.NODE_ENV = originalNodeEnv;
+        });
+    });
+
+    describe("pageLoad metric", () => {
+        it("sets pageLoad when loadEventEnd is available and positive", () => {
+            const mockPerformance = {
+                getEntriesByType: vi.fn().mockReturnValue([
+                    { responseStart: 200, requestStart: 100, loadEventEnd: 1500, startTime: 0 }
+                ])
+            };
+            // @ts-expect-error - overriding for test
+            globalThis.performance = mockPerformance;
+
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.measure();
+            expect(monitor.report()["pageLoad"]).toBe(1500);
+        });
+
+        it("does not set pageLoad when loadEventEnd is zero", () => {
+            const mockPerformance = {
+                getEntriesByType: vi.fn().mockReturnValue([
+                    { responseStart: 200, requestStart: 100, loadEventEnd: 0, startTime: 0 }
+                ])
+            };
+            // @ts-expect-error - overriding for test
+            globalThis.performance = mockPerformance;
+
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.measure();
+            expect(monitor.report()["pageLoad"]).toBeUndefined();
+        });
+
+        it("does not set pageLoad when loadEventEnd is undefined", () => {
+            const mockPerformance = {
+                getEntriesByType: vi.fn().mockReturnValue([
+                    { responseStart: 200, requestStart: 100 }
+                ])
+            };
+            // @ts-expect-error - overriding for test
+            globalThis.performance = mockPerformance;
+
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.measure();
+            expect(monitor.report()["pageLoad"]).toBeUndefined();
+        });
+    });
 });

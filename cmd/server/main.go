@@ -48,6 +48,23 @@ func (w *gzipResponseWriter) WriteString(s string) (int, error) {
 	return w.Writer.Write([]byte(s))
 }
 
+// securityHeadersMiddleware adds browser security headers to every
+// response: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection,
+// Referrer-Policy, and a Content-Security-Policy that restricts
+// resource loading to same-origin (with unsafe-inline permitted for
+// script/style to support the inline event handlers and style tags
+// used by the static frontend).
+func securityHeadersMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Header("X-Content-Type-Options", "nosniff")
+		c.Header("X-Frame-Options", "DENY")
+		c.Header("X-XSS-Protection", "1; mode=block")
+		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
+		c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:")
+		c.Next()
+	}
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -109,6 +126,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(securityHeadersMiddleware())
 	r.Use(gzipMiddleware())
 	apiRouter := apiInstance.Router()
 	r.Any("/api/v1/:path", func(c *gin.Context) {

@@ -210,6 +210,13 @@
                     <input type="text" placeholder="Search calculators..." aria-label="Search calculators">
                 </div>
                 <div id="sidebar-auth-section"></div>
+                <section id="sidebar-workspaces" class="sidebar-workspaces" aria-label="Workspaces" style="display:none">
+                    <div class="sidebar-workspaces-header">
+                        <span class="sidebar-workspaces-title">Workspaces</span>
+                        <button type="button" class="workspace-create-btn" aria-label="Create workspace">+</button>
+                    </div>
+                    <ul class="workspace-list"></ul>
+                </section>
                 <div class="nav-recent"></div>
                 <nav class="sidebar-nav">
                     <ul>
@@ -1296,43 +1303,43 @@
         <!-- Mobile bottom tab bar -->
         <nav class="bottom-tabs" aria-label="Quick access">
             <div class="tab-indicator"></div>
-            <button class="tab-item" data-target="element-lookup">
+            <button type="button" class="tab-item" data-target="element-lookup" aria-label="Element lookup">
                 <svg aria-hidden="true" focusable="false"><use href="#icon-element"></use></svg>
                 <span class="tab-label">Elements</span>
             </button>
-            <button class="tab-item" data-target="mass-calc">
+            <button type="button" class="tab-item" data-target="mass-calc" aria-label="Molar mass calculator">
                 <svg aria-hidden="true" focusable="false"><use href="#icon-molar-mass"></use></svg>
                 <span class="tab-label">Molar Mass</span>
             </button>
-            <button class="tab-item" data-target="balancing">
+            <button type="button" class="tab-item" data-target="balancing" aria-label="Equation balancer">
                 <svg aria-hidden="true" focusable="false"><use href="#icon-balance"></use></svg>
                 <span class="tab-label">Balancer</span>
             </button>
-            <button class="tab-item" data-target="dilution-calc">
+            <button type="button" class="tab-item" data-target="dilution-calc" aria-label="Dilution calculator">
                 <svg aria-hidden="true" focusable="false"><use href="#icon-dilution"></use></svg>
                 <span class="tab-label">Dilution</span>
             </button>
-            <button class="tab-item" data-target="more">
+            <button type="button" class="tab-item" data-target="more" aria-label="More calculators">
                 <svg aria-hidden="true" focusable="false"><use href="#icon-more"></use></svg>
                 <span class="tab-label">More</span>
             </button>
         </nav>
         <!-- Mobile nav sheet -->
         <div class="nav-sheet-backdrop"></div>
-        <div class="nav-sheet"></div>
+        <div class="nav-sheet" role="dialog" aria-modal="true" aria-label="More calculators"></div>
         <!-- Command palette -->
         <div class="palette-backdrop"></div>
-        <div class="command-palette">
+        <div class="command-palette" role="dialog" aria-modal="true" aria-label="Calculator search">
             <div class="palette-input-wrap">
                 <svg class="palette-search-icon" aria-hidden="true" focusable="false"><use href="#icon-search"></use></svg>
                 <input type="text" class="palette-input" placeholder="Search calculators..." aria-label="Search calculators" role="combobox" aria-expanded="false" aria-controls="palette-list" aria-autocomplete="list">
             </div>
             <div class="palette-list" id="palette-list" role="listbox"></div>
         </div>
-        <div id="comparison-modal" class="comparison-modal" style="display:none">
+        <div id="comparison-modal" class="comparison-modal" role="dialog" aria-modal="true" aria-labelledby="comparison-modal-title" style="display:none">
             <div class="comparison-modal-content">
-                <span class="comparison-close">&times;</span>
-                <h2>Comparison</h2>
+                <button type="button" class="comparison-close" aria-label="Close comparison dialog">&times;</button>
+                <h2 id="comparison-modal-title">Comparison</h2>
                 <div id="comparison-content"></div>
             </div>
         </div>

@@ -686,6 +686,11 @@ input:focus-visible, select:focus-visible, textarea:focus-visible{
     outline: 2px solid var(--md-input-focus-border);
     outline-offset: 1px;
 }
+/* Global focus indicator for all keyboard-focusable elements */
+*:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
 input.error, select.error, textarea.error{
     border-color: var(--md-error);
     box-shadow: none;
@@ -3203,6 +3208,10 @@ a{color:var(--md-primary)}
     color: var(--md-on-surface-variant);
     line-height: 1;
     user-select: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    border-radius: var(--md-shape-full);
 }
 .comparison-close:hover{
     color: var(--md-on-surface);
@@ -3320,5 +3329,396 @@ a{color:var(--md-primary)}
     }
     .dashboard-activity .chart-container{
         height: 200px;
+    }
+}
+
+/* ── Workspace collaboration UI ── */
+.sidebar-workspaces{
+    padding: var(--md-space-2) var(--md-space-4);
+    border-bottom: 1px solid var(--md-outline-variant);
+}
+.sidebar-workspaces-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--md-space-2);
+    margin-bottom: var(--md-space-2);
+}
+.sidebar-workspaces-title{
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--md-on-surface-variant);
+}
+.workspace-create-btn{
+    width: 24px;
+    height: 24px;
+    min-height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.workspace-create-btn:hover{
+    box-shadow: var(--md-elevation-1);
+}
+.workspace-create-btn:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.workspace-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-1);
+}
+.workspace-list-item{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--md-space-2);
+    border-radius: var(--md-shape-sm);
+    cursor: pointer;
+    background: transparent;
+    transition: background var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+}
+.workspace-list-item:hover{
+    background: var(--md-surface-container-high);
+}
+.workspace-list-item:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.workspace-list-name{
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--md-on-surface);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.workspace-list-count{
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+}
+.workspace-empty{
+    font-size: 0.8125rem;
+    color: var(--md-on-surface-variant);
+    padding: var(--md-space-2);
+}
+.workspace-view{
+    padding: var(--md-space-4);
+}
+.workspace-detail-header{
+    margin-bottom: var(--md-space-4);
+}
+.workspace-detail-title{
+    margin: 0 0 var(--md-space-2) 0;
+    color: var(--md-on-surface);
+}
+.workspace-detail-description{
+    width: 100%;
+    max-width: 480px;
+    padding: var(--md-space-2);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--md-shape-sm);
+    background-color: var(--md-surface-container-low);
+    color: var(--md-on-surface);
+    font-size: 0.875rem;
+}
+.workspace-detail-description:focus{
+    outline: 2px solid var(--md-primary);
+    outline-offset: -1px;
+    border-color: var(--md-primary);
+}
+.workspace-detail-error{
+    color: var(--md-error);
+    background: var(--md-error-container);
+    padding: var(--md-space-2) var(--md-space-3);
+    border-radius: var(--md-shape-sm);
+    margin-bottom: var(--md-space-3);
+    font-size: 0.875rem;
+}
+.workspace-detail-actions{
+    display: flex;
+    gap: var(--md-space-2);
+    margin: var(--md-space-3) 0;
+    flex-wrap: wrap;
+}
+.workspace-export-pdf-btn,
+.workspace-delete-btn,
+.workspace-add-member-submit,
+.workspace-member-remove{
+    padding: var(--md-space-2) var(--md-space-3);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--md-shape-full);
+    background: var(--md-surface);
+    color: var(--md-on-surface);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-height: 36px;
+}
+.workspace-export-pdf-btn:hover,
+.workspace-add-member-submit:hover{
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border-color: var(--md-primary);
+}
+.workspace-delete-btn{
+    color: var(--md-error);
+    border-color: var(--md-error);
+}
+.workspace-delete-btn:hover{
+    background: var(--md-error);
+    color: var(--md-on-error);
+}
+.workspace-members,
+.workspace-add-member,
+.workspace-shared-calculations{
+    margin-top: var(--md-space-4);
+}
+.workspace-members h3,
+.workspace-shared-calculations h3{
+    margin: 0 0 var(--md-space-2) 0;
+    font-size: 1rem;
+    color: var(--md-on-surface);
+}
+.workspace-member-list,
+.workspace-calc-list{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-1);
+}
+.workspace-member-item,
+.workspace-calc-item{
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-3);
+    padding: var(--md-space-2) var(--md-space-3);
+    background: var(--md-surface-container-low);
+    border-radius: var(--md-shape-sm);
+}
+.workspace-member-name{
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--md-on-surface);
+}
+.workspace-member-role{
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+    text-transform: capitalize;
+}
+.workspace-calc-type{
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--md-primary);
+}
+.workspace-calc-preview{
+    flex: 1;
+    font-size: 0.8125rem;
+    color: var(--md-on-surface);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.workspace-calc-date{
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+}
+.workspace-add-member-form{
+    display: flex;
+    gap: var(--md-space-2);
+    flex-wrap: wrap;
+    align-items: center;
+}
+.workspace-add-member-email,
+.workspace-add-member-role{
+    padding: var(--md-space-2);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--md-shape-sm);
+    background-color: var(--md-surface-container-low);
+    color: var(--md-on-surface);
+    font-size: 0.875rem;
+    min-height: 36px;
+}
+.workspace-add-member-email{
+    flex: 1;
+    min-width: 200px;
+}
+.workspace-add-member-email:focus,
+.workspace-add-member-role:focus{
+    outline: 2px solid var(--md-primary);
+    outline-offset: -1px;
+    border-color: var(--md-primary);
+}
+
+/* ── Share button on calculation results ── */
+.share-button{
+    display: inline-flex;
+    align-items: center;
+    gap: var(--md-space-1);
+    margin-top: var(--md-space-2);
+    margin-left: var(--md-space-2);
+    padding: 4px var(--md-space-2);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--md-shape-full);
+    background: var(--md-surface);
+    color: var(--md-on-surface-variant);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-height: 28px;
+}
+.share-button:hover{
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border-color: var(--md-primary);
+}
+.share-button.shared{
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border-color: var(--md-primary);
+}
+.share-button:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* ── Experiment log UI ── */
+.experiment-log-view{
+    padding: var(--md-space-4);
+}
+.experiment-log-header{
+    margin-bottom: var(--md-space-4);
+}
+.experiment-log-title{
+    margin: 0 0 var(--md-space-1) 0;
+    color: var(--md-on-surface);
+}
+.experiment-log-meta{
+    margin: 0 0 var(--md-space-3) 0;
+    font-size: 0.8125rem;
+    color: var(--md-on-surface-variant);
+}
+.experiment-log-add-step-btn,
+.experiment-log-export-pdf-btn{
+    padding: var(--md-space-2) var(--md-space-3);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--md-shape-full);
+    background: var(--md-surface);
+    color: var(--md-on-surface);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    min-height: 36px;
+    margin-right: var(--md-space-2);
+}
+.experiment-log-add-step-btn:hover,
+.experiment-log-export-pdf-btn:hover{
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border-color: var(--md-primary);
+}
+.experiment-log-error{
+    color: var(--md-error);
+    background: var(--md-error-container);
+    padding: var(--md-space-2) var(--md-space-3);
+    border-radius: var(--md-shape-sm);
+    margin-bottom: var(--md-space-3);
+    font-size: 0.875rem;
+}
+.experiment-log-timeline h3{
+    margin: 0 0 var(--md-space-2) 0;
+    font-size: 1rem;
+    color: var(--md-on-surface);
+}
+.experiment-log-empty{
+    font-size: 0.8125rem;
+    color: var(--md-on-surface-variant);
+    padding: var(--md-space-2);
+}
+.experiment-log-steps{
+    list-style: decimal inside;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-2);
+}
+.experiment-log-step{
+    padding: var(--md-space-3);
+    background: var(--md-surface-container-low);
+    border-radius: var(--md-shape-md);
+    border-left: 3px solid var(--md-primary);
+}
+.experiment-log-step-title{
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--md-on-surface);
+    margin-bottom: var(--md-space-1);
+}
+.experiment-log-step-data{
+    font-size: 0.8125rem;
+    color: var(--md-on-surface);
+    margin-bottom: var(--md-space-1);
+}
+.experiment-log-step-annotation{
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+    font-style: italic;
+    margin-bottom: var(--md-space-2);
+}
+.experiment-log-step-annotate-input{
+    width: 100%;
+    padding: var(--md-space-2);
+    border: 1px solid var(--md-outline);
+    border-radius: var(--md-shape-sm);
+    background-color: var(--md-surface-container);
+    color: var(--md-on-surface);
+    font-size: 0.8125rem;
+}
+.experiment-log-step-annotate-input:focus{
+    outline: 2px solid var(--md-primary);
+    outline-offset: -1px;
+    border-color: var(--md-primary);
+}
+
+/* ── Print rules for workspace + experiment log PDF export ── */
+@media print{
+    .sidebar-workspaces,
+    .workspace-add-member,
+    .workspace-detail-actions,
+    .workspace-member-remove,
+    .experiment-log-add-step-btn,
+    .experiment-log-export-pdf-btn,
+    .experiment-log-step-annotate-input,
+    .share-button,
+    #workspace-view .workspace-detail-error,
+    #experiment-log-view .experiment-log-error{
+        display: none !important;
+    }
+    .workspace-view,
+    .experiment-log-view{
+        display: block !important;
+        padding: 0;
+    }
+    .workspace-member-item,
+    .workspace-calc-item,
+    .experiment-log-step{
+        break-inside: avoid;
+        background: #fff !important;
+        color: #000 !important;
+        border-left-color: #999 !important;
     }
 }
