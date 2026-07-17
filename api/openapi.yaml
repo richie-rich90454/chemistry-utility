@@ -1,0 +1,1556 @@
+openapi: 3.1.0
+info:
+  title: Chemistry Utility API
+  version: 1.0.0
+  description: |
+    REST API for the Chemistry Utility application.
+
+    Provides chemistry calculators (molar mass, equation balancing, stoichiometry,
+    gas laws, thermodynamics, kinetics, electrochemistry, quantum, solutions),
+    compound search, calculation history, workspace collaboration, API key
+    management, analytics, and plugin administration.
+
+    ## Authentication
+    Most endpoints require a JWT bearer token obtained via `POST /auth/login`,
+    `POST /auth/register`, or OAuth. Include the token in the `Authorization`
+    header as `Bearer <access_token>`.
+
+    ## Roles
+    - `student` (default for new registrations): can use calculators and manage own data.
+    - `researcher`: student permissions plus API key management.
+    - `educator`: same as researcher (granted by admins).
+    - `admin`: full access including analytics and plugin management.
+
+    ## Errors
+    All error responses use RFC 7807 Problem Details (`application/problem+json`).
+  contact:
+    name: Chemistry Utility
+    url: https://chemistry-utility.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: http://localhost:6005/api/v1
+    description: Local development server
+  - url: https://api.chemistry-utility.dev/api/v1
+    description: Production server
+security:
+  - BearerAuth: []
+tags:
+  - name: Auth
+    description: Registration, login, token refresh, password reset, and OAuth
+  - name: Users
+    description: Authenticated user profile management
+  - name: Calculators
+    description: List and run chemistry calculators
+  - name: Calculations
+    description: Saved calculation history and annotations
+  - name: Workspaces
+    description: Collaborative workspaces and membership
+  - name: Compounds
+    description: Chemical compound lookup and search
+  - name: APIKeys
+    description: API key management (researcher+)
+  - name: Analytics
+    description: Platform analytics (admin only)
+  - name: Plugins
+    description: Plugin management (admin only)
+  - name: Docs
+    description: Interactive API documentation
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      description: Creates a new user account with the `student` role and returns auth tokens.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in with email and password
+      description: Authenticates a user and returns access/refresh tokens.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      description: Exchanges a valid refresh token for a new token pair.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: New token pair
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tokens:
+                    $ref: '#/components/schemas/TokenPair'
+                required: [tokens]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request a password reset link
+      description: |
+        Triggers a password reset flow for the given email. Always returns success
+        to prevent email enumeration, regardless of whether the email exists.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Reset email sent (if account exists)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: if the email exists, a reset link has been sent
+                required: [message]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password using a reset token
+      description: Sets a new password for a user given a valid reset token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: password has been reset
+                required: [message]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /auth/github:
+    get:
+      tags: [Auth]
+      summary: Begin GitHub OAuth flow
+      description: Redirects to GitHub's OAuth authorization page. Returns 404 if GitHub OAuth is not configured.
+      security: []
+      responses:
+        '302':
+          description: Redirect to GitHub authorization URL
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /auth/github/callback:
+    get:
+      tags: [Auth]
+      summary: GitHub OAuth callback
+      description: Handles the OAuth callback from GitHub, exchanges the code, and returns auth tokens.
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code returned by GitHub
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OAuth login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /auth/google:
+    get:
+      tags: [Auth]
+      summary: Begin Google OAuth flow
+      description: Redirects to Google's OAuth authorization page. Returns 404 if Google OAuth is not configured.
+      security: []
+      responses:
+        '302':
+          description: Redirect to Google authorization URL
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /auth/google/callback:
+    get:
+      tags: [Auth]
+      summary: Google OAuth callback
+      description: Handles the OAuth callback from Google, exchanges the code, and returns auth tokens.
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          description: Authorization code returned by Google
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OAuth login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get the current user's profile
+      description: Returns the authenticated user's public profile.
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUser'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    patch:
+      tags: [Users]
+      summary: Update the current user's profile
+      description: Updates the authenticated user's name and/or email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicUser'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /calculators:
+    get:
+      tags: [Calculators]
+      summary: List available calculator types
+      description: Returns the sorted list of all registered calculator type identifiers.
+      security: []
+      responses:
+        '200':
+          description: List of calculator types
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calculators:
+                    type: array
+                    items:
+                      type: string
+                    example: [arrhenius, bond-type, buffer-solution, cell-potential]
+                required: [calculators]
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+  /calculators/{type}:
+    post:
+      tags: [Calculators]
+      summary: Run a calculator
+      description: |
+        Executes the calculator identified by `type` with the provided input map.
+        The shape of `inputs` depends on the calculator type; see the developer
+        guide for per-calculator input schemas. Returns a `CalculationResult`.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CalculatorType'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Calculator-specific input map. See developer guide for details.
+              additionalProperties: true
+            example:
+              formula: H2O
+      responses:
+        '200':
+          description: Calculator result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalculationResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /calculations:
+    get:
+      tags: [Calculations]
+      summary: List the current user's calculations
+      description: Returns a paginated list of the authenticated user's saved calculations.
+      parameters:
+        - $ref: '#/components/parameters/PageQuery'
+        - $ref: '#/components/parameters/LimitQuery'
+      responses:
+        '200':
+          description: Paginated list of calculations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calculations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Calculation'
+                  page:
+                    type: integer
+                    minimum: 1
+                    example: 1
+                  limit:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                    example: 20
+                required: [calculations, page, limit]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /calculations/{id}:
+    get:
+      tags: [Calculations]
+      summary: Get a calculation by ID
+      description: Returns a specific calculation. Only the owner or an admin may view it.
+      parameters:
+        - $ref: '#/components/parameters/CalculationIdPath'
+      responses:
+        '200':
+          description: The calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calculation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Calculations]
+      summary: Delete a calculation
+      description: Permanently deletes a calculation. Only the owner or an admin may delete it.
+      parameters:
+        - $ref: '#/components/parameters/CalculationIdPath'
+      responses:
+        '204':
+          description: Calculation deleted successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /calculations/{id}/annotate:
+    post:
+      tags: [Calculations]
+      summary: Annotate a calculation
+      description: Sets or updates the annotation text on a calculation. Only the owner or an admin may annotate.
+      parameters:
+        - $ref: '#/components/parameters/CalculationIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                annotation:
+                  type: string
+                  description: Free-form annotation text
+              required: [annotation]
+      responses:
+        '200':
+          description: Updated calculation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calculation'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /calculations/{id}/star:
+    post:
+      tags: [Calculations]
+      summary: Toggle star on a calculation
+      description: Toggles the starred flag on a calculation and returns the new state. Only the owner or an admin may star.
+      parameters:
+        - $ref: '#/components/parameters/CalculationIdPath'
+      responses:
+        '200':
+          description: New starred state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  starred:
+                    type: boolean
+                required: [starred]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /workspaces:
+    get:
+      tags: [Workspaces]
+      summary: List the current user's workspaces
+      description: Returns all workspaces the authenticated user belongs to.
+      responses:
+        '200':
+          description: List of workspaces
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workspaces:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Workspace'
+                required: [workspaces]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Workspaces]
+      summary: Create a workspace
+      description: Creates a new workspace and adds the creator as the `owner` member.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceRequest'
+      responses:
+        '201':
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /workspaces/{id}:
+    get:
+      tags: [Workspaces]
+      summary: Get a workspace by ID
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceIdPath'
+      responses:
+        '200':
+          description: The workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    patch:
+      tags: [Workspaces]
+      summary: Update a workspace
+      description: Updates the name and/or description. Only the owner or an admin may update.
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkspaceRequest'
+      responses:
+        '200':
+          description: Updated workspace
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Workspaces]
+      summary: Delete a workspace
+      description: Permanently deletes a workspace. Only the owner or an admin may delete.
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceIdPath'
+      responses:
+        '204':
+          description: Workspace deleted successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /workspaces/{id}/members:
+    post:
+      tags: [Workspaces]
+      summary: Add a member to a workspace
+      description: Adds a user to the workspace with the given role. Only the owner or an admin may add members.
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddMemberRequest'
+      responses:
+        '201':
+          description: Member added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceMember'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /workspaces/{id}/members/{userId}:
+    delete:
+      tags: [Workspaces]
+      summary: Remove a member from a workspace
+      description: Removes a user from the workspace. Only the owner or an admin may remove members.
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceIdPath'
+        - $ref: '#/components/parameters/MemberUserIdPath'
+      responses:
+        '204':
+          description: Member removed successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /workspaces/{id}/calculations:
+    get:
+      tags: [Workspaces]
+      summary: List calculations in a workspace
+      description: Returns all calculations associated with the given workspace.
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceIdPath'
+      responses:
+        '200':
+          description: List of workspace calculations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calculations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Calculation'
+                required: [calculations]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /compounds:
+    get:
+      tags: [Compounds]
+      summary: Search compounds
+      description: Searches compounds by name, formula, or other indexed fields.
+      security: []
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string
+          schema:
+            type: string
+            minLength: 1
+        - $ref: '#/components/parameters/LimitQuery'
+        - $ref: '#/components/parameters/OffsetQuery'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  compounds:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Compound'
+                  query:
+                    type: string
+                required: [compounds, query]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /compounds/{id}:
+    get:
+      tags: [Compounds]
+      summary: Get a compound by ID
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CompoundIdPath'
+      responses:
+        '200':
+          description: The compound
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Compound'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api-keys:
+    get:
+      tags: [APIKeys]
+      summary: List the current user's API keys
+      description: Returns all API keys owned by the authenticated user. Requires `researcher`, `educator`, or `admin` role.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of API keys (without raw key values)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_keys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/APIKey'
+                required: [api_keys]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [APIKeys]
+      summary: Create an API key
+      description: |
+        Creates a new API key for the authenticated user. The raw key value is
+        only returned once in the response and cannot be retrieved again.
+        Requires `researcher`, `educator`, or `admin` role.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Human-readable label for the key
+              required: [name]
+      responses:
+        '201':
+          description: API key created (includes raw key value)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKey'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api-keys/{id}:
+    delete:
+      tags: [APIKeys]
+      summary: Delete an API key
+      description: Permanently deletes an API key by ID. Requires `researcher`, `educator`, or `admin` role.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/APIKeyIdPath'
+      responses:
+        '204':
+          description: API key deleted successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /analytics/overview:
+    get:
+      tags: [Analytics]
+      summary: Platform overview statistics
+      description: Returns aggregated platform statistics. Admin only.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Overview statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  overview:
+                    type: object
+                    additionalProperties: true
+                    description: Aggregated platform statistics
+                required: [overview]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /analytics/usage:
+    get:
+      tags: [Analytics]
+      summary: Daily active users usage metrics
+      description: Returns usage metrics including daily active users (DAU). Admin only.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Usage metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dau:
+                    type: integer
+                    description: Daily active users count
+                    example: 1234
+                required: [dau]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /plugins:
+    get:
+      tags: [Plugins]
+      summary: List all plugins
+      description: Returns all registered plugins. Admin only.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of plugins
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plugins:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Plugin'
+                required: [plugins]
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      tags: [Plugins]
+      summary: Create a plugin
+      description: Registers a new plugin (created in disabled state). Admin only.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePluginRequest'
+      responses:
+        '201':
+          description: Plugin created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plugin'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /plugins/{id}/enable:
+    patch:
+      tags: [Plugins]
+      summary: Enable a plugin
+      description: Enables the plugin with the given ID. Admin only.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PluginIdPath'
+      responses:
+        '200':
+          description: Plugin enabled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    example: true
+                required: [enabled]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /plugins/{id}/disable:
+    patch:
+      tags: [Plugins]
+      summary: Disable a plugin
+      description: Disables the plugin with the given ID. Admin only.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PluginIdPath'
+      responses:
+        '200':
+          description: Plugin disabled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    example: false
+                required: [enabled]
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /plugins/{id}:
+    delete:
+      tags: [Plugins]
+      summary: Delete a plugin
+      description: Permanently deletes a plugin by ID. Admin only.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PluginIdPath'
+      responses:
+        '204':
+          description: Plugin deleted successfully
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT bearer token obtained from /auth/login, /auth/register, or OAuth callback.
+  parameters:
+    CalculatorType:
+      name: type
+      in: path
+      required: true
+      description: Calculator type identifier (e.g. `molar-mass`, `equation-balance`).
+      schema:
+        type: string
+      example: molar-mass
+    CalculationIdPath:
+      name: id
+      in: path
+      required: true
+      description: UUID of the calculation
+      schema:
+        type: string
+        format: uuid
+    WorkspaceIdPath:
+      name: id
+      in: path
+      required: true
+      description: UUID of the workspace
+      schema:
+        type: string
+        format: uuid
+    MemberUserIdPath:
+      name: userId
+      in: path
+      required: true
+      description: UUID of the user to remove
+      schema:
+        type: string
+        format: uuid
+    CompoundIdPath:
+      name: id
+      in: path
+      required: true
+      description: UUID of the compound
+      schema:
+        type: string
+        format: uuid
+    APIKeyIdPath:
+      name: id
+      in: path
+      required: true
+      description: UUID of the API key
+      schema:
+        type: string
+        format: uuid
+    PluginIdPath:
+      name: id
+      in: path
+      required: true
+      description: UUID of the plugin
+      schema:
+        type: string
+        format: uuid
+    PageQuery:
+      name: page
+      in: query
+      required: false
+      description: 1-based page number (defaults to 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    LimitQuery:
+      name: limit
+      in: query
+      required: false
+      description: Number of items per page (1-100, defaults to 20)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    OffsetQuery:
+      name: offset
+      in: query
+      required: false
+      description: Number of items to skip (defaults to 0)
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+  responses:
+    ValidationError:
+      description: The request was malformed or failed validation (RFC 7807).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    UnauthorizedError:
+      description: Authentication is missing or invalid (RFC 7807).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ForbiddenError:
+      description: The authenticated user lacks permission for this resource (RFC 7807).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFoundError:
+      description: The requested resource was not found (RFC 7807).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ConflictError:
+      description: The request conflicts with the current state of the resource (RFC 7807).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    RateLimitError:
+      description: Rate limit exceeded (RFC 7807).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InternalError:
+      description: Unexpected server error (RFC 7807).
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  schemas:
+    Problem:
+      type: object
+      description: RFC 7807 Problem Details object.
+      properties:
+        type:
+          type: string
+          format: uri
+          description: URI identifying the problem type.
+          example: https://chemistry-utility.dev/errors/400
+        title:
+          type: string
+          description: Short human-readable summary of the problem.
+          example: Bad Request
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 400
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+          example: "missing required field: email"
+        instance:
+          type: string
+          description: Request path that produced the problem.
+          example: /api/v1/auth/register
+      required: [type, title, status, detail, instance]
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: alice@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: super-secret-123
+        name:
+          type: string
+          example: Alice Doe
+      required: [email, password, name]
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: alice@example.com
+        password:
+          type: string
+          format: password
+          example: super-secret-123
+      required: [email, password]
+    RefreshRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          description: A valid refresh token previously issued by the API.
+      required: [refresh_token]
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: alice@example.com
+      required: [email]
+    ResetPasswordRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Reset token issued by /auth/forgot-password.
+        password:
+          type: string
+          format: password
+          minLength: 8
+      required: [token, password]
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Alice Doe
+        email:
+          type: string
+          format: email
+          example: alice@new.example.com
+    CreateWorkspaceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Organic Chemistry Lab
+        description:
+          type: string
+          example: Shared workspace for organic synthesis calculations
+      required: [name]
+    UpdateWorkspaceRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    AddMemberRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          description: UUID of the user to add
+        role:
+          type: string
+          description: Role to assign to the new member
+          example: member
+      required: [user_id, role]
+    CreatePluginRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: crystal-structure
+        version:
+          type: string
+          example: 1.0.0
+        author:
+          type: string
+          example: Chemistry Utility Team
+        manifest:
+          type: string
+          description: Plugin manifest JSON or YAML (optional)
+      required: [name, version, author]
+    PublicUser:
+      type: object
+      description: User profile safe for API responses (no password hash).
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [student, researcher, educator, admin]
+        email_verified:
+          type: boolean
+        oauth_provider:
+          type: string
+          description: OAuth provider name, if account was created via OAuth.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, email, name, role, email_verified, created_at, updated_at]
+    TokenPair:
+      type: object
+      description: |
+        JWT access/refresh token pair. Field names reflect the serialized
+        form of `auth.TokenPair`.
+      properties:
+        AccessToken:
+          type: string
+          description: Short-lived JWT access token (15 minute default expiry).
+        RefreshToken:
+          type: string
+          description: Long-lived JWT refresh token (7 day default expiry).
+        AccessExpiry:
+          type: string
+          format: date-time
+          description: Expiration timestamp of the access token.
+        RefreshExpiry:
+          type: string
+          format: date-time
+          description: Expiration timestamp of the refresh token.
+      required: [AccessToken, RefreshToken, AccessExpiry, RefreshExpiry]
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/PublicUser'
+        tokens:
+          $ref: '#/components/schemas/TokenPair'
+      required: [user, tokens]
+    Calculation:
+      type: object
+      description: |
+        A saved calculation record. Field names reflect the serialized form
+        of `db.Calculation` (PascalCase JSON keys).
+      properties:
+        ID:
+          type: string
+          format: uuid
+        UserID:
+          type: string
+          format: uuid
+        CalculatorType:
+          type: string
+          example: molar-mass
+        Inputs:
+          type: string
+          description: JSON-encoded input map used for the calculation.
+        Result:
+          type: string
+          description: JSON-encoded calculation result.
+        Annotation:
+          type: string
+          description: User-provided annotation text.
+        Starred:
+          type: boolean
+        WorkspaceID:
+          type: string
+          format: uuid
+          description: UUID of the owning workspace, or the zero UUID if none.
+        CreatedAt:
+          type: string
+          format: date-time
+      required: [ID, UserID, CalculatorType, Inputs, Result, Starred, CreatedAt]
+    CalculationResult:
+      type: object
+      description: |
+        Result returned by a calculator. Reflects the serialized form of
+        `calculators.CalculationResult`.
+      properties:
+        Value:
+          type: number
+          description: Primary calculated value.
+          example: 18.015
+        Unit:
+          type: string
+          example: g/mol
+        Breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              Label:
+                type: string
+              Value:
+                type: number
+              Unit:
+                type: string
+        Steps:
+          type: array
+          items:
+            type: string
+        Metadata:
+          type: object
+          additionalProperties: true
+      required: [Value, Unit]
+    Workspace:
+      type: object
+      description: |
+        A collaborative workspace. Field names reflect the serialized form
+        of `db.Workspace` (PascalCase JSON keys).
+      properties:
+        ID:
+          type: string
+          format: uuid
+        Name:
+          type: string
+        Description:
+          type: string
+        OwnerID:
+          type: string
+          format: uuid
+        CreatedAt:
+          type: string
+          format: date-time
+        UpdatedAt:
+          type: string
+          format: date-time
+      required: [ID, Name, OwnerID, CreatedAt, UpdatedAt]
+    WorkspaceMember:
+      type: object
+      description: |
+        A workspace membership. Field names reflect the serialized form
+        of `db.WorkspaceMember` (PascalCase JSON keys).
+      properties:
+        WorkspaceID:
+          type: string
+          format: uuid
+        UserID:
+          type: string
+          format: uuid
+        Role:
+          type: string
+          example: owner
+        JoinedAt:
+          type: string
+          format: date-time
+      required: [WorkspaceID, UserID, Role, JoinedAt]
+    Compound:
+      type: object
+      description: |
+        A chemical compound record. Field names reflect the serialized form
+        of `db.Compound` (PascalCase JSON keys).
+      properties:
+        ID:
+          type: string
+          format: uuid
+        Name:
+          type: string
+          example: Water
+        Formula:
+          type: string
+          example: H2O
+        CASNumber:
+          type: string
+          example: 7732-18-5
+        SMILES:
+          type: string
+          example: O
+        InChI:
+          type: string
+        MolarMass:
+          type: number
+          example: 18.015
+        Properties:
+          type: string
+          description: JSON-encoded additional properties.
+        Source:
+          type: string
+          description: Data source (e.g. PubChem, manual).
+        CreatedAt:
+          type: string
+          format: date-time
+        UpdatedAt:
+          type: string
+          format: date-time
+      required: [ID, Name, Formula, MolarMass, CreatedAt, UpdatedAt]
+    APIKey:
+      type: object
+      description: |
+        An API key record. The raw `key` value is only present in the
+        response to `POST /api-keys` and is omitted on list responses.
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: CI pipeline key
+        key:
+          type: string
+          description: Raw API key value. Only present on creation.
+          example: cu_550e8400-e29b-41d4-a716-446655440000
+        created_at:
+          type: string
+          format: date-time
+      required: [id, name, created_at]
+    Plugin:
+      type: object
+      description: |
+        A plugin record. Field names reflect the serialized form of
+        `db.Plugin` (PascalCase JSON keys).
+      properties:
+        ID:
+          type: string
+          format: uuid
+        Name:
+          type: string
+          example: crystal-structure
+        Version:
+          type: string
+          example: 1.0.0
+        Author:
+          type: string
+        Manifest:
+          type: string
+          description: Plugin manifest content (JSON or YAML).
+        Enabled:
+          type: boolean
+        CreatedAt:
+          type: string
+          format: date-time
+      required: [ID, Name, Version, Author, Enabled, CreatedAt]

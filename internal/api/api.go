@@ -80,6 +80,13 @@ func (a *API) Router() *gin.Engine {
 	r.Use(gin.Recovery())
 	r.Use(a.CORSMiddleware(a.cfg.CORSAllowedOrigins))
 
+	// API documentation (Swagger UI + OpenAPI spec) at /api/docs
+	docsGroup := r.Group("/api/docs")
+	{
+		docsGroup.GET("", ServeDocs)
+		docsGroup.GET("/openapi.yaml", ServeSpec)
+	}
+
 	v1 := r.Group("/api/v1")
 
 	// Public rate-limited routes

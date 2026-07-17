@@ -127,6 +127,16 @@ func main() {
 		c.Request.URL.Path = "/api/v1/" + c.Param("path") + "/" + c.Param("sub") + "/" + c.Param("id") + "/" + c.Param("action")
 		apiRouter.HandleContext(c)
 	})
+	// Proxy the Swagger UI and OpenAPI spec to the API router so the docs
+	// routes registered in api.Router() are reachable through this server.
+	r.GET("/api/docs", func(c *gin.Context) {
+		c.Request.URL.Path = "/api/docs"
+		apiRouter.HandleContext(c)
+	})
+	r.GET("/api/docs/openapi.yaml", func(c *gin.Context) {
+		c.Request.URL.Path = "/api/docs/openapi.yaml"
+		apiRouter.HandleContext(c)
+	})
 	r.Static("/assets", filepath.Join(distDir, "assets"))
 	r.Static("/src", filepath.Join(distDir, "src"))
 	r.Static("/wailsjs", filepath.Join(distDir, "wailsjs"))
