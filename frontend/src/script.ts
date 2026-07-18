@@ -14,13 +14,22 @@ import {CompoundSearchUI} from "./modules/compoundSearchUI.js";
 import {WorkspaceManager} from "./modules/workspaceManager.js";
 import {ExperimentLogManager} from "./modules/experimentLog.js";
 import {DataPortabilityManager} from "./modules/dataPortabilityManager.js";
+import {WebModeGuard} from "./modules/webModeGuard.js";
 document.addEventListener("DOMContentLoaded", function(): void{
+	// Apply web-mode class to <html> before any feature init so CSS can
+	// hide backend-dependent cards and JS guards can skip their setup.
+	WebModeGuard.getInstance().apply();
 	new UIHandlerInitializer().initialize();
 	initializeAppNav();
 	ValidationUIManager.getInstance().attachBlurValidators();
-	BatchCalculator.getInstance().init();
+	// Batch calculation and compound search depend on the Go backend API
+	// (/api/v1/*). They must not initialize in web mode (browser without
+	// Wails) because their requests would all fail.
+	if (!WebModeGuard.getInstance().isWebMode) {
+		BatchCalculator.getInstance().init();
+		CompoundSearchUI.getInstance().init();
+	}
 	MolecularViewer.getInstance().init();
-	CompoundSearchUI.getInstance().init();
 	try {
 		WorkspaceManager.getInstance().init();
 	} catch (e) {
