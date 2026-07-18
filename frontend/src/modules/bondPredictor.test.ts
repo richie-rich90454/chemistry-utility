@@ -113,4 +113,48 @@ describe("bondPredictor", () => {
         expect(html).toContain("Error");
         expect(html).toContain("enter both element symbols");
     });
+
+    it("should not round deltaEN up to 1.7 threshold (uses raw value for comparison)", () => {
+        // Two non-metals with deltaEN = 1.696, which rounds to "1.70" for display
+        // but the raw value (1.696) is below the 1.7 ionic threshold.
+        // The buggy code parses the rounded string and misclassifies as Ionic.
+        const boundaryElements: ChemicalElement[] = [
+            {
+                atomicNumber: 900,
+                symbol: "Xa",
+                name: "TestA",
+                atomicMass: 1,
+                type: "non-metal",
+                period: 2,
+                group: 14,
+                electronegativity: 1.000,
+                electronAffinity: null,
+                atomicRadius: null,
+                ionizationEnergy: null,
+                valenceElectrons: 4,
+                totalElectrons: 4,
+            },
+            {
+                atomicNumber: 901,
+                symbol: "Xb",
+                name: "TestB",
+                atomicMass: 1,
+                type: "non-metal",
+                period: 2,
+                group: 15,
+                electronegativity: 2.696,
+                electronAffinity: null,
+                atomicRadius: null,
+                ionizationEnergy: null,
+                valenceElectrons: 5,
+                totalElectrons: 5,
+            },
+        ];
+        setOrCreateInput("element1-input", "Xa", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "Xb", "bond-predictor", "text");
+        predictBondType(boundaryElements);
+        const html = getResultHTML("bond-type-result");
+        expect(html).toContain("Polar Covalent");
+        expect(html).not.toContain("Ionic");
+    });
 });

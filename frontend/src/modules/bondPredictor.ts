@@ -51,7 +51,8 @@ export class BondTypePredictor extends Calculator {
 			this.resultDisplay.showResult("<p>Bond prediction not possible due to unavailable electronegativity data</p>");
 			return;
 		}
-		let deltaEN = this.numberFormatter.format(Math.abs(en1 - en2), 2);
+		let deltaENValue = Math.abs(en1 - en2);
+		let deltaEN = this.numberFormatter.format(deltaENValue, 2);
 		let type1 = element1.type.toLowerCase();
 		let type2 = element2.type.toLowerCase();
 		let isMetal1 = (type1 == "lanthanide" || type1 == "actinide" || (type1.indexOf("metal") != -1 && type1 != "metalloid" && type1 != "non-metal"));
@@ -60,10 +61,10 @@ export class BondTypePredictor extends Calculator {
 		if (isMetal1 && isMetal2) {
 			bondType = "Metallic";
 		}
-		else if (isMetal1 != isMetal2 || parseFloat(deltaEN) >= 1.7) {
+		else if (isMetal1 != isMetal2 || deltaENValue >= 1.7) {
 			bondType = "Ionic";
 		}
-		else if (parseFloat(deltaEN) >= .4) {
+		else if (deltaENValue >= .4) {
 			bondType = "Polar Covalent";
 		}
 		else {
