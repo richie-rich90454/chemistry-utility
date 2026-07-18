@@ -174,6 +174,17 @@ describe("calculatePKaPKb", () => {
         const text = getResultText("pka-pkb-result");
         expect(text).toContain("Error");
     });
+
+    it("should display non-zero Kw mantissa (not 0.0000 x 10^-14)", () => {
+        createSelect("pka-pkb-input-type", "Ka", ["Ka", "pKa", "Kb", "pKb"], "pka-pkb-calc");
+        createInput("pka-pkb-input-value", "0.000018", "pka-pkb-calc");
+
+        calculatePKaPKb();
+
+        const text = getResultText("pka-pkb-result");
+        expect(text).not.toContain("Kw = 0.0000");
+        expect(text).toContain("Kw = 1.0000");
+    });
 });
 
 describe("calculateKsp", () => {

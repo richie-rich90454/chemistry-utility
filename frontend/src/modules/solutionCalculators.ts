@@ -213,7 +213,7 @@ export class PKaPKbCalculator extends Calculator {
             "<p>pK<sub>a</sub> = " + this.numberFormatter.format(pKa, 4) + "</p>" +
             "<p>K<sub>b</sub> = " + this.numberFormatter.format(Kb, 6) + "</p>" +
             "<p>pK<sub>b</sub> = " + this.numberFormatter.format(pKb, 4) + "</p>" +
-            "<p>K<sub>a</sub> &times; K<sub>b</sub> = K<sub>w</sub> = " + this.numberFormatter.format(Kw, 4) + " &times; 10<sup>-14</sup></p>"
+            "<p>K<sub>a</sub> &times; K<sub>b</sub> = K<sub>w</sub> = " + this.numberFormatter.format(Kw / 1e-14, 4) + " &times; 10<sup>-14</sup></p>"
         );
     }
 }
