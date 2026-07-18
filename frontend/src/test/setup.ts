@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import "@testing-library/jest-dom/vitest";
 
 // Mock gsap (required by appNavigationStrategy transitively imported via navigationManager)
 // Hoisted to top level by vitest; safe to call unconditionally.
