@@ -411,7 +411,7 @@ describe("Step-by-step Explanation", ()=>{
 		const result = balanceEquation("H2 + O2 -> H2O", 10000, true) as BalanceResult;
 		expect(result.equation).toBe("2H2 + O2 -> 2H2O");
 		expect(result.explanation).toBeDefined();
-		expect(result.explanation.method).toBe("Gaussian elimination over rationals");
+		expect(result.explanation.method).toBe("Gaussian elimination over rationals with backtracking search");
 		expect(result.explanation.steps.length).toBeGreaterThan(0);
 		expect(result.explanation.coefficients).toEqual([2, 1, 2]);
 	});
@@ -422,12 +422,14 @@ describe("Step-by-step Explanation", ()=>{
 	});
 	it("explanation steps describe the balancing process", ()=>{
 		const result = balanceEquation("C3H8 + O2 -> CO2 + H2O", 10000, true) as BalanceResult;
-		expect(result.explanation.steps.length).toBe(4);
+		expect(result.explanation.steps.length).toBe(6);
 		expect(result.explanation.steps[0]).toContain("Parsed");
 		expect(result.explanation.steps[0]).toContain("reactants");
-		expect(result.explanation.steps[1]).toContain("matrix");
-		expect(result.explanation.steps[2]).toContain("Gaussian");
-		expect(result.explanation.steps[3]).toContain("Coefficients");
+		expect(result.explanation.steps[1]).toContain("elements");
+		expect(result.explanation.steps[2]).toContain("matrix");
+		expect(result.explanation.steps[3]).toContain("Gaussian");
+		expect(result.explanation.steps[4]).toContain("backtracking");
+		expect(result.explanation.steps[5]).toContain("coefficients");
 		expect(result.explanation.coefficients).toEqual([1, 5, 3, 4]);
 	});
 	it("explain works for equations with large coefficients", ()=>{

@@ -322,12 +322,14 @@ export class EquationBalancer {
 		let balanced=fmt(reactants, 0)+" -> "+fmt(products, reactants.length);
 		if (explain){
 			let stepList: string[]=[];
-			stepList.push("Parsed "+reactants.length+" reactants and "+products.length+" products");
-			stepList.push("Built element matrix ("+elements.length+" elements x "+all.length+" species)");
-			stepList.push("Solved via Gaussian elimination");
-			stepList.push("Coefficients: "+coeffs.join(", "));
+			stepList.push("Parsed "+reactants.length+" reactants ("+reactants.join(", ")+") and "+products.length+" products ("+products.join(", ")+")");
+			stepList.push("Tracked "+elements.length+" elements: "+elements.join(", "));
+			stepList.push("Built element matrix ("+elements.length+" elements x "+all.length+" species) with reactant counts positive and product counts negative");
+			stepList.push("Computed rational nullspace via Gaussian elimination over the rationals");
+			stepList.push("Enumerated smallest positive integer solution via backtracking search bounded by "+maxCoefficient);
+			stepList.push("Final coefficients: ["+coeffs.join(", ")+"]");
 			let explanation: BalanceExplanation={
-				method: "Gaussian elimination over rationals",
+				method: "Gaussian elimination over rationals with backtracking search",
 				steps: stepList,
 				coefficients: coeffs
 			};
