@@ -1,67 +1,68 @@
 /* ═══════════════════════════════════════════════════════════════
-   Chemistry Utility — Material Design 3 Design System
+   Chemistry Utility — Lab Parchment Design System
+   Forest-green primary, burnt-sienna accent, parchment surfaces.
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── MD3 Light Theme Tokens ── */
+/* ── Lab Parchment Light Theme Tokens ── */
 :root{
     color-scheme: light;
-    /* Primary */
-    --md-primary: #1a73e8;
-    --md-on-primary: #ffffff;
-    --md-primary-container: #d3e3fd;
-    --md-on-primary-container: #041e49;
-    /* Secondary */
-    --md-secondary: #5f6368;
-    --md-on-secondary: #ffffff;
-    --md-secondary-container: #e8eaed;
-    --md-on-secondary-container: #1c1f23;
-    /* Tertiary */
-    --md-tertiary: #00897b;
+    /* Primary — Forest Green */
+    --md-primary: #2d5a3d;
+    --md-on-primary: #f5f1e8;
+    --md-primary-container: #c8e6d4;
+    --md-on-primary-container: #0a2415;
+    /* Secondary — Deep Teal */
+    --md-secondary: #0f3a3a;
+    --md-on-secondary: #f5f1e8;
+    --md-secondary-container: #d0e8e8;
+    --md-on-secondary-container: #051a1a;
+    /* Tertiary — Burnt Sienna */
+    --md-tertiary: #c8553d;
     --md-on-tertiary: #ffffff;
-    --md-tertiary-container: #bdf1e8;
-    --md-on-tertiary-container: #00201c;
+    --md-tertiary-container: #f4d5cc;
+    --md-on-tertiary-container: #3d1208;
     /* Error */
     --md-error: #b3261e;
     --md-on-error: #ffffff;
     --md-error-container: #f9dedc;
     --md-on-error-container: #410e0b;
-    /* Success */
-    --md-success: #1e8e3e;
-    --md-on-success: #ffffff;
-    --md-success-container: #c4eed0;
-    --md-on-success-container: #0b3d1c;
-    /* Warning */
-    --md-warning: #f9ab00;
-    --md-on-warning: #3e2e00;
-    --md-warning-container: #fff4cc;
-    --md-on-warning-container: #3e2e00;
-    /* Surfaces */
+    /* Success — Forest Green */
+    --md-success: #2d5a3d;
+    --md-on-success: #f5f1e8;
+    --md-success-container: #c8e6d4;
+    --md-on-success-container: #0a2415;
+    /* Warning — Amber */
+    --md-warning: #e0a458;
+    --md-on-warning: #1a1a1a;
+    --md-warning-container: #faecd0;
+    --md-on-warning-container: #3d2a05;
+    /* Surfaces — Parchment */
     --md-surface: #ffffff;
-    --md-surface-dim: #d9d9d9;
-    --md-surface-bright: #f9f9f9;
+    --md-surface-dim: #e8e3d6;
+    --md-surface-bright: #fffdf8;
     --md-surface-container-lowest: #ffffff;
-    --md-surface-container-low: #f3f3f3;
-    --md-surface-container: #eeeeee;
-    --md-surface-container-high: #e8e8e8;
-    --md-surface-container-highest: #e2e2e2;
-    --md-on-surface: #1c1b1f;
-    --md-on-surface-variant: #49454f;
-    --md-surface-variant: #e1e2ec;
-    --md-inverse-surface: #313033;
-    --md-inverse-on-surface: #f4eff4;
+    --md-surface-container-low: #f5f1e8;
+    --md-surface-container: #efeadd;
+    --md-surface-container-high: #e8e3d6;
+    --md-surface-container-highest: #e2ddcf;
+    --md-on-surface: #1a1a1a;
+    --md-on-surface-variant: #4a4640;
+    --md-surface-variant: #d6cfc0;
+    --md-inverse-surface: #2a2620;
+    --md-inverse-on-surface: #f0ebde;
     /* Outlines */
-    --md-outline: #79747e;
-    --md-outline-variant: #cac4d0;
-    /* Background */
-    --md-background: #fdfbff;
-    --md-on-background: #1c1b1f;
+    --md-outline: #8a8478;
+    --md-outline-variant: #d6cfc0;
+    /* Background — Parchment */
+    --md-background: #f5f1e8;
+    --md-on-background: #1a1a1a;
     /* Form element overrides — explicit colors that bypass color-scheme */
     --md-input-bg: #ffffff;
-    --md-input-text: #1c1b1f;
-    --md-input-border: #79747e;
-    --md-input-placeholder: #49454f;
-    --md-input-focus-border: #1a73e8;
-    --md-input-hover-border: #1c1b1f;
+    --md-input-text: #1a1a1a;
+    --md-input-border: #8a8478;
+    --md-input-placeholder: #4a4640;
+    --md-input-focus-border: #2d5a3d;
+    --md-input-hover-border: #1a1a1a;
     /* Scrim */
     --md-scrim: rgba(0,0,0,0.4);
     /* Elevation shadows (MD3) */
@@ -107,102 +108,121 @@
     --sidebar-width: 256px;
     --sidebar-collapsed-width: 80px;
     /* State layers (MD3) */
-    --md-state-hover: rgba(28,27,31,0.08);
-    --md-state-focus: rgba(28,27,31,0.12);
-    --md-state-pressed: rgba(28,27,31,0.12);
-    --md-state-dragged: rgba(28,27,31,0.16);
+    --md-state-hover: rgba(26,26,26,0.08);
+    --md-state-focus: rgba(26,26,26,0.12);
+    --md-state-pressed: rgba(26,26,26,0.12);
+    --md-state-dragged: rgba(26,26,26,0.16);
 }
 
-/* ── MD3 Dark Theme Tokens ── */
+/* ── Lab Parchment Dark Theme Tokens ── */
 .dark{
     color-scheme: dark;
-    --md-primary: #a8c7fa;
-    --md-on-primary: #062e6f;
-    --md-primary-container: #0842a0;
-    --md-on-primary-container: #d3e3fd;
-    --md-secondary: #c4c6d0;
-    --md-on-secondary: #2e3038;
-    --md-secondary-container: #44474f;
-    --md-on-secondary-container: #e0e1ec;
-    --md-tertiary: #82d5c6;
-    --md-on-tertiary: #003731;
-    --md-tertiary-container: #004f48;
-    --md-on-tertiary-container: #9ef2e2;
+    /* Primary — Forest Green (lightened for dark surfaces) */
+    --md-primary: #7fb89a;
+    --md-on-primary: #0a2415;
+    --md-primary-container: #1f4530;
+    --md-on-primary-container: #c8e6d4;
+    /* Secondary — Deep Teal (lightened for dark surfaces) */
+    --md-secondary: #7ab8b8;
+    --md-on-secondary: #051a1a;
+    --md-secondary-container: #1f4d4d;
+    --md-on-secondary-container: #d0e8e8;
+    /* Tertiary — Burnt Sienna (lightened for dark surfaces) */
+    --md-tertiary: #e8967f;
+    --md-on-tertiary: #3d1208;
+    --md-tertiary-container: #5d2618;
+    --md-on-tertiary-container: #f4d5cc;
+    /* Error */
     --md-error: #f2b8b5;
     --md-on-error: #601410;
     --md-error-container: #8c1d18;
     --md-on-error-container: #f9dedc;
-    --md-success: #81c995;
-    --md-on-success: #003d17;
-    --md-success-container: #005224;
-    --md-on-success-container: #a4f5b2;
-    --md-warning: #fdd663;
-    --md-on-warning: #3e2e00;
-    --md-warning-container: #4a3d00;
-    --md-on-warning-container: #fdd663;
-    --md-surface: #1c1b1f;
-    --md-surface-dim: #1c1b1f;
-    --md-surface-bright: #37353a;
-    --md-surface-container-lowest: #0f0d13;
-    --md-surface-container-low: #1c1b1f;
-    --md-surface-container: #211f26;
-    --md-surface-container-high: #2b2930;
-    --md-surface-container-highest: #36343b;
-    --md-on-surface: #e6e1e5;
-    --md-on-surface-variant: #cac4d0;
-    --md-surface-variant: #49454f;
-    --md-inverse-surface: #e6e1e5;
-    --md-inverse-on-surface: #313033;
+    /* Success — Forest Green (lightened) */
+    --md-success: #7fb89a;
+    --md-on-success: #0a2415;
+    --md-success-container: #1f4530;
+    --md-on-success-container: #c8e6d4;
+    /* Warning — Amber (lightened) */
+    --md-warning: #e8c896;
+    --md-on-warning: #3d2a05;
+    --md-warning-container: #5d4108;
+    --md-on-warning-container: #faecd0;
+    /* Surfaces — Charcoal with parchment undertone */
+    --md-surface: #1a1a1a;
+    --md-surface-dim: #141414;
+    --md-surface-bright: #2a2620;
+    --md-surface-container-lowest: #0f0f0f;
+    --md-surface-container-low: #1a1a1a;
+    --md-surface-container: #1f1f1d;
+    --md-surface-container-high: #252523;
+    --md-surface-container-highest: #2a2a28;
+    --md-on-surface: #f5f1e8;
+    --md-on-surface-variant: #d6cfc0;
+    --md-surface-variant: #4a4640;
+    --md-inverse-surface: #f5f1e8;
+    --md-inverse-on-surface: #2a2620;
+    /* Outlines */
     --md-outline: #938f99;
-    --md-outline-variant: #49454f;
-    --md-background: #1c1b1f;
-    --md-on-background: #e6e1e5;
+    --md-outline-variant: #4a4640;
+    /* Background — Charcoal */
+    --md-background: #1a1a1a;
+    --md-on-background: #f5f1e8;
     /* Form element overrides — explicit dark colors */
-    --md-input-bg: #1c1b1f;
-    --md-input-text: #e6e1e5;
+    --md-input-bg: #1a1a1a;
+    --md-input-text: #f5f1e8;
     --md-input-border: #938f99;
-    --md-input-placeholder: #cac4d0;
-    --md-input-focus-border: #a8c7fa;
-    --md-input-hover-border: #e6e1e5;
+    --md-input-placeholder: #d6cfc0;
+    --md-input-focus-border: #7fb89a;
+    --md-input-hover-border: #f5f1e8;
+    /* Scrim */
     --md-scrim: rgba(0,0,0,0.6);
+    /* Elevation shadows (MD3) */
     --md-elevation-1: 0 1px 3px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
     --md-elevation-2: 0 2px 6px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
     --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.5);
     --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,.4), 0 2px 3px rgba(0,0,0,.5);
     --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,.4), 0 4px 4px rgba(0,0,0,.5);
-    --md-state-hover: rgba(230,225,229,0.08);
-    --md-state-focus: rgba(230,225,229,0.12);
-    --md-state-pressed: rgba(230,225,229,0.12);
-    --md-state-dragged: rgba(230,225,229,0.16);
+    /* State layers (MD3) */
+    --md-state-hover: rgba(245,241,232,0.08);
+    --md-state-focus: rgba(245,241,232,0.12);
+    --md-state-pressed: rgba(245,241,232,0.12);
+    --md-state-dragged: rgba(245,241,232,0.16);
 }
 
-/* ── MD3 AMOLED Black Theme Tokens ── */
+/* ── Lab Parchment AMOLED Black Theme Tokens ── */
 .amoled{
     color-scheme: dark;
-    --md-primary: #a8c7fa;
-    --md-on-primary: #062e6f;
-    --md-primary-container: #0842a0;
-    --md-on-primary-container: #d3e3fd;
-    --md-secondary: #c4c6d0;
-    --md-on-secondary: #2e3038;
-    --md-secondary-container: #1a1a1a;
-    --md-on-secondary-container: #e0e1ec;
-    --md-tertiary: #82d5c6;
-    --md-on-tertiary: #003731;
-    --md-tertiary-container: #004f48;
-    --md-on-tertiary-container: #9ef2e2;
+    /* Primary — Forest Green (lightened for AMOLED surfaces) */
+    --md-primary: #7fb89a;
+    --md-on-primary: #0a2415;
+    --md-primary-container: #1f4530;
+    --md-on-primary-container: #c8e6d4;
+    /* Secondary — Deep Teal (lightened for AMOLED surfaces) */
+    --md-secondary: #7ab8b8;
+    --md-on-secondary: #051a1a;
+    --md-secondary-container: #1f4d4d;
+    --md-on-secondary-container: #d0e8e8;
+    /* Tertiary — Burnt Sienna (lightened for AMOLED surfaces) */
+    --md-tertiary: #e8967f;
+    --md-on-tertiary: #3d1208;
+    --md-tertiary-container: #5d2618;
+    --md-on-tertiary-container: #f4d5cc;
+    /* Error */
     --md-error: #f2b8b5;
     --md-on-error: #601410;
     --md-error-container: #8c1d18;
     --md-on-error-container: #f9dedc;
-    --md-success: #81c995;
-    --md-on-success: #003d17;
-    --md-success-container: #005224;
-    --md-on-success-container: #a4f5b2;
-    --md-warning: #fdd663;
-    --md-on-warning: #3e2e00;
-    --md-warning-container: #4a3d00;
-    --md-on-warning-container: #fdd663;
+    /* Success — Forest Green (lightened) */
+    --md-success: #7fb89a;
+    --md-on-success: #0a2415;
+    --md-success-container: #1f4530;
+    --md-on-success-container: #c8e6d4;
+    /* Warning — Amber (lightened) */
+    --md-warning: #e8c896;
+    --md-on-warning: #3d2a05;
+    --md-warning-container: #5d4108;
+    --md-on-warning-container: #faecd0;
+    /* Surfaces — Pure black for AMOLED displays */
     --md-surface: #000000;
     --md-surface-dim: #000000;
     --md-surface-bright: #1a1a1a;
@@ -211,32 +231,37 @@
     --md-surface-container: #0a0a0a;
     --md-surface-container-high: #141414;
     --md-surface-container-highest: #1e1e1e;
-    --md-on-surface: #e6e1e5;
-    --md-on-surface-variant: #cac4d0;
-    --md-surface-variant: #49454f;
-    --md-inverse-surface: #e6e1e5;
-    --md-inverse-on-surface: #313033;
+    --md-on-surface: #f5f1e8;
+    --md-on-surface-variant: #d6cfc0;
+    --md-surface-variant: #4a4640;
+    --md-inverse-surface: #f5f1e8;
+    --md-inverse-on-surface: #2a2620;
+    /* Outlines */
     --md-outline: #938f99;
-    --md-outline-variant: #49454f;
+    --md-outline-variant: #4a4640;
+    /* Background — Pure black */
     --md-background: #000000;
-    --md-on-background: #e6e1e5;
+    --md-on-background: #f5f1e8;
     /* Form element overrides — AMOLED black colors */
     --md-input-bg: #000000;
-    --md-input-text: #e6e1e5;
+    --md-input-text: #f5f1e8;
     --md-input-border: #938f99;
-    --md-input-placeholder: #cac4d0;
-    --md-input-focus-border: #a8c7fa;
-    --md-input-hover-border: #e6e1e5;
+    --md-input-placeholder: #d6cfc0;
+    --md-input-focus-border: #7fb89a;
+    --md-input-hover-border: #f5f1e8;
+    /* Scrim */
     --md-scrim: rgba(0,0,0,0.8);
+    /* Elevation shadows (MD3) */
     --md-elevation-1: 0 1px 3px rgba(0,0,0,.7), 0 1px 2px rgba(0,0,0,.6);
     --md-elevation-2: 0 2px 6px rgba(0,0,0,.7), 0 1px 2px rgba(0,0,0,.6);
     --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,.6), 0 1px 3px rgba(0,0,0,.7);
     --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,.6), 0 2px 3px rgba(0,0,0,.7);
     --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,.6), 0 4px 4px rgba(0,0,0,.7);
-    --md-state-hover: rgba(230,225,229,0.08);
-    --md-state-focus: rgba(230,225,229,0.12);
-    --md-state-pressed: rgba(230,225,229,0.12);
-    --md-state-dragged: rgba(230,225,229,0.16);
+    /* State layers (MD3) */
+    --md-state-hover: rgba(245,241,232,0.08);
+    --md-state-focus: rgba(245,241,232,0.12);
+    --md-state-pressed: rgba(245,241,232,0.12);
+    --md-state-dragged: rgba(245,241,232,0.16);
 }
 
 /* Explicit light mode class */
@@ -248,64 +273,76 @@
 @media (prefers-color-scheme: dark){
     :root:not(.light){
         color-scheme: dark;
-        --md-primary: #a8c7fa;
-        --md-on-primary: #062e6f;
-        --md-primary-container: #0842a0;
-        --md-on-primary-container: #d3e3fd;
-        --md-secondary: #c4c6d0;
-        --md-on-secondary: #2e3038;
-        --md-secondary-container: #44474f;
-        --md-on-secondary-container: #e0e1ec;
-        --md-tertiary: #82d5c6;
-        --md-on-tertiary: #003731;
-        --md-tertiary-container: #004f48;
-        --md-on-tertiary-container: #9ef2e2;
+        /* Primary — Forest Green (lightened for dark surfaces) */
+        --md-primary: #7fb89a;
+        --md-on-primary: #0a2415;
+        --md-primary-container: #1f4530;
+        --md-on-primary-container: #c8e6d4;
+        /* Secondary — Deep Teal (lightened for dark surfaces) */
+        --md-secondary: #7ab8b8;
+        --md-on-secondary: #051a1a;
+        --md-secondary-container: #1f4d4d;
+        --md-on-secondary-container: #d0e8e8;
+        /* Tertiary — Burnt Sienna (lightened for dark surfaces) */
+        --md-tertiary: #e8967f;
+        --md-on-tertiary: #3d1208;
+        --md-tertiary-container: #5d2618;
+        --md-on-tertiary-container: #f4d5cc;
+        /* Error */
         --md-error: #f2b8b5;
         --md-on-error: #601410;
         --md-error-container: #8c1d18;
         --md-on-error-container: #f9dedc;
-        --md-success: #81c995;
-        --md-on-success: #003d17;
-        --md-success-container: #005224;
-        --md-on-success-container: #a4f5b2;
-        --md-warning: #fdd663;
-        --md-on-warning: #3e2e00;
-        --md-warning-container: #4a3d00;
-        --md-on-warning-container: #fdd663;
-        --md-surface: #1c1b1f;
-        --md-surface-dim: #1c1b1f;
-        --md-surface-bright: #37353a;
-        --md-surface-container-lowest: #0f0d13;
-        --md-surface-container-low: #1c1b1f;
-        --md-surface-container: #211f26;
-        --md-surface-container-high: #2b2930;
-        --md-surface-container-highest: #36343b;
-        --md-on-surface: #e6e1e5;
-        --md-on-surface-variant: #cac4d0;
-        --md-surface-variant: #49454f;
-        --md-inverse-surface: #e6e1e5;
-        --md-inverse-on-surface: #313033;
+        /* Success — Forest Green (lightened) */
+        --md-success: #7fb89a;
+        --md-on-success: #0a2415;
+        --md-success-container: #1f4530;
+        --md-on-success-container: #c8e6d4;
+        /* Warning — Amber (lightened) */
+        --md-warning: #e8c896;
+        --md-on-warning: #3d2a05;
+        --md-warning-container: #5d4108;
+        --md-on-warning-container: #faecd0;
+        /* Surfaces — Charcoal with parchment undertone */
+        --md-surface: #1a1a1a;
+        --md-surface-dim: #141414;
+        --md-surface-bright: #2a2620;
+        --md-surface-container-lowest: #0f0f0f;
+        --md-surface-container-low: #1a1a1a;
+        --md-surface-container: #1f1f1d;
+        --md-surface-container-high: #252523;
+        --md-surface-container-highest: #2a2a28;
+        --md-on-surface: #f5f1e8;
+        --md-on-surface-variant: #d6cfc0;
+        --md-surface-variant: #4a4640;
+        --md-inverse-surface: #f5f1e8;
+        --md-inverse-on-surface: #2a2620;
+        /* Outlines */
         --md-outline: #938f99;
-        --md-outline-variant: #49454f;
-        --md-background: #1c1b1f;
-        --md-on-background: #e6e1e5;
+        --md-outline-variant: #4a4640;
+        /* Background — Charcoal */
+        --md-background: #1a1a1a;
+        --md-on-background: #f5f1e8;
         /* Form element overrides — explicit dark colors */
-        --md-input-bg: #1c1b1f;
-        --md-input-text: #e6e1e5;
+        --md-input-bg: #1a1a1a;
+        --md-input-text: #f5f1e8;
         --md-input-border: #938f99;
-        --md-input-placeholder: #cac4d0;
-        --md-input-focus-border: #a8c7fa;
-        --md-input-hover-border: #e6e1e5;
+        --md-input-placeholder: #d6cfc0;
+        --md-input-focus-border: #7fb89a;
+        --md-input-hover-border: #f5f1e8;
+        /* Scrim */
         --md-scrim: rgba(0,0,0,0.6);
+        /* Elevation shadows (MD3) */
         --md-elevation-1: 0 1px 3px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
         --md-elevation-2: 0 2px 6px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
         --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.5);
         --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,.4), 0 2px 3px rgba(0,0,0,.5);
         --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,.4), 0 4px 4px rgba(0,0,0,.5);
-        --md-state-hover: rgba(230,225,229,0.08);
-        --md-state-focus: rgba(230,225,229,0.12);
-        --md-state-pressed: rgba(230,225,229,0.12);
-        --md-state-dragged: rgba(230,225,229,0.16);
+        /* State layers (MD3) */
+        --md-state-hover: rgba(245,241,232,0.08);
+        --md-state-focus: rgba(245,241,232,0.12);
+        --md-state-pressed: rgba(245,241,232,0.12);
+        --md-state-dragged: rgba(245,241,232,0.16);
     }
 }
 
@@ -2747,7 +2784,7 @@ a{color:var(--md-primary)}
 .ptable-cell.ptable-heatmap-cell .ptable-cell-symbol,
 .ptable-cell.ptable-heatmap-cell .ptable-cell-number,
 .ptable-cell.ptable-heatmap-cell .ptable-cell-mass{
-    color: #1c1b1f;
+    color: #1a1a1a;
     opacity: 1;
 }
 .dark .ptable-cell.ptable-heatmap-cell .ptable-cell-symbol,
