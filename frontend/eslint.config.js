@@ -1,5 +1,6 @@
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsparser from "@typescript-eslint/parser";
+import solid from "eslint-plugin-solid";
 
 export default [
 	{
@@ -24,6 +25,13 @@ export default [
 			"@typescript-eslint/no-unsafe-member-access": "off",
 			"@typescript-eslint/no-unsafe-return": "off",
 			"@typescript-eslint/no-unsafe-argument": "off",
+		},
+	},
+	{
+		files: ["src/**/*.{tsx,jsx}"],
+		...solid.configs["flat/typescript"],
+		languageOptions: {
+			parser: tsparser,
 		},
 	},
 	{
