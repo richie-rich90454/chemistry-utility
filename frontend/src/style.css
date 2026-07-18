@@ -3843,3 +3843,13 @@ a{color:var(--md-primary)}
         border-left-color: #999 !important;
     }
 }
+
+/* ── Web Mode: hide features that require the Go backend ──
+   When the app runs in a browser without the Wails bridge, the
+   /api/v1/* endpoints are unavailable. The WebModeGuard applies
+   the `web-mode` class to <html>; CSS then hides any element
+   marked with [data-requires-backend] (nav entries + cards). */
+.web-mode [data-requires-backend]{
+    display: none !important;
+}
+
