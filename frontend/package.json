@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
-    "check-bundle-size": "node scripts/check-bundle-size.mjs"
+    "check-bundle-size": "node scripts/check-bundle-size.mjs",
+    "cli": "tsx src/cli/index.ts"
   },
   "dependencies": {
     "chart.js": "^4.5.1",
