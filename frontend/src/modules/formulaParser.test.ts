@@ -68,9 +68,8 @@ describe("calculateMolarMass", () => {
         expect(mass).toBeCloseTo(55.845, 2);
     });
 
-    it("returns 0 for empty string", () => {
-        const mass = calculateMolarMass("", testElements);
-        expect(mass).toBe(0);
+    it("throws for empty string", () => {
+        expect(() => calculateMolarMass("", testElements)).toThrow("Empty formula");
     });
 
     it("throws for unmatched opening parenthesis", () => {
