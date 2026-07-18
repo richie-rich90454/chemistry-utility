@@ -522,4 +522,20 @@ describe("Common Ion Effect - solubility formula", () => {
 		expect(html).toContain("Molar Solubility (with common ion) = 0.000103 M");
 		expect(html).not.toContain("Molar Solubility (with common ion) = 0.000309 M");
 	});
+
+	it("rejects zero common ion concentration instead of returning Infinity", () => {
+		// With commonIonConc = 0 the formula Ksp / commonIonConc^stoichB divides by
+		// zero and yields Infinity, which is meaningless for this calculator.
+		createContainer("common-ion-calc");
+		createSelect("common-ion-salt-type", "AB", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+		createInput("common-ion-Ksp", "0.00000000018", "common-ion-calc");
+		createInput("common-ion-concentration", "0", "common-ion-calc");
+		createResultDiv("common-ion-result", "common-ion-calc");
+
+		calculateCommonIonEffect();
+
+		const html = getResultHTML("common-ion-result");
+		expect(html).not.toContain("Infinity");
+		expect(html).toContain("Error");
+	});
 });

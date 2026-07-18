@@ -498,7 +498,7 @@ export class CommonIonEffectCalculator extends Calculator {
             ["common-ion-Ksp", "common-ion-concentration"]
         );
         if (Ksp <= 0) throw new Error("Ksp must be positive");
-        if (commonIonConc < 0) throw new Error("Common ion concentration cannot be negative");
+        if (commonIonConc <= 0) throw new Error("Common ion concentration must be positive");
         let stoichA: number, stoichB: number;
         if (saltType === "AB") {
             stoichA = 1;
