@@ -24,7 +24,7 @@
         "jsx": "preserve",
         "jsxImportSource": "solid-js",
         "paths": {
-            "@solid/*": ["src/solid/*"]
+            "@solid/*": ["./src/solid/*"]
         }
     },
     "include": [
