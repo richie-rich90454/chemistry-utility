@@ -251,7 +251,7 @@
                         <li><a href="#bond-type-predictor"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-bond-type"></use></svg><span class="nav-label">Bond Type</span></a></li>
                         <li><a href="#molecular-viewer"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-bond-type"></use></svg><span class="nav-label">Molecular Viewer</span></a></li>
                         <li class="nav-category">Database</li>
-                        <li><a href="#compound-search"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-search"></use></svg><span class="nav-label">Compound Search</span></a></li>
+                        <li data-requires-backend><a href="#compound-search"><svg class="nav-icon" aria-hidden="true" focusable="false"><use href="#icon-search"></use></svg><span class="nav-label">Compound Search</span></a></li>
                     </ul>
                     <div class="no-results" style="display:none">No calculators found</div>
                 </nav>
@@ -1200,7 +1200,7 @@
                         <p>Try <strong>CCO</strong> for ethanol, <strong>c1ccccc1</strong> for benzene, or select a preset from the dropdown above.</p>
                         </details>
                     </div>
-                    <div id="batch-calc" class="main-groups card view-hidden">
+                    <div id="batch-calc" class="main-groups card view-hidden" data-requires-backend>
                         <h2>Batch Calculation - Process Multiple Inputs from CSV</h2>
                         <p>Upload a CSV file to run the same calculator across many rows of inputs at once.
                             The first row must contain headers matching the calculator's input field names;
@@ -1258,7 +1258,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="compound-search" class="main-groups card view-hidden">
+                    <div id="compound-search" class="main-groups card view-hidden" data-requires-backend>
                         <h2>Compound Database Search - Search Compounds by Name, Formula, CAS, or SMILES</h2>
                         <p>Search the chemical compound database to find detailed information about compounds:</p>
                         <div class="tool-container">
