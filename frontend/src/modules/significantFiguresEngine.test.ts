@@ -64,6 +64,13 @@ describe("SignificantFiguresEngine", () => {
         it("should handle zero", () => {
             expect(SignificantFiguresEngine.countSigFigs("0")).toBe(1);
         });
+
+        it("should count sig figs in pure-zero decimal values (not return 0)", () => {
+            expect(SignificantFiguresEngine.countSigFigs("0.0")).toBe(1);
+            expect(SignificantFiguresEngine.countSigFigs("0.00")).toBe(1);
+            expect(SignificantFiguresEngine.countSigFigs("0.000")).toBe(1);
+            expect(SignificantFiguresEngine.countSigFigs("00.00")).toBe(1);
+        });
     });
 
     describe("roundToSigFigs", () => {

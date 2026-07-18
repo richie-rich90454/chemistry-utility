@@ -39,8 +39,8 @@ export class SignificantFiguresEngine {
             coefficient = trimmed.substring(0, eIndex);
         }
 
-        // Special case: just "0" or variations like "0.0"
-        if (coefficient === "0" || coefficient === "0." || coefficient === ".0" || coefficient === ".00") {
+        // Special case: pure-zero values like "0", "0.", ".0", "0.00", "00.000"
+        if (/^(0+\.?0*|0*\.0+)$/.test(coefficient)) {
             return 1;
         }
 
