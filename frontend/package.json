@@ -27,6 +27,8 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "@solidjs/testing-library": "^0.8.10",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/chart.js": "^2.9.41",
     "@types/node": "^26.1.1",
     "@typescript-eslint/eslint-plugin": "^8.64.0",
