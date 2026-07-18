@@ -155,9 +155,9 @@ class ThemeManager {
 			if (this.currentTheme === "amoled") {
 				meta.setAttribute("content", "#000000");
 			} else if (this.currentTheme === "dark") {
-				meta.setAttribute("content", "#1c1b1f");
+				meta.setAttribute("content", "#1a1a1a");
 			} else {
-				meta.setAttribute("content", "#1a73e8");
+				meta.setAttribute("content", "#2d5a3d");
 			}
 		}
 	}
