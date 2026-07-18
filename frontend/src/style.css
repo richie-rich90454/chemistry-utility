@@ -559,21 +559,22 @@ h1, h2, h3, h4{
 .sidebar-footer-button{
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 10px;
+    gap: var(--md-space-2);
+    padding: var(--md-space-2) var(--md-space-3);
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-md);
+    border-radius: var(--md-shape-sm);
     background: transparent;
     color: var(--md-on-surface-variant);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
+    font-weight: 500;
     font-family: inherit;
     cursor: pointer;
-    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
 }
 .sidebar-footer-button:hover{
     background: var(--md-state-hover);
     border-color: var(--md-primary);
-    color: var(--md-on-surface);
+    color: var(--md-primary);
 }
 .sidebar-footer-button:focus-visible{
     outline: 2px solid var(--md-primary);
@@ -591,12 +592,13 @@ h1, h2, h3, h4{
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%) translateY(20px);
-    padding: 12px 20px;
-    background: var(--md-primary);
-    color: var(--md-on-primary, #ffffff);
+    padding: var(--md-space-3) var(--md-space-5);
+    background: var(--md-inverse-surface);
+    color: var(--md-inverse-on-surface);
     border-radius: var(--md-shape-md);
     font-size: 0.875rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-weight: 500;
+    box-shadow: var(--md-elevation-3);
     opacity: 0;
     transition: opacity var(--md-motion-duration-medium4) var(--md-motion-easing-standard), transform var(--md-motion-duration-medium4) var(--md-motion-easing-standard);
     z-index: 10000;
@@ -609,8 +611,8 @@ h1, h2, h3, h4{
     transform: translateX(-50%) translateY(0);
 }
 .data-toast-error{
-    background: var(--md-error, #b3261e);
-    color: var(--md-on-error, #ffffff);
+    background: var(--md-error);
+    color: var(--md-on-error);
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1121,9 +1123,9 @@ svg.icon{
     width: 48px;
     height: 48px;
     border-radius: var(--md-shape-full);
-    background: var(--md-surface-container-high);
+    background: var(--md-primary);
     border: none;
-    color: var(--md-on-surface);
+    color: var(--md-on-primary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -1131,7 +1133,8 @@ svg.icon{
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--md-motion-duration-medium1) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
+                transform var(--md-motion-duration-short4) var(--md-motion-easing-standard);
     z-index: 20;
     box-shadow: var(--md-elevation-2);
 }
@@ -1141,6 +1144,7 @@ svg.icon{
 }
 #scroll-top:hover{
     box-shadow: var(--md-elevation-3);
+    transform: translateY(-2px);
 }
 #scroll-top:active{
     box-shadow: var(--md-elevation-1);
@@ -1539,10 +1543,11 @@ details.example-details p strong:hover{
     pointer-events: none;
 }
 .page-overlay .loader{
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border: 3px solid var(--md-outline-variant);
     border-top-color: var(--md-primary);
+    border-right-color: var(--md-tertiary);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     will-change: transform;
