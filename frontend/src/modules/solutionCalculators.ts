@@ -520,8 +520,7 @@ export class CommonIonEffectCalculator extends Calculator {
         }
         let s: number;
         let concA: number, concB: number;
-        concB = stoichB * 0 + commonIonConc;
-        s = Math.pow(Ksp / Math.pow(commonIonConc, stoichB), 1 / stoichA);
+        s = Math.pow(Ksp / Math.pow(commonIonConc, stoichB), 1 / stoichA) / stoichA;
         concA = stoichA * s;
         concB = stoichB * s + commonIonConc;
         let exponent = stoichA + stoichB;
