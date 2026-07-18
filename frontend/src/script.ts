@@ -13,6 +13,7 @@ import {MolecularViewer} from "./modules/molecularViewer.js";
 import {CompoundSearchUI} from "./modules/compoundSearchUI.js";
 import {WorkspaceManager} from "./modules/workspaceManager.js";
 import {ExperimentLogManager} from "./modules/experimentLog.js";
+import {DataPortabilityManager} from "./modules/dataPortabilityManager.js";
 document.addEventListener("DOMContentLoaded", function(): void{
 	new UIHandlerInitializer().initialize();
 	initializeAppNav();
@@ -150,6 +151,52 @@ document.addEventListener("DOMContentLoaded", function(): void{
 			updateThemeColorMeta();
 		});
 	}
+	// Data export/import — replaces cloud sync. Export downloads a .chemutil
+	// backup of all local state; import opens a file picker and restores.
+	function showDataToast(message: string, isError: boolean): void {
+		let existing = document.querySelector(".data-toast") as HTMLElement;
+		if (existing) existing.remove();
+		let toast = document.createElement("div");
+		toast.className = "data-toast" + (isError ? " data-toast-error" : "");
+		toast.setAttribute("role", "status");
+		toast.textContent = message;
+		document.body.appendChild(toast);
+		setTimeout(function (): void { toast.classList.add("visible"); }, 10);
+		setTimeout(function (): void {
+			toast.classList.remove("visible");
+			setTimeout(function (): void { toast.remove(); }, 300);
+		}, 3000);
+	}
+	let exportDataBtn = document.getElementById("export-data-button");
+	if (exportDataBtn) {
+		exportDataBtn.addEventListener("click", function (): void {
+			try {
+				DataPortabilityManager.getInstance().exportToFile();
+				showDataToast("Backup downloaded", false);
+			} catch (err) {
+				showDataToast("Export failed: " + (err as Error).message, true);
+			}
+		});
+	}
+	let importDataBtn = document.getElementById("import-data-button");
+	let importDataInput = document.getElementById("import-data-input") as HTMLInputElement | null;
+	if (importDataBtn && importDataInput) {
+		importDataBtn.addEventListener("click", function (): void {
+			importDataInput.value = "";
+			importDataInput.click();
+		});
+		importDataInput.addEventListener("change", function (): void {
+			let file = importDataInput.files && importDataInput.files.length > 0 ? importDataInput.files[0] : null;
+			if (!file) return;
+			DataPortabilityManager.getInstance().importFromFile(file).then(function (): void {
+				showDataToast("Data imported. Reloading…", false);
+				setTimeout(function (): void { window.location.reload(); }, 800);
+			}).catch(function (err: Error): void {
+				showDataToast("Import failed: " + err.message, true);
+			});
+		});
+	}
+
 	// Copy-to-clipboard for result areas
 	document.querySelectorAll(".result").forEach(function(resultEl: Element){
 		let copyBtn=document.createElement("button") as HTMLButtonElement;
