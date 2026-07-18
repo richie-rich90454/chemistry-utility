@@ -6,7 +6,7 @@
             "DOM",
             "DOM.Iterable"
         ],
-        "types": ["node"],
+        "types": ["node", "vite/client"],
         "module": "ESNext",
         "moduleResolution": "bundler",
         "resolveJsonModule": true,
@@ -20,7 +20,12 @@
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
         "useDefineForClassFields": false,
-        "noEmit": true
+        "noEmit": true,
+        "jsx": "preserve",
+        "jsxImportSource": "solid-js",
+        "paths": {
+            "@solid/*": ["src/solid/*"]
+        }
     },
     "include": [
         "src/**/*.ts",
