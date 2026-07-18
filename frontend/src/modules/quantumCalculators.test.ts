@@ -370,6 +370,17 @@ describe("quantumCalculators", () => {
             expect(html).toContain("Work function");
             expect(html).toContain("eV");
         });
+
+        it("shows error for invalid solveFor value instead of silent failure", () => {
+            setOrCreateSelect("pe-solve-for", "invalid", "photoelectric-section", ["KE", "threshold-frequency", "work-function", "wavelength", "invalid"]);
+            setOrCreateInput("pe-wavelength", "400", "photoelectric-section");
+            setOrCreateInput("pe-frequency", "", "photoelectric-section", "text");
+            setOrCreateInput("pe-work-function", "2.3", "photoelectric-section");
+            setOrCreateInput("pe-ke", "", "photoelectric-section", "text");
+            calculatePhotoelectricEffect();
+            const html = getResultHTML("photoelectric-result");
+            expect(html).toContain("Error");
+        });
     });
 
     describe("HeisenbergUncertaintyCalculator", () => {
@@ -435,6 +446,16 @@ describe("quantumCalculators", () => {
             calculateHeisenbergUncertainty();
             const html = getResultHTML("heisenberg-result");
             expect(html).toContain("J");
+        });
+
+        it("shows error for invalid solveFor value instead of silent failure", () => {
+            setOrCreateSelect("heis-solve-for", "invalid", "heisenberg-section", ["min-delta-x", "min-delta-p", "invalid"]);
+            setOrCreateInput("heis-delta-x", "1e-10", "heisenberg-section");
+            setOrCreateInput("heis-delta-p", "1e-24", "heisenberg-section");
+            setOrCreateInput("heis-mass", "", "heisenberg-section", "text");
+            calculateHeisenbergUncertainty();
+            const html = getResultHTML("heisenberg-result");
+            expect(html).toContain("Error");
         });
     });
 });

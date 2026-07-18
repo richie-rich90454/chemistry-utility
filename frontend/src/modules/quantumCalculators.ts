@@ -635,6 +635,8 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             html += "<p>Total photon energy: " + this.numberFormatter.format(totalEnergyEv, 4) + " eV</p>";
             html += "<p>Required wavelength: <strong>" + this.numberFormatter.format(lambdaNm, 2) + " nm</strong></p>";
             html += "<p>Required frequency: <strong>" + this.numberFormatter.format(freq, 4) + " Hz</strong></p>";
+        } else {
+            throw new Error("Invalid solve-for selection");
         }
 
         this.resultDisplay.showResult(html);
@@ -698,6 +700,8 @@ export class HeisenbergUncertaintyCalculator extends SolveForCalculator {
                 let minDeltaV: number = minDeltaP / massVal;
                 html += "<p>Minimum \u0394v: <strong>" + this.numberFormatter.format(minDeltaV, 4) + " m/s</strong></p>";
             }
+        } else {
+            throw new Error("Invalid solve-for selection");
         }
 
         this.resultDisplay.showResult(html);
