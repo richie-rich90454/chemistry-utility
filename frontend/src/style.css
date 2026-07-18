@@ -741,18 +741,21 @@ h1, h2, h3, h4{
 }
 .card input, .card select, .card textarea,
 .main-groups input, .main-groups select, .main-groups textarea{
-    margin: 0 var(--md-space-4) var(--md-space-2) var(--md-space-4);
-    width: calc(100% - 2 * var(--md-space-4));
+    margin: 0 var(--md-space-5) var(--md-space-3) var(--md-space-5);
+    width: calc(100% - 2 * var(--md-space-5));
 }
 .card .input-group, .main-groups .input-group{
-    margin: 0 var(--md-space-4) var(--md-space-2) var(--md-space-4);
-    width: calc(100% - 2 * var(--md-space-4));
+    margin: 0 var(--md-space-5) var(--md-space-3) var(--md-space-5);
+    width: calc(100% - 2 * var(--md-space-5));
 }
 .card .result, .main-groups .result{
-    margin: var(--md-space-2) var(--md-space-4) var(--md-space-4) var(--md-space-4);
+    margin: var(--md-space-3) var(--md-space-5) var(--md-space-5) var(--md-space-5);
 }
 .card button, .main-groups button{
-    margin: var(--md-space-2) var(--md-space-4) var(--md-space-4) var(--md-space-4);
+    margin: var(--md-space-3) var(--md-space-5) var(--md-space-5) var(--md-space-5);
+}
+.card label, .main-groups label{
+    margin: 0 var(--md-space-5) var(--md-space-1) var(--md-space-5);
 }
 
 /* ── Input Group ── */
@@ -770,17 +773,17 @@ h1, h2, h3, h4{
    ═══════════════════════════════════════════════════════════════ */
 input, select, textarea{
     width: 100%;
-    padding: 10px var(--md-space-3);
+    padding: 10px var(--md-space-4);
     font-family: "Noto Sans", sans-serif;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     /* Force light color-scheme on form elements so browser doesn't
        override our colors with its internal dark-mode form styling.
        Our CSS variables handle the actual colors. */
     color-scheme: light !important;
     background: var(--md-input-bg) !important;
     color: var(--md-input-text) !important;
-    border: 1px solid var(--md-input-border);
-    border-radius: var(--md-shape-xs);
+    border: 1.5px solid var(--md-input-border);
+    border-radius: var(--md-shape-sm);
     transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
                 box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
                 background-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
@@ -801,10 +804,10 @@ input:hover, select:hover, textarea:hover{
 }
 input:focus, select:focus, textarea:focus{
     border-color: var(--md-input-focus-border);
-    box-shadow: none;
+    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
     outline: none;
     border-width: 2px;
-    padding: 9px 11px;
+    padding: 9px 15px;
 }
 input:focus-visible, select:focus-visible, textarea:focus-visible{
     outline: 2px solid var(--md-input-focus-border);
@@ -822,13 +825,13 @@ input.error, select.error, textarea.error{
 input.error:focus, select.error:focus, textarea.error:focus{
     border-color: var(--md-error);
     border-width: 2px;
-    padding: 9px 11px;
+    padding: 9px 15px;
 }
 /* ── Inline Validation UX ── */
 input.input-error{
     border-color: var(--md-error) !important;
     border-width: 2px;
-    padding: 9px 11px;
+    padding: 9px 15px;
 }
 input.input-error:focus{
     border-color: var(--md-error) !important;
@@ -906,22 +909,25 @@ button:active:not(:disabled), .primary-button:active:not(:disabled){
     padding: 0 var(--md-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: 0.1px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
     color: var(--md-on-primary) !important;
     background-color: var(--md-primary) !important;
     border: none;
     border-radius: var(--md-shape-full);
     cursor: pointer;
     transition: box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
-    min-height: 40px;
+                background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
+                transform var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+    min-height: 42px;
     width: auto;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--md-elevation-1);
 }
 .primary-button:hover{
-    box-shadow: var(--md-elevation-1);
+    box-shadow: var(--md-elevation-2);
+    filter: brightness(1.08);
 }
 .primary-button:active{
     box-shadow: none;
@@ -1346,6 +1352,31 @@ details.example-details p strong:hover{
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   Responsive — Large Desktop (1200px+)
+   Wider main content for big screens; sidebar stays fixed width.
+   ═══════════════════════════════════════════════════════════════ */
+@media (min-width: 1200px){
+    .main-content{
+        max-width: 1080px;
+        padding: var(--md-space-8) clamp(var(--md-space-6), 4vw + 2rem, var(--md-space-12));
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Responsive — Tablet Landscape (≤1024px)
+   Slightly narrower sidebar, tighter main content padding.
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px){
+    :root{
+        --sidebar-width: 220px;
+    }
+    .main-content{
+        padding: var(--md-space-5) var(--md-space-6);
+        max-width: 100%;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Responsive — Mobile
    ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px){
@@ -1424,7 +1455,7 @@ details.example-details p strong:hover{
         gap: var(--md-space-3);
     }
     .card h2, .main-groups h2{
-        font-size: 1rem;
+        font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.1rem);
     }
     #scroll-top{
         bottom: 16px;
