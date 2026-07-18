@@ -245,7 +245,7 @@ describe("ThemeManager", () => {
         document.head.appendChild(meta);
         const tm = ThemeManager.getInstance();
         tm.setTheme("dark");
-        expect(meta.getAttribute("content")).toBe("#1c1b1f");
+        expect(meta.getAttribute("content")).toBe("#1a1a1a");
     });
 
     it("applyTheme updates the theme-color meta tag for amoled", () => {
@@ -263,7 +263,7 @@ describe("ThemeManager", () => {
         document.head.appendChild(meta);
         const tm = ThemeManager.getInstance();
         tm.setTheme("light");
-        expect(meta.getAttribute("content")).toBe("#1a73e8");
+        expect(meta.getAttribute("content")).toBe("#2d5a3d");
     });
 
     it("applyTheme does not crash when there is no theme-color meta tag", () => {
