@@ -552,7 +552,7 @@ body{
     gap: 6px;
     padding: 6px 10px;
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-medium);
+    border-radius: var(--md-shape-md);
     background: transparent;
     color: var(--md-on-surface-variant);
     font-size: 0.6875rem;
@@ -584,7 +584,7 @@ body{
     padding: 12px 20px;
     background: var(--md-primary);
     color: var(--md-on-primary, #ffffff);
-    border-radius: var(--md-shape-medium);
+    border-radius: var(--md-shape-md);
     font-size: 0.875rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     opacity: 0;
