@@ -2,6 +2,7 @@ import {defineConfig} from "vite";
 import path from "path";
 import {fileURLToPath} from "url";
 import {createHtmlPlugin} from "vite-plugin-html";
+import solid from "vite-plugin-solid";
 const __dirname=path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig(({mode})=>({
 	base: "/",
@@ -43,9 +44,12 @@ export default defineConfig(({mode})=>({
 		include: ["katex"],
 	},
 	css:{
-		modules: false,
+		modules:{
+			localsConvention: "camelCaseOnly",
+		},
 	},
 	plugins: [
+		solid(),
 		createHtmlPlugin({
 			minify:{
 				collapseWhitespace: true,
