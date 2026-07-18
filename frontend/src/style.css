@@ -1220,24 +1220,29 @@ details.vdw-details > .main-groups{
 
 /* ── Worked Example Sections ── */
 details.example-details{
-    margin: var(--md-space-3) 0 0;
+    margin: var(--md-space-4) 0 0;
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-sm);
+    border-radius: var(--md-shape-md);
     overflow: hidden;
+    background: var(--md-surface-container-low);
+    transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+details.example-details[open]{
+    border-color: var(--md-outline);
+    box-shadow: var(--md-elevation-1);
 }
 details.example-details summary{
-    padding: var(--md-space-2) var(--md-space-3);
-    font-size: 0.8125rem;
-    font-weight: 500;
+    padding: var(--md-space-3) var(--md-space-4);
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--md-on-surface-variant);
     cursor: pointer;
-    background: var(--md-surface-container-low);
+    background: transparent;
     list-style: none;
     display: flex;
     align-items: center;
-    gap: var(--md-space-2);
-    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    gap: var(--md-space-3);
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
 }
 details.example-details summary::-webkit-details-marker{
     display: none;
@@ -1247,10 +1252,10 @@ details.example-details summary::before{
     display: inline-block;
     width: 0;
     height: 0;
-    border-left: 5px solid currentColor;
-    border-top: 4px solid transparent;
-    border-bottom: 4px solid transparent;
-    transition: transform var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    border-left: 6px solid currentColor;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transition: transform var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate);
     flex-shrink: 0;
 }
 details.example-details[open] summary::before{
@@ -1260,16 +1265,25 @@ details.example-details summary:hover{
     background: var(--md-state-hover);
     color: var(--md-on-surface);
 }
+details.example-details summary:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: -2px;
+}
+details.example-details[open] summary{
+    color: var(--md-on-surface);
+    border-bottom: 1px solid var(--md-outline-variant);
+}
 details.example-details p{
-    padding: var(--md-space-3);
+    padding: var(--md-space-4);
     margin: 0;
-    font-size: 0.8125rem;
-    line-height: 1.5;
+    font-size: 0.875rem;
+    line-height: 1.6;
     color: var(--md-on-surface-variant);
 }
 details.example-details p strong{
     color: var(--md-primary);
     cursor: pointer;
+    font-weight: 600;
 }
 details.example-details p strong:hover{
     text-decoration: underline;
@@ -3129,26 +3143,28 @@ a{color:var(--md-primary)}
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--md-scrim);
     z-index: 1000;
     align-items: center;
     justify-content: center;
+    padding: var(--md-space-4);
 }
 .comparison-modal-content{
     background-color: var(--md-surface);
     color: var(--md-on-surface);
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: var(--md-shape-lg);
+    padding: var(--md-space-6);
     max-width: 90vw;
     max-height: 85vh;
     overflow: auto;
     position: relative;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--md-elevation-5);
+    border: 1px solid var(--md-outline-variant);
 }
 .comparison-close{
     position: absolute;
-    top: 12px;
-    right: 16px;
+    top: var(--md-space-3);
+    right: var(--md-space-4);
     font-size: 28px;
     cursor: pointer;
     color: var(--md-on-surface-variant);
@@ -3156,11 +3172,17 @@ a{color:var(--md-primary)}
     user-select: none;
     background: transparent;
     border: none;
-    padding: 0;
+    padding: var(--md-space-2);
     border-radius: var(--md-shape-full);
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
 }
 .comparison-close:hover{
     color: var(--md-on-surface);
+    background: var(--md-state-hover);
+}
+.comparison-close:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
 }
 .comparison-empty{
     color: var(--md-on-surface-variant);
@@ -3254,8 +3276,9 @@ a{color:var(--md-primary)}
     height: 320px;
     margin-top: var(--md-space-4);
     background: var(--md-surface-container-low);
+    border: 1px solid var(--md-outline-variant);
     border-radius: var(--md-shape-md);
-    padding: var(--md-space-3);
+    padding: var(--md-space-4);
     box-sizing: border-box;
 }
 .chart-container canvas{
@@ -3266,12 +3289,14 @@ a{color:var(--md-primary)}
     height: 240px;
     margin-top: var(--md-space-3);
     background: transparent;
+    border: none;
     padding: 0;
     box-shadow: none;
 }
 @media (max-width: 768px){
     .chart-container{
         height: 260px;
+        padding: var(--md-space-3);
     }
     .dashboard-activity .chart-container{
         height: 200px;
