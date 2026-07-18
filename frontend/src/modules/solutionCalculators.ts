@@ -104,9 +104,6 @@ export class MixingCalculator extends Calculator {
 		if (C2 <= 0) throw new Error("Second solution concentration must be positive");
 		if (V1 <= 0) throw new Error("First solution volume must be positive");
 		if (V2 <= 0) throw new Error("Second solution volume must be positive");
-		if (V1 + V2 === 0) {
-			throw new Error("Total volume cannot be zero");
-		}
 		const totalMoles = (C1 * V1) + (C2 * V2);
 		const totalVolume = V1 + V2;
 		const finalConcentration = totalMoles / totalVolume;
