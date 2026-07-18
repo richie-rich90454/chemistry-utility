@@ -119,10 +119,24 @@ export class OnboardingManager {
 		this.overlay.appendChild(tooltip);
 		document.body.appendChild(this.overlay);
 
-		// Position tooltip near the target element
+		// Position tooltip near the target element.
+		// The tooltip is a child of the fixed-position overlay, so it uses
+		// viewport coordinates (rect.top/bottom/left) — NOT document
+		// coordinates (which would add window.scrollY/scrollX). Adding
+		// scrollY here would push the tooltip down by the scroll offset
+		// when the page is scrolled, making it appear detached from the
+		// highlighted target.
 		let rect = target.getBoundingClientRect();
-		tooltip.style.top = (rect.bottom + window.scrollY + 12) + "px";
-		tooltip.style.left = Math.max(16, rect.left + window.scrollX) + "px";
+		let tooltipTop = rect.bottom + 12;
+		let tooltipLeft = Math.max(16, rect.left);
+		// If the tooltip would overflow the bottom of the viewport, flip
+		// it above the target instead.
+		let tooltipEstHeight = 160;
+		if (tooltipTop + tooltipEstHeight > window.innerHeight) {
+			tooltipTop = Math.max(16, rect.top - tooltipEstHeight - 12);
+		}
+		tooltip.style.top = tooltipTop + "px";
+		tooltip.style.left = tooltipLeft + "px";
 
 		// Highlight the target
 		target.classList.add("onboarding-highlight");
