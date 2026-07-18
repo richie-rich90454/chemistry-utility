@@ -4,7 +4,7 @@
     "description": "Free chemistry calculators — molar mass, equation balancer, stoichiometry, gas laws, dilution, electrochemistry & more.",
     "start_url": "/",
     "display": "standalone",
-    "theme_color": "#1a73e8",
+    "theme_color": "#2d5a3d",
     "background_color": "#ffffff",
     "icons": [
         {
