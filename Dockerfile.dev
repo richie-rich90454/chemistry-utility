@@ -1,9 +1,0 @@
-FROM golang:1.25-alpine
-RUN apk add --no-cache gcc musl-dev git
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . .
-RUN go install github.com/air-verse/air@latest
-EXPOSE 6005
-CMD ["air", "-c", ".air.toml"]
