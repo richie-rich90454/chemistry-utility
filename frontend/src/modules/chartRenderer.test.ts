@@ -69,9 +69,9 @@ function createSampleData(): ChartData {
         "datasets": [{
             "label": "Series A",
             "data": [1, 2, 3],
-            "color": "#1a73e8",
-            "borderColor": "#1a73e8",
-            "backgroundColor": "rgba(26,115,232,0.1)"
+            "color": "#2d5a3d",
+            "borderColor": "#2d5a3d",
+            "backgroundColor": "rgba(45,90,61,0.1)"
         }]
     };
 }
