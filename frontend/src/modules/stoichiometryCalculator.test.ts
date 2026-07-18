@@ -176,6 +176,16 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
             expect(() => calculateStoichiometry("invalid equation")).toThrow();
         });
+
+        it("should throw for invalid calculation type", () => {
+            setOrCreateSelect("calculation-type", "invalid", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant", "invalid",
+            ]);
+            setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
+            setOrCreateInput("reactant-moles", "2", "stoich-inputs");
+            setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
+            expect(() => calculateStoichiometry(equation)).toThrow("Invalid calculation type");
+        });
     });
 
     describe("Term class", () => {
@@ -395,6 +405,19 @@ describe("stoichiometryCalculator", () => {
             const calc = new TestableStoichiometryCalculator();
             calc.setTestEquation(equation);
             expect(() => calc.callPerformCalculation()).toThrow("Invalid moles for H2");
+        });
+
+        it("throws for invalid calculation type via class", () => {
+            setOrCreateSelect("calculation-type", "invalid", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant", "invalid",
+            ]);
+            setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
+            setOrCreateInput("reactant-moles", "2", "stoich-inputs");
+            setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
+
+            const calc = new TestableStoichiometryCalculator();
+            calc.setTestEquation(equation);
+            expect(() => calc.callPerformCalculation()).toThrow("Invalid calculation type");
         });
 
         it("removes error class when moles become valid in product-from-reactant", () => {

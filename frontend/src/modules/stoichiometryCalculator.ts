@@ -260,6 +260,9 @@ export class StoichiometryCalculator extends Calculator {
             let molesProduct = minRatio * product.getCoefficient();
             this.resultDisplay.showResult("<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
         }
+        else {
+            throw new Error("Invalid calculation type");
+        }
     }
 }
 
@@ -407,5 +410,8 @@ export function calculateStoichiometry(equation: string): void {
         let molesProduct = minRatio * product.coefficient;
         resultDiv.innerHTML = "<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + NumberFormatter.createFromCurrentLocale().format(molesProduct, 2) + "</p>";
         resultDiv.classList.add("show");
+    }
+    else {
+        throw new Error("Invalid calculation type");
     }
 }
