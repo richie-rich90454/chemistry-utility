@@ -1608,11 +1608,12 @@ details.example-details p strong:hover{
     align-items: center;
     justify-content: center;
     border-radius: var(--md-shape-full);
-    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
     flex-shrink: 0;
 }
 .back-button:hover{
     background: var(--md-state-hover);
+    color: var(--md-on-surface);
 }
 .back-button:active{
     background: var(--md-state-pressed);
@@ -1635,12 +1636,12 @@ details.example-details p strong:hover{
 }
 .view-category{
     font-size: 0.6875rem;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.08em;
     color: var(--md-on-primary-container);
     background: var(--md-primary-container);
-    padding: 2px 8px;
+    padding: var(--md-space-1) var(--md-space-3);
     border-radius: var(--md-shape-full);
     white-space: nowrap;
     flex-shrink: 0;
@@ -1772,8 +1773,8 @@ details.example-details p strong:hover{
     margin-bottom: var(--md-space-1);
 }
 .welcome-card .welcome-card-title{
-    font-size: 0.8125rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--md-on-surface);
 }
 .welcome-card .welcome-card-desc{
@@ -2360,12 +2361,12 @@ a{color:var(--md-primary)}
     text-align: center;
 }
 [dir="rtl"] .search-icon{
-    left: var(--md-space-3);
-    right: auto;
+    left: auto;
+    right: calc(var(--md-space-4) + 12px);
 }
 [dir="rtl"] .sidebar-search input{
-    padding-left: var(--md-space-8);
-    padding-right: var(--md-space-3);
+    padding-left: var(--md-space-4);
+    padding-right: 36px;
 }
 
 /* ═══════════════════════════════════════════════════════════════
