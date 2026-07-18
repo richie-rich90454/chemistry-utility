@@ -369,6 +369,20 @@ describe("Half-life - edge cases", () => {
 		expect(match).not.toBeNull();
 		expect(parseFloat(match![1])).toBeCloseTo(5, 0);
 	});
+
+	it("shows error for invalid solveFor value instead of silent failure", () => {
+		const select = document.getElementById("half-life-solve-for") as HTMLSelectElement;
+		const badOpt = document.createElement("option");
+		badOpt.value = "invalid";
+		badOpt.textContent = "invalid";
+		select.appendChild(badOpt);
+		select.value = "invalid";
+
+		calculateHalfLife();
+
+		const html = getResultHTML("half-life-result");
+		expect(html).toContain("Error");
+	});
 });
 
 describe("Gas Laws - additional edge cases", () => {

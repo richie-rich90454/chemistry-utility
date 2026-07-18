@@ -191,6 +191,8 @@ export class HalfLifeCalculator extends SolveForCalculator {
 			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
 			result = t / (Math.log(Nt / N0) / Math.log(0.5));
 			this.resultDisplay.showResult("<p>Half-life: " + this.numberFormatter.format(result, 4) + " units</p>");
+		} else {
+			throw new Error("Invalid solve-for selection");
 		}
 	}
 }
