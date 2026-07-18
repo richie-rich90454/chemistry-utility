@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function(): void{
 		let meta=document.querySelector('meta[name="theme-color"]');
 		if (meta){
 			let isDark=document.documentElement.classList.contains("dark")||(!document.documentElement.classList.contains("light")&&window.matchMedia("(prefers-color-scheme: dark)").matches);
-			meta.setAttribute("content", isDark ? "#1c1b1f" : "#1a73e8");
+			meta.setAttribute("content", isDark ? "#1a1a1a" : "#2d5a3d");
 		}
 	}
 	function updateThemeIcon(isDark: boolean): void{
