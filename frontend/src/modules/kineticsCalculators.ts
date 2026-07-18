@@ -269,9 +269,15 @@ export class IntegratedRateLawCalculator extends SolveForCalculator {
                 result = (A0 - A) / k;
                 formula = "t = ([A]\u2080 - [A]) / k";
             } else if (order === 1) {
+                if (A >= A0) {
+                    throw new Error("Concentration must be less than initial concentration for first order");
+                }
                 result = Math.log(A0 / A) / k;
                 formula = "t = ln([A]\u2080/[A]) / k";
             } else if (order === 2) {
+                if (A >= A0) {
+                    throw new Error("Concentration must be less than initial concentration for second order");
+                }
                 result = (1 / A - 1 / A0) / k;
                 formula = "t = (1/[A] - 1/[A]\u2080) / k";
             } else {
