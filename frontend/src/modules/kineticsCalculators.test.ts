@@ -224,6 +224,24 @@ describe("IntegratedRateLawCalculator", () => {
         expect(result!).toBeCloseTo(0.5, 3);
     });
 
+    it("should clamp zero order concentration to 0 when kt exceeds [A]0", () => {
+        createSelect("irl-solve-for", "concentration", ["concentration", "time"], "irl-calc");
+        createSelect("irl-order", "0", ["0", "1", "2"], "irl-calc");
+        createInput("irl-A0", "1", "irl-calc");
+        createInput("irl-k", "0.05", "irl-calc");
+        createInput("irl-t", "30", "irl-calc");
+        createInput("irl-A", "", "irl-calc");
+
+        calculateIntegratedRateLaw();
+
+        const text = getResultText("integrated-rate-law-result");
+        const result = extractResultNumber(text);
+        expect(result).not.toBeNull();
+        // [A] = 1 - 0.05*30 = -0.5 (unphysical); clamp to 0
+        expect(result!).toBeGreaterThanOrEqual(0);
+        expect(result!).toBeCloseTo(0, 3);
+    });
+
     it("should calculate second order concentration: [A]0=1, k=0.1, t=5", () => {
         createSelect("irl-solve-for", "concentration", ["concentration", "time"], "irl-calc");
         createSelect("irl-order", "2", ["0", "1", "2"], "irl-calc");

@@ -239,7 +239,7 @@ export class IntegratedRateLawCalculator extends SolveForCalculator {
                 throw new Error("Rate constant cannot be negative");
             }
             if (order === 0) {
-                result = A0 - k * t;
+                result = Math.max(0, A0 - k * t);
                 formula = "[A] = [A]\u2080 - kt";
             } else if (order === 1) {
                 result = A0 * Math.exp(-k * t);
