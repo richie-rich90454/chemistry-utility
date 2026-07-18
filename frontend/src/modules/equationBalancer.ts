@@ -163,9 +163,11 @@ export class EquationBalancer {
 		let splitSide=(s: string)=>s.trim().split(/\s+\+\s+/).map(x=>x.trim()).filter(x=>x.length>0);
 		return { reactants: splitSide(sides[0]), products: splitSide(sides[1]) };
 	}
-	private static solveHomogeneous(matrix: Fraction[][]): Fraction[]|null{
+	private static solveHomogeneous(matrix: Fraction[][], maxCoefficient: number=10000): Fraction[]|null{
 		let r=matrix.length;
+		if (r===0) return null;
 		let c=matrix[0].length;
+		if (c===0) return null;
 		let m=matrix.map(row=>row.map(x=>new Fraction(x.n, x.d)));
 		let pivotCol:number[]=[];
 		let row=0;
@@ -173,7 +175,7 @@ export class EquationBalancer {
 			let sel=row;
 			while (sel<r&&m[sel][col].isZero()) sel++;
 			if (sel===r) continue;
-			[m[row], m[sel]]=[m[sel], m[row]];
+			let tmp=m[row]; m[row]=m[sel]; m[sel]=tmp;
 			let div=m[row][col];
 			for (let j=col;j<c;j++) m[row][j]=m[row][j].divide(div);
 			for (let i=0;i<r;i++){
@@ -185,31 +187,109 @@ export class EquationBalancer {
 			pivotCol[row]=col;
 			row++;
 		}
+		let pivotCount=pivotCol.length;
 		let isPivot=new Array(c).fill(false);
-		for (let i=0;i<pivotCol.length;i++) isPivot[pivotCol[i]]=true;
+		for (let i=0;i<pivotCount;i++) isPivot[pivotCol[i]]=true;
 		let free:number[]=[];
 		for (let i=0;i<c;i++) if (!isPivot[i]) free.push(i);
 		if (free.length===0) return null;
-		for (let trial=1;trial<=1000;trial++){
-			let sol=Array.from({ length:c },()=>new Fraction(0));
-			for (let f of free) sol[f]=new Fraction(trial);
-			for (let i=pivotCol.length-1;i>=0;i--){
-				let col=pivotCol[i];
-				let sum=new Fraction(0);
-				for (let j=col+1;j<c;j++) sum=sum.add(m[i][j].multiply(sol[j]));
-				sol[col]=sum.multiply(new Fraction(-1));
+		let basis: Fraction[][]=[];
+		for (let fi=0;fi<free.length;fi++){
+			let f=free[fi];
+			let vec: Fraction[]=new Array(c);
+			for (let j=0;j<c;j++) vec[j]=new Fraction(0);
+			vec[f]=new Fraction(1);
+			for (let pr=0;pr<pivotCount;pr++){
+				let pc=pivotCol[pr];
+				vec[pc]=m[pr][f].multiply(new Fraction(-1));
 			}
-			let den=sol.reduce((a,x)=>EquationBalancer.lcm(a, x.d),1);
-			let ints=sol.map(x=>x.n*(den/x.d));
-			if (ints.every(v=>v===0)) continue;
-			let sign=ints.find(v=>v!==0)!<0?-1:1;
-			ints=ints.map(v=>v*sign);
-			if (ints.every(v=>v>0)){
-				let g=ints.reduce((a,v)=>EquationBalancer.gcd(a,v),0);
-				return ints.map(v=>new Fraction(v/g));
+			basis.push(vec);
+		}
+		let intBasis: number[][]=[];
+		for (let i=0;i<basis.length;i++){
+			let den=1;
+			for (let j=0;j<c;j++){
+				den=EquationBalancer.lcm(den, Math.abs(basis[i][j].d));
+			}
+			let intVec: number[]=new Array(c);
+			for (let j=0;j<c;j++){
+				intVec[j]=basis[i][j].n*(den/basis[i][j].d);
+			}
+			let g=0;
+			for (let j=0;j<c;j++) g=EquationBalancer.gcd(g, Math.abs(intVec[j]));
+			if (g>1){
+				for (let j=0;j<c;j++) intVec[j]=intVec[j]/g;
+			}
+			intBasis.push(intVec);
+		}
+		let k=intBasis.length;
+		let best: number[]|null=null;
+		let bestSum=0;
+		function trySolution(result: number[]): void{
+			let g=0;
+			for (let j=0;j<c;j++) g=EquationBalancer.gcd(g, Math.abs(result[j]));
+			if (g===0) return;
+			let reduced=new Array(c);
+			for (let j=0;j<c;j++) reduced[j]=result[j]/g;
+			for (let j=0;j<c;j++){
+				if (reduced[j]<=0 || reduced[j]>maxCoefficient) return;
+			}
+			let sum=0;
+			for (let j=0;j<c;j++) sum=sum+reduced[j];
+			if (best===null || sum<bestSum){
+				best=reduced;
+				bestSum=sum;
 			}
 		}
-		return null;
+		if (k===1){
+			let result=new Array(c);
+			for (let j=0;j<c;j++) result[j]=intBasis[0][j];
+			let allPos=true;
+			let allNeg=true;
+			for (let j=0;j<c;j++){
+				if (result[j]<=0) allPos=false;
+				if (result[j]>=0) allNeg=false;
+			}
+			if (allPos){
+				trySolution(result);
+			} else if (allNeg){
+				let flipped=new Array(c);
+				for (let j=0;j<c;j++) flipped[j]=-result[j];
+				trySolution(flipped);
+			}
+		} else {
+			function dfs(idx: number, current: number[]): void{
+				if (best!==null && bestSum<=c+1) return;
+				if (idx===k){
+					trySolution(current);
+					return;
+				}
+				let ciMax=maxCoefficient;
+				for (let j=0;j<c;j++){
+					if (intBasis[idx][j]>0){
+						let headroom=maxCoefficient-current[j];
+						let bound=Math.floor(headroom/intBasis[idx][j]);
+						if (bound<ciMax) ciMax=bound;
+					}
+				}
+				if (best!==null && bestSum<ciMax) ciMax=bestSum;
+				for (let ci=1;ci<=ciMax;ci++){
+					let newCurrent=new Array(c);
+					for (let j=0;j<c;j++){
+						newCurrent[j]=current[j]+ci*intBasis[idx][j];
+					}
+					dfs(idx+1, newCurrent);
+				}
+			}
+			let initial=new Array(c);
+			for (let j=0;j<c;j++) initial[j]=0;
+			dfs(0, initial);
+		}
+		if (best===null) return null;
+		let solution: number[]=best as number[];
+		let out: Fraction[]=new Array(solution.length);
+		for (let j=0;j<solution.length;j++) out[j]=new Fraction(solution[j], 1);
+		return out;
 	}
 	public static balanceEquation(equation: string, maxCoefficient: number=10000, explain: boolean=false): string|BalanceResult{
 		let { reactants, products }=EquationBalancer.parseEquation(equation);
@@ -226,7 +306,7 @@ export class EquationBalancer {
 				return new Fraction(i<reactants.length?v:-v);
 			});
 		});
-		let sol=EquationBalancer.solveHomogeneous(A);
+		let sol=EquationBalancer.solveHomogeneous(A, maxCoefficient);
 		if (!sol) throw new Error("Could not balance");
 		let coeffs=sol.map(f=>f.n);
 		if (coeffs.some(c=>c<=0||c>maxCoefficient)) throw new Error("Could not balance");
@@ -329,7 +409,7 @@ export class EquationBalancer {
 		}
 		return { counts: counts, charge: charge };
 	}
-	public static balanceIonic(equation: string): string{
+	public static balanceIonic(equation: string, maxCoefficient: number=10000): string{
 		let parsedEquation=EquationBalancer.parseEquation(equation);
 		let reactants=parsedEquation.reactants;
 		let products=parsedEquation.products;
@@ -360,13 +440,12 @@ export class EquationBalancer {
 			chargeRow.push(new Fraction(i<reactantsStripped.length?v:-v));
 		}
 		A.push(chargeRow);
-		let sol=EquationBalancer.solveHomogeneous(A);
+		let sol=EquationBalancer.solveHomogeneous(A, maxCoefficient);
 		if (!sol) throw new Error("Could not balance ionic equation");
 		let coeffs: number[]=[];
 		for (let i=0;i<sol.length;i++){
 			coeffs.push(sol[i].n);
 		}
-		let maxCoefficient=10000;
 		for (let i=0;i<coeffs.length;i++){
 			if (coeffs[i]<=0 || coeffs[i]>maxCoefficient) throw new Error("Could not balance ionic equation");
 		}
@@ -389,6 +468,6 @@ export function parseEquation(equation: string): { reactants: string[], products
 export function balanceEquation(equation: string, maxCoefficient: number=10000, explain: boolean=false): string|BalanceResult{
 	return EquationBalancer.balanceEquation(equation, maxCoefficient, explain);
 }
-export function balanceIonic(equation: string): string{
-	return EquationBalancer.balanceIonic(equation);
+export function balanceIonic(equation: string, maxCoefficient: number=10000): string{
+	return EquationBalancer.balanceIonic(equation, maxCoefficient);
 }
