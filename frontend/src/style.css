@@ -997,13 +997,18 @@ svg.icon{
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
 }
 .sidebar-toggle:hover{
     background: var(--md-state-hover);
+    color: var(--md-on-surface);
 }
 .sidebar-toggle:active{
     background: var(--md-state-pressed);
+}
+.sidebar-toggle:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
 }
 .sidebar-toggle svg{
     width: 20px;
@@ -1767,38 +1772,50 @@ details.example-details p strong:hover{
    Sidebar Search — MD3 Search Bar
    ═══════════════════════════════════════════════════════════════ */
 .sidebar-search{
-    padding: var(--md-space-2) var(--md-space-3);
+    padding: var(--md-space-3) var(--md-space-4) var(--md-space-2);
     position: relative;
 }
 .sidebar-search input{
     width: 100%;
-    padding-left: 32px;
-    min-height: 44px;
-    font-size: 0.8125rem;
+    padding: var(--md-space-3) var(--md-space-4) var(--md-space-3) 36px;
+    min-height: 42px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: var(--md-on-surface);
     border-radius: var(--md-shape-full);
     background: var(--md-surface-container-high);
-    border: none;
+    border: 1px solid transparent;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.sidebar-search input::placeholder{
+    color: var(--md-on-surface-variant);
+}
+.sidebar-search input:hover{
+    background: var(--md-surface-container-highest);
+    border-color: var(--md-outline-variant);
 }
 .sidebar-search input:focus{
-    border: none;
-    box-shadow: none;
-    padding: 9px 11px 9px 32px;
-    background: var(--md-surface-container-high);
+    background: var(--md-surface-container-lowest);
+    border-color: var(--md-primary);
+    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
     outline: none;
 }
 .sidebar-search input:focus-visible{
-    outline: 2px solid var(--md-primary);
-    outline-offset: 1px;
+    outline: none;
 }
 .sidebar-search .search-icon{
     position: absolute;
-    left: calc(var(--md-space-3) + 10px);
+    left: calc(var(--md-space-4) + 12px);
     top: 50%;
     transform: translateY(-50%);
     color: var(--md-on-surface-variant);
     pointer-events: none;
     width: 16px;
     height: 16px;
+    transition: color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.sidebar-search:focus-within .search-icon{
+    color: var(--md-primary);
 }
 .sidebar-search .search-icon svg{
     width: 16px;
