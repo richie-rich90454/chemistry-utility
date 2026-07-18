@@ -139,6 +139,31 @@ describe("UnitConverter", () => {
             let result = UnitConverter.convert(500, "mM", "M", "concentration");
             expect(result.value).toBeCloseTo(0.5, 3);
         });
+
+        it("should convert 1% to 10000 ppm (parts per million = 1e-6)", () => {
+            let result = UnitConverter.convert(1, "%", "ppm", "concentration");
+            expect(result.value).toBeCloseTo(10000, 0);
+        });
+
+        it("should convert 1 M to 1000000 ppm", () => {
+            let result = UnitConverter.convert(1, "M", "ppm", "concentration");
+            expect(result.value).toBeCloseTo(1e6, 0);
+        });
+
+        it("should convert 1 ppm to 1e-6 M", () => {
+            let result = UnitConverter.convert(1, "ppm", "M", "concentration");
+            expect(result.value).toBeCloseTo(1e-6, 10);
+        });
+
+        it("should convert 1 ppm to 1000 ppb", () => {
+            let result = UnitConverter.convert(1, "ppm", "ppb", "concentration");
+            expect(result.value).toBeCloseTo(1000, 0);
+        });
+
+        it("should convert 1 ppb to 1000 ppt", () => {
+            let result = UnitConverter.convert(1, "ppb", "ppt", "concentration");
+            expect(result.value).toBeCloseTo(1000, 0);
+        });
     });
 
     describe("convert - energy", () => {

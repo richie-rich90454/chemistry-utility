@@ -108,9 +108,9 @@ const CATEGORIES: Record<string, UnitCategory> = {
             "\u00B5M": { name: "micromolar", toBase: 1e-6 },
             "mM": { name: "millimolar", toBase: 1e-3 },
             "M": { name: "molar", toBase: 1 },
-            "ppt": { name: "parts per trillion", toBase: 1e-9 },
-            "ppb": { name: "parts per billion", toBase: 1e-6 },
-            "ppm": { name: "parts per million", toBase: 1e-3 },
+            "ppt": { name: "parts per trillion", toBase: 1e-12 },
+            "ppb": { name: "parts per billion", toBase: 1e-9 },
+            "ppm": { name: "parts per million", toBase: 1e-6 },
             "%": { name: "percent", toBase: 1e-2 }
         }
     },
