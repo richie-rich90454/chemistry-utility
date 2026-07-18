@@ -273,6 +273,36 @@ describe("IntegratedRateLawCalculator", () => {
         expect(text).toContain("Error");
         expect(text).toContain("positive");
     });
+
+    it("should show error for first order time when A > A0 (would give negative time)", () => {
+        createSelect("irl-solve-for", "time", ["concentration", "time"], "irl-calc");
+        createSelect("irl-order", "1", ["0", "1", "2"], "irl-calc");
+        createInput("irl-A0", "0.5", "irl-calc");
+        createInput("irl-k", "0.05", "irl-calc");
+        createInput("irl-t", "", "irl-calc");
+        createInput("irl-A", "1.0", "irl-calc");
+
+        calculateIntegratedRateLaw();
+
+        const text = getResultText("integrated-rate-law-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("less than");
+    });
+
+    it("should show error for second order time when A > A0 (would give negative time)", () => {
+        createSelect("irl-solve-for", "time", ["concentration", "time"], "irl-calc");
+        createSelect("irl-order", "2", ["0", "1", "2"], "irl-calc");
+        createInput("irl-A0", "0.5", "irl-calc");
+        createInput("irl-k", "0.05", "irl-calc");
+        createInput("irl-t", "", "irl-calc");
+        createInput("irl-A", "1.0", "irl-calc");
+
+        calculateIntegratedRateLaw();
+
+        const text = getResultText("integrated-rate-law-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("less than");
+    });
 });
 
 describe("ReactionOrderCalculator", () => {
