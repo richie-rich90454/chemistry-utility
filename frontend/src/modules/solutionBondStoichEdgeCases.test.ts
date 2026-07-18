@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { calculateDilution, calculateMassPercent, calculateMixing } from "./solutionCalculators.js";
+import { calculateDilution, calculateMassPercent, calculateMixing, calculateKsp } from "./solutionCalculators.js";
 import { predictBondType } from "./bondPredictor.js";
 import { parseBalancedEquation, parseTerm, calculateStoichiometry } from "./stoichiometryCalculator.js";
 import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM, getResultHTML } from "../test/helpers.js";
@@ -425,5 +425,59 @@ describe("Solution Calculators - more edge cases", () => {
 		expect(result.products).toEqual([
 			{ formula: "H2O", coefficient: 2 },
 		]);
+	});
+});
+
+describe("Ksp Calculator - charge display", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("displays correct charges for AB2 salt (e.g. CaCl2: Ca^2+, Cl^1-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "AB2", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For AB2 (e.g. CaCl2): A is cation with charge +2 (= stoichB), B is anion with charge -1 (= stoichA)
+		expect(html).toContain("[A<sup>2+</sup>]");
+		expect(html).toContain("[B<sup>1-</sup>]");
+	});
+
+	it("displays correct charges for A2B salt (e.g. Na2S: Na^1+, S^2-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "A2B", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For A2B (e.g. Na2S): A is cation with charge +1 (= stoichB), B is anion with charge -2 (= stoichA)
+		expect(html).toContain("[A<sup>1+</sup>]");
+		expect(html).toContain("[B<sup>2-</sup>]");
+	});
+
+	it("displays correct charges for AB3 salt (e.g. FeCl3: Fe^3+, Cl^1-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "AB3", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For AB3 (e.g. FeCl3): A is cation with charge +3 (= stoichB), B is anion with charge -1 (= stoichA)
+		expect(html).toContain("[A<sup>3+</sup>]");
+		expect(html).toContain("[B<sup>1-</sup>]");
 	});
 });

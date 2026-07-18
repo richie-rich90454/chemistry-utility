@@ -273,8 +273,8 @@ export class KspCalculator extends Calculator {
         this.resultDisplay.showResult(
             "<p>K<sub>sp</sub> = " + this.numberFormatter.format(resultKsp, 6) + "</p>" +
             "<p>Molar Solubility (s) = " + this.numberFormatter.format(resultS, 6) + " M</p>" +
-            "<p>[A<sup>" + stoichA + "+</sup>] = " + this.numberFormatter.format(concA, 6) + " M</p>" +
-            "<p>[B<sup>" + stoichB + "-</sup>] = " + this.numberFormatter.format(concB, 6) + " M</p>"
+            "<p>[A<sup>" + stoichB + "+</sup>] = " + this.numberFormatter.format(concA, 6) + " M</p>" +
+            "<p>[B<sup>" + stoichA + "-</sup>] = " + this.numberFormatter.format(concB, 6) + " M</p>"
         );
     }
 }
