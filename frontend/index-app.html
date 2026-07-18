@@ -104,6 +104,17 @@
                     <div class="no-results" style="display:none">No calculators found</div>
                 </nav>
                 <div class="sidebar-footer">
+                    <div class="sidebar-footer-actions">
+                        <button type="button" class="sidebar-footer-button" id="export-data-button" aria-label="Export all data as a .chemutil backup file">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <span>Export Data</span>
+                        </button>
+                        <button type="button" class="sidebar-footer-button" id="import-data-button" aria-label="Import data from a .chemutil backup file">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span>Import Data</span>
+                        </button>
+                        <input type="file" id="import-data-input" accept=".chemutil,.json,application/json" style="display:none" aria-hidden="true">
+                    </div>
                     <p>&copy; 2026 Richard's Blogs</p>
                 </div>
             </aside>
