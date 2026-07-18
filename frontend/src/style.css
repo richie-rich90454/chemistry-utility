@@ -477,19 +477,19 @@ h1, h2, h3, h4{
 }
 .nav-category{
     font-size: 0.6875rem;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.1em;
     color: var(--md-on-surface-variant);
-    padding: var(--md-space-6) var(--md-space-4) var(--md-space-1);
+    padding: var(--md-space-6) var(--md-space-5) var(--md-space-2);
     list-style: none;
 }
 .sidebar-nav a{
     display: flex;
     align-items: center;
     gap: var(--md-space-3);
-    padding: 0 var(--md-space-5);
-    height: 56px;
+    padding: 0 var(--md-space-4);
+    height: 52px;
     color: var(--md-on-surface-variant);
     text-decoration: none;
     font-size: 0.875rem;
@@ -531,7 +531,7 @@ h1, h2, h3, h4{
 .sidebar-nav a:hover .nav-icon{opacity:1}
 .sidebar-nav a.active{
     color: var(--md-on-primary-container);
-    font-weight: 500;
+    font-weight: 600;
 }
 .sidebar-nav a.active .nav-icon{opacity:1}
 
@@ -1890,7 +1890,7 @@ details.example-details p strong:hover{
     right: 0;
     height: 80px;
     background: var(--md-surface-container);
-    border-top: none;
+    border-top: 1px solid var(--md-outline-variant);
     z-index: 40;
     padding: var(--md-space-2) var(--md-space-2) 0;
     padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -1937,7 +1937,7 @@ details.example-details p strong:hover{
     z-index: 1;
 }
 .tab-item.active{
-    color: var(--md-on-surface);
+    color: var(--md-on-secondary-container);
 }
 .tab-item.active svg{
     color: var(--md-on-secondary-container);
