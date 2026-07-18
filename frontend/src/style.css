@@ -3517,6 +3517,266 @@ a{color:var(--md-primary)}
     flex-direction: column;
     gap: var(--md-space-2);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Onboarding Tour — first-run guided walkthrough
+   The OnboardingManager creates overlay + tooltip elements in JS;
+   these rules give them visible, accessible styling.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Full-screen dimmed backdrop that locks interaction behind the tour */
+.onboarding-overlay{
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: var(--md-scrim);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: onboarding-fade-in var(--md-motion-duration-short3, 150ms) var(--md-motion-easing-decelerated, ease-out);
+}
+
+/* Tooltip card anchored below the highlighted target */
+.onboarding-step-tooltip{
+    position: absolute;
+    z-index: 10001;
+    min-width: 280px;
+    max-width: 360px;
+    background: var(--md-surface-container-high);
+    color: var(--md-on-surface);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-lg);
+    box-shadow: var(--md-elevation-3);
+    padding: var(--md-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-3);
+    animation: onboarding-pop var(--md-motion-duration-medium2, 300ms) var(--md-motion-easing-emphasized-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1));
+}
+
+/* Step text area */
+.onboarding-step-content{
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-2);
+}
+.onboarding-step-content p{
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--md-on-surface-variant);
+}
+
+/* "1 / 4" indicator pill */
+.onboarding-step-indicator{
+    align-self: flex-start;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--md-on-primary-container);
+    background: var(--md-primary-container);
+    padding: var(--md-space-1) var(--md-space-3);
+    border-radius: var(--md-shape-full);
+}
+
+/* Action button row */
+.onboarding-step-actions{
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-2);
+    margin-top: var(--md-space-2);
+}
+
+/* Primary Next/Done button */
+.onboarding-next{
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 var(--md-space-4);
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: var(--md-shape-full);
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    cursor: pointer;
+    transition: background var(--md-motion-duration-short2, 100ms) var(--md-motion-easing-standard, ease),
+                box-shadow var(--md-motion-duration-short2, 100ms) var(--md-motion-easing-standard, ease);
+}
+.onboarding-next:hover{
+    background: var(--md-primary);
+    filter: brightness(1.08);
+    box-shadow: var(--md-elevation-1);
+}
+.onboarding-next:active{
+    filter: brightness(0.96);
+}
+.onboarding-next:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* Secondary Back button */
+.onboarding-prev{
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 var(--md-space-4);
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: inherit;
+    border: 1px solid var(--md-outline);
+    border-radius: var(--md-shape-full);
+    background: transparent;
+    color: var(--md-on-surface);
+    cursor: pointer;
+    transition: background var(--md-motion-duration-short2, 100ms) var(--md-motion-easing-standard, ease);
+}
+.onboarding-prev:hover{
+    background: var(--md-state-hover);
+}
+.onboarding-prev:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* Tertiary Skip-tour text button, pushed to the right */
+.onboarding-skip{
+    flex: 1 1 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 36px;
+    padding: 0 var(--md-space-2);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    font-family: inherit;
+    border: none;
+    background: transparent;
+    color: var(--md-on-surface-variant);
+    cursor: pointer;
+    transition: color var(--md-motion-duration-short2, 100ms) var(--md-motion-easing-standard, ease);
+}
+.onboarding-skip:hover{
+    color: var(--md-tertiary);
+    text-decoration: underline;
+}
+.onboarding-skip:focus-visible{
+    outline: 2px solid var(--md-tertiary);
+    outline-offset: 2px;
+    border-radius: var(--md-shape-xs);
+}
+
+/* Highlight ring drawn around the active target element */
+.onboarding-highlight{
+    position: relative;
+    z-index: 10001;
+    box-shadow: 0 0 0 9999px var(--md-scrim);
+    border-radius: var(--md-shape-md);
+    outline: 3px solid var(--md-primary);
+    outline-offset: 2px;
+    transition: outline-color var(--md-motion-duration-short3, 150ms) var(--md-motion-easing-standard, ease);
+}
+
+/* Standalone tooltip used by showTooltip() (contextual help) */
+.onboarding-tooltip{
+    position: absolute;
+    z-index: 10002;
+    min-width: 200px;
+    max-width: 320px;
+    background: var(--md-inverse-surface);
+    color: var(--md-inverse-on-surface);
+    border-radius: var(--md-shape-md);
+    box-shadow: var(--md-elevation-2);
+    padding: var(--md-space-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-2);
+    animation: onboarding-pop var(--md-motion-duration-medium2, 300ms) var(--md-motion-easing-emphasized-decelerate, cubic-bezier(0.05, 0.7, 0.1, 1));
+}
+.onboarding-tooltip-content{
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+.onboarding-tooltip-actions{
+    display: flex;
+    justify-content: flex-end;
+}
+.onboarding-tooltip-dismiss{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0 var(--md-space-3);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    border-radius: var(--md-shape-full);
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    cursor: pointer;
+    transition: filter var(--md-motion-duration-short2, 100ms) var(--md-motion-easing-standard, ease);
+}
+.onboarding-tooltip-dismiss:hover{
+    filter: brightness(1.08);
+}
+.onboarding-tooltip-dismiss:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+
+/* Keyframes for tour animations */
+@keyframes onboarding-fade-in{
+    from{ opacity: 0; }
+    to{ opacity: 1; }
+}
+@keyframes onboarding-pop{
+    from{
+        opacity: 0;
+        transform: translateY(8px) scale(0.96);
+    }
+    to{
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* On small screens, the tooltip card stretches full-width with a margin */
+@media (max-width: 600px){
+    .onboarding-step-tooltip{
+        min-width: unset;
+        left: var(--md-space-3) !important;
+        right: var(--md-space-3) !important;
+        max-width: unset;
+    }
+    .onboarding-tooltip{
+        min-width: unset;
+        left: var(--md-space-3) !important;
+        right: var(--md-space-3) !important;
+        max-width: unset;
+    }
+}
+
+/* Respect reduced-motion preference: disable animations */
+@media (prefers-reduced-motion: reduce){
+    .onboarding-overlay,
+    .onboarding-step-tooltip,
+    .onboarding-tooltip{
+        animation: none;
+    }
+    .onboarding-next,
+    .onboarding-prev,
+    .onboarding-skip,
+    .onboarding-tooltip-dismiss{
+        transition: none;
+    }
+}
 .experiment-log-step{
     padding: var(--md-space-3);
     background: var(--md-surface-container-low);
