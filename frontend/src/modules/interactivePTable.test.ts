@@ -272,6 +272,10 @@ describe("guessOxidationStates", function () {
         expect(InteractivePTable.guessOxidationStates(elementOfType("non-metal", 6))).toBe("-2, +4, +6");
     });
 
+    it("returns -1, +1 for hydrogen (non-metal with valence 1)", function () {
+        expect(InteractivePTable.guessOxidationStates(elementOfType("non-metal", 1))).toBe("-1, +1");
+    });
+
     it("returns +1, +2, +3 (variable) for transition metals", function () {
         expect(InteractivePTable.guessOxidationStates(elementOfType("transition metal", 2))).toBe("+1, +2, +3 (variable)");
     });

@@ -350,6 +350,9 @@ export class InteractivePTable {
             return "-1, +1, +3, +5, +7";
         }
         if (type === "non-metal") {
+            if (valence === 1) {
+                return "-1, +1";
+            }
             if (valence === 4) {
                 return "-4, +4";
             }
