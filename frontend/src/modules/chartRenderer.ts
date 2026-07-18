@@ -483,9 +483,9 @@ class ChartRenderer {
         let datasets: ChartDataset[] = [{
             "label": "pH",
             "data": phValues,
-            "color": "#1a73e8",
-            "borderColor": "#1a73e8",
-            "backgroundColor": "rgba(26,115,232,0.1)"
+            "color": "#2d5a3d",
+            "borderColor": "#2d5a3d",
+            "backgroundColor": "rgba(45,90,61,0.1)"
         }];
         if (equivPoint) {
             let equivIndex: number = this.findNearestIndex(dataPoints, equivPoint.volume);
@@ -570,9 +570,9 @@ class ChartRenderer {
             "datasets": [{
                 "label": "[A] (M)",
                 "data": values,
-                "color": "#1a73e8",
-                "borderColor": "#1a73e8",
-                "backgroundColor": "rgba(26,115,232,0.1)"
+                "color": "#0f3a3a",
+                "borderColor": "#0f3a3a",
+                "backgroundColor": "rgba(15,58,58,0.1)"
             }]
         };
         let options: ChartOptions = {
@@ -604,9 +604,9 @@ class ChartRenderer {
             "datasets": [{
                 "label": "Energy",
                 "data": values,
-                "color": "#9c27b0",
-                "borderColor": "#9c27b0",
-                "backgroundColor": "rgba(156,39,176,0.1)"
+                "color": "#c8553d",
+                "borderColor": "#c8553d",
+                "backgroundColor": "rgba(200,85,61,0.1)"
             }]
         };
         let options: ChartOptions = {
