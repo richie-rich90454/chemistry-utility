@@ -3,15 +3,12 @@
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.25-00ADD8)](https://golang.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6)](https://www.typescriptlang.org)
 [![Gin](https://img.shields.io/badge/Gin-1.x-00ADD8)](https://gin-gonic.com)
-[![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED)](https://www.docker.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1)](https://www.postgresql.org)
-[![Redis](https://img.shields.io/badge/Redis-7-DC382D)](https://redis.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-ff69b4)](https://github.com/richie-rich90454/chemistry-utility/pulls)
 [![GitHub stars](https://img.shields.io/github/stars/richie-rich90454/chemistry-utility?style=social)](https://github.com/richie-rich90454/chemistry-utility/stargazers)
 [![Go Report Card](https://goreportcard.com/badge/github.com/richie-rich90454/chemistry-utility)](https://goreportcard.com/report/github.com/richie-rich90454/chemistry-utility)
 
-A research-grade **chemistry SaaS platform** for chemists, researchers, and students. Built with **Go + Gin**, **TypeScript + Vite**, and the **Material Design 3** design system, deployed via **Docker** with **PostgreSQL** and **Redis**.
+A research-grade **chemistry utility** for chemists, researchers, and students. Built with **Go + Gin**, **TypeScript + Vite**, and the **Lab Parchment** design system.
 
 🌐 **Live Demo**: [chemutil.richardsblogs.com](https://chemutil.richardsblogs.com)
 
@@ -54,9 +51,8 @@ A research-grade **chemistry SaaS platform** for chemists, researchers, and stud
 - **Offline indicator** and graceful degradation via service workers
 
 ### Infrastructure & Developer Experience
-- **Docker deployment** with multi-stage production builds
 - **REST API** with OpenAPI 3.1 documentation and Swagger UI
-- **Material Design 3** design system with responsive layouts (desktop, tablet, mobile)
+- **Lab Parchment** design system with responsive layouts (desktop, tablet, mobile)
 - **Dark mode** theme support
 - **Internationalization (i18n)** with locale detection and number formatting
 - **CI/CD pipeline** with GitHub Actions, enforcing 90% line / 85% branch coverage
@@ -81,8 +77,8 @@ The Chemistry Utility is a full SaaS platform composed of a Go backend, a TypeSc
 - **Animation:** GSAP
 
 ### Deployment
-- **Production:** `docker-compose.yml` — app + PostgreSQL + Redis
-- **Development:** `docker-compose.dev.yml` — hot-reloading app + frontend dev server
+- **Desktop app:** Wails builds a native binary for Windows, macOS, and Linux
+- **Web app:** Vite dev server for development; static `dist/` for production hosting
 
 | Feature | Backend (Go + Gin) | Frontend (TS + Vite) |
 |---------|--------------------|-----------------------|
@@ -99,38 +95,23 @@ The Chemistry Utility is a full SaaS platform composed of a Go backend, a TypeSc
 ### Prerequisites
 - **Go** 1.25 or higher
 - **Node.js** 18.x or higher with **npm** 9.x+
-- **Docker** and **Docker Compose** (for containerized deployment)
 
-### Option 1: Docker (recommended)
-
-```bash
-# Clone the repository
-git clone https://github.com/richie-rich90454/chemistry-utility.git
-cd chemistry-utility
-
-# Copy environment defaults and adjust secrets
-cp .env.example .env
-
-# Start the full stack (app + PostgreSQL + Redis)
-docker-compose up
-```
-
-The app is available on `http://localhost:6005`.
-
-### Option 2: Development environment
+### Option 1: Development environment
 
 ```bash
 git clone https://github.com/richie-rich90454/chemistry-utility.git
 cd chemistry-utility
 
-# Hot-reloading backend + frontend dev server
-docker-compose -f docker-compose.dev.yml up
+# Frontend (Vite dev server with hot reload)
+cd frontend && npm install && npm run dev
+# -> http://localhost:5173
+
+# Backend (with air for live reload, in a second terminal)
+air
+# -> http://localhost:6005
 ```
 
-- Backend: `http://localhost:6005`
-- Frontend (Vite dev server): `http://localhost:5173`
-
-### Option 3: Manual build
+### Option 2: Manual build
 
 ```bash
 # Frontend
@@ -142,16 +123,6 @@ cd ..
 # Backend
 go build -o server ./cmd/server
 ./server
-```
-
-For development with hot reload:
-
-```bash
-# Frontend
-cd frontend && npm run dev
-
-# Backend (with air for live reload)
-air
 ```
 
 ---
@@ -242,10 +213,6 @@ chemistry-utility/
 │   ├── workflows/              # CI/CD pipelines
 │   ├── ISSUE_TEMPLATE/
 │   └── changelog-configuration.json
-├── Dockerfile                  # Multi-stage production build
-├── Dockerfile.dev              # Development image
-├── docker-compose.yml          # Production stack (app + PostgreSQL + Redis)
-├── docker-compose.dev.yml      # Development stack
 ├── main.go                     # Wails desktop app entry point
 ├── app.go                      # Wails app struct and bindings
 ├── go.mod
@@ -283,10 +250,9 @@ chemistry-utility/
 - **SQL migrations** versioned under `migrations/`
 
 ### Build & Deployment
-- **Docker multi-stage builds** for small production images
-- **Docker Compose** stacks for development and production
 - **Vite** for frontend bundling and optimization
 - **Go compiler** for native backend binaries
+- **Wails** for native desktop app packaging (Windows, macOS, Linux)
 - **GitHub Actions** CI/CD with test coverage enforcement (90% lines, 85% branches)
 
 ---
@@ -344,9 +310,8 @@ The full REST API is documented with **OpenAPI 3.1** and served via **Swagger UI
 - [x] Batch calculation mode with CSV upload
 - [x] Plugin architecture with lifecycle hooks
 - [x] Result annotation, star/favorite, and comparison
-- [x] Docker deployment with multi-stage builds
 - [x] REST API with OpenAPI 3.1 documentation
-- [x] Material Design 3 design system
+- [x] Lab Parchment design system
 - [x] Dark mode theme
 - [x] Internationalization (i18n)
 - [x] CI/CD pipeline with GitHub Actions
