@@ -2008,6 +2008,8 @@ details.example-details p strong:hover{
     right: 0;
     background: var(--md-surface-container-low);
     border-radius: var(--md-shape-xl) var(--md-shape-xl) 0 0;
+    border-top: 1px solid var(--md-outline-variant);
+    box-shadow: var(--md-elevation-3);
     z-index: 61;
     max-height: 70vh;
     overflow-y: auto;
@@ -2019,20 +2021,20 @@ details.example-details p strong:hover{
     transform: translateY(0);
 }
 .nav-sheet .sheet-handle{
-    width: 32px;
+    width: 36px;
     height: 4px;
-    border-radius: 2px;
+    border-radius: var(--md-shape-full);
     background: var(--md-on-surface-variant);
-    opacity: 0.4;
+    opacity: 0.35;
     margin: 0 auto var(--md-space-4);
 }
 .nav-sheet .sheet-category{
     font-size: 0.6875rem;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.1em;
     color: var(--md-on-surface-variant);
-    padding: var(--md-space-2) 0 var(--md-space-1);
+    padding: var(--md-space-3) 0 var(--md-space-2);
 }
 .nav-sheet .sheet-item{
     display: flex;
@@ -2072,9 +2074,9 @@ details.example-details p strong:hover{
 }
 .nav-recent .nav-recent-label{
     font-size: 0.6875rem;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.1em;
     color: var(--md-on-surface-variant);
     padding: var(--md-space-2) var(--md-space-4) var(--md-space-1);
 }
@@ -2165,9 +2167,9 @@ details.example-details p strong:hover{
     max-width: calc(100vw - 32px);
     max-height: 60vh;
     background: var(--md-surface-container-high);
-    border: none;
+    border: 1px solid var(--md-outline-variant);
     border-radius: var(--md-shape-xl);
-    box-shadow: var(--md-elevation-3);
+    box-shadow: var(--md-elevation-5);
     z-index: 101;
     overflow: hidden;
     flex-direction: column;
@@ -2244,13 +2246,17 @@ details.example-details p strong:hover{
     font-size: 0.6875rem;
     color: var(--md-on-surface-variant);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.08em;
+    font-weight: 600;
 }
 .palette-item .palette-item-shortcut{
     font-size: 0.6875rem;
     color: var(--md-on-surface-variant);
     font-family: monospace;
     margin-left: auto;
+    background: var(--md-surface-container);
+    padding: 2px var(--md-space-2);
+    border-radius: var(--md-shape-xs);
 }
 .palette-empty{
     padding: var(--md-space-8);
