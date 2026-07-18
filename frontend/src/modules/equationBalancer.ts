@@ -45,6 +45,11 @@ export interface BalanceResult {
 	explanation: BalanceExplanation;
 }
 
+export interface HalfReactionState {
+	reactants: Map<string, number>;
+	products: Map<string, number>;
+}
+
 const POLYATOMIC_IONS: { [key: string]: { charge: number; composition: { [key: string]: number } } } = {
 	"NO3": { charge: -1, composition: { N: 1, O: 3 } },
 	"SO4": { charge: -2, composition: { S: 1, O: 4 } },
@@ -460,6 +465,233 @@ export class EquationBalancer {
 		};
 		return fmt(reactantsStripped, 0)+" -> "+fmt(productsStripped, reactantsStripped.length);
 	}
+	private static countAtomInSide(side: Map<string, number>, element: string): number{
+		let total=0;
+		for (let entry of side){
+			let formula=entry[0];
+			let coeff=entry[1];
+			let parsed=EquationBalancer.parseFormulaWithCharge(formula);
+			let count=parsed.counts[element]||0;
+			total=total+count*coeff;
+		}
+		return total;
+	}
+	private static countChargeInSide(side: Map<string, number>): number{
+		let total=0;
+		for (let entry of side){
+			let formula=entry[0];
+			let coeff=entry[1];
+			let parsed=EquationBalancer.parseFormulaWithCharge(formula);
+			total=total+parsed.charge*coeff;
+		}
+		return total;
+	}
+	private static balanceNonOHAtoms(state: HalfReactionState, maxCoefficient: number): void{
+		let reactantList=Array.from(state.reactants.keys());
+		let productList=Array.from(state.products.keys());
+		let allSpecies=reactantList.concat(productList);
+		let parsed=allSpecies.map(EquationBalancer.parseFormulaWithCharge);
+		let elementSet=new Set<string>();
+		for (let p of parsed){
+			for (let el of Object.keys(p.counts)){
+				if (el!=="O"&&el!=="H"){
+					elementSet.add(el);
+				}
+			}
+		}
+		let elements=Array.from(elementSet);
+		if (elements.length===0) return;
+		let matrix: Fraction[][]=[];
+		for (let el of elements){
+			let row: Fraction[]=[];
+			for (let i=0;i<allSpecies.length;i++){
+				let count=parsed[i].counts[el]||0;
+				let v=i<reactantList.length?count:-count;
+				row.push(new Fraction(v));
+			}
+			matrix.push(row);
+		}
+		let sol=EquationBalancer.solveHomogeneous(matrix, maxCoefficient);
+		if (!sol) return;
+		for (let i=0;i<reactantList.length;i++){
+			let c=sol[i].n;
+			if (c<=0) return;
+			state.reactants.set(reactantList[i], c);
+		}
+		for (let i=0;i<productList.length;i++){
+			let c=sol[reactantList.length+i].n;
+			if (c<=0) return;
+			state.products.set(productList[i], c);
+		}
+	}
+	private static balanceOxygen(state: HalfReactionState): void{
+		let oReactants=EquationBalancer.countAtomInSide(state.reactants, "O");
+		let oProducts=EquationBalancer.countAtomInSide(state.products, "O");
+		if (oReactants===oProducts) return;
+		if (oReactants>oProducts){
+			let diff=oReactants-oProducts;
+			state.products.set("H2O", (state.products.get("H2O")||0)+diff);
+		}
+		else {
+			let diff=oProducts-oReactants;
+			state.reactants.set("H2O", (state.reactants.get("H2O")||0)+diff);
+		}
+	}
+	private static balanceHydrogenAcidic(state: HalfReactionState): void{
+		let hReactants=EquationBalancer.countAtomInSide(state.reactants, "H");
+		let hProducts=EquationBalancer.countAtomInSide(state.products, "H");
+		if (hReactants===hProducts) return;
+		if (hReactants>hProducts){
+			let diff=hReactants-hProducts;
+			state.products.set("H+", (state.products.get("H+")||0)+diff);
+		}
+		else {
+			let diff=hProducts-hReactants;
+			state.reactants.set("H+", (state.reactants.get("H+")||0)+diff);
+		}
+	}
+	private static balanceChargeWithElectrons(state: HalfReactionState): void{
+		let chargeReactants=EquationBalancer.countChargeInSide(state.reactants);
+		let chargeProducts=EquationBalancer.countChargeInSide(state.products);
+		if (chargeReactants===chargeProducts) return;
+		if (chargeReactants>chargeProducts){
+			let diff=chargeReactants-chargeProducts;
+			state.reactants.set("e-", (state.reactants.get("e-")||0)+diff);
+		}
+		else {
+			let diff=chargeProducts-chargeReactants;
+			state.products.set("e-", (state.products.get("e-")||0)+diff);
+		}
+	}
+	private static convertToBasic(state: HalfReactionState): void{
+		let hPlusReactants=state.reactants.get("H+")||0;
+		let hPlusProducts=state.products.get("H+")||0;
+		if (hPlusReactants>0){
+			state.products.set("OH-", (state.products.get("OH-")||0)+hPlusReactants);
+			state.reactants.delete("H+");
+			state.reactants.set("H2O", (state.reactants.get("H2O")||0)+hPlusReactants);
+		}
+		if (hPlusProducts>0){
+			state.reactants.set("OH-", (state.reactants.get("OH-")||0)+hPlusProducts);
+			state.products.delete("H+");
+			state.products.set("H2O", (state.products.get("H2O")||0)+hPlusProducts);
+		}
+	}
+	private static cancelSpecies(state: HalfReactionState): void{
+		let reactantKeys=Array.from(state.reactants.keys());
+		for (let species of reactantKeys){
+			let r=state.reactants.get(species)||0;
+			let p=state.products.get(species)||0;
+			if (r>0&&p>0){
+				let cancel=Math.min(r, p);
+				if (r===cancel) state.reactants.delete(species);
+				else state.reactants.set(species, r-cancel);
+				if (p===cancel) state.products.delete(species);
+				else state.products.set(species, p-cancel);
+			}
+		}
+	}
+	private static getElectronCount(state: HalfReactionState): number{
+		let r=state.reactants.get("e-")||0;
+		let p=state.products.get("e-")||0;
+		return Math.max(r, p);
+	}
+	private static multiplyHalfReaction(state: HalfReactionState, factor: number): HalfReactionState{
+		let reactants=new Map<string, number>();
+		let products=new Map<string, number>();
+		for (let entry of state.reactants){
+			reactants.set(entry[0], entry[1]*factor);
+		}
+		for (let entry of state.products){
+			products.set(entry[0], entry[1]*factor);
+		}
+		return { reactants: reactants, products: products };
+	}
+	private static combineHalfReactions(hr1: HalfReactionState, hr2: HalfReactionState): HalfReactionState{
+		let reactants=new Map<string, number>();
+		let products=new Map<string, number>();
+		for (let entry of hr1.reactants){
+			reactants.set(entry[0], entry[1]);
+		}
+		for (let entry of hr2.reactants){
+			reactants.set(entry[0], (reactants.get(entry[0])||0)+entry[1]);
+		}
+		for (let entry of hr1.products){
+			products.set(entry[0], entry[1]);
+		}
+		for (let entry of hr2.products){
+			products.set(entry[0], (products.get(entry[0])||0)+entry[1]);
+		}
+		return { reactants: reactants, products: products };
+	}
+	private static formatHalfReaction(state: HalfReactionState): string{
+		let formatSide=function(side: Map<string, number>): string{
+			let main: string[]=[];
+			let hPlus=0;
+			let ohMinus=0;
+			let h2o=0;
+			for (let entry of side){
+				let species=entry[0];
+				let coeff=entry[1];
+				if (species==="H+"){
+					hPlus=coeff;
+				}
+				else if (species==="OH-"){
+					ohMinus=coeff;
+				}
+				else if (species==="H2O"){
+					h2o=coeff;
+				}
+				else if (species==="e-"){
+					continue;
+				}
+				else {
+					main.push((coeff===1?"":""+coeff)+species);
+				}
+			}
+			if (hPlus>0) main.push((hPlus===1?"":""+hPlus)+"H+");
+			if (ohMinus>0) main.push((ohMinus===1?"":""+ohMinus)+"OH-");
+			if (h2o>0) main.push((h2o===1?"":""+h2o)+"H2O");
+			return main.join(" + ");
+		};
+		return formatSide(state.reactants)+" -> "+formatSide(state.products);
+	}
+	private static balanceHalfReaction(hr: { reactants: string[], products: string[] }, maxCoefficient: number): HalfReactionState{
+		let state: HalfReactionState={
+			reactants: new Map<string, number>(),
+			products: new Map<string, number>()
+		};
+		for (let r of hr.reactants) state.reactants.set(r, 1);
+		for (let p of hr.products) state.products.set(p, 1);
+		EquationBalancer.balanceNonOHAtoms(state, maxCoefficient);
+		EquationBalancer.balanceOxygen(state);
+		EquationBalancer.balanceHydrogenAcidic(state);
+		EquationBalancer.balanceChargeWithElectrons(state);
+		return state;
+	}
+	public static balanceRedox(equation: string, medium: "acidic"|"basic", maxCoefficient: number=10000): string{
+		let parts=equation.split("||");
+		if (parts.length!==2) throw new Error("Invalid redox format: expected '||' separator");
+		let hr1Input=EquationBalancer.parseEquation(parts[0].trim());
+		let hr2Input=EquationBalancer.parseEquation(parts[1].trim());
+		let hr1=EquationBalancer.balanceHalfReaction(hr1Input, maxCoefficient);
+		let hr2=EquationBalancer.balanceHalfReaction(hr2Input, maxCoefficient);
+		let e1=EquationBalancer.getElectronCount(hr1);
+		let e2=EquationBalancer.getElectronCount(hr2);
+		if (e1===0||e2===0) throw new Error("Could not determine electron count for half-reaction");
+		let lcmVal=EquationBalancer.lcm(e1, e2);
+		let f1=lcmVal/e1;
+		let f2=lcmVal/e2;
+		hr1=EquationBalancer.multiplyHalfReaction(hr1, f1);
+		hr2=EquationBalancer.multiplyHalfReaction(hr2, f2);
+		let combined=EquationBalancer.combineHalfReactions(hr1, hr2);
+		EquationBalancer.cancelSpecies(combined);
+		if (medium==="basic"){
+			EquationBalancer.convertToBasic(combined);
+			EquationBalancer.cancelSpecies(combined);
+		}
+		return EquationBalancer.formatHalfReaction(combined);
+	}
 }
 
 export function parseEquation(equation: string): { reactants: string[], products: string[] }{
@@ -470,4 +702,7 @@ export function balanceEquation(equation: string, maxCoefficient: number=10000, 
 }
 export function balanceIonic(equation: string, maxCoefficient: number=10000): string{
 	return EquationBalancer.balanceIonic(equation, maxCoefficient);
+}
+export function balanceRedox(equation: string, medium: "acidic"|"basic", maxCoefficient: number=10000): string{
+	return EquationBalancer.balanceRedox(equation, medium, maxCoefficient);
 }
