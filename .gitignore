@@ -197,12 +197,3 @@ test-results/
 # Editor/IDE
 .idea/
 .vscode/
-
-# C build artifacts (native/titrate/c)
-*.o
-*.a
-
-# Python build artifacts (native/titrate/python)
-__pycache__/
-*.pyc
-*.pyo
