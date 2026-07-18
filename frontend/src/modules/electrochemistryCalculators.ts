@@ -104,6 +104,8 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 			const n = m / M;
 			const time = (n * faradayConstant * z) / I;
 			this.resultDisplay.showResult("<p>The time t=" + this.numberFormatter.format(time, 3) + " s</p>");
+		} else {
+			throw new Error("Invalid solve-for selection");
 		}
 	}
 }
