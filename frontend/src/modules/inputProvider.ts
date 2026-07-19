@@ -38,3 +38,31 @@ export class DomInputProvider implements InputProvider {
 		return document.getElementById(id);
 	}
 }
+
+/**
+ * DOM-free implementation of {@link InputProvider} that reads values from an
+ * in-memory record. Used by Solid components and unit tests to construct
+ * calculators (typically via {@link CalculatorBuilder.setInputProvider})
+ * without touching the DOM. {@link getElement} always returns null because
+ * there is no underlying DOM node — calculators that rely solely on the pure
+ * {@link Calculator.calculatePure} path never call it.
+ */
+export class PureInputProvider implements InputProvider {
+	private values: Record<string, string>;
+
+	constructor(values: Record<string, string>) {
+		this.values = values;
+	}
+
+	public getValue(id: string): number {
+		return parseFloat(this.values[id] ?? "");
+	}
+
+	public getStringValue(id: string): string {
+		return this.values[id] ?? "";
+	}
+
+	public getElement(_id: string): HTMLElement | null {
+		return null;
+	}
+}
