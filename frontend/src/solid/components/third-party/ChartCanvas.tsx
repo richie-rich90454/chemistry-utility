@@ -1,5 +1,6 @@
 import type {JSX} from "solid-js";
 import {onMount, onCleanup, createMemo, createRenderEffect, createEffect} from "solid-js";
+import "../../third-party/registerChartPlugins.js";
 import {ChartRenderer} from "../../../modules/chartRenderer.js";
 import type {ChartData, ChartOptions} from "../../../modules/chartRenderer.js";
 import styles from "./ChartCanvas.module.css";
