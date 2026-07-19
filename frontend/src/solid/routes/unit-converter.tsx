@@ -8,115 +8,33 @@
  * manual diff of the rendered DOM against the legacy markup.
  */
 import type {JSX} from "solid-js";
-import {createSignal, For} from "solid-js";
-import {UnitConverter, ConversionResult} from "../../modules/unitConverter.js";
+import {For} from "solid-js";
+import {useUnitConverter} from "../lib/useUnitConverter";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import styles from "./unit-converter.module.css";
-interface ConversionRow {
-    unit: string;
-    unitName: string;
-    value: string;
-}
-interface ConversionDisplay {
-    sourceValue: string;
-    sourceUnit: string;
-    targetValue: string;
-    targetUnit: string;
-    targetUnitName: string;
-    isTable: boolean;
-    rows: ConversionRow[];
-}
 function UnitConverterRoute(): JSX.Element {
-    let categories: string[] = UnitConverter.getCategories();
-    let [category, setCategorySignal] = createSignal(categories[0]);
-    let [fromUnit, setFromUnitSignal] = createSignal(UnitConverter.getUnitsForCategory(categories[0])[0]);
-    let [toUnit, setToUnitSignal] = createSignal(UnitConverter.getUnitsForCategory(categories[0])[1] || UnitConverter.getUnitsForCategory(categories[0])[0]);
-    let [value, setValueSignal] = createSignal("");
-    let [result, setResult] = createSignal<ConversionDisplay | null>(null);
-    let [error, setError] = createSignal("");
-    function setCategory(next: string): void {
-        setCategorySignal(next);
-        let units = UnitConverter.getUnitsForCategory(next);
-        if (units.length === 0) {
-            setFromUnitSignal("");
-            setToUnitSignal("");
-            return;
-        }
-        setFromUnitSignal(units[0]);
-        setToUnitSignal(units.length > 1 ? units[1] : units[0]);
-        setResult(null);
-        setError("");
+    let state = useUnitConverter();
+    let category = state.category;
+    let setCategory = state.setCategory;
+    let fromUnit = state.fromUnit;
+    let setFromUnit = state.setFromUnit;
+    let toUnit = state.toUnit;
+    let setToUnit = state.setToUnit;
+    let value = state.value;
+    let setValue = state.setValue;
+    let result = state.result;
+    let error = state.error;
+    let convert = state.convert;
+    let clear = state.clear;
+    let categories = state.categories;
+    let unitsForCategory = state.unitsForCategory;
+    function handleConvert(): void {
+        convert();
     }
-    function setFromUnit(next: string): void {
-        setFromUnitSignal(next);
-    }
-    function setToUnit(next: string): void {
-        setToUnitSignal(next);
-    }
-    function setValue(next: string): void {
-        setValueSignal(next);
-    }
-    function convert(): void {
-        setError("");
-        setResult(null);
-        let trimmed = value().trim();
-        if (trimmed === "") {
-            setError("Please enter a numeric value");
-            return;
-        }
-        let numeric = Number(trimmed);
-        if (isNaN(numeric)) {
-            setError("Please enter a valid numeric value");
-            return;
-        }
-        let currentCategory = category();
-        let currentFrom = fromUnit();
-        let currentTo = toUnit();
-        try {
-            if (currentTo === "all") {
-                let conversions = UnitConverter.convertToAll(numeric, currentFrom, currentCategory);
-                let rows: ConversionRow[] = [];
-                for (let i = 0; i < conversions.length; i++) {
-                    let c = conversions[i];
-                    rows.push({
-                        unit: c.unit,
-                        unitName: c.unitName,
-                        value: UnitConverter.formatValue(c.value)
-                    });
-                }
-                setResult({
-                    sourceValue: trimmed,
-                    sourceUnit: currentFrom,
-                    targetValue: "",
-                    targetUnit: "all",
-                    targetUnitName: "all " + currentCategory + " units",
-                    isTable: true,
-                    rows: rows
-                });
-                return;
-            }
-            let res: ConversionResult = UnitConverter.convert(numeric, currentFrom, currentTo, currentCategory);
-            setResult({
-                sourceValue: trimmed,
-                sourceUnit: currentFrom,
-                targetValue: UnitConverter.formatValue(res.value),
-                targetUnit: res.unit,
-                targetUnitName: res.unitName,
-                isTable: false,
-                rows: []
-            });
-        }
-        catch (err) {
-            let message = err instanceof Error ? err.message : String(err);
-            setError(message);
-        }
-    }
-    function clear(): void {
-        setValueSignal("");
-        setResult(null);
-        setError("");
+    function handleClear(): void {
+        clear();
     }
     function handleInput(e: Event): void {
         let target = e.currentTarget as HTMLInputElement;
@@ -203,7 +121,7 @@ function UnitConverterRoute(): JSX.Element {
                 value={category()}
                 onChange={handleCategoryChange}
             >
-                <For each={categories}>
+                <For each={categories()}>
                     {(cat) => <option value={cat}>{cat}</option>}
                 </For>
             </select>
@@ -226,7 +144,7 @@ function UnitConverterRoute(): JSX.Element {
                 value={fromUnit()}
                 onChange={handleFromUnitChange}
             >
-                <For each={UnitConverter.getUnitsForCategory(category())}>
+                <For each={unitsForCategory(category())}>
                     {(unit) => <option value={unit}>{unit}</option>}
                 </For>
             </select>
@@ -239,13 +157,13 @@ function UnitConverterRoute(): JSX.Element {
                 onChange={handleToUnitChange}
             >
                 <option value="all">{"all"}</option>
-                <For each={UnitConverter.getUnitsForCategory(category())}>
+                <For each={unitsForCategory(category())}>
                     {(unit) => <option value={unit}>{unit}</option>}
                 </For>
             </select>
             <div class={styles.buttonRow}>
-                <button class={styles.button} onClick={convert}>Convert</button>
-                <button class={styles.secondaryButton} onClick={clear}>Clear</button>
+                <button class={styles.button} onClick={handleConvert}>Convert</button>
+                <button class={styles.secondaryButton} onClick={handleClear}>Clear</button>
             </div>
             {error() !== "" && <div class={styles.result + " " + styles.error}><p>{error()}</p></div>}
             {renderResult()}
