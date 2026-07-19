@@ -1,0 +1,29 @@
+.pageOverlay{
+    position: fixed;
+    inset: 0;
+    background: var(--md-background);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity var(--md-motion-duration-medium4) var(--md-motion-easing-standard),
+                visibility var(--md-motion-duration-medium4) var(--md-motion-easing-standard);
+}
+.pageOverlay.loaded{
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.loader{
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--md-outline-variant);
+    border-top-color: var(--md-primary);
+    border-right-color: var(--md-tertiary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    will-change: transform;
+}
+@keyframes spin{
+    to{transform: rotate(360deg)}
+}
