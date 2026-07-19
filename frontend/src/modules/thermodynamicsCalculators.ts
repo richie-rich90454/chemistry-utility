@@ -1,4 +1,5 @@
 import { Calculator } from "./calculator.js";
+import type { CalculatorResult } from "./calculator.js";
 import { SolveForCalculator } from "./solveForCalculator.js";
 import { InputValidator } from "./validation.js";
 
@@ -36,6 +37,40 @@ export class GibbsFreeEnergyCalculator extends Calculator {
             "<p>\u0394G = " + this.numberFormatter.format(deltaG, 4) + " kJ/mol</p>" +
             "<p>Process: " + spontaneity + "</p>"
         );
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const deltaH = parseFloat(inputs["gibbs-deltaH"] ?? "");
+        const deltaS = parseFloat(inputs["gibbs-deltaS"] ?? "");
+        const T = parseFloat(inputs["gibbs-T"] ?? "");
+        if (isNaN(deltaH) || isNaN(deltaS) || isNaN(T)) {
+            throw new Error("Missing or invalid inputs for gibbs-deltaH, gibbs-deltaS, gibbs-T");
+        }
+        if (T < 0) {
+            throw new Error("Temperature cannot be negative");
+        }
+        const deltaS_kJ = deltaS / 1000;
+        const deltaG = deltaH - T * deltaS_kJ;
+        let spontaneity: string;
+        if (deltaG < 0) {
+            spontaneity = "Spontaneous";
+        } else if (deltaG > 0) {
+            spontaneity = "Non-spontaneous";
+        } else {
+            spontaneity = "Equilibrium";
+        }
+        return {
+            value: "dG = " + this.numberFormatter.format(deltaG, 4) + " kJ/mol; Process: " + spontaneity,
+            explanation: "dG = dH - T*dS = " + this.numberFormatter.format(deltaH, 4) + " - " + this.numberFormatter.format(T, 4) + " * " + this.numberFormatter.format(deltaS_kJ, 4) + " = " + this.numberFormatter.format(deltaG, 4) + " kJ/mol; Process: " + spontaneity,
+            metadata: {
+                deltaG: deltaG,
+                deltaH: deltaH,
+                deltaS: deltaS,
+                deltaS_kJ: deltaS_kJ,
+                temperature: T,
+                spontaneity: spontaneity
+            }
+        };
     }
 }
 
@@ -79,6 +114,37 @@ export class HessLawCalculator extends Calculator {
             "<p>Total \u0394H = " + this.numberFormatter.format(totalH, 4) + " kJ/mol</p>" +
             "<p>Steps: " + parts.length + "</p>"
         );
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const rawValue = (inputs["hess-steps"] ?? "").trim();
+        if (rawValue === "") {
+            throw new Error("Please enter at least 2 enthalpy values separated by commas");
+        }
+        const parts = rawValue.split(",");
+        if (parts.length < 2) {
+            throw new Error("At least 2 enthalpy values are required");
+        }
+        if (parts.length > 10) {
+            throw new Error("Maximum of 10 enthalpy values allowed");
+        }
+        let totalH = 0;
+        for (let i = 0; i < parts.length; i++) {
+            const parsed = parseFloat(parts[i].trim());
+            if (isNaN(parsed)) {
+                throw new Error("All values must be valid numbers");
+            }
+            totalH = totalH + parsed;
+        }
+        return {
+            value: "Total dH = " + this.numberFormatter.format(totalH, 4) + " kJ/mol",
+            explanation: "Sum of " + parts.length + " enthalpy steps = " + this.numberFormatter.format(totalH, 4) + " kJ/mol",
+            metadata: {
+                totalH: totalH,
+                stepCount: parts.length,
+                steps: parts.map((p) => parseFloat(p.trim()))
+            }
+        };
     }
 }
 
@@ -128,6 +194,44 @@ export class EntropyCalculator extends Calculator {
             "<p>\u03A3S\u00B0(products) = " + this.numberFormatter.format(sumProducts, 4) + " J/(mol\u00B7K)</p>" +
             "<p>\u03A3S\u00B0(reactants) = " + this.numberFormatter.format(sumReactants, 4) + " J/(mol\u00B7K)</p>"
         );
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const productsRaw = (inputs["entropy-products"] ?? "").trim();
+        const reactantsRaw = (inputs["entropy-reactants"] ?? "").trim();
+        if (productsRaw === "" || reactantsRaw === "") {
+            throw new Error("Please enter entropy values for both products and reactants");
+        }
+        const productParts = productsRaw.split(",");
+        const reactantParts = reactantsRaw.split(",");
+        let sumProducts = 0;
+        for (let i = 0; i < productParts.length; i++) {
+            const parsed = parseFloat(productParts[i].trim());
+            if (isNaN(parsed)) {
+                throw new Error("All product entropy values must be valid numbers");
+            }
+            sumProducts = sumProducts + parsed;
+        }
+        let sumReactants = 0;
+        for (let i = 0; i < reactantParts.length; i++) {
+            const parsed = parseFloat(reactantParts[i].trim());
+            if (isNaN(parsed)) {
+                throw new Error("All reactant entropy values must be valid numbers");
+            }
+            sumReactants = sumReactants + parsed;
+        }
+        const deltaS = sumProducts - sumReactants;
+        return {
+            value: "dS = " + this.numberFormatter.format(deltaS, 4) + " J/(mol*K)",
+            explanation: "dS = S(products) - S(reactants) = " + this.numberFormatter.format(sumProducts, 4) + " - " + this.numberFormatter.format(sumReactants, 4) + " = " + this.numberFormatter.format(deltaS, 4) + " J/(mol*K)",
+            metadata: {
+                deltaS: deltaS,
+                sumProducts: sumProducts,
+                sumReactants: sumReactants,
+                productCount: productParts.length,
+                reactantCount: reactantParts.length
+            }
+        };
     }
 }
 
@@ -207,6 +311,70 @@ export class HeatCapacityCalculator extends SolveForCalculator {
             throw new Error("Invalid solve-for selection");
         }
     }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const solveFor = this.getSolveFor(inputs);
+        const mass = parseFloat(inputs["heat-cap-mass"] ?? "");
+        const c = parseFloat(inputs["heat-cap-specific-heat"] ?? "");
+        const T_initial = parseFloat(inputs["heat-cap-initial-temp"] ?? "");
+        const T_final = parseFloat(inputs["heat-cap-final-temp"] ?? "");
+        const q = parseFloat(inputs["heat-cap-heat"] ?? "");
+
+        if (solveFor === "q") {
+            if (isNaN(mass) || isNaN(c) || isNaN(T_initial) || isNaN(T_final)) {
+                throw new Error("Missing or invalid inputs for heat-cap-mass, heat-cap-specific-heat, heat-cap-initial-temp, heat-cap-final-temp");
+            }
+            if (mass <= 0) throw new Error("Mass must be positive");
+            if (c <= 0) throw new Error("Specific heat must be positive");
+            const deltaT = T_final - T_initial;
+            const result = mass * c * deltaT;
+            return {
+                value: "Heat: " + this.numberFormatter.format(result, 4) + " J",
+                explanation: "q = m*c*dT = " + this.numberFormatter.format(mass, 4) + " * " + this.numberFormatter.format(c, 4) + " * " + this.numberFormatter.format(deltaT, 4) + " = " + this.numberFormatter.format(result, 4) + " J",
+                metadata: { q: result, mass: mass, c: c, deltaT: deltaT, solveFor: solveFor }
+            };
+        } else if (solveFor === "c") {
+            if (isNaN(mass) || isNaN(T_initial) || isNaN(T_final) || isNaN(q)) {
+                throw new Error("Missing or invalid inputs for heat-cap-mass, heat-cap-initial-temp, heat-cap-final-temp, heat-cap-heat");
+            }
+            if (mass <= 0) throw new Error("Mass must be positive");
+            const deltaT = T_final - T_initial;
+            if (deltaT === 0) throw new Error("Temperature change cannot be zero");
+            const result = q / (mass * deltaT);
+            return {
+                value: "Specific Heat: " + this.numberFormatter.format(result, 4) + " J/(g*K)",
+                explanation: "c = q/(m*dT) = " + this.numberFormatter.format(q, 4) + " / (" + this.numberFormatter.format(mass, 4) + " * " + this.numberFormatter.format(deltaT, 4) + ") = " + this.numberFormatter.format(result, 4) + " J/(g*K)",
+                metadata: { c: result, mass: mass, q: q, deltaT: deltaT, solveFor: solveFor }
+            };
+        } else if (solveFor === "deltaT") {
+            if (isNaN(mass) || isNaN(c) || isNaN(q)) {
+                throw new Error("Missing or invalid inputs for heat-cap-mass, heat-cap-specific-heat, heat-cap-heat");
+            }
+            if (mass <= 0) throw new Error("Mass must be positive");
+            if (c <= 0) throw new Error("Specific heat must be positive");
+            const result = q / (mass * c);
+            return {
+                value: "Temperature Change: " + this.numberFormatter.format(result, 4) + " K",
+                explanation: "dT = q/(m*c) = " + this.numberFormatter.format(q, 4) + " / (" + this.numberFormatter.format(mass, 4) + " * " + this.numberFormatter.format(c, 4) + ") = " + this.numberFormatter.format(result, 4) + " K",
+                metadata: { deltaT: result, mass: mass, c: c, q: q, solveFor: solveFor }
+            };
+        } else if (solveFor === "Tfinal") {
+            if (isNaN(mass) || isNaN(c) || isNaN(T_initial) || isNaN(q)) {
+                throw new Error("Missing or invalid inputs for heat-cap-mass, heat-cap-specific-heat, heat-cap-initial-temp, heat-cap-heat");
+            }
+            if (mass <= 0) throw new Error("Mass must be positive");
+            if (c <= 0) throw new Error("Specific heat must be positive");
+            const deltaT = q / (mass * c);
+            const result = T_initial + deltaT;
+            return {
+                value: "Final Temperature: " + this.numberFormatter.format(result, 4) + " K",
+                explanation: "T_final = T_initial + q/(m*c) = " + this.numberFormatter.format(T_initial, 4) + " + " + this.numberFormatter.format(deltaT, 4) + " = " + this.numberFormatter.format(result, 4) + " K",
+                metadata: { Tfinal: result, Tinitial: T_initial, deltaT: deltaT, mass: mass, c: c, q: q, solveFor: solveFor }
+            };
+        } else {
+            throw new Error("Invalid solve-for selection");
+        }
+    }
 }
 
 /**
@@ -262,6 +430,35 @@ export class BondEnthalpyCalculator extends Calculator {
             "<p>Estimated \u0394H = " + this.numberFormatter.format(deltaH, 4) + " kJ/mol</p>" +
             "<p>Process: " + processType + "</p>"
         );
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const brokenRaw = (inputs["bond-enthalpy-broken"] ?? "").trim();
+        const formedRaw = (inputs["bond-enthalpy-formed"] ?? "").trim();
+        if (brokenRaw === "" || formedRaw === "") {
+            throw new Error("Please enter bond information for both broken and formed bonds");
+        }
+        const brokenEnergy = this.parseBondList(brokenRaw, "broken");
+        const formedEnergy = this.parseBondList(formedRaw, "formed");
+        const deltaH = brokenEnergy - formedEnergy;
+        let processType: string;
+        if (deltaH < 0) {
+            processType = "Exothermic";
+        } else if (deltaH > 0) {
+            processType = "Endothermic";
+        } else {
+            processType = "Thermoneutral";
+        }
+        return {
+            value: "Estimated dH = " + this.numberFormatter.format(deltaH, 4) + " kJ/mol; Process: " + processType,
+            explanation: "dH = bonds broken - bonds formed = " + this.numberFormatter.format(brokenEnergy, 4) + " - " + this.numberFormatter.format(formedEnergy, 4) + " = " + this.numberFormatter.format(deltaH, 4) + " kJ/mol; Process: " + processType,
+            metadata: {
+                deltaH: deltaH,
+                brokenEnergy: brokenEnergy,
+                formedEnergy: formedEnergy,
+                processType: processType
+            }
+        };
     }
 
     private parseBondList(raw: string, label: string): number {
@@ -328,6 +525,30 @@ export class BornHaberCycleCalculator extends Calculator {
             "<p>U = \u0394H<sub>f</sub> - \u0394H<sub>sub</sub> - IE - \u0394H<sub>diss</sub>/2 - EA</p>" +
             "<p>Lattice Energy U = " + this.numberFormatter.format(U, 4) + " kJ/mol</p>"
         );
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const dHf = parseFloat(inputs["born-haber-dHf"] ?? "");
+        const dHsub = parseFloat(inputs["born-haber-dHsub"] ?? "");
+        const IE = parseFloat(inputs["born-haber-IE"] ?? "");
+        const dHdiss = parseFloat(inputs["born-haber-dHdiss"] ?? "");
+        const EA = parseFloat(inputs["born-haber-EA"] ?? "");
+        if (isNaN(dHf) || isNaN(dHsub) || isNaN(IE) || isNaN(dHdiss) || isNaN(EA)) {
+            throw new Error("Missing or invalid inputs for born-haber-dHf, born-haber-dHsub, born-haber-IE, born-haber-dHdiss, born-haber-EA");
+        }
+        const U = dHf - dHsub - IE - (dHdiss / 2) - EA;
+        return {
+            value: "Lattice Energy U = " + this.numberFormatter.format(U, 4) + " kJ/mol",
+            explanation: "U = dHf - dHsub - IE - dHdiss/2 - EA = " + this.numberFormatter.format(dHf, 4) + " - " + this.numberFormatter.format(dHsub, 4) + " - " + this.numberFormatter.format(IE, 4) + " - " + this.numberFormatter.format(dHdiss / 2, 4) + " - " + this.numberFormatter.format(EA, 4) + " = " + this.numberFormatter.format(U, 4) + " kJ/mol",
+            metadata: {
+                U: U,
+                dHf: dHf,
+                dHsub: dHsub,
+                IE: IE,
+                dHdiss: dHdiss,
+                EA: EA
+            }
+        };
     }
 }
 

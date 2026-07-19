@@ -6,6 +6,12 @@ import {
     calculateHeatCapacity,
     calculateBondEnthalpy,
     calculateBornHaberCycle,
+    GibbsFreeEnergyCalculator,
+    HessLawCalculator,
+    EntropyCalculator,
+    HeatCapacityCalculator,
+    BondEnthalpyCalculator,
+    BornHaberCycleCalculator,
 } from "./thermodynamicsCalculators.js";
 import { setOrCreateInput, setOrCreateSelect, getResultHTML } from "../test/helpers.js";
 
@@ -376,5 +382,155 @@ describe("thermodynamicsCalculators", () => {
             const html = getResultHTML("born-haber-result");
             expect(html).toContain("Error");
         });
+    });
+});
+
+describe("GibbsFreeEnergyCalculator.calculatePure", () => {
+    it("should calculate spontaneous reaction (negative dG)", () => {
+        const calc = new GibbsFreeEnergyCalculator();
+        const result = calc.calculatePure({
+            "gibbs-deltaH": "-100",
+            "gibbs-deltaS": "200",
+            "gibbs-T": "298"
+        });
+        expect(result.value).toContain("-159.6");
+        expect(result.value).toContain("Spontaneous");
+        expect(result.metadata).toHaveProperty("deltaG");
+    });
+
+    it("should return error result when temperature is negative", () => {
+        const calc = new GibbsFreeEnergyCalculator();
+        const result = calc.calculatePure({
+            "gibbs-deltaH": "-100",
+            "gibbs-deltaS": "200",
+            "gibbs-T": "-50"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+});
+
+describe("HessLawCalculator.calculatePure", () => {
+    it("should sum 2 enthalpy values", () => {
+        const calc = new HessLawCalculator();
+        const result = calc.calculatePure({
+            "hess-steps": "-100,50"
+        });
+        expect(result.value).toContain("-50");
+        expect(result.metadata).toHaveProperty("totalH");
+        expect(result.metadata).toHaveProperty("stepCount");
+    });
+
+    it("should return error result when only one value is provided", () => {
+        const calc = new HessLawCalculator();
+        const result = calc.calculatePure({
+            "hess-steps": "100"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+});
+
+describe("EntropyCalculator.calculatePure", () => {
+    it("should calculate positive dS", () => {
+        const calc = new EntropyCalculator();
+        const result = calc.calculatePure({
+            "entropy-products": "200,150",
+            "entropy-reactants": "100,50"
+        });
+        expect(result.value).toContain("200");
+        expect(result.metadata).toHaveProperty("deltaS");
+        expect(result.metadata).toHaveProperty("sumProducts");
+    });
+
+    it("should return error result when products is empty", () => {
+        const calc = new EntropyCalculator();
+        const result = calc.calculatePure({
+            "entropy-products": "",
+            "entropy-reactants": "100"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+});
+
+describe("HeatCapacityCalculator.calculatePure", () => {
+    it("should solve for q (heat)", () => {
+        const calc = new HeatCapacityCalculator();
+        const result = calc.calculatePure({
+            "heat-cap-solve-for": "q",
+            "heat-cap-mass": "100",
+            "heat-cap-specific-heat": "4.184",
+            "heat-cap-initial-temp": "25",
+            "heat-cap-final-temp": "75",
+            "heat-cap-heat": ""
+        });
+        expect(result.value).toContain("20920");
+        expect(result.metadata).toHaveProperty("q");
+    });
+
+    it("should return error result when mass is zero solving for q", () => {
+        const calc = new HeatCapacityCalculator();
+        const result = calc.calculatePure({
+            "heat-cap-solve-for": "q",
+            "heat-cap-mass": "0",
+            "heat-cap-specific-heat": "4.184",
+            "heat-cap-initial-temp": "25",
+            "heat-cap-final-temp": "75",
+            "heat-cap-heat": ""
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+});
+
+describe("BondEnthalpyCalculator.calculatePure", () => {
+    it("should calculate exothermic reaction", () => {
+        const calc = new BondEnthalpyCalculator();
+        const result = calc.calculatePure({
+            "bond-enthalpy-broken": "O=O,H-H:2",
+            "bond-enthalpy-formed": "O-H:4"
+        });
+        expect(result.value).toContain("-485");
+        expect(result.value).toContain("Exothermic");
+        expect(result.metadata).toHaveProperty("deltaH");
+    });
+
+    it("should return error result when broken bonds is empty", () => {
+        const calc = new BondEnthalpyCalculator();
+        const result = calc.calculatePure({
+            "bond-enthalpy-broken": "",
+            "bond-enthalpy-formed": "C-H"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+});
+
+describe("BornHaberCycleCalculator.calculatePure", () => {
+    it("should calculate NaCl lattice energy", () => {
+        const calc = new BornHaberCycleCalculator();
+        const result = calc.calculatePure({
+            "born-haber-dHf": "-411",
+            "born-haber-dHsub": "108",
+            "born-haber-IE": "496",
+            "born-haber-dHdiss": "244",
+            "born-haber-EA": "-349"
+        });
+        expect(result.value).toContain("-788");
+        expect(result.metadata).toHaveProperty("U");
+    });
+
+    it("should return error result when dHf is missing", () => {
+        const calc = new BornHaberCycleCalculator();
+        const result = calc.calculatePure({
+            "born-haber-dHf": "",
+            "born-haber-dHsub": "108",
+            "born-haber-IE": "496",
+            "born-haber-dHdiss": "244",
+            "born-haber-EA": "-349"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
     });
 });
