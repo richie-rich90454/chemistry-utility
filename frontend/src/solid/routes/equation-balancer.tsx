@@ -8,93 +8,23 @@
  * rendered DOM against the legacy markup.
  */
 import type {JSX} from "solid-js";
-import {createSignal, For} from "solid-js";
-import {balanceEquation, balanceIonic, balanceRedox, BalanceResult} from "../../modules/equationBalancer.js";
+import {For} from "solid-js";
+import {useEquationBalancer} from "../lib/useEquationBalancer";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import styles from "./equation-balancer.module.css";
 function EquationBalancer(): JSX.Element {
-    let [equation, setEquationSignal] = createSignal("");
-    let [medium, setMediumSignal] = createSignal<"acidic" | "basic">("acidic");
-    let [result, setResult] = createSignal<BalanceResult | null>(null);
-    let [error, setError] = createSignal("");
-    let [isLoading, setLoading] = createSignal(false);
-    function setEquation(next: string): void {
-        setEquationSignal(next);
-    }
-    function setMedium(next: "acidic" | "basic"): void {
-        setMediumSignal(next);
-    }
-    function clear(): void {
-        setEquationSignal("");
-        setResult(null);
-        setError("");
-        setLoading(false);
-    }
-    function balance(): void {
-        setError("");
-        setResult(null);
-        let trimmed = equation().trim();
-        if (trimmed === "") {
-            setError("Please enter a chemical equation");
-            return;
-        }
-        setLoading(true);
-        try {
-            if (trimmed.indexOf("||") !== -1) {
-                let balanced = balanceRedox(trimmed, medium());
-                let steps: string[] = [];
-                steps.push("Detected || separator; balancing as redox half-reaction in " + medium() + " medium.");
-                steps.push("Balanced each half-reaction (atoms then charge via electrons).");
-                steps.push("Scaled half-reactions to cancel electrons and combined.");
-                steps.push("Final balanced equation: " + balanced);
-                let res: BalanceResult = {
-                    equation: balanced,
-                    explanation: {
-                        method: "Half-reaction method for redox equations (" + medium() + " medium)",
-                        steps: steps,
-                        coefficients: []
-                    }
-                };
-                setResult(res);
-            }
-            else {
-                let res = balanceEquation(trimmed, 10000, true) as BalanceResult;
-                setResult(res);
-            }
-        }
-        catch (err) {
-            let message = err instanceof Error ? err.message : String(err);
-            if (trimmed.indexOf("||") === -1) {
-                try {
-                    let balanced = balanceIonic(trimmed);
-                    let steps: string[] = [];
-                    steps.push("Standard atomic balancing failed: " + message + ".");
-                    steps.push("Fell back to charge-conserving ionic balancing.");
-                    steps.push("Final balanced equation: " + balanced);
-                    let res: BalanceResult = {
-                        equation: balanced,
-                        explanation: {
-                            method: "Ionic balancing with charge conservation",
-                            steps: steps,
-                            coefficients: []
-                        }
-                    };
-                    setResult(res);
-                    setLoading(false);
-                    return;
-                }
-                catch {
-                    // Fall through to error display below.
-                }
-            }
-            setError(message);
-        }
-        finally {
-            setLoading(false);
-        }
-    }
+    let state = useEquationBalancer();
+    let equation = state.equation;
+    let setEquation = state.setEquation;
+    let medium = state.medium;
+    let setMedium = state.setMedium;
+    let result = state.result;
+    let error = state.error;
+    let isLoading = state.isLoading;
+    let balance = state.balance;
+    let clear = state.clear;
     function handleBalance(): void {
         balance();
     }
@@ -148,7 +78,7 @@ function EquationBalancer(): JSX.Element {
             description="Enter an unbalanced chemical equation like H2 + O2 -> H2O and the balancer finds the smallest whole-number coefficients using Gaussian elimination over the rationals. Supports nested parentheses, hydrates, ionic species, and redox half-reactions in acidic or basic medium."
             exampleDetails={
                 <ExampleDetails>
-                    <p>Try <strong>H2 + O2 -> H2O</strong> for water synthesis, <strong>C3H8 + O2 -> CO2 + H2O</strong> for propane combustion, or <strong>MnO4- -> Mn2+ || Fe2+ -> Fe3+</strong> for a redox equation (use the medium selector for acidic vs basic).</p>
+                    <p>Try <strong>H2 + O2 {"->"} H2O</strong> for water synthesis, <strong>C3H8 + O2 {"->"} CO2 + H2O</strong> for propane combustion, or <strong>MnO4- {"->"} Mn2+ || Fe2+ {"->"} Fe3+</strong> for a redox equation (use the medium selector for acidic vs basic).</p>
                 </ExampleDetails>
             }
             seeAlso={
