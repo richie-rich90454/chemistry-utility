@@ -6,6 +6,12 @@ import {
     calculateDeBroglie,
     calculatePhotoelectricEffect,
     calculateHeisenbergUncertainty,
+    QuantumNumbersValidator,
+    ElectronConfigurationGenerator,
+    RydbergCalculator,
+    DeBroglieWavelengthCalculator,
+    PhotoelectricEffectCalculator,
+    HeisenbergUncertaintyCalculator,
 } from "./quantumCalculators.js";
 import { setOrCreateInput, setOrCreateSelect, getResultHTML, createContainer, createResultDiv } from "../test/helpers.js";
 
@@ -457,5 +463,246 @@ describe("quantumCalculators", () => {
             const html = getResultHTML("heisenberg-result");
             expect(html).toContain("Error");
         });
+    });
+});
+
+describe("QuantumNumbersValidator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "quantum-numbers-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("validates a valid set of quantum numbers (n=2, l=1, ml=0, ms=0.5)", () => {
+        const calc = new QuantumNumbersValidator();
+        const result = calc.calculatePure({
+            "qn-n": "2",
+            "qn-l": "1",
+            "qn-ml": "0",
+            "qn-ms": "0.5"
+        });
+        expect(result.value).toContain("Valid");
+        const meta = result.metadata as { valid: boolean; orbitalDesignation: string; maxElectrons: number };
+        expect(meta.valid).toBe(true);
+        expect(meta.orbitalDesignation).toBe("2p");
+        expect(meta.maxElectrons).toBe(6);
+    });
+
+    it("returns an invalid result when l >= n", () => {
+        const calc = new QuantumNumbersValidator();
+        const result = calc.calculatePure({
+            "qn-n": "1",
+            "qn-l": "1",
+            "qn-ml": "0",
+            "qn-ms": "0.5"
+        });
+        expect(result.value).toContain("Invalid");
+        const meta = result.metadata as { valid: boolean; errors: string[] };
+        expect(meta.valid).toBe(false);
+        expect(meta.errors.length).toBeGreaterThan(0);
+    });
+});
+
+describe("ElectronConfigurationGenerator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "electron-config-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("generates correct configuration for Fe (Z=26)", () => {
+        const calc = new ElectronConfigurationGenerator();
+        const result = calc.calculatePure({
+            "ec-atomic-number": "26"
+        });
+        const meta = result.metadata as { atomicNumber: number; fullConfig: string; nobleGasNotation: string; valenceElectrons: number };
+        expect(meta.atomicNumber).toBe(26);
+        expect(meta.fullConfig).toContain("3d6");
+        expect(meta.fullConfig).toContain("4s2");
+        expect(meta.nobleGasNotation).toContain("[Ar]");
+        expect(meta.valenceElectrons).toBeGreaterThan(0);
+    });
+
+    it("returns an error result when atomic number is out of range", () => {
+        const calc = new ElectronConfigurationGenerator();
+        const result = calc.calculatePure({
+            "ec-atomic-number": "0"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("1 and 118");
+    });
+});
+
+describe("RydbergCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "rydberg-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("calculates Balmer series H-alpha (n1=2, n2=3) at ~656 nm", () => {
+        const calc = new RydbergCalculator();
+        const result = calc.calculatePure({
+            "rydberg-n1": "2",
+            "rydberg-n2": "3"
+        });
+        expect(result.value).toContain("nm");
+        const match = result.value.match(/^([\d.]+)/);
+        expect(match).not.toBeNull();
+        const expected = 1 / (RYDBERG * (1 / 4 - 1 / 9)) * 1e9;
+        expect(parseFloat(match![1])).toBeCloseTo(expected, 1);
+        const meta = result.metadata as { seriesName: string; wavelengthNm: number; frequencyHz: number; energyEv: number };
+        expect(meta.seriesName).toContain("Balmer");
+        expect(meta.wavelengthNm).toBeCloseTo(expected, 1);
+    });
+
+    it("returns an error result when n2 <= n1", () => {
+        const calc = new RydbergCalculator();
+        const result = calc.calculatePure({
+            "rydberg-n1": "3",
+            "rydberg-n2": "2"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("n2 must be greater than n1");
+    });
+});
+
+describe("DeBroglieWavelengthCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "debroglie-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("calculates wavelength for an electron at 1e6 m/s", () => {
+        const calc = new DeBroglieWavelengthCalculator();
+        const result = calc.calculatePure({
+            "db-mass": String(9.109e-31),
+            "db-velocity": "1e6",
+            "db-mass-unit": "kg"
+        });
+        expect(result.value).toContain("nm");
+        const meta = result.metadata as { wavelengthM: number; unit: string; massKg: number };
+        const expectedLambda = PLANCK / (9.109e-31 * 1e6);
+        expect(meta.wavelengthM).toBeCloseTo(expectedLambda, -12);
+    });
+
+    it("returns an error result when mass <= 0", () => {
+        const calc = new DeBroglieWavelengthCalculator();
+        const result = calc.calculatePure({
+            "db-mass": "0",
+            "db-velocity": "1000",
+            "db-mass-unit": "kg"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("Mass must be positive");
+    });
+});
+
+describe("PhotoelectricEffectCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "photoelectric-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("calculates KE from wavelength and work function", () => {
+        const calc = new PhotoelectricEffectCalculator();
+        const result = calc.calculatePure({
+            "pe-solve-for": "KE",
+            "pe-wavelength": "400",
+            "pe-frequency": "",
+            "pe-work-function": "2.3",
+            "pe-ke": ""
+        });
+        const photonEnergy = (PLANCK * SPEED_OF_LIGHT) / (400e-9) / 1.602e-19;
+        const expectedKE = photonEnergy - 2.3;
+        expect(expectedKE).toBeGreaterThan(0);
+        expect(result.value).toContain("eV");
+        const match = result.value.match(/^([\d.eE+-]+)/);
+        expect(match).not.toBeNull();
+        expect(parseFloat(match![1])).toBeCloseTo(expectedKE, 1);
+        const meta = result.metadata as { emissionOccurred: boolean; photonEnergyEv: number; kineticEnergyEv: number };
+        expect(meta.emissionOccurred).toBe(true);
+    });
+
+    it("returns No electron emission when photon energy is below work function", () => {
+        const calc = new PhotoelectricEffectCalculator();
+        const result = calc.calculatePure({
+            "pe-solve-for": "KE",
+            "pe-wavelength": "700",
+            "pe-frequency": "",
+            "pe-work-function": "4.5",
+            "pe-ke": ""
+        });
+        expect(result.value).toContain("No electron emission");
+        const meta = result.metadata as { emissionOccurred: boolean; kineticEnergyEv: number };
+        expect(meta.emissionOccurred).toBe(false);
+        expect(meta.kineticEnergyEv).toBeLessThan(0);
+    });
+});
+
+describe("HeisenbergUncertaintyCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "heisenberg-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("calculates minimum delta-x from delta-p", () => {
+        const calc = new HeisenbergUncertaintyCalculator();
+        const result = calc.calculatePure({
+            "heis-solve-for": "min-delta-x",
+            "heis-delta-x": "",
+            "heis-delta-p": "1e-24",
+            "heis-mass": ""
+        });
+        expect(result.value).toContain("m");
+        const minDeltaX = (HBAR / 2) / 1e-24;
+        const match = result.value.match(/^([\d.eE+-]+)/);
+        expect(match).not.toBeNull();
+        expect(parseFloat(match![1])).toBeCloseTo(minDeltaX, -13);
+        const meta = result.metadata as { minDeltaX: number; minProduct: number };
+        expect(meta.minDeltaX).toBeCloseTo(minDeltaX, -13);
+    });
+
+    it("returns an error result when delta-p <= 0", () => {
+        const calc = new HeisenbergUncertaintyCalculator();
+        const result = calc.calculatePure({
+            "heis-solve-for": "min-delta-x",
+            "heis-delta-x": "",
+            "heis-delta-p": "0",
+            "heis-mass": ""
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("positive");
     });
 });

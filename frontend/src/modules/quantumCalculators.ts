@@ -1,4 +1,5 @@
 import { Calculator } from "./calculator.js";
+import type { CalculatorResult } from "./calculator.js";
 import { SolveForCalculator } from "./solveForCalculator.js";
 import { InputValidator } from "./validation.js";
 
@@ -93,6 +94,71 @@ export class QuantumNumbersValidator extends Calculator {
         html += "<p>Max electrons in " + orbitalDesignation + " subshell: <strong>" + maxElectrons + "</strong></p>";
         this.resultDisplay.showResult(html);
     }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const nVal = parseFloat(inputs["qn-n"] ?? "");
+        const lVal = parseFloat(inputs["qn-l"] ?? "");
+        const mlVal = parseFloat(inputs["qn-ml"] ?? "");
+        const msVal = parseFloat(inputs["qn-ms"] ?? "");
+        if (isNaN(nVal) || isNaN(lVal) || isNaN(mlVal) || isNaN(msVal)) {
+            throw new Error("Missing or invalid inputs for qn-n, qn-l, qn-ml, qn-ms");
+        }
+        const n: number = nVal;
+        const l: number = lVal;
+        const ml: number = mlVal;
+        const ms: number = msVal;
+        let errors: string[] = [];
+        if (n !== Math.floor(n) || n < 1) {
+            errors.push("n must be a positive integer (1, 2, 3, ...)");
+        }
+        if (l !== Math.floor(l) || l < 0 || l >= n) {
+            errors.push("l must be an integer from 0 to n-1");
+        }
+        if (ml !== Math.floor(ml) || ml < -l || ml > l) {
+            errors.push("ml must be an integer from -l to +l");
+        }
+        if (ms !== 0.5 && ms !== -0.5) {
+            errors.push("ms must be +1/2 or -1/2");
+        }
+        let valid: boolean = errors.length === 0;
+        let shellNames: Record<number, string> = {
+            1: "K", 2: "L", 3: "M", 4: "N", 5: "O", 6: "P", 7: "Q"
+        };
+        let subshellNames: Record<number, string> = {
+            0: "s", 1: "p", 2: "d", 3: "f"
+        };
+        let shell: string = shellNames[n] || "";
+        let subshell: string = subshellNames[l] || "";
+        let orbitalDesignation: string = String(Math.round(n)) + subshell;
+        let maxElectrons: number = 2 * (2 * Math.round(l) + 1);
+        let value: string = valid ? "Valid quantum numbers" : "Invalid quantum numbers";
+        let explanation: string = "n = " + Math.round(n) + " (shell " + shell + "); ";
+        explanation += "l = " + Math.round(l) + " (subshell " + subshell + "); ";
+        explanation += "ml = " + Math.round(ml) + "; ";
+        explanation += "ms = " + (ms > 0 ? "+1/2" : "-1/2") + "; ";
+        if (valid) {
+            explanation += "Orbital designation: " + orbitalDesignation + "; ";
+            explanation += "Max electrons in " + orbitalDesignation + " subshell: " + maxElectrons;
+        } else {
+            explanation += "Errors: " + errors.join("; ");
+        }
+        return {
+            value: value,
+            explanation: explanation,
+            metadata: {
+                valid: valid,
+                n: Math.round(n),
+                l: Math.round(l),
+                ml: Math.round(ml),
+                ms: ms,
+                shell: shell,
+                subshell: subshell,
+                orbitalDesignation: orbitalDesignation,
+                maxElectrons: maxElectrons,
+                errors: errors
+            }
+        };
+    }
 }
 
 /**
@@ -170,6 +236,37 @@ export class ElectronConfigurationGenerator extends Calculator {
         html += "<p>Orbital diagram:</p>";
         html += "<pre>" + orbitalDiagram + "</pre>";
         this.resultDisplay.showResult(html);
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const zVal = parseFloat(inputs["ec-atomic-number"] ?? "");
+        if (isNaN(zVal)) {
+            throw new Error("Missing or invalid input for ec-atomic-number");
+        }
+        const z: number = Math.round(zVal);
+        if (z < 1 || z > 118) {
+            throw new Error("Atomic number must be between 1 and 118");
+        }
+        let config: string = this.buildConfiguration(z);
+        let nobleGasNotation: string = this.buildNobleGasNotation(z);
+        let orbitalDiagram: string = this.buildOrbitalDiagram(z);
+        let valenceElectrons: number = this.countValenceElectrons(z);
+        let explanation: string = "Atomic number: " + z + "; ";
+        explanation += "Full configuration: " + config + "; ";
+        explanation += "Noble gas notation: " + nobleGasNotation + "; ";
+        explanation += "Valence electrons: " + valenceElectrons + "; ";
+        explanation += "Orbital diagram:\n" + orbitalDiagram;
+        return {
+            value: config,
+            explanation: explanation,
+            metadata: {
+                atomicNumber: z,
+                fullConfig: config,
+                nobleGasNotation: nobleGasNotation,
+                valenceElectrons: valenceElectrons,
+                orbitalDiagram: orbitalDiagram
+            }
+        };
     }
 
     private buildConfiguration(z: number): string {
@@ -447,6 +544,50 @@ export class RydbergCalculator extends Calculator {
         this.resultDisplay.showResult(html);
     }
 
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const n1Val = parseFloat(inputs["rydberg-n1"] ?? "");
+        const n2Val = parseFloat(inputs["rydberg-n2"] ?? "");
+        if (isNaN(n1Val) || isNaN(n2Val)) {
+            throw new Error("Missing or invalid inputs for rydberg-n1, rydberg-n2");
+        }
+        const n1: number = n1Val;
+        const n2: number = n2Val;
+        if (n1 !== Math.floor(n1) || n1 < 1) {
+            throw new Error("n1 must be a positive integer");
+        }
+        if (n2 !== Math.floor(n2) || n2 < 1) {
+            throw new Error("n2 must be a positive integer");
+        }
+        if (n2 <= n1) {
+            throw new Error("n2 must be greater than n1");
+        }
+        let invLambda: number = RYDBERG * (1 / (n1 * n1) - 1 / (n2 * n2));
+        let lambdaM: number = 1 / invLambda;
+        let lambdaNm: number = lambdaM * 1e9;
+        let frequency: number = SPEED_OF_LIGHT / lambdaM;
+        let energyJ: number = PLANCK * frequency;
+        let energyEv: number = energyJ / ELEMENTARY_CHARGE;
+        let seriesName: string = this.getSeriesName(n1);
+        let value: string = this.numberFormatter.format(lambdaNm, 2) + " nm";
+        let explanation: string = "Spectral series: " + seriesName + " (n\u2081 = " + Math.round(n1) + "); ";
+        explanation += "Transition: n = " + Math.round(n2) + " \u2192 n = " + Math.round(n1) + "; ";
+        explanation += "Wavelength: " + this.numberFormatter.format(lambdaNm, 2) + " nm; ";
+        explanation += "Frequency: " + this.numberFormatter.format(frequency, 4) + " Hz; ";
+        explanation += "Energy: " + this.numberFormatter.format(energyEv, 4) + " eV";
+        return {
+            value: value,
+            explanation: explanation,
+            metadata: {
+                n1: Math.round(n1),
+                n2: Math.round(n2),
+                wavelengthNm: lambdaNm,
+                frequencyHz: frequency,
+                energyEv: energyEv,
+                seriesName: seriesName
+            }
+        };
+    }
+
     private getSeriesName(n1: number): string {
         if (n1 === 1) {
             return "Lyman (UV)";
@@ -532,6 +673,61 @@ export class DeBroglieWavelengthCalculator extends Calculator {
         html += "<p>De Broglie wavelength: <strong>" + this.numberFormatter.format(lambdaDisplay, 4) + " " + unit + "</strong></p>";
         html += "<p>Wavelength in meters: " + this.numberFormatter.format(lambdaM, 4) + " m</p>";
         this.resultDisplay.showResult(html);
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const massRaw = parseFloat(inputs["db-mass"] ?? "");
+        const velocity = parseFloat(inputs["db-velocity"] ?? "");
+        if (isNaN(massRaw) || isNaN(velocity)) {
+            throw new Error("Missing or invalid inputs for db-mass, db-velocity");
+        }
+        if (massRaw <= 0) {
+            throw new Error("Mass must be positive");
+        }
+        if (velocity <= 0) {
+            throw new Error("Velocity must be positive");
+        }
+        const massUnit: string = inputs["db-mass-unit"] || "kg";
+        let massKg: number = massRaw;
+        if (massUnit === "amu") {
+            massKg = massRaw * AMU_TO_KG;
+        }
+        let lambdaM: number = PLANCK / (massKg * velocity);
+        let lambdaDisplay: number;
+        let unit: string;
+        if (lambdaM < 1e-12) {
+            lambdaDisplay = lambdaM * 1e12;
+            unit = "pm";
+        } else if (lambdaM < 1e-9) {
+            lambdaDisplay = lambdaM * 1e9;
+            unit = "nm";
+        } else if (lambdaM < 1e-7) {
+            lambdaDisplay = lambdaM * 1e9;
+            unit = "nm";
+        } else {
+            lambdaDisplay = lambdaM * 1e10;
+            unit = "\u00C5";
+        }
+        let value: string = this.numberFormatter.format(lambdaDisplay, 4) + " " + unit;
+        let explanation: string = "\u03BB = h / (m\u00B7v); ";
+        if (massUnit === "amu") {
+            explanation += "Mass: " + this.numberFormatter.format(massRaw, 4) + " amu = " + this.numberFormatter.format(massKg, 4) + " kg; ";
+        }
+        explanation += "De Broglie wavelength: " + this.numberFormatter.format(lambdaDisplay, 4) + " " + unit + "; ";
+        explanation += "Wavelength in meters: " + this.numberFormatter.format(lambdaM, 4) + " m";
+        return {
+            value: value,
+            explanation: explanation,
+            metadata: {
+                wavelengthM: lambdaM,
+                wavelengthDisplay: lambdaDisplay,
+                unit: unit,
+                massKg: massKg,
+                massRaw: massRaw,
+                massUnit: massUnit,
+                velocity: velocity
+            }
+        };
     }
 }
 
@@ -641,6 +837,133 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
 
         this.resultDisplay.showResult(html);
     }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const solveFor: string = this.getSolveFor(inputs);
+        const wavelengthNm: number = parseFloat(inputs["pe-wavelength"] ?? "");
+        const frequencyHz: number = parseFloat(inputs["pe-frequency"] ?? "");
+        const workFunctionEv: number = parseFloat(inputs["pe-work-function"] ?? "");
+        const keEv: number = parseFloat(inputs["pe-ke"] ?? "");
+        if (solveFor === "KE") {
+            let freq: number = frequencyHz;
+            if (isNaN(freq) && !isNaN(wavelengthNm)) {
+                if (wavelengthNm <= 0) {
+                    throw new Error("Wavelength must be positive");
+                }
+                let lambdaM: number = wavelengthNm * 1e-9;
+                freq = SPEED_OF_LIGHT / lambdaM;
+            }
+            if (isNaN(freq)) {
+                throw new Error("Please enter wavelength or frequency");
+            }
+            if (isNaN(workFunctionEv)) {
+                throw new Error("Please enter the work function");
+            }
+            let energyEv: number = (PLANCK * freq) / ELEMENTARY_CHARGE;
+            let ke: number = energyEv - workFunctionEv;
+            let thresholdFreq: number = (workFunctionEv * ELEMENTARY_CHARGE) / PLANCK;
+            let thresholdWavelengthNm: number = (SPEED_OF_LIGHT / thresholdFreq) * 1e9;
+            let value: string;
+            let explanation: string = "Photon energy: " + this.numberFormatter.format(energyEv, 4) + " eV; ";
+            explanation += "Work function \u03C6: " + this.numberFormatter.format(workFunctionEv, 4) + " eV; ";
+            if (ke < 0) {
+                value = "No electron emission";
+                explanation += "No electron emission (photon energy below work function); ";
+                explanation += "KE would be: " + this.numberFormatter.format(ke, 4) + " eV (negative = no emission); ";
+            } else {
+                value = this.numberFormatter.format(ke, 4) + " eV";
+                explanation += "Kinetic energy KE: " + this.numberFormatter.format(ke, 4) + " eV; ";
+            }
+            explanation += "Threshold frequency: " + this.numberFormatter.format(thresholdFreq, 4) + " Hz; ";
+            explanation += "Threshold wavelength: " + this.numberFormatter.format(thresholdWavelengthNm, 2) + " nm";
+            return {
+                value: value,
+                explanation: explanation,
+                metadata: {
+                    photonEnergyEv: energyEv,
+                    kineticEnergyEv: ke,
+                    workFunctionEv: workFunctionEv,
+                    thresholdFrequencyHz: thresholdFreq,
+                    thresholdWavelengthNm: thresholdWavelengthNm,
+                    emissionOccurred: ke >= 0
+                }
+            };
+        } else if (solveFor === "threshold-frequency") {
+            if (isNaN(workFunctionEv)) {
+                throw new Error("Please enter the work function");
+            }
+            let thresholdFreq: number = (workFunctionEv * ELEMENTARY_CHARGE) / PLANCK;
+            let thresholdWavelengthNm: number = (SPEED_OF_LIGHT / thresholdFreq) * 1e9;
+            let value: string = this.numberFormatter.format(thresholdFreq, 4) + " Hz";
+            let explanation: string = "Threshold frequency: " + this.numberFormatter.format(thresholdFreq, 4) + " Hz; ";
+            explanation += "Threshold wavelength: " + this.numberFormatter.format(thresholdWavelengthNm, 2) + " nm";
+            return {
+                value: value,
+                explanation: explanation,
+                metadata: {
+                    thresholdFrequencyHz: thresholdFreq,
+                    thresholdWavelengthNm: thresholdWavelengthNm,
+                    workFunctionEv: workFunctionEv
+                }
+            };
+        } else if (solveFor === "work-function") {
+            let freq: number = frequencyHz;
+            if (isNaN(freq) && !isNaN(wavelengthNm)) {
+                if (wavelengthNm <= 0) {
+                    throw new Error("Wavelength must be positive");
+                }
+                let lambdaM: number = wavelengthNm * 1e-9;
+                freq = SPEED_OF_LIGHT / lambdaM;
+            }
+            if (isNaN(freq)) {
+                throw new Error("Please enter wavelength or frequency");
+            }
+            if (isNaN(keEv)) {
+                throw new Error("Please enter the kinetic energy");
+            }
+            let photonEnergyEv: number = (PLANCK * freq) / ELEMENTARY_CHARGE;
+            let phi: number = photonEnergyEv - keEv;
+            let value: string = this.numberFormatter.format(phi, 4) + " eV";
+            let explanation: string = "Photon energy: " + this.numberFormatter.format(photonEnergyEv, 4) + " eV; ";
+            explanation += "Work function \u03C6: " + this.numberFormatter.format(phi, 4) + " eV";
+            return {
+                value: value,
+                explanation: explanation,
+                metadata: {
+                    photonEnergyEv: photonEnergyEv,
+                    workFunctionEv: phi,
+                    kineticEnergyEv: keEv
+                }
+            };
+        } else if (solveFor === "wavelength") {
+            if (isNaN(keEv)) {
+                throw new Error("Please enter the kinetic energy");
+            }
+            if (isNaN(workFunctionEv)) {
+                throw new Error("Please enter the work function");
+            }
+            let totalEnergyEv: number = keEv + workFunctionEv;
+            let totalEnergyJ: number = totalEnergyEv * ELEMENTARY_CHARGE;
+            let freq: number = totalEnergyJ / PLANCK;
+            let lambdaM: number = SPEED_OF_LIGHT / freq;
+            let lambdaNm: number = lambdaM * 1e9;
+            let value: string = this.numberFormatter.format(lambdaNm, 2) + " nm";
+            let explanation: string = "Total photon energy: " + this.numberFormatter.format(totalEnergyEv, 4) + " eV; ";
+            explanation += "Required wavelength: " + this.numberFormatter.format(lambdaNm, 2) + " nm; ";
+            explanation += "Required frequency: " + this.numberFormatter.format(freq, 4) + " Hz";
+            return {
+                value: value,
+                explanation: explanation,
+                metadata: {
+                    totalPhotonEnergyEv: totalEnergyEv,
+                    wavelengthNm: lambdaNm,
+                    frequencyHz: freq
+                }
+            };
+        } else {
+            throw new Error("Invalid solve-for selection");
+        }
+    }
 }
 
 /**
@@ -705,6 +1028,74 @@ export class HeisenbergUncertaintyCalculator extends SolveForCalculator {
         }
 
         this.resultDisplay.showResult(html);
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const solveFor: string = this.getSolveFor(inputs);
+        const deltaXVal: number = parseFloat(inputs["heis-delta-x"] ?? "");
+        const deltaPVal: number = parseFloat(inputs["heis-delta-p"] ?? "");
+        const massVal: number = parseFloat(inputs["heis-mass"] ?? "");
+        let minProduct: number = HBAR / 2.0;
+        if (solveFor === "min-delta-x") {
+            if (isNaN(deltaPVal)) {
+                throw new Error("Please enter the uncertainty in momentum (\u0394p)");
+            }
+            if (deltaPVal <= 0) {
+                throw new Error("\u0394p must be positive");
+            }
+            let minDeltaX: number = minProduct / deltaPVal;
+            let value: string = this.numberFormatter.format(minDeltaX, 4) + " m";
+            let explanation: string = "\u0394x\u00B7\u0394p \u2265 \u0127/2 = " + this.numberFormatter.format(minProduct, 4) + " J\u00B7s; ";
+            explanation += "Minimum \u0394x: " + this.numberFormatter.format(minDeltaX, 4) + " m";
+            let metadata: Record<string, unknown> = {
+                minProduct: minProduct,
+                minDeltaX: minDeltaX,
+                deltaP: deltaPVal
+            };
+            if (!isNaN(massVal) && massVal > 0) {
+                let deltaV: number = deltaPVal / massVal;
+                let minDeltaV: number = minDeltaX * massVal;
+                explanation += "; \u0394v corresponding to \u0394p: " + this.numberFormatter.format(deltaV, 4) + " m/s";
+                explanation += "; Minimum \u0394v from \u0394x: " + this.numberFormatter.format(minDeltaV / massVal, 4) + " m/s";
+                metadata.deltaV = deltaV;
+                metadata.minDeltaV = minDeltaV / massVal;
+                metadata.mass = massVal;
+            }
+            return {
+                value: value,
+                explanation: explanation,
+                metadata: metadata
+            };
+        } else if (solveFor === "min-delta-p") {
+            if (isNaN(deltaXVal)) {
+                throw new Error("Please enter the uncertainty in position (\u0394x)");
+            }
+            if (deltaXVal <= 0) {
+                throw new Error("\u0394x must be positive");
+            }
+            let minDeltaP: number = minProduct / deltaXVal;
+            let value: string = this.numberFormatter.format(minDeltaP, 4) + " kg\u00B7m/s";
+            let explanation: string = "\u0394x\u00B7\u0394p \u2265 \u0127/2 = " + this.numberFormatter.format(minProduct, 4) + " J\u00B7s; ";
+            explanation += "Minimum \u0394p: " + this.numberFormatter.format(minDeltaP, 4) + " kg\u00B7m/s";
+            let metadata: Record<string, unknown> = {
+                minProduct: minProduct,
+                minDeltaP: minDeltaP,
+                deltaX: deltaXVal
+            };
+            if (!isNaN(massVal) && massVal > 0) {
+                let minDeltaV: number = minDeltaP / massVal;
+                explanation += "; Minimum \u0394v: " + this.numberFormatter.format(minDeltaV, 4) + " m/s";
+                metadata.minDeltaV = minDeltaV;
+                metadata.mass = massVal;
+            }
+            return {
+                value: value,
+                explanation: explanation,
+                metadata: metadata
+            };
+        } else {
+            throw new Error("Invalid solve-for selection");
+        }
     }
 }
 
