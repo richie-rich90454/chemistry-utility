@@ -453,3 +453,47 @@ describe("stoichiometryCalculator", () => {
         });
     });
 });
+
+describe("StoichiometryCalculator.calculatePure", () => {
+    beforeEach(() => {
+        // Legacy DOM hooks are still constructed by the calculator; supply
+        // a result element so the constructor does not throw.
+        const result = document.createElement("div");
+        result.id = "stoich-result";
+        document.body.appendChild(result);
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("computes product-from-reactant: 2 mol H2 -> 2 mol H2O", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "product-from-reactant",
+            "reactant-select": "H2",
+            "reactant-moles": "2",
+            "product-select": "H2O"
+        });
+        // molesProduct = (2/2)*2 = 2.00
+        expect(result.value).toContain("H2O");
+        expect(result.value).toContain("2.00");
+        expect(result.metadata).toHaveProperty("molesProduct");
+        expect(result.metadata).toHaveProperty("calculationType", "product-from-reactant");
+    });
+
+    it("returns an error result when moles input is invalid", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "product-from-reactant",
+            "reactant-select": "H2",
+            "reactant-moles": "0",
+            "product-select": "H2O"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid moles input");
+    });
+});
