@@ -20,6 +20,7 @@ import {CommonIonEffect} from "./routes/common-ion";
 import {NuclearChemistry} from "./routes/nuclear";
 import {GasLaws} from "./routes/gas-laws";
 import {Electrochemistry} from "./routes/electrochemistry";
+import {Thermodynamics} from "./routes/thermodynamics";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -106,6 +107,27 @@ function App(): JSX.Element {
         if (window.location.hash === "#electrolysis") {
             window.location.replace("/electrochemistry");
         }
+        if (window.location.hash === "#thermodynamics") {
+            window.location.replace("/thermodynamics");
+        }
+        if (window.location.hash === "#gibbs-free-energy") {
+            window.location.replace("/thermodynamics");
+        }
+        if (window.location.hash === "#hess-law") {
+            window.location.replace("/thermodynamics");
+        }
+        if (window.location.hash === "#entropy-change") {
+            window.location.replace("/thermodynamics");
+        }
+        if (window.location.hash === "#heat-capacity") {
+            window.location.replace("/thermodynamics");
+        }
+        if (window.location.hash === "#bond-enthalpy") {
+            window.location.replace("/thermodynamics");
+        }
+        if (window.location.hash === "#born-haber") {
+            window.location.replace("/thermodynamics");
+        }
     });
     return (
         <Router>
@@ -129,6 +151,7 @@ function App(): JSX.Element {
             <Route path="/nuclear" component={NuclearChemistry} />
             <Route path="/gas-laws" component={GasLaws} />
             <Route path="/electrochemistry" component={Electrochemistry} />
+            <Route path="/thermodynamics" component={Thermodynamics} />
         </Router>
     );
 }

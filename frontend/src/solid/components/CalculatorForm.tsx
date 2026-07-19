@@ -6,6 +6,7 @@ interface CalculatorField {
     label: string;
     placeholder: string;
     ariaLabel: string;
+    type?: string;
 }
 interface CalculatorSelectOption {
     value: string;
@@ -129,7 +130,7 @@ function CalculatorForm(props: CalculatorFormProps): JSX.Element {
                 <For each={props.fields}>
                     {(f) => (
                         <input
-                            type="number"
+                            type={f.type !== undefined ? f.type : "number"}
                             class={styles.input}
                             id={f.id}
                             placeholder={f.placeholder}
