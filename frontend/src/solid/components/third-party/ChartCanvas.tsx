@@ -1,5 +1,5 @@
 import type {JSX} from "solid-js";
-import {onMount, onCleanup, createMemo, createRenderEffect} from "solid-js";
+import {onMount, onCleanup, createMemo, createRenderEffect, createEffect} from "solid-js";
 import {ChartRenderer} from "../../../modules/chartRenderer.js";
 import type {ChartData, ChartOptions} from "../../../modules/chartRenderer.js";
 import styles from "./ChartCanvas.module.css";
@@ -35,6 +35,18 @@ function ChartCanvas(props: ChartCanvasProps): JSX.Element {
     }
     onMount(function (): void {
         renderByType(props.type, props.data, props.options);
+    });
+    let firstEffectRun: boolean = true;
+    createEffect(function (): void {
+        let currentData: ChartData = props.data;
+        let currentOptions: ChartOptions = props.options;
+        let currentType: "line" | "bar" | "scatter" = props.type;
+        if (firstEffectRun) {
+            firstEffectRun = false;
+            return;
+        }
+        ChartRenderer.getInstance().destroyChart(canvasId);
+        renderByType(currentType, currentData, currentOptions);
     });
     onCleanup(function (): void {
         ChartRenderer.getInstance().destroyChart(canvasId);
