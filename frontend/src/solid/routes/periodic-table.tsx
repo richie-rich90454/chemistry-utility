@@ -10,6 +10,7 @@ import type {JSX} from "solid-js";
 import {createSignal, onMount, For} from "solid-js";
 import {ChemicalElement} from "../../types.js";
 import {DataCache} from "../../modules/dataCache.js";
+import {InteractivePTable} from "../../modules/interactivePTable.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
@@ -65,10 +66,20 @@ function formatNumber(value: number): string {
     }
     return value.toFixed(2);
 }
+function formatOptionalNumber(value: number | null | undefined, unit: string): string {
+    if (value === null || value === undefined) {
+        return "N/A";
+    }
+    return formatNumber(value) + unit;
+}
+function formatCategoryLabel(type: string): string {
+    return type.charAt(0).toUpperCase() + type.slice(1);
+}
 function PeriodicTable(): JSX.Element {
     let [elements, setElements] = createSignal<ChemicalElement[]>([]);
     let [loading, setLoading] = createSignal(true);
     let [loadError, setLoadError] = createSignal("");
+    let [selected, setSelected] = createSignal<ChemicalElement | null>(null);
     onMount(function (): void {
         loadElements();
     });
@@ -119,6 +130,47 @@ function PeriodicTable(): JSX.Element {
         let pos = computeCellPosition(element);
         return "grid-column: " + pos.col + "; grid-row: " + pos.row + ";";
     }
+    function handleSelectElement(element: ChemicalElement): void {
+        setSelected(element);
+    }
+    function handleCloseDetail(): void {
+        setSelected(null);
+    }
+    function renderDetailPanel(): JSX.Element {
+        let el = selected();
+        if (el === null) {
+            return <></>;
+        }
+        let config = InteractivePTable.generateElectronConfiguration(el.atomicNumber);
+        let oxidation = InteractivePTable.guessOxidationStates(el);
+        return (
+            <div class={styles.detailPanel} role="dialog" aria-label={el.name + " details"}>
+                <div class={styles.detailHeader}>
+                    <div class={styles.detailSymbol + " " + getCategoryClass(el.type)}>{el.symbol}</div>
+                    <div class={styles.detailTitle}>
+                        <h3>{el.name}</h3>
+                        <p>{"#" + String(el.atomicNumber) + " · " + formatCategoryLabel(el.type)}</p>
+                    </div>
+                    <button type="button" class={styles.detailClose} onClick={handleCloseDetail} aria-label="Close detail panel">×</button>
+                </div>
+                <dl class={styles.detailGrid}>
+                    <dt>Atomic Number</dt><dd>{String(el.atomicNumber)}</dd>
+                    <dt>Atomic Mass</dt><dd>{formatNumber(el.atomicMass) + " u"}</dd>
+                    <dt>Category</dt><dd>{formatCategoryLabel(el.type)}</dd>
+                    <dt>Group</dt><dd>{el.group === null ? "n/a" : String(el.group)}</dd>
+                    <dt>Period</dt><dd>{String(el.period)}</dd>
+                    <dt>Electron Configuration</dt><dd class={styles.detailRowFull}>{config}</dd>
+                    <dt>Ionization Energy</dt><dd>{formatOptionalNumber(el.ionizationEnergy, " kJ/mol")}</dd>
+                    <dt>Electron Affinity</dt><dd>{formatOptionalNumber(el.electronAffinity, " kJ/mol")}</dd>
+                    <dt>Atomic Radius</dt><dd>{formatOptionalNumber(el.atomicRadius, " pm")}</dd>
+                    <dt>Electronegativity</dt><dd>{formatOptionalNumber(el.electronegativity, "")}</dd>
+                    <dt>Valence Electrons</dt><dd>{String(el.valenceElectrons)}</dd>
+                    <dt>Total Electrons</dt><dd>{String(el.totalElectrons)}</dd>
+                    <dt>Common Oxidation States</dt><dd class={styles.detailRowFull}>{oxidation}</dd>
+                </dl>
+            </div>
+        );
+    }
     return (
         <CalculatorCard
             title="Interactive Periodic Table - Element Properties, Heatmaps, and Details"
@@ -147,6 +199,7 @@ function PeriodicTable(): JSX.Element {
                                     class={getCellClass(element)}
                                     style={getCellStyle(element)}
                                     aria-label={element.name + ", atomic number " + element.atomicNumber}
+                                    onClick={function () { handleSelectElement(element); }}
                                 >
                                     <span class={styles.cellNumber}>{String(element.atomicNumber)}</span>
                                     <span class={styles.cellSymbol}>{element.symbol}</span>
@@ -157,6 +210,7 @@ function PeriodicTable(): JSX.Element {
                         </For>
                     </div>
                 )}
+                {renderDetailPanel()}
             </div>
         </CalculatorCard>
     );
