@@ -1,4 +1,5 @@
 import { Calculator } from "./calculator.js";
+import type { CalculatorResult } from "./calculator.js";
 import { SolveForCalculator } from "./solveForCalculator.js";
 import { InputValidator } from "./validation.js";
 import { ChartRenderer } from "./chartRenderer.js";
@@ -46,6 +47,62 @@ export class DilutionCalculator extends SolveForCalculator {
 		const unit = solveFor.startsWith("M") ? "M" : "L";
 		this.resultDisplay.showFormula(formula, result, unit);
 	}
+
+	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+		const solveFor = this.getSolveFor(inputs);
+		const M1 = parseFloat(inputs["dilution-M1"] ?? "");
+		const V1 = parseFloat(inputs["dilution-V1"] ?? "");
+		const M2 = parseFloat(inputs["dilution-M2"] ?? "");
+		const V2 = parseFloat(inputs["dilution-V2"] ?? "");
+		let result: number;
+		let formula: string;
+		if (solveFor === "M1") {
+			if (isNaN(V1) || isNaN(M2) || isNaN(V2)) {
+				throw new Error("Missing or invalid inputs for dilution-V1, dilution-M2, dilution-V2");
+			}
+			if (V1 <= 0) throw new Error("Initial volume must be positive");
+			if (M2 <= 0) throw new Error("Final molarity must be positive");
+			if (V2 <= 0) throw new Error("Final volume must be positive");
+			result = (M2 * V2) / V1;
+			formula = "M1 = (M2 * V2) / V1";
+		} else if (solveFor === "V1") {
+			if (isNaN(M1) || isNaN(M2) || isNaN(V2)) {
+				throw new Error("Missing or invalid inputs for dilution-M1, dilution-M2, dilution-V2");
+			}
+			if (M1 <= 0) throw new Error("Initial molarity must be positive");
+			if (M2 <= 0) throw new Error("Final molarity must be positive");
+			if (V2 <= 0) throw new Error("Final volume must be positive");
+			result = (M2 * V2) / M1;
+			formula = "V1 = (M2 * V2) / M1";
+		} else if (solveFor === "M2") {
+			if (isNaN(M1) || isNaN(V1) || isNaN(V2)) {
+				throw new Error("Missing or invalid inputs for dilution-M1, dilution-V1, dilution-V2");
+			}
+			if (M1 <= 0) throw new Error("Initial molarity must be positive");
+			if (V1 <= 0) throw new Error("Initial volume must be positive");
+			if (V2 <= 0) throw new Error("Final volume must be positive");
+			result = (M1 * V1) / V2;
+			formula = "M2 = (M1 * V1) / V2";
+		} else if (solveFor === "V2") {
+			if (isNaN(M1) || isNaN(V1) || isNaN(M2)) {
+				throw new Error("Missing or invalid inputs for dilution-M1, dilution-V1, dilution-M2");
+			}
+			if (M1 <= 0) throw new Error("Initial molarity must be positive");
+			if (V1 <= 0) throw new Error("Initial volume must be positive");
+			if (M2 <= 0) throw new Error("Final molarity must be positive");
+			result = (M1 * V1) / M2;
+			formula = "V2 = (M1 * V1) / M2";
+		} else {
+			throw new Error("Invalid calculation type");
+		}
+		const unit = solveFor.startsWith("M") ? "M" : "L";
+		const formatted = this.numberFormatter.format(result, 4);
+		return {
+			value: formatted + " " + unit,
+			explanation: formula + " = " + formatted + " " + unit,
+			metadata: { solveFor: solveFor, result: result, unit: unit, formula: formula }
+		};
+	}
 }
 
 /**
@@ -83,6 +140,40 @@ export class MassPercentCalculator extends Calculator {
 		}
 		this.resultDisplay.showResult("<p>Concentration: " + this.numberFormatter.format(result, 4) + " " + unitText + "</p>");
 	}
+
+	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+		const solute = parseFloat(inputs["mass-solute"] ?? "");
+		const solution = parseFloat(inputs["mass-solution"] ?? "");
+		const unit = inputs["concentration-unit"] || "percent";
+		if (isNaN(solute) || isNaN(solution)) {
+			throw new Error("Missing or invalid inputs for mass-solute, mass-solution");
+		}
+		if (solution === 0) {
+			throw new Error("Solution mass cannot be zero");
+		}
+		if (solute < 0) throw new Error("Solute mass cannot be negative");
+		const ratio = solute / solution;
+		let result: number;
+		let unitText: string;
+		if (unit === "percent") {
+			result = ratio * 100;
+			unitText = "%";
+		} else if (unit === "ppm") {
+			result = ratio * 1000000;
+			unitText = "ppm";
+		} else if (unit === "ppb") {
+			result = ratio * 1000000000;
+			unitText = "ppb";
+		} else {
+			throw new Error("Invalid unit");
+		}
+		const formatted = this.numberFormatter.format(result, 4);
+		return {
+			value: formatted + " " + unitText,
+			explanation: "Concentration: " + formatted + " " + unitText,
+			metadata: { concentration: result, unit: unitText, ratio: ratio, solute: solute, solution: solution }
+		};
+	}
 }
 
 /**
@@ -108,6 +199,30 @@ export class MixingCalculator extends Calculator {
 		const totalVolume = V1 + V2;
 		const finalConcentration = totalMoles / totalVolume;
 		this.resultDisplay.showResult("<p>Final Concentration: " + this.numberFormatter.format(finalConcentration, 4) + " M</p><p>Total Volume: " + this.numberFormatter.format(totalVolume, 4) + " L</p>");
+	}
+
+	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+		const C1 = parseFloat(inputs["mix-C1"] ?? "");
+		const V1 = parseFloat(inputs["mix-V1"] ?? "");
+		const C2 = parseFloat(inputs["mix-C2"] ?? "");
+		const V2 = parseFloat(inputs["mix-V2"] ?? "");
+		if (isNaN(C1) || isNaN(V1) || isNaN(C2) || isNaN(V2)) {
+			throw new Error("Missing or invalid inputs for mix-C1, mix-V1, mix-C2, mix-V2");
+		}
+		if (C1 <= 0) throw new Error("First solution concentration must be positive");
+		if (C2 <= 0) throw new Error("Second solution concentration must be positive");
+		if (V1 <= 0) throw new Error("First solution volume must be positive");
+		if (V2 <= 0) throw new Error("Second solution volume must be positive");
+		const totalMoles = (C1 * V1) + (C2 * V2);
+		const totalVolume = V1 + V2;
+		const finalConcentration = totalMoles / totalVolume;
+		const fcFormatted = this.numberFormatter.format(finalConcentration, 4);
+		const tvFormatted = this.numberFormatter.format(totalVolume, 4);
+		return {
+			value: fcFormatted + " M",
+			explanation: "Final Concentration: " + fcFormatted + " M; Total Volume: " + tvFormatted + " L",
+			metadata: { finalConcentration: finalConcentration, totalVolume: totalVolume, totalMoles: totalMoles }
+		};
 	}
 }
 
@@ -166,6 +281,70 @@ export class BufferSolutionCalculator extends Calculator {
             "<p>Buffer Capacity: " + bufferCapacity + "</p>"
         );
     }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const pKa = parseFloat(inputs["buffer-pKa"] ?? "");
+        const HA = parseFloat(inputs["buffer-HA"] ?? "");
+        const Aminus = parseFloat(inputs["buffer-Aminus"] ?? "");
+        const pH = parseFloat(inputs["buffer-pH"] ?? "");
+        const solveFor = inputs["buffer-solve-for"] || "pH";
+        let resultpH: number, resultpKa: number, resultRatio: number;
+        if (solveFor === "pH") {
+            if (isNaN(pKa)) throw new Error("pKa is required");
+            if (isNaN(HA) || isNaN(Aminus)) throw new Error("[HA] and [A-] are required");
+            if (HA <= 0) throw new Error("[HA] must be positive");
+            if (Aminus <= 0) throw new Error("[A-] must be positive");
+            resultRatio = Aminus / HA;
+            resultpH = pKa + Math.log10(resultRatio);
+            resultpKa = pKa;
+        } else if (solveFor === "pKa") {
+            if (isNaN(pH)) throw new Error("pH is required");
+            if (isNaN(HA) || isNaN(Aminus)) throw new Error("[HA] and [A-] are required");
+            if (HA <= 0) throw new Error("[HA] must be positive");
+            if (Aminus <= 0) throw new Error("[A-] must be positive");
+            resultRatio = Aminus / HA;
+            resultpKa = pH - Math.log10(resultRatio);
+            resultpH = pH;
+        } else if (solveFor === "ratio") {
+            if (isNaN(pKa)) throw new Error("pKa is required");
+            if (isNaN(pH)) throw new Error("pH is required");
+            resultpH = pH;
+            resultpKa = pKa;
+            resultRatio = Math.pow(10, pH - pKa);
+        } else {
+            throw new Error("Invalid solve-for selection");
+        }
+        let bufferCapacity: string;
+        let logRatio = Math.abs(Math.log10(resultRatio));
+        if (logRatio <= 1) {
+            bufferCapacity = "Good (ratio within 10:1)";
+        } else {
+            bufferCapacity = "Poor (ratio outside 10:1)";
+        }
+        let value: string;
+        if (solveFor === "pH") {
+            value = "pH = " + this.numberFormatter.format(resultpH, 4);
+        } else if (solveFor === "pKa") {
+            value = "pKa = " + this.numberFormatter.format(resultpKa, 4);
+        } else {
+            value = "[A-]/[HA] = " + this.numberFormatter.format(resultRatio, 4);
+        }
+        let explanation: string = "pH = " + this.numberFormatter.format(resultpH, 4) + "; ";
+        explanation += "pKa = " + this.numberFormatter.format(resultpKa, 4) + "; ";
+        explanation += "[A-]/[HA] = " + this.numberFormatter.format(resultRatio, 4) + "; ";
+        explanation += "Buffer Capacity: " + bufferCapacity;
+        return {
+            value: value,
+            explanation: explanation,
+            metadata: {
+                pH: resultpH,
+                pKa: resultpKa,
+                ratio: resultRatio,
+                bufferCapacity: bufferCapacity,
+                solveFor: solveFor
+            }
+        };
+    }
 }
 
 /**
@@ -212,6 +391,55 @@ export class PKaPKbCalculator extends Calculator {
             "<p>pK<sub>b</sub> = " + this.numberFormatter.format(pKb, 4) + "</p>" +
             "<p>K<sub>a</sub> &times; K<sub>b</sub> = K<sub>w</sub> = " + this.numberFormatter.format(Kw / 1e-14, 4) + " &times; 10<sup>-14</sup></p>"
         );
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const inputValue = parseFloat(inputs["pka-pkb-input-value"] ?? "");
+        const inputType = inputs["pka-pkb-input-type"] || "Ka";
+        if (isNaN(inputValue) || inputValue <= 0) throw new Error("Input value must be a positive number");
+        let Ka: number, pKa: number, Kb: number, pKb: number;
+        if (inputType === "Ka") {
+            Ka = inputValue;
+            pKa = -Math.log10(Ka);
+            pKb = 14 - pKa;
+            Kb = Math.pow(10, -pKb);
+        } else if (inputType === "pKa") {
+            pKa = inputValue;
+            Ka = Math.pow(10, -pKa);
+            pKb = 14 - pKa;
+            Kb = Math.pow(10, -pKb);
+        } else if (inputType === "Kb") {
+            Kb = inputValue;
+            pKb = -Math.log10(Kb);
+            pKa = 14 - pKb;
+            Ka = Math.pow(10, -pKa);
+        } else if (inputType === "pKb") {
+            pKb = inputValue;
+            Kb = Math.pow(10, -pKb);
+            pKa = 14 - pKb;
+            Ka = Math.pow(10, -pKa);
+        } else {
+            throw new Error("Invalid input type");
+        }
+        const Kw = Ka * Kb;
+        let explanation: string = "Ka = " + this.numberFormatter.format(Ka, 6) + "; ";
+        explanation += "pKa = " + this.numberFormatter.format(pKa, 4) + "; ";
+        explanation += "Kb = " + this.numberFormatter.format(Kb, 6) + "; ";
+        explanation += "pKb = " + this.numberFormatter.format(pKb, 4) + "; ";
+        explanation += "Ka * Kb = Kw = " + this.numberFormatter.format(Kw / 1e-14, 4) + " x 10^-14";
+        return {
+            value: "pKa = " + this.numberFormatter.format(pKa, 4) + "; pKb = " + this.numberFormatter.format(pKb, 4),
+            explanation: explanation,
+            metadata: {
+                Ka: Ka,
+                pKa: pKa,
+                Kb: Kb,
+                pKb: pKb,
+                Kw: Kw,
+                inputType: inputType,
+                inputValue: inputValue
+            }
+        };
     }
 }
 
@@ -274,6 +502,69 @@ export class KspCalculator extends Calculator {
             "<p>[B<sup>" + stoichA + "-</sup>] = " + this.numberFormatter.format(concB, 6) + " M</p>"
         );
     }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const kspVal = parseFloat(inputs["ksp-value"] ?? "");
+        const solubility = parseFloat(inputs["ksp-molar-solubility"] ?? "");
+        const saltType = inputs["ksp-salt-type"] || "AB";
+        const solveFor = inputs["ksp-solve-for"] || "Ksp";
+        let resultKsp: number, resultS: number;
+        let concA: number, concB: number;
+        let stoichA: number, stoichB: number;
+        if (saltType === "AB") {
+            stoichA = 1;
+            stoichB = 1;
+        } else if (saltType === "AB2") {
+            stoichA = 1;
+            stoichB = 2;
+        } else if (saltType === "A2B") {
+            stoichA = 2;
+            stoichB = 1;
+        } else if (saltType === "AB3") {
+            stoichA = 1;
+            stoichB = 3;
+        } else if (saltType === "A3B") {
+            stoichA = 3;
+            stoichB = 1;
+        } else {
+            throw new Error("Invalid salt type");
+        }
+        if (solveFor === "Ksp") {
+            if (isNaN(solubility) || solubility <= 0) throw new Error("Molar solubility must be positive");
+            resultS = solubility;
+            concA = stoichA * resultS;
+            concB = stoichB * resultS;
+            resultKsp = Math.pow(concA, stoichA) * Math.pow(concB, stoichB);
+        } else if (solveFor === "solubility") {
+            if (isNaN(kspVal) || kspVal <= 0) throw new Error("Ksp must be positive");
+            resultKsp = kspVal;
+            let exponent = stoichA + stoichB;
+            let coeff = Math.pow(stoichA, stoichA) * Math.pow(stoichB, stoichB);
+            resultS = Math.pow(resultKsp / coeff, 1 / exponent);
+            concA = stoichA * resultS;
+            concB = stoichB * resultS;
+        } else {
+            throw new Error("Invalid solve-for selection");
+        }
+        let explanation: string = "Ksp = " + this.numberFormatter.format(resultKsp, 6) + "; ";
+        explanation += "Molar Solubility (s) = " + this.numberFormatter.format(resultS, 6) + " M; ";
+        explanation += "[A] = " + this.numberFormatter.format(concA, 6) + " M; ";
+        explanation += "[B] = " + this.numberFormatter.format(concB, 6) + " M";
+        return {
+            value: "Ksp = " + this.numberFormatter.format(resultKsp, 6) + "; s = " + this.numberFormatter.format(resultS, 6) + " M",
+            explanation: explanation,
+            metadata: {
+                Ksp: resultKsp,
+                solubility: resultS,
+                concA: concA,
+                concB: concB,
+                stoichA: stoichA,
+                stoichB: stoichB,
+                saltType: saltType,
+                solveFor: solveFor
+            }
+        };
+    }
 }
 
 /**
@@ -333,6 +624,66 @@ export class ColligativePropertiesCalculator extends Calculator {
             html += "<p>New Vapor Pressure = " + this.numberFormatter.format(Psolvent - deltaP, 4) + " atm</p>";
         }
         this.resultDisplay.showResult(html);
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const soluteMass = parseFloat(inputs["collig-solute-mass"] ?? "");
+        const molarMass = parseFloat(inputs["collig-molar-mass"] ?? "");
+        const solventMass = parseFloat(inputs["collig-solvent-mass"] ?? "");
+        const i = parseFloat(inputs["collig-vanthoff"] ?? "");
+        const Kb = parseFloat(inputs["collig-Kb"] ?? "");
+        const Kf = parseFloat(inputs["collig-Kf"] ?? "");
+        const solventBp = parseFloat(inputs["collig-solvent-bp"] ?? "");
+        const solventFp = parseFloat(inputs["collig-solvent-fp"] ?? "");
+        const Psolvent = parseFloat(inputs["collig-Psolvent"] ?? "");
+        if (isNaN(soluteMass) || isNaN(molarMass) || isNaN(solventMass) || isNaN(i)) {
+            throw new Error("Missing or invalid inputs for collig-solute-mass, collig-molar-mass, collig-solvent-mass, collig-vanthoff");
+        }
+        if (soluteMass <= 0) throw new Error("Solute mass must be positive");
+        if (molarMass <= 0) throw new Error("Molar mass must be positive");
+        if (solventMass <= 0) throw new Error("Solvent mass must be positive");
+        if (i < 1) throw new Error("Van't Hoff factor must be >= 1");
+        let molesSolute = soluteMass / molarMass;
+        let molality = molesSolute / (solventMass / 1000);
+        let explanation: string = "Molality (m) = " + this.numberFormatter.format(molality, 4) + " mol/kg";
+        let metadata: Record<string, unknown> = {
+            molality: molality,
+            molesSolute: molesSolute,
+            i: i
+        };
+        if (!isNaN(Kb) && Kb > 0 && !isNaN(solventBp)) {
+            let deltaTb = Kb * molality * i;
+            let newBp = solventBp + deltaTb;
+            explanation += "; Delta Tb = " + this.numberFormatter.format(deltaTb, 4) + " C; New Boiling Point = " + this.numberFormatter.format(newBp, 4) + " C";
+            metadata.deltaTb = deltaTb;
+            metadata.newBp = newBp;
+        }
+        if (!isNaN(Kf) && Kf > 0 && !isNaN(solventFp)) {
+            let deltaTf = Kf * molality * i;
+            let newFp = solventFp - deltaTf;
+            explanation += "; Delta Tf = " + this.numberFormatter.format(deltaTf, 4) + " C; New Freezing Point = " + this.numberFormatter.format(newFp, 4) + " C";
+            metadata.deltaTf = deltaTf;
+            metadata.newFp = newFp;
+        }
+        let molesSolvent = (solventMass / 1000) / 0.018015;
+        let xSolute = molesSolute / (molesSolute + molesSolvent);
+        let molarity = molesSolute / (solventMass / 1000);
+        let osmoticPressure = molarity * 0.08206 * 298.15 * i;
+        explanation += "; Osmotic Pressure = " + this.numberFormatter.format(osmoticPressure, 4) + " atm (at 298.15 K)";
+        metadata.osmoticPressure = osmoticPressure;
+        metadata.xSolute = xSolute;
+        metadata.molarity = molarity;
+        if (!isNaN(Psolvent) && Psolvent > 0) {
+            let deltaP = xSolute * Psolvent;
+            explanation += "; Delta P = " + this.numberFormatter.format(deltaP, 4) + " atm; New Vapor Pressure = " + this.numberFormatter.format(Psolvent - deltaP, 4) + " atm";
+            metadata.deltaP = deltaP;
+            metadata.newVaporPressure = Psolvent - deltaP;
+        }
+        return {
+            value: "Molality = " + this.numberFormatter.format(molality, 4) + " mol/kg; Osmotic Pressure = " + this.numberFormatter.format(osmoticPressure, 4) + " atm",
+            explanation: explanation,
+            metadata: metadata
+        };
     }
 }
 
@@ -437,6 +788,98 @@ export class TitrationCurveCalculator extends Calculator {
             ChartRenderer.getInstance().renderTitrationCurve("titration-chart", dataPoints);
         }
     }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const acidConc = parseFloat(inputs["titration-acid-conc"] ?? "");
+        const acidVol = parseFloat(inputs["titration-acid-vol"] ?? "");
+        const baseConc = parseFloat(inputs["titration-base-conc"] ?? "");
+        const maxVol = parseFloat(inputs["titration-max-vol"] ?? "");
+        const acidType = inputs["titration-acid-type"] || "strong";
+        let Ka: number;
+        if (acidType === "weak") {
+            Ka = parseFloat(inputs["titration-Ka"] ?? "");
+            if (isNaN(Ka) || Ka <= 0) throw new Error("Ka is required for weak acid");
+        } else {
+            Ka = 1e7;
+        }
+        if (isNaN(acidConc) || isNaN(acidVol) || isNaN(baseConc) || isNaN(maxVol)) {
+            throw new Error("Missing or invalid inputs for titration-acid-conc, titration-acid-vol, titration-base-conc, titration-max-vol");
+        }
+        if (acidConc <= 0) throw new Error("Acid concentration must be positive");
+        if (acidVol <= 0) throw new Error("Acid volume must be positive");
+        if (baseConc <= 0) throw new Error("Base concentration must be positive");
+        if (maxVol <= 0) throw new Error("Max volume must be positive");
+        let equivVol = (acidConc * acidVol) / baseConc;
+        let halfEquivVol = equivVol / 2;
+        let dataPoints: Array<{ volume: number; pH: number }> = [];
+        let steps = 50;
+        let stepSize = maxVol / steps;
+        for (let step = 0; step <= steps; step = step + 1) {
+            let Vb = step * stepSize;
+            let pH: number;
+            let totalAcid = acidConc * acidVol;
+            let addedBase = baseConc * Vb;
+            let totalVolume = acidVol + Vb;
+            if (totalVolume === 0) {
+                pH = -Math.log10(acidConc);
+            } else if (Vb === 0) {
+                if (acidType === "strong") {
+                    pH = -Math.log10(acidConc);
+                } else {
+                    pH = -Math.log10(Math.sqrt(Ka * acidConc));
+                }
+            } else if (Vb < equivVol) {
+                let remainingAcid = totalAcid - addedBase;
+                let formedBase = addedBase;
+                if (acidType === "strong") {
+                    let concH = remainingAcid / totalVolume;
+                    pH = -Math.log10(concH);
+                } else {
+                    let concHA = remainingAcid / totalVolume;
+                    let concA = formedBase / totalVolume;
+                    pH = -Math.log10(Ka) + Math.log10(concA / concHA);
+                }
+            } else if (Math.abs(Vb - equivVol) < stepSize * 0.01) {
+                if (acidType === "strong") {
+                    let concOH = (addedBase - totalAcid) / totalVolume;
+                    if (concOH > 0) {
+                        pH = 14 + Math.log10(concOH);
+                    } else {
+                        pH = 7;
+                    }
+                } else {
+                    let concA = totalAcid / totalVolume;
+                    let Kb = 1e-14 / Ka;
+                    let concOH = Math.sqrt(Kb * concA);
+                    pH = 14 + Math.log10(concOH);
+                }
+            } else {
+                let excessBase = addedBase - totalAcid;
+                let concOH = excessBase / totalVolume;
+                pH = 14 + Math.log10(concOH);
+            }
+            if (pH < 0) { pH = 0; }
+            if (pH > 14) { pH = 14; }
+            dataPoints.push({ volume: Vb, pH: pH });
+        }
+        let explanation: string = "Equivalence Point: " + this.numberFormatter.format(equivVol, 2) + " mL";
+        if (acidType === "weak") {
+            explanation += "; Half-Equivalence Point: " + this.numberFormatter.format(halfEquivVol, 2) + " mL (pH = pKa = " + this.numberFormatter.format(-Math.log10(Ka), 4) + ")";
+        }
+        explanation += "; Data Points: " + dataPoints.length;
+        return {
+            value: "Equivalence Point: " + this.numberFormatter.format(equivVol, 2) + " mL",
+            explanation: explanation,
+            chartData: dataPoints,
+            metadata: {
+                equivalenceVolume: equivVol,
+                halfEquivalenceVolume: halfEquivVol,
+                acidType: acidType,
+                Ka: Ka,
+                dataPointCount: dataPoints.length
+            }
+        };
+    }
 }
 
 /**
@@ -474,6 +917,43 @@ export class DebyeHuckelCalculator extends Calculator {
             "<p>&gamma;<sub>&plusmn;</sub> = " + this.numberFormatter.format(gamma, 6) + "</p>" +
             "<p>Mean Activity (a<sub>&plusmn;</sub>) = " + this.numberFormatter.format(meanActivity, 6) + "</p>"
         );
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const zplus = parseFloat(inputs["dh-zplus"] ?? "");
+        const zminus = parseFloat(inputs["dh-zminus"] ?? "");
+        const concentration = parseFloat(inputs["dh-concentration"] ?? "");
+        const ionSize = parseFloat(inputs["dh-ion-size"] ?? "");
+        if (isNaN(zplus) || isNaN(zminus) || isNaN(concentration) || isNaN(ionSize)) {
+            throw new Error("Missing or invalid inputs for dh-zplus, dh-zminus, dh-concentration, dh-ion-size");
+        }
+        if (zplus === 0 || zminus === 0) throw new Error("Ion charges cannot be zero");
+        if (concentration <= 0) throw new Error("Concentration must be positive");
+        if (ionSize <= 0) throw new Error("Ion size parameter must be positive");
+        let I = 0.5 * concentration * (zplus * zplus + zminus * zminus);
+        let sqrtI = Math.sqrt(I);
+        let absProduct = Math.abs(zplus * zminus);
+        let logGamma = -0.509 * absProduct * sqrtI / (1 + 3.28 * ionSize * sqrtI);
+        let gamma = Math.pow(10, logGamma);
+        let meanActivity = gamma * Math.pow(concentration, 1);
+        let explanation: string = "Ionic Strength (I) = " + this.numberFormatter.format(I, 6) + " M; ";
+        explanation += "log(gamma) = " + this.numberFormatter.format(logGamma, 6) + "; ";
+        explanation += "gamma = " + this.numberFormatter.format(gamma, 6) + "; ";
+        explanation += "Mean Activity = " + this.numberFormatter.format(meanActivity, 6);
+        return {
+            value: "I = " + this.numberFormatter.format(I, 6) + " M; gamma = " + this.numberFormatter.format(gamma, 6),
+            explanation: explanation,
+            metadata: {
+                ionicStrength: I,
+                logGamma: logGamma,
+                gamma: gamma,
+                meanActivity: meanActivity,
+                zplus: zplus,
+                zminus: zminus,
+                concentration: concentration,
+                ionSize: ionSize
+            }
+        };
     }
 }
 
@@ -530,6 +1010,63 @@ export class CommonIonEffectCalculator extends Calculator {
             "<p>[B] = " + this.numberFormatter.format(concB, 6) + " M</p>" +
             "<p>Solubility Ratio = " + this.numberFormatter.format(s / solubilityWithout, 6) + "</p>"
         );
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const Ksp = parseFloat(inputs["common-ion-Ksp"] ?? "");
+        const commonIonConc = parseFloat(inputs["common-ion-concentration"] ?? "");
+        const saltType = inputs["common-ion-salt-type"] || "AB";
+        if (isNaN(Ksp) || isNaN(commonIonConc)) {
+            throw new Error("Missing or invalid inputs for common-ion-Ksp, common-ion-concentration");
+        }
+        if (Ksp <= 0) throw new Error("Ksp must be positive");
+        if (commonIonConc <= 0) throw new Error("Common ion concentration must be positive");
+        let stoichA: number, stoichB: number;
+        if (saltType === "AB") {
+            stoichA = 1;
+            stoichB = 1;
+        } else if (saltType === "AB2") {
+            stoichA = 1;
+            stoichB = 2;
+        } else if (saltType === "A2B") {
+            stoichA = 2;
+            stoichB = 1;
+        } else if (saltType === "AB3") {
+            stoichA = 1;
+            stoichB = 3;
+        } else if (saltType === "A3B") {
+            stoichA = 3;
+            stoichB = 1;
+        } else {
+            throw new Error("Invalid salt type");
+        }
+        let s: number;
+        let concA: number, concB: number;
+        s = Math.pow(Ksp / Math.pow(commonIonConc, stoichB), 1 / stoichA) / stoichA;
+        concA = stoichA * s;
+        concB = stoichB * s + commonIonConc;
+        let exponent = stoichA + stoichB;
+        let coeff = Math.pow(stoichA, stoichA) * Math.pow(stoichB, stoichB);
+        let solubilityWithout = Math.pow(Ksp / coeff, 1 / exponent);
+        let explanation: string = "Molar Solubility (with common ion) = " + this.numberFormatter.format(s, 6) + " M; ";
+        explanation += "Molar Solubility (without common ion) = " + this.numberFormatter.format(solubilityWithout, 6) + " M; ";
+        explanation += "[A] = " + this.numberFormatter.format(concA, 6) + " M; ";
+        explanation += "[B] = " + this.numberFormatter.format(concB, 6) + " M; ";
+        explanation += "Solubility Ratio = " + this.numberFormatter.format(s / solubilityWithout, 6);
+        return {
+            value: "s (with common ion) = " + this.numberFormatter.format(s, 6) + " M; s (without) = " + this.numberFormatter.format(solubilityWithout, 6) + " M",
+            explanation: explanation,
+            metadata: {
+                solubilityWithCommonIon: s,
+                solubilityWithoutCommonIon: solubilityWithout,
+                concA: concA,
+                concB: concB,
+                solubilityRatio: s / solubilityWithout,
+                saltType: saltType,
+                stoichA: stoichA,
+                stoichB: stoichB
+            }
+        };
     }
 }
 
