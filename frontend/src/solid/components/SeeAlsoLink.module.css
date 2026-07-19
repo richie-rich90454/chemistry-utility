@@ -1,0 +1,14 @@
+.seeAlso{
+    padding: 0 var(--md-space-5);
+    margin-bottom: var(--md-space-3);
+    color: var(--md-on-surface-variant);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.seeAlso a{
+    color: var(--md-primary);
+    text-decoration: none;
+}
+.seeAlso a:hover{
+    text-decoration: underline;
+}
