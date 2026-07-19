@@ -4,8 +4,11 @@
  *  - This route surfaces a Clear button per calculator (legacy lacked one)
  *  - Each sub-section is wrapped in a <section> with a divider to mirror
  *    the legacy .sub-group visual rhythm
- *  - Hess's Law, Entropy, and Bond Enthalpy inputs use type="text" via
- *    the shared CalculatorForm (legacy used <input type="text">)
+ *  - Hess's Law and Entropy inputs use type="text" via the shared
+ *    CalculatorForm (legacy used <input type="text">); Bond Enthalpy
+ *    uses a dynamic BondEditor component (see SubTask 20.2) that
+ *    serializes rows of bond-type + count into the comma-separated
+ *    format expected by BondEnthalpyCalculator.calculatePure
  * Routes math through calculatePure on GibbsFreeEnergyCalculator,
  * HessLawCalculator, EntropyCalculator, HeatCapacityCalculator,
  * BondEnthalpyCalculator, and BornHaberCycleCalculator. No Playwright
@@ -18,6 +21,7 @@ import {GibbsFreeEnergyCalculator, HessLawCalculator, EntropyCalculator, HeatCap
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
+import {BondEditor} from "../components/BondEditor";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import styles from "./thermodynamics.module.css";
@@ -58,10 +62,6 @@ let heatCapacitySelects: CalculatorSelect[] = [{
     ],
     "defaultValue": "q"
 }];
-let bondEnthalpyFields: CalculatorField[] = [
-    {"id": "bond-enthalpy-broken", "label": "Bonds broken", "placeholder": "Bonds broken (e.g., C-H:4,H-H)", "ariaLabel": "Bonds broken", "type": "text"},
-    {"id": "bond-enthalpy-formed", "label": "Bonds formed", "placeholder": "Bonds formed (e.g., C-C:2,O-H:2)", "ariaLabel": "Bonds formed", "type": "text"}
-];
 let bornHaberFields: CalculatorField[] = [
     {"id": "born-haber-dHf", "label": "ΔHf", "placeholder": "ΔHf (kJ/mol)", "ariaLabel": "Enthalpy of formation"},
     {"id": "born-haber-dHsub", "label": "ΔHsub", "placeholder": "ΔHsub (kJ/mol)", "ariaLabel": "Enthalpy of sublimation"},
@@ -209,18 +209,16 @@ function Thermodynamics(): JSX.Element {
             </section>
             <section class={styles.subGroup}>
                 <h3>Bond Enthalpy Calculator - ΔH ≈ Σ(bonds broken) - Σ(bonds formed)</h3>
-                <p>Estimate reaction enthalpy from bond energies. Supported bonds: C-H, C-C, C=C, C≡C, O-H, O=O, N≡N, C-O, C=O, H-H.</p>
-                <CalculatorForm
-                    fields={bondEnthalpyFields}
-                    inputGroupLabel="Bond information"
-                    calculateLabel="Calculate ΔH"
+                <p>Estimate reaction enthalpy from bond energies. Add bonds broken and formed using the dynamic editors below. Supported bonds: C-H, C-C, C=C, C≡C, O-H, O=O, N≡N, C-O, C=O, H-H.</p>
+                <BondEditor
                     onCalculate={handleBondEnthalpyCalculate}
                     onClear={handleBondEnthalpyClear}
                     result={bondEnthalpyResult}
                     error={bondEnthalpyError}
+                    calculateLabel="Calculate ΔH"
                 />
                 <ExampleDetails>
-                    <p>Try broken: O=O:1,H-H:2 and formed: O-H:4. ΔH = (495 + 872) - 1852 = -485 kJ/mol (Exothermic).</p>
+                    <p>Try broken: O=O (count 1) + H-H (count 2) and formed: O-H (count 4). ΔH = (495 + 872) - 1852 = -485 kJ/mol (Exothermic).</p>
                 </ExampleDetails>
             </section>
             <section class={styles.subGroup}>

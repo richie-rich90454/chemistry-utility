@@ -1,0 +1,82 @@
+.row{
+    display: flex;
+    gap: var(--md-space-2);
+    align-items: center;
+    margin: var(--md-space-2) var(--md-space-5);
+}
+.rowSelect{
+    flex: 2;
+    margin: 0;
+    padding: 10px var(--md-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.9rem;
+    color-scheme: light !important;
+    background: var(--md-input-bg) !important;
+    color: var(--md-input-text) !important;
+    border: 1.5px solid var(--md-input-border);
+    border-radius: var(--md-shape-sm);
+    min-height: 48px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.rowSelect:focus{
+    border-color: var(--md-input-focus-border);
+    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+    outline: none;
+    border-width: 2px;
+    padding: 9px 15px;
+}
+.rowInput{
+    flex: 1;
+    margin: 0;
+    padding: 10px var(--md-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.9rem;
+    color-scheme: light !important;
+    background: var(--md-input-bg) !important;
+    color: var(--md-input-text) !important;
+    border: 1.5px solid var(--md-input-border);
+    border-radius: var(--md-shape-sm);
+    min-height: 48px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-text-fill-color: var(--md-input-text) !important;
+}
+.rowInput:focus{
+    border-color: var(--md-input-focus-border);
+    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+    outline: none;
+    border-width: 2px;
+    padding: 9px 15px;
+}
+.removeButton{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--md-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--md-on-error-container) !important;
+    background-color: var(--md-error-container) !important;
+    border: 1.5px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-full);
+    cursor: pointer;
+    min-height: 42px;
+    flex-shrink: 0;
+}
+.removeButton:hover{
+    box-shadow: var(--md-elevation-1);
+    border-color: var(--md-outline);
+}
+.addButtonRow{
+    margin: 0 var(--md-space-5) var(--md-space-3);
+}
+.emptyHint{
+    margin: var(--md-space-2) var(--md-space-5);
+    font-size: 0.85rem;
+    color: var(--md-on-surface-variant);
+    font-style: italic;
+}
