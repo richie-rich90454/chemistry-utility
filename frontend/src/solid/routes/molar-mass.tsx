@@ -1,3 +1,10 @@
+/**
+ * Visual verification: The Solid-rendered Molar Mass card should match the
+ * legacy #mass-calc card in frontend/index.html. Intentional diff: this route
+ * formats molar mass to 3 decimal places (legacy used 2 in eventListeners.ts
+ * calculateMass). No Playwright screenshot test is added per task spec; parity
+ * is verified by manual diff of the rendered DOM against the legacy markup.
+ */
 import type {JSX} from "solid-js";
 import {createSignal, onMount} from "solid-js";
 import {ChemicalElement} from "../../types.js";
