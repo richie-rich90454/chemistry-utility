@@ -1,0 +1,33 @@
+.scrollTop{
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--md-shape-full);
+    background: var(--md-primary);
+    border: none;
+    color: var(--md-on-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity var(--md-motion-duration-medium1) var(--md-motion-easing-standard),
+                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
+                transform var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    z-index: 20;
+    box-shadow: var(--md-elevation-2);
+}
+.scrollTop:hover{
+    box-shadow: var(--md-elevation-3);
+    transform: translateY(-2px);
+}
+.scrollTop:active{
+    box-shadow: var(--md-elevation-1);
+}
+.scrollTop:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
