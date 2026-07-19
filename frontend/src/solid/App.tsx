@@ -1,10 +1,10 @@
 import type {JSX} from "solid-js";
 import {onMount} from "solid-js";
-import {Router, Route, Redirect} from "@solidjs/router";
+import {Router, Route, Navigate} from "@solidjs/router";
 import {HomePage} from "./routes/HomePage";
 import {MolarMass} from "./routes/molar-mass";
 function MassCalcRedirect(): JSX.Element {
-    return <Redirect href="/molar-mass" />;
+    return <Navigate href="/molar-mass" />;
 }
 function App(): JSX.Element {
     onMount(function (): void {
