@@ -59,3 +59,37 @@ describe("KaTeX createEffect re-render", function (): void {
         expect(renderSpy).toHaveBeenNthCalledWith(2, "y^2", expect.any(HTMLElement), {displayMode: false, throwOnError: false});
     });
 });
+describe("KaTeX options and cleanup", function (): void {
+    let renderSpy: ReturnType<typeof vi.spyOn>;
+    beforeEach(function (): void {
+        renderSpy = vi.spyOn(katex, "render");
+    });
+    afterEach(function (): void {
+        cleanup();
+        vi.restoreAllMocks();
+    });
+    it("passes throwOnError=true in options", function (): void {
+        render(function (): JSX.Element {
+            return <KaTeX expr="x^2" throwOnError={true} />;
+        });
+        expect(renderSpy).toHaveBeenCalledWith("x^2", expect.any(HTMLElement), {displayMode: false, throwOnError: true});
+    });
+    it("passes displayMode=true in options", function (): void {
+        render(function (): JSX.Element {
+            return <KaTeX expr="x^2" displayMode={true} />;
+        });
+        expect(renderSpy).toHaveBeenCalledWith("x^2", expect.any(HTMLElement), {displayMode: true, throwOnError: false});
+    });
+    it("clears the container innerHTML on unmount", function (): void {
+        renderSpy.mockImplementation(function (_expr: string, element: HTMLElement): void {
+            element.innerHTML = '<span class="katex-mock">rendered</span>';
+        });
+        let result = render(function (): JSX.Element {
+            return <KaTeX expr="x^2" />;
+        });
+        let span: HTMLElement = result.container.querySelector("span") as HTMLElement;
+        expect(span.innerHTML).not.toBe("");
+        cleanup();
+        expect(span.innerHTML).toBe("");
+    });
+});
