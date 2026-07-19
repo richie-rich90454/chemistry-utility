@@ -17,6 +17,9 @@ import {Colligative} from "./routes/colligative";
 import {Titration} from "./routes/titration";
 import {DebyeHuckel} from "./routes/debye-huckel";
 import {CommonIonEffect} from "./routes/common-ion";
+import {NuclearChemistry} from "./routes/nuclear";
+import {GasLaws} from "./routes/gas-laws";
+import {Electrochemistry} from "./routes/electrochemistry";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -73,6 +76,36 @@ function App(): JSX.Element {
         if (window.location.hash === "#common-ion-calc") {
             window.location.replace("/common-ion");
         }
+        if (window.location.hash === "#nuclear-chemistry") {
+            window.location.replace("/nuclear");
+        }
+        if (window.location.hash === "#half-life-calc") {
+            window.location.replace("/nuclear");
+        }
+        if (window.location.hash === "#gas-laws") {
+            window.location.replace("/gas-laws");
+        }
+        if (window.location.hash === "#ideal-gas-law") {
+            window.location.replace("/gas-laws");
+        }
+        if (window.location.hash === "#combined-gas-law") {
+            window.location.replace("/gas-laws");
+        }
+        if (window.location.hash === "#van-der-waals") {
+            window.location.replace("/gas-laws");
+        }
+        if (window.location.hash === "#electrochemistry") {
+            window.location.replace("/electrochemistry");
+        }
+        if (window.location.hash === "#cell-potential") {
+            window.location.replace("/electrochemistry");
+        }
+        if (window.location.hash === "#nernst-equation") {
+            window.location.replace("/electrochemistry");
+        }
+        if (window.location.hash === "#electrolysis") {
+            window.location.replace("/electrochemistry");
+        }
     });
     return (
         <Router>
@@ -93,6 +126,9 @@ function App(): JSX.Element {
             <Route path="/titration" component={Titration} />
             <Route path="/debye-huckel" component={DebyeHuckel} />
             <Route path="/common-ion" component={CommonIonEffect} />
+            <Route path="/nuclear" component={NuclearChemistry} />
+            <Route path="/gas-laws" component={GasLaws} />
+            <Route path="/electrochemistry" component={Electrochemistry} />
         </Router>
     );
 }
