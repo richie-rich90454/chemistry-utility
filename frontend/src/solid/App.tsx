@@ -25,6 +25,7 @@ import {Kinetics} from "./routes/kinetics";
 import {QuantumAtomic} from "./routes/quantum-atomic";
 import {Stoichiometry} from "./routes/stoichiometry";
 import {BondType} from "./routes/bond-type";
+import {MolecularViewerRoute} from "./routes/molecular-viewer";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -177,6 +178,9 @@ function App(): JSX.Element {
         if (window.location.hash === "#bond-type-predictor") {
             window.location.replace("/bond-type");
         }
+        if (window.location.hash === "#molecular-viewer") {
+            window.location.replace("/molecular-viewer");
+        }
     });
     return (
         <Router>
@@ -205,6 +209,7 @@ function App(): JSX.Element {
             <Route path="/quantum-atomic" component={QuantumAtomic} />
             <Route path="/stoichiometry" component={Stoichiometry} />
             <Route path="/bond-type" component={BondType} />
+            <Route path="/molecular-viewer" component={MolecularViewerRoute} />
         </Router>
     );
 }
