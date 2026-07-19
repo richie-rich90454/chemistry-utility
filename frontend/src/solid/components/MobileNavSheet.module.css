@@ -1,0 +1,75 @@
+.navSheetBackdrop{
+    position: fixed;
+    inset: 0;
+    background: var(--md-scrim);
+    z-index: 60;
+    opacity: 1;
+    visibility: visible;
+}
+.navSheet{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--md-surface-container-low);
+    border-radius: var(--md-shape-xl) var(--md-shape-xl) 0 0;
+    border-top: 1px solid var(--md-outline-variant);
+    box-shadow: var(--md-elevation-3);
+    z-index: 61;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: var(--md-space-4);
+    transform: translateY(0);
+}
+.navSheetList{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.navSheetList li{
+    list-style: none;
+}
+.sheetItem{
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-3);
+    padding: var(--md-space-3) var(--md-space-4);
+    border-radius: var(--md-shape-full);
+    cursor: pointer;
+    color: var(--md-on-surface-variant);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard),
+                color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    text-decoration: none;
+}
+.sheetItem:hover, .sheetItem.active{
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+}
+.sheetItem:active{
+    background: var(--md-state-pressed);
+}
+.sheetItem:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.sheetItem svg{
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+@media (max-width: 768px){
+    .navSheet{
+        max-height: 60vh;
+    }
+}
+@media (max-height: 400px) and (max-width: 900px){
+    .navSheet{
+        max-height: 50vh;
+    }
+}

@@ -1,0 +1,92 @@
+.bottomTabs{
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: var(--md-surface-container);
+    border-top: 1px solid var(--md-outline-variant);
+    z-index: 40;
+    padding: var(--md-space-2) var(--md-space-2) 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    align-items: flex-start;
+    justify-content: space-around;
+}
+.tabIndicator{
+    display: none;
+}
+.tabItem{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--md-space-1);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--md-on-surface-variant);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: var(--md-space-1) 0;
+    min-width: 48px;
+    max-width: 96px;
+    position: relative;
+    transition: color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    -webkit-tap-highlight-color: transparent;
+    text-decoration: none;
+}
+.tabItem.active::before{
+    content: "";
+    position: absolute;
+    top: 4px;
+    width: 64px;
+    height: 32px;
+    border-radius: var(--md-shape-full);
+    background: var(--md-secondary-container);
+    z-index: -1;
+}
+.tabItem svg{
+    width: 24px;
+    height: 24px;
+    position: relative;
+    z-index: 1;
+}
+.tabItem.active{
+    color: var(--md-on-secondary-container);
+}
+.tabItem.active svg{
+    color: var(--md-on-secondary-container);
+}
+.tabLabel{
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+}
+.tabItem:active{
+    background: var(--md-state-pressed);
+    border-radius: var(--md-shape-md);
+}
+.tabItem:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+@media (max-width: 768px){
+    .bottomTabs{
+        display: flex;
+    }
+}
+@media (max-width: 480px){
+    .tabItem svg{
+        width: 20px;
+        height: 20px;
+    }
+    .tabLabel{
+        font-size: 0.6875rem;
+    }
+}
+@media (max-height: 400px) and (max-width: 900px){
+    .bottomTabs{
+        height: 56px;
+    }
+}
