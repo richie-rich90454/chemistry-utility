@@ -6,6 +6,7 @@ import {MolarMass} from "./routes/molar-mass";
 import {ElementLookup} from "./routes/element-lookup";
 import {PeriodicTable} from "./routes/periodic-table";
 import {EquationBalancer} from "./routes/equation-balancer";
+import UnitConverter from "./routes/unit-converter";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -29,6 +30,9 @@ function App(): JSX.Element {
         if (window.location.hash === "#equation-balancer") {
             window.location.replace("/equation-balancer");
         }
+        if (window.location.hash === "#unit-converter") {
+            window.location.replace("/unit-converter");
+        }
     });
     return (
         <Router>
@@ -38,6 +42,7 @@ function App(): JSX.Element {
             <Route path="/element-lookup" component={ElementLookup} />
             <Route path="/periodic-table" component={PeriodicTable} />
             <Route path="/equation-balancer" component={EquationBalancer} />
+            <Route path="/unit-converter" component={UnitConverter} />
         </Router>
     );
 }
