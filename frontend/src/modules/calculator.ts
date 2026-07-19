@@ -140,6 +140,64 @@ export abstract class Calculator {
 	protected abstract performCalculation(): void;
 
 	/**
+	 * DOM-free calculation hook. Subclasses override this to expose the same
+	 * math as {@link performCalculation} but reading from the supplied
+	 * inputs record and returning a structured {@link CalculatorResult}
+	 * instead of writing to the DOM. The default implementation throws so
+	 * subclasses can opt in incrementally without breaking the legacy
+	 * hierarchy.
+	 */
+	protected performCalculationPure(_inputs: Record<string, string>): CalculatorResult {
+		throw new Error("performCalculationPure not implemented for " + this.calculatorId);
+	}
+
+	/**
+	 * DOM-free template method. Mirrors {@link calculate} but reads inputs
+	 * from a record and returns a {@link CalculatorResult} instead of
+	 * touching the DOM. Lifecycle hooks ("beforeCalculation",
+	 * "afterCalculation") are dispatched to enabled plugins so plugins can
+	 * transform inputs or results just like in the legacy path. The only
+	 * side-effect is appending to the calculation history via
+	 * {@link ExportManager.addToHistory} (which is DOM-free and persists to
+	 * localStorage). Errors are caught and surfaced as a
+	 * {@link CalculatorResult} with `value: ""` and an "Error: …"
+	 * explanation rather than being thrown to the caller.
+	 */
+	public calculatePure(inputs: Record<string, string>): CalculatorResult {
+		try {
+			let pm: PluginManager = PluginManager.getInstance();
+			let beforePayload: BeforeCalculationPayload = {
+				calculatorId: this.calculatorId,
+				inputs: inputs as Record<string, unknown>
+			};
+			let beforeResult: unknown = pm.executeHook("beforeCalculation", beforePayload);
+			let beforeFinal: BeforeCalculationPayload = beforeResult as BeforeCalculationPayload;
+			let finalInputs: Record<string, string> = {};
+			let keys: string[] = Object.keys(beforeFinal.inputs);
+			for (let i = 0; i < keys.length; i++) {
+				let key: string = keys[i];
+				let v: unknown = beforeFinal.inputs[key];
+				finalInputs[key] = v === undefined || v === null ? "" : String(v);
+			}
+			let result: CalculatorResult = this.performCalculationPure(finalInputs);
+			let afterPayload: AfterCalculationPayload = {
+				calculatorId: this.calculatorId,
+				result: result.value
+			};
+			let afterResult: unknown = pm.executeHook("afterCalculation", afterPayload);
+			let afterFinal: AfterCalculationPayload = afterResult as AfterCalculationPayload;
+			if (typeof afterFinal.result === "string" && afterFinal.result !== result.value) {
+				result = { value: afterFinal.result, explanation: result.explanation, chartData: result.chartData, metadata: result.metadata };
+			}
+			ExportManager.getInstance().addToHistory(this.calculatorId, finalInputs, result.value);
+			return result;
+		} catch (error) {
+			let message: string = error instanceof Error ? error.message : String(error);
+			return { value: "", explanation: "Error: " + message };
+		}
+	}
+
+	/**
 	 * Finds an input element owned by this calculator by its DOM element id.
 	 * Throws if no matching element exists.
 	 */
