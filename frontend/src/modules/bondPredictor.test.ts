@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { predictBondType } from "./bondPredictor.js";
+import { predictBondType, BondTypePredictor } from "./bondPredictor.js";
 import { mockElements } from "../test/elementsData";
 import { setOrCreateInput, getResultHTML } from "../test/helpers.js";
 import type { ChemicalElement } from "../types";
@@ -156,5 +156,43 @@ describe("bondPredictor", () => {
         const html = getResultHTML("bond-type-result");
         expect(html).toContain("Polar Covalent");
         expect(html).not.toContain("Ionic");
+    });
+});
+
+describe("BondTypePredictor.calculatePure", () => {
+    beforeEach(() => {
+        // Legacy DOM hooks are still constructed by the calculator; supply
+        // a result element so the constructor does not throw.
+        const result = document.createElement("div");
+        result.id = "bond-type-result";
+        document.body.appendChild(result);
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("predicts Ionic bond for Na + Cl", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({
+            "element1-input": "Na",
+            "element2-input": "Cl"
+        });
+        expect(result.value).toContain("Ionic");
+        expect(result.value).toContain("Na");
+        expect(result.value).toContain("Cl");
+        expect(result.metadata).toHaveProperty("bondType", "Ionic");
+        expect(result.metadata).toHaveProperty("deltaEN");
+    });
+
+    it("returns an error result when an element symbol is missing", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({
+            "element1-input": "Xx",
+            "element2-input": "Na"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("not found");
     });
 });
