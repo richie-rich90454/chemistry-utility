@@ -1,0 +1,10 @@
+.subGroup{
+    padding-bottom: var(--md-space-4);
+    border-bottom: 1px solid var(--md-outline-variant);
+    margin-bottom: var(--md-space-4);
+}
+.subGroup:last-child{
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}

@@ -22,6 +22,7 @@ import {GasLaws} from "./routes/gas-laws";
 import {Electrochemistry} from "./routes/electrochemistry";
 import {Thermodynamics} from "./routes/thermodynamics";
 import {Kinetics} from "./routes/kinetics";
+import {QuantumAtomic} from "./routes/quantum-atomic";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -147,6 +148,27 @@ function App(): JSX.Element {
         if (window.location.hash === "#collision-theory-calc") {
             window.location.replace("/kinetics");
         }
+        if (window.location.hash === "#quantum-atomic") {
+            window.location.replace("/quantum-atomic");
+        }
+        if (window.location.hash === "#quantum-numbers") {
+            window.location.replace("/quantum-atomic");
+        }
+        if (window.location.hash === "#electron-configuration") {
+            window.location.replace("/quantum-atomic");
+        }
+        if (window.location.hash === "#rydberg-calc") {
+            window.location.replace("/quantum-atomic");
+        }
+        if (window.location.hash === "#debroglie-calc") {
+            window.location.replace("/quantum-atomic");
+        }
+        if (window.location.hash === "#photoelectric-calc") {
+            window.location.replace("/quantum-atomic");
+        }
+        if (window.location.hash === "#heisenberg-calc") {
+            window.location.replace("/quantum-atomic");
+        }
     });
     return (
         <Router>
@@ -172,6 +194,7 @@ function App(): JSX.Element {
             <Route path="/electrochemistry" component={Electrochemistry} />
             <Route path="/thermodynamics" component={Thermodynamics} />
             <Route path="/kinetics" component={Kinetics} />
+            <Route path="/quantum-atomic" component={QuantumAtomic} />
         </Router>
     );
 }
