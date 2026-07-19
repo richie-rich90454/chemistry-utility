@@ -504,4 +504,104 @@ describe("NavigationManager", () => {
             expect(() => manager.updateHistoryButtons()).not.toThrow();
         });
     });
+
+    describe("subscribe / unsubscribe", () => {
+        it("calls the listener immediately with the current active view id", () => {
+            manager.setActiveViewId("mass-calc");
+            const calls: Array<string | null> = [];
+            manager.subscribe((id: string | null): void => {
+                calls.push(id);
+            });
+            expect(calls.length).toBe(1);
+            expect(calls[0]).toBe("mass-calc");
+        });
+
+        it("calls the listener with null when no active view is set", () => {
+            const calls: Array<string | null> = [];
+            manager.subscribe((id: string | null): void => {
+                calls.push(id);
+            });
+            expect(calls.length).toBe(1);
+            expect(calls[0]).toBeNull();
+        });
+
+        it("notifies the listener when setActiveViewId is called after subscribe", () => {
+            const calls: Array<string | null> = [];
+            manager.subscribe((id: string | null): void => {
+                calls.push(id);
+            });
+            manager.setActiveViewId("balancing");
+            expect(calls.length).toBe(2);
+            expect(calls[1]).toBe("balancing");
+        });
+
+        it("notifies the listener when setActiveViewId is set to null", () => {
+            manager.setActiveViewId("mass-calc");
+            const calls: Array<string | null> = [];
+            manager.subscribe((id: string | null): void => {
+                calls.push(id);
+            });
+            manager.setActiveViewId(null);
+            expect(calls[calls.length - 1]).toBeNull();
+        });
+
+        it("does not notify after unsubscribe is called", () => {
+            const calls: Array<string | null> = [];
+            const listener = (id: string | null): void => {
+                calls.push(id);
+            };
+            manager.subscribe(listener);
+            manager.unsubscribe(listener);
+            manager.setActiveViewId("balancing");
+            expect(calls.length).toBe(1);
+        });
+
+        it("does not add the same listener twice", () => {
+            manager.setActiveViewId("mass-calc");
+            const calls: Array<string | null> = [];
+            const listener = (id: string | null): void => {
+                calls.push(id);
+            };
+            manager.subscribe(listener);
+            manager.subscribe(listener);
+            expect(calls.length).toBe(1);
+        });
+
+        it("unsubscribe is a no-op for an unknown listener", () => {
+            const listener = (id: string | null): void => {
+                void id;
+            };
+            expect(() => manager.unsubscribe(listener)).not.toThrow();
+        });
+
+        it("notifies multiple listeners on setActiveViewId", () => {
+            const callsA: Array<string | null> = [];
+            const callsB: Array<string | null> = [];
+            manager.subscribe((id: string | null): void => {
+                callsA.push(id);
+            });
+            manager.subscribe((id: string | null): void => {
+                callsB.push(id);
+            });
+            manager.setActiveViewId("balancing");
+            expect(callsA[callsA.length - 1]).toBe("balancing");
+            expect(callsB[callsB.length - 1]).toBe("balancing");
+        });
+
+        it("keeps other listeners working after one unsubscribes", () => {
+            const callsA: Array<string | null> = [];
+            const callsB: Array<string | null> = [];
+            const listenerA = (id: string | null): void => {
+                callsA.push(id);
+            };
+            manager.subscribe(listenerA);
+            manager.subscribe((id: string | null): void => {
+                callsB.push(id);
+            });
+            manager.unsubscribe(listenerA);
+            manager.setActiveViewId("balancing");
+            expect(callsA.length).toBe(1);
+            expect(callsB[callsB.length - 1]).toBe("balancing");
+        });
+    });
 });

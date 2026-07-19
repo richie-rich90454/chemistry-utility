@@ -1,4 +1,4 @@
-import {createSignal} from "solid-js";
+import {createSignal, onCleanup} from "solid-js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 interface NavigationStore {
     currentRoute: () => string;
@@ -22,6 +22,18 @@ function useNavigation(): NavigationStore {
     let recentSignal = createSignal<string[]>(manager.getNavHistory().slice(-5));
     let recentCalculators = recentSignal[0];
     let [favorites, setFavoritesSignal] = createSignal<string[]>(manager.getFavorites());
+    let listener = function (id: string | null): void {
+        if (id !== null) {
+            setCurrentRouteSignal(id);
+        }
+        else {
+            setCurrentRouteSignal("");
+        }
+    };
+    manager.subscribe(listener);
+    onCleanup(function (): void {
+        manager.unsubscribe(listener);
+    });
     function setCurrentRoute(route: string): void {
         setCurrentRouteSignal(route);
         manager.setActiveViewId(route);

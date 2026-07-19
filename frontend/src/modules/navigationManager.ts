@@ -52,6 +52,7 @@ class NavigationManager {
 	private navHistory: string[] = [];
 	private forwardHistory: string[] = [];
 	private activeViewId: string | null = null;
+	private listeners: Array<(id: string | null) => void> = [];
 
 	private constructor() {}
 
@@ -124,6 +125,35 @@ class NavigationManager {
 
 	public setActiveViewId(id: string | null): void {
 		this.activeViewId = id;
+		this.notifyListeners();
+	}
+
+	public subscribe(listener: (id: string | null) => void): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			if (this.listeners[i] === listener) {
+				return;
+			}
+		}
+		this.listeners.push(listener);
+		listener(this.activeViewId);
+	}
+
+	public unsubscribe(listener: (id: string | null) => void): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			if (this.listeners[i] === listener) {
+				this.listeners.splice(i, 1);
+				return;
+			}
+		}
+	}
+
+	private notifyListeners(): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			this.listeners[i](this.activeViewId);
+		}
 	}
 
 	public pushHistory(_id: string): void {
