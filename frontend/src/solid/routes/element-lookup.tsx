@@ -7,85 +7,22 @@
  * the rendered DOM against the legacy markup.
  */
 import type {JSX} from "solid-js";
-import {createSignal, onMount} from "solid-js";
-import {ChemicalElement} from "../../types.js";
-import {DataCache} from "../../modules/dataCache.js";
+import {useElementLookup} from "../lib/useElementLookup";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import styles from "./element-lookup.module.css";
 function ElementLookup(): JSX.Element {
-    let [query, setQuery] = createSignal("");
-    let [result, setResult] = createSignal<ChemicalElement | null>(null);
-    let [error, setError] = createSignal("");
-    let [elements, setElements] = createSignal<ChemicalElement[]>([]);
-    let [loading, setLoading] = createSignal(true);
-    let [loadError, setLoadError] = createSignal("");
-    onMount(function (): void {
-        loadElements();
-    });
-    function loadElements(): void {
-        let cache = DataCache.getInstance();
-        cache.get("ptable").then(function (cached: string | null): void {
-            if (cached !== null) {
-                try {
-                    let parsed: ChemicalElement[] = JSON.parse(cached) as ChemicalElement[];
-                    setElements(parsed);
-                    setLoading(false);
-                    return;
-                }
-                catch {
-                    // Corrupt cache — fall through to fetch
-                }
-            }
-            fetch("/ptable.json").then(function (response: Response): Promise<unknown> {
-                if (!response.ok) {
-                    throw new Error("HTTP error! status: " + response.status);
-                }
-                return response.json();
-            }).then(function (data: unknown): void {
-                let elementData = data as ChemicalElement[];
-                setElements(elementData);
-                cache.set("ptable", JSON.stringify(elementData));
-                setLoading(false);
-            }).catch(function (err: unknown): void {
-                let message = err instanceof Error ? err.message : String(err);
-                setLoadError(message);
-                setLoading(false);
-            });
-        });
-    }
-    function findElement(q: string, list: ChemicalElement[]): ChemicalElement | null {
-        let trimmed = q.trim().toLowerCase();
-        if (trimmed === "") {
-            return null;
-        }
-        for (let i = 0; i < list.length; i++) {
-            let el = list[i];
-            if (el.symbol.toLowerCase() === trimmed || el.name.toLowerCase() === trimmed || String(el.atomicNumber) === trimmed) {
-                return el;
-            }
-        }
-        return null;
-    }
+    let state = useElementLookup();
+    let query = state.query;
+    let setQuery = state.setQuery;
+    let result = state.result;
+    let error = state.error;
+    let loading = state.loading;
+    let loadError = state.loadError;
+    let search = state.search;
     function handleSearch(): void {
-        if (loading() || loadError() !== "") {
-            return;
-        }
-        setError("");
-        let trimmed = query().trim();
-        if (trimmed === "") {
-            setResult(null);
-            setError("Please enter an element symbol, name, or atomic number");
-            return;
-        }
-        let found = findElement(trimmed, elements());
-        if (found === null) {
-            setResult(null);
-            setError("Element not found");
-            return;
-        }
-        setResult(found);
+        search();
     }
     function handleInput(e: Event): void {
         let target = e.currentTarget as HTMLInputElement;
@@ -93,7 +30,7 @@ function ElementLookup(): JSX.Element {
     }
     function handleKeyDown(e: KeyboardEvent): void {
         if (e.key === "Enter") {
-            handleSearch();
+            search();
         }
     }
     function formatOptional(value: number | null | undefined, suffix: string): string {
