@@ -232,7 +232,7 @@ function PeriodicTable(): JSX.Element {
                                     onClick={function () { handleToggleCategory(cat.type); }}
                                     aria-pressed={activeCategory() === cat.type}
                                 >
-                                    <span class={styles.legendSwatch + " " + cat.cls}></span>
+                                    <span class={styles.legendSwatch + " " + cat.cls} />
                                     <span>{cat.label}</span>
                                 </button>
                             )}
