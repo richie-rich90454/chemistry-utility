@@ -57,7 +57,161 @@ interface StoredChart {
     options: ChartOptions;
     type: ChartType;
 }
-
+function getThemeColorsForTheme(isDark: boolean): ThemeColors {
+    if (isDark) {
+        return {
+            "textColor": "#e0e0e0",
+            "tickColor": "#b0b0b0",
+            "gridColor": "rgba(255,255,255,0.12)",
+            "tooltipBg": "rgba(40,40,40,0.95)",
+            "tooltipText": "#f0f0f0"
+        };
+    }
+    return {
+        "textColor": "#333333",
+        "tickColor": "#555555",
+        "gridColor": "rgba(0,0,0,0.1)",
+        "tooltipBg": "rgba(60,60,60,0.95)",
+        "tooltipText": "#ffffff"
+    };
+}
+function toScatterPoints(values: number[], labels: string[]): DataPoint[] {
+    let points: DataPoint[] = [];
+    let i: number;
+    for (i = 0; i < values.length; i++) {
+        let x: number = parseFloat(labels[i]);
+        if (isNaN(x)) {
+            x = i;
+        }
+        points.push({ "x": x, "y": values[i] });
+    }
+    return points;
+}
+function formatTooltipLabel(context: TooltipContext): string {
+    let label: string = context.dataset.label || "";
+    let parsed: string;
+    let value: number | DataPoint;
+    if (typeof context.parsed.y === "number") {
+        value = context.parsed.y;
+    } else if (context.parsed.y !== null && typeof context.parsed.y === "object") {
+        value = context.parsed.y;
+    } else {
+        value = context.parsed.x;
+    }
+    parsed = typeof value === "number" ? String(value) : "";
+    if (label.length > 0) {
+        return label + ": " + parsed;
+    }
+    return parsed;
+}
+function buildChartConfiguration(type: ChartType, data: ChartData, options: ChartOptions, isDark: boolean): ChartConfiguration {
+    let datasetsConfig: ChartDatasetConfig[] = [];
+    let i: number;
+    for (i = 0; i < data.datasets.length; i++) {
+        let ds: ChartDataset = data.datasets[i];
+        let seriesData: DataPoint[] | number[];
+        if (type === "scatter") {
+            seriesData = toScatterPoints(ds.data, data.labels);
+        } else {
+            seriesData = ds.data;
+        }
+        datasetsConfig.push({
+            "label": ds.label,
+            "data": seriesData,
+            "borderColor": ds.borderColor,
+            "backgroundColor": ds.backgroundColor,
+            "borderWidth": 2,
+            "pointRadius": type === "line" ? 0 : 3,
+            "pointHoverRadius": 5,
+            "fill": type === "line" ? false : true,
+            "tension": type === "line" ? 0.1 : 0,
+            "showLine": type === "scatter" ? false : true
+        });
+    }
+    let themeColors: ThemeColors = getThemeColorsForTheme(isDark);
+    return {
+        "type": type,
+        "data": {
+            "labels": data.labels,
+            "datasets": datasetsConfig
+        },
+        "options": {
+            "responsive": true,
+            "maintainAspectRatio": false,
+            "interaction": {
+                "mode": "nearest",
+                "intersect": false
+            },
+            "plugins": {
+                "title": {
+                    "display": options.title.length > 0,
+                    "text": options.title,
+                    "color": themeColors.textColor
+                },
+                "legend": {
+                    "display": options.showLegend,
+                    "labels": {
+                        "color": themeColors.textColor
+                    }
+                },
+                "tooltip": {
+                    "enabled": true,
+                    "backgroundColor": themeColors.tooltipBg,
+                    "titleColor": themeColors.tooltipText,
+                    "bodyColor": themeColors.tooltipText,
+                    "callbacks": {
+                        "label": function (context: TooltipContext): string {
+                            return formatTooltipLabel(context);
+                        }
+                    }
+                },
+                "zoom": {
+                    "pan": {
+                        "enabled": true,
+                        "mode": "xy"
+                    },
+                    "zoom": {
+                        "wheel": {
+                            "enabled": true
+                        },
+                        "pinch": {
+                            "enabled": true
+                        },
+                        "mode": "xy"
+                    }
+                }
+            },
+            "scales": {
+                "x": {
+                    "title": {
+                        "display": options.xLabel.length > 0,
+                        "text": options.xLabel,
+                        "color": themeColors.textColor
+                    },
+                    "ticks": {
+                        "color": themeColors.tickColor
+                    },
+                    "grid": {
+                        "color": themeColors.gridColor
+                    }
+                },
+                "y": {
+                    "title": {
+                        "display": options.yLabel.length > 0,
+                        "text": options.yLabel,
+                        "color": themeColors.textColor
+                    },
+                    "ticks": {
+                        "color": themeColors.tickColor
+                    },
+                    "grid": {
+                        "color": themeColors.gridColor
+                    }
+                }
+            }
+        }
+    };
+}
 /**
  * Singleton renderer wrapping Chart.js for chemistry-related visualizations.
  * Supports line, bar, and scatter charts with theme-aware styling, zoom/pan,
@@ -200,163 +354,10 @@ class ChartRenderer {
     }
 
     private buildConfiguration(type: ChartType, data: ChartData, options: ChartOptions): ChartConfiguration {
-        let self: ChartRenderer = this;
-        let datasetsConfig: ChartDatasetConfig[] = [];
-        let i: number;
-        for (i = 0; i < data.datasets.length; i++) {
-            let ds: ChartDataset = data.datasets[i];
-            let seriesData: DataPoint[] | number[];
-            if (type === "scatter") {
-                seriesData = self.toScatterPoints(ds.data, data.labels);
-            } else {
-                seriesData = ds.data;
-            }
-            datasetsConfig.push({
-                "label": ds.label,
-                "data": seriesData,
-                "borderColor": ds.borderColor,
-                "backgroundColor": ds.backgroundColor,
-                "borderWidth": 2,
-                "pointRadius": type === "line" ? 0 : 3,
-                "pointHoverRadius": 5,
-                "fill": type === "line" ? false : true,
-                "tension": type === "line" ? 0.1 : 0,
-                "showLine": type === "scatter" ? false : true
-            });
-        }
-        let themeColors: ThemeColors = this.getThemeColors();
-        return {
-            "type": type,
-            "data": {
-                "labels": data.labels,
-                "datasets": datasetsConfig
-            },
-            "options": {
-                "responsive": true,
-                "maintainAspectRatio": false,
-                "interaction": {
-                    "mode": "nearest",
-                    "intersect": false
-                },
-                "plugins": {
-                    "title": {
-                        "display": options.title.length > 0,
-                        "text": options.title,
-                        "color": themeColors.textColor
-                    },
-                    "legend": {
-                        "display": options.showLegend,
-                        "labels": {
-                            "color": themeColors.textColor
-                        }
-                    },
-                    "tooltip": {
-                        "enabled": true,
-                        "backgroundColor": themeColors.tooltipBg,
-                        "titleColor": themeColors.tooltipText,
-                        "bodyColor": themeColors.tooltipText,
-                        "callbacks": {
-                            "label": function (context: TooltipContext): string {
-                                return self.formatTooltipLabel(context);
-                            }
-                        }
-                    },
-                    "zoom": {
-                        "pan": {
-                            "enabled": true,
-                            "mode": "xy"
-                        },
-                        "zoom": {
-                            "wheel": {
-                                "enabled": true
-                            },
-                            "pinch": {
-                                "enabled": true
-                            },
-                            "mode": "xy"
-                        }
-                    }
-                },
-                "scales": {
-                    "x": {
-                        "title": {
-                            "display": options.xLabel.length > 0,
-                            "text": options.xLabel,
-                            "color": themeColors.textColor
-                        },
-                        "ticks": {
-                            "color": themeColors.tickColor
-                        },
-                        "grid": {
-                            "color": themeColors.gridColor
-                        }
-                    },
-                    "y": {
-                        "title": {
-                            "display": options.yLabel.length > 0,
-                            "text": options.yLabel,
-                            "color": themeColors.textColor
-                        },
-                        "ticks": {
-                            "color": themeColors.tickColor
-                        },
-                        "grid": {
-                            "color": themeColors.gridColor
-                        }
-                    }
-                }
-            }
-        };
+        return buildChartConfiguration(type, data, options, this.isDark);
     }
-
-    private toScatterPoints(values: number[], labels: string[]): DataPoint[] {
-        let points: DataPoint[] = [];
-        let i: number;
-        for (i = 0; i < values.length; i++) {
-            let x: number = parseFloat(labels[i]);
-            if (isNaN(x)) {
-                x = i;
-            }
-            points.push({ "x": x, "y": values[i] });
-        }
-        return points;
-    }
-
-    private formatTooltipLabel(context: TooltipContext): string {
-        let label: string = context.dataset.label || "";
-        let parsed: string;
-        let value: number | DataPoint;
-        if (typeof context.parsed.y === "number") {
-            value = context.parsed.y;
-        } else if (context.parsed.y !== null && typeof context.parsed.y === "object") {
-            value = context.parsed.y;
-        } else {
-            value = context.parsed.x;
-        }
-        parsed = typeof value === "number" ? String(value) : "";
-        if (label.length > 0) {
-            return label + ": " + parsed;
-        }
-        return parsed;
-    }
-
     private getThemeColors(): ThemeColors {
-        if (this.isDark) {
-            return {
-                "textColor": "#e0e0e0",
-                "tickColor": "#b0b0b0",
-                "gridColor": "rgba(255,255,255,0.12)",
-                "tooltipBg": "rgba(40,40,40,0.95)",
-                "tooltipText": "#f0f0f0"
-            };
-        }
-        return {
-            "textColor": "#333333",
-            "tickColor": "#555555",
-            "gridColor": "rgba(0,0,0,0.1)",
-            "tooltipBg": "rgba(60,60,60,0.95)",
-            "tooltipText": "#ffffff"
-        };
+        return getThemeColorsForTheme(this.isDark);
     }
 
     /**
@@ -691,7 +692,7 @@ interface TooltipContext {
     parsed: { x: number; y: number | DataPoint | null };
 }
 
-interface ChartConfiguration {
+export interface ChartConfiguration {
     type: ChartType;
     data: {
         labels: string[];
@@ -700,4 +701,4 @@ interface ChartConfiguration {
     options: Record<string, unknown>;
 }
 
-export { ChartRenderer };
+export { ChartRenderer, buildChartConfiguration };
