@@ -1,4 +1,5 @@
 import { Calculator } from "./calculator.js";
+import type { CalculatorResult } from "./calculator.js";
 import { SolveForCalculator } from "./solveForCalculator.js";
 import { InputValidator } from "./validation.js";
 import { ChartRenderer, ConcentrationTimePoint } from "./chartRenderer.js";
@@ -86,6 +87,82 @@ export class ArrheniusCalculator extends SolveForCalculator {
             throw new Error("Invalid solveFor value");
         }
         this.resultDisplay.showFormula(formula, result, unit);
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const solveFor = this.getSolveFor(inputs);
+        const A = parseFloat(inputs["arrhenius-A"] ?? "");
+        const Ea = parseFloat(inputs["arrhenius-Ea"] ?? "");
+        const T = parseFloat(inputs["arrhenius-T"] ?? "");
+        const k = parseFloat(inputs["arrhenius-k"] ?? "");
+        const R = 8.314;
+        const EaJ = Ea * 1000;
+        let result: number;
+        let unit: string;
+        let formula: string;
+        if (solveFor === "k") {
+            if (isNaN(A) || isNaN(Ea) || isNaN(T)) {
+                throw new Error("Missing or invalid inputs for arrhenius-A, arrhenius-Ea, arrhenius-T");
+            }
+            if (T <= 0) {
+                throw new Error("Temperature must be positive");
+            }
+            if (A <= 0) {
+                throw new Error("Frequency factor A must be positive");
+            }
+            result = A * Math.exp(-EaJ / (R * T));
+            unit = "s\u207B\u00B9";
+            formula = "k = A\u00B7e^(-Ea/RT)";
+        } else if (solveFor === "Ea") {
+            if (isNaN(A) || isNaN(T) || isNaN(k)) {
+                throw new Error("Missing or invalid inputs for arrhenius-A, arrhenius-T, arrhenius-k");
+            }
+            if (T <= 0) {
+                throw new Error("Temperature must be positive");
+            }
+            if (A <= 0) {
+                throw new Error("Frequency factor A must be positive");
+            }
+            if (k <= 0) {
+                throw new Error("Rate constant k must be positive");
+            }
+            result = (-R * T * Math.log(k / A)) / 1000;
+            unit = "kJ/mol";
+            formula = "Ea = -RT\u00B7ln(k/A)";
+        } else if (solveFor === "T") {
+            if (isNaN(A) || isNaN(Ea) || isNaN(k)) {
+                throw new Error("Missing or invalid inputs for arrhenius-A, arrhenius-Ea, arrhenius-k");
+            }
+            if (A <= 0) {
+                throw new Error("Frequency factor A must be positive");
+            }
+            if (k <= 0) {
+                throw new Error("Rate constant k must be positive");
+            }
+            if (k >= A) {
+                throw new Error("k must be less than A for a valid temperature");
+            }
+            result = -EaJ / (R * Math.log(k / A));
+            unit = "K";
+            formula = "T = -Ea/(R\u00B7ln(k/A))";
+        } else if (solveFor === "A") {
+            if (isNaN(Ea) || isNaN(T) || isNaN(k)) {
+                throw new Error("Missing or invalid inputs for arrhenius-Ea, arrhenius-T, arrhenius-k");
+            }
+            if (T <= 0) {
+                throw new Error("Temperature must be positive");
+            }
+            if (k <= 0) {
+                throw new Error("Rate constant k must be positive");
+            }
+            result = k / Math.exp(-EaJ / (R * T));
+            unit = "s\u207B\u00B9";
+            formula = "A = k / e^(-Ea/RT)";
+        } else {
+            throw new Error("Invalid solveFor value");
+        }
+        const formatted = this.numberFormatter.format(result, 4);
+        return { value: formatted + " " + unit, explanation: formula + " = " + formatted + " " + unit };
     }
 }
 
@@ -199,6 +276,84 @@ export class RateLawCalculator extends Calculator {
         html += "<p>Rate law: <strong>" + expression + "</strong></p>";
         this.resultDisplay.showResult(html);
     }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const A1 = parseFloat(inputs["ratelaw-A1"] ?? "");
+        const B1 = parseFloat(inputs["ratelaw-B1"] ?? "");
+        const rate1 = parseFloat(inputs["ratelaw-rate1"] ?? "");
+        const A2 = parseFloat(inputs["ratelaw-A2"] ?? "");
+        const B2 = parseFloat(inputs["ratelaw-B2"] ?? "");
+        const rate2 = parseFloat(inputs["ratelaw-rate2"] ?? "");
+        if (isNaN(A1) || isNaN(B1) || isNaN(rate1) || isNaN(A2) || isNaN(B2) || isNaN(rate2)) {
+            throw new Error("Missing or invalid inputs for ratelaw-A1, ratelaw-B1, ratelaw-rate1, ratelaw-A2, ratelaw-B2, ratelaw-rate2");
+        }
+        if (A1 <= 0 || A2 <= 0) {
+            throw new Error("Concentrations of A must be positive");
+        }
+        if (B1 <= 0 || B2 <= 0) {
+            throw new Error("Concentrations of B must be positive");
+        }
+        if (rate1 <= 0 || rate2 <= 0) {
+            throw new Error("Rates must be positive");
+        }
+        let m: number;
+        let n: number;
+        if (Math.abs(B1 - B2) < 1e-10) {
+            if (Math.abs(A1 - A2) < 1e-10) {
+                throw new Error("Experiments must differ in at least one concentration");
+            }
+            m = Math.log(rate2 / rate1) / Math.log(A2 / A1);
+            m = Math.round(m * 100) / 100;
+            n = 0;
+        } else if (Math.abs(A1 - A2) < 1e-10) {
+            n = Math.log(rate2 / rate1) / Math.log(B2 / B1);
+            n = Math.round(n * 100) / 100;
+            m = 0;
+        } else {
+            let bestM = 0;
+            let bestN = 0;
+            let bestError = Infinity;
+            let rateRatio = rate2 / rate1;
+            let aRatio = A2 / A1;
+            let bRatio = B2 / B1;
+            for (let mi = 0; mi <= 3; mi++) {
+                for (let ni = 0; ni <= 3; ni++) {
+                    let predicted = Math.pow(aRatio, mi) * Math.pow(bRatio, ni);
+                    let err = Math.abs(predicted - rateRatio);
+                    if (err < bestError) {
+                        bestError = err;
+                        bestM = mi;
+                        bestN = ni;
+                    }
+                }
+            }
+            m = bestM;
+            n = bestN;
+        }
+        let k = rate1 / (Math.pow(A1, m) * Math.pow(B1, n));
+        let expression = "rate = " + this.numberFormatter.format(k, 4);
+        if (m !== 0) {
+            if (m === 1) {
+                expression += "[A]";
+            } else {
+                expression += "[A]^" + m;
+            }
+        }
+        if (n !== 0) {
+            if (n === 1) {
+                expression += "[B]";
+            } else {
+                expression += "[B]^" + n;
+            }
+        }
+        const kFormatted = this.numberFormatter.format(k, 4);
+        const explanation = "Order with respect to A: " + m + "; Order with respect to B: " + n + "; Rate constant k = " + kFormatted + "; Rate law: " + expression;
+        return {
+            value: expression,
+            explanation: explanation,
+            metadata: { orderA: m, orderB: n, k: k, rateLaw: expression }
+        };
+    }
 }
 
 /**
@@ -299,6 +454,87 @@ export class IntegratedRateLawCalculator extends SolveForCalculator {
             let points = this.buildConcentrationTimeSeries(order, A0, k, endTime);
             ChartRenderer.getInstance().renderConcentrationTimeChart("integrated-rate-law-chart", points);
         }
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const solveFor = this.getSolveFor(inputs);
+        const order = parseInt(inputs["irl-order"] ?? "", 10);
+        const A0 = parseFloat(inputs["irl-A0"] ?? "");
+        const k = parseFloat(inputs["irl-k"] ?? "");
+        const t = parseFloat(inputs["irl-t"] ?? "");
+        const A = parseFloat(inputs["irl-A"] ?? "");
+        let result: number;
+        let unit: string;
+        let formula: string;
+        if (solveFor === "concentration") {
+            if (isNaN(A0) || isNaN(k) || isNaN(t)) {
+                throw new Error("Missing or invalid inputs for irl-A0, irl-k, irl-t");
+            }
+            if (A0 <= 0) {
+                throw new Error("Initial concentration must be positive");
+            }
+            if (k < 0) {
+                throw new Error("Rate constant cannot be negative");
+            }
+            if (order === 0) {
+                result = Math.max(0, A0 - k * t);
+                formula = "[A] = [A]\u2080 - kt";
+            } else if (order === 1) {
+                result = A0 * Math.exp(-k * t);
+                formula = "[A] = [A]\u2080\u00B7e^(-kt)";
+            } else if (order === 2) {
+                result = A0 / (1 + k * A0 * t);
+                formula = "[A] = [A]\u2080 / (1 + k[A]\u2080t)";
+            } else {
+                throw new Error("Order must be 0, 1, or 2");
+            }
+            unit = "M";
+        } else if (solveFor === "time") {
+            if (isNaN(A0) || isNaN(k) || isNaN(A)) {
+                throw new Error("Missing or invalid inputs for irl-A0, irl-k, irl-A");
+            }
+            if (A0 <= 0) {
+                throw new Error("Initial concentration must be positive");
+            }
+            if (k <= 0) {
+                throw new Error("Rate constant must be positive for solving time");
+            }
+            if (A <= 0) {
+                throw new Error("Concentration must be positive");
+            }
+            if (order === 0) {
+                if (A >= A0) {
+                    throw new Error("Concentration must be less than initial concentration for zero order");
+                }
+                result = (A0 - A) / k;
+                formula = "t = ([A]\u2080 - [A]) / k";
+            } else if (order === 1) {
+                if (A >= A0) {
+                    throw new Error("Concentration must be less than initial concentration for first order");
+                }
+                result = Math.log(A0 / A) / k;
+                formula = "t = ln([A]\u2080/[A]) / k";
+            } else if (order === 2) {
+                if (A >= A0) {
+                    throw new Error("Concentration must be less than initial concentration for second order");
+                }
+                result = (1 / A - 1 / A0) / k;
+                formula = "t = (1/[A] - 1/[A]\u2080) / k";
+            } else {
+                throw new Error("Order must be 0, 1, or 2");
+            }
+            unit = "s";
+        } else {
+            throw new Error("Invalid solveFor value");
+        }
+        const formatted = this.numberFormatter.format(result, 4);
+        const endTime = solveFor === "concentration" ? t : result;
+        const points = this.buildConcentrationTimeSeries(order, A0, k, endTime);
+        return {
+            value: formatted + " " + unit,
+            explanation: formula + " = " + formatted + " " + unit,
+            chartData: points
+        };
     }
 
     private buildConcentrationTimeSeries(order: number, A0: number, k: number, endTime: number): ConcentrationTimePoint[] {
@@ -403,6 +639,76 @@ export class ReactionOrderCalculator extends Calculator {
         }
         html += "</p>";
         this.resultDisplay.showResult(html);
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const dataInput = inputs["reaction-order-data"] ?? "";
+        if (!dataInput || dataInput.trim() === "") {
+            throw new Error("Please enter time-concentration data");
+        }
+        let points: Array<{ t: number; c: number }> = [];
+        let entries = dataInput.split(/[;\n]+/);
+        for (let i = 0; i < entries.length; i++) {
+            let entry = entries[i].trim();
+            if (entry === "") continue;
+            let parts = entry.split(",");
+            if (parts.length !== 2) {
+                throw new Error("Invalid data format. Use t1,c1;t2,c2;... or one pair per line");
+            }
+            let t = parseFloat(parts[0].trim());
+            let c = parseFloat(parts[1].trim());
+            if (isNaN(t) || isNaN(c)) {
+                throw new Error("Invalid number in data: " + entry);
+            }
+            if (c <= 0) {
+                throw new Error("Concentrations must be positive for order determination");
+            }
+            points.push({ t: t, c: c });
+        }
+        if (points.length < 3) {
+            throw new Error("At least 3 data points are required");
+        }
+        let r2Zero = this.calculateRSquared(points, function(p: { t: number; c: number }): number { return p.c; });
+        let r2First = this.calculateRSquared(points, function(p: { t: number; c: number }): number { return Math.log(p.c); });
+        let r2Second = this.calculateRSquared(points, function(p: { t: number; c: number }): number { return 1 / p.c; });
+        let bestOrder = 0;
+        let bestR2 = r2Zero;
+        if (r2First > bestR2) {
+            bestOrder = 1;
+            bestR2 = r2First;
+        }
+        if (r2Second > bestR2) {
+            bestOrder = 2;
+            bestR2 = r2Second;
+        }
+        let k = this.calculateSlope(points, bestOrder);
+        let kUnit: string;
+        if (bestOrder === 0) {
+            kUnit = "M/s";
+        } else if (bestOrder === 1) {
+            kUnit = "s\u207B\u00B9";
+        } else {
+            kUnit = "M\u207B\u00B9s\u207B\u00B9";
+        }
+        let kAbs = Math.abs(k);
+        let value = "Best-fit reaction order: " + bestOrder;
+        let explanation = "Best-fit reaction order: " + bestOrder + "; ";
+        explanation += "R\u00B2 zero order: " + this.numberFormatter.format(r2Zero, 6) + "; ";
+        explanation += "R\u00B2 first order: " + this.numberFormatter.format(r2First, 6) + "; ";
+        explanation += "R\u00B2 second order: " + this.numberFormatter.format(r2Second, 6) + "; ";
+        explanation += "Rate constant k \u2248 " + this.numberFormatter.format(kAbs, 6) + " " + kUnit;
+        return {
+            value: value,
+            explanation: explanation,
+            metadata: {
+                bestOrder: bestOrder,
+                r2Zero: r2Zero,
+                r2First: r2First,
+                r2Second: r2Second,
+                k: kAbs,
+                kUnit: kUnit
+            }
+        };
     }
 
     private calculateRSquared(points: Array<{ t: number; c: number }>, transform: (p: { t: number; c: number }) => number): number {
@@ -543,6 +849,93 @@ export class CollisionTheoryCalculator extends SolveForCalculator {
         html += "<p>Result: " + this.numberFormatter.format(result, 6) + " " + unit + "</p>";
         html += "<p>Fraction of effective collisions (e^(-Ea/RT)): " + this.numberFormatter.format(fractionEffective, 6) + "</p>";
         this.resultDisplay.showResult(html);
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const solveFor = this.getSolveFor(inputs);
+        const Ea = parseFloat(inputs["collision-Ea"] ?? "");
+        const T = parseFloat(inputs["collision-T"] ?? "");
+        const Z = parseFloat(inputs["collision-Z"] ?? "");
+        const p = parseFloat(inputs["collision-p"] ?? "");
+        const k = parseFloat(inputs["collision-k"] ?? "");
+        const R = 8.314;
+        const EaJ = Ea * 1000;
+        let result: number;
+        let unit: string;
+        let formula: string;
+        if (solveFor === "k") {
+            if (isNaN(Ea) || isNaN(T) || isNaN(Z) || isNaN(p)) {
+                throw new Error("Missing or invalid inputs for collision-Ea, collision-T, collision-Z, collision-p");
+            }
+            if (T <= 0) {
+                throw new Error("Temperature must be positive");
+            }
+            if (Z <= 0) {
+                throw new Error("Collision frequency must be positive");
+            }
+            if (p < 0 || p > 1) {
+                throw new Error("Steric factor must be between 0 and 1");
+            }
+            result = Z * p * Math.exp(-EaJ / (R * T));
+            unit = "s\u207B\u00B9";
+            formula = "k = Z\u00B7p\u00B7e^(-Ea/RT)";
+        } else if (solveFor === "Z") {
+            if (isNaN(Ea) || isNaN(T) || isNaN(p) || isNaN(k)) {
+                throw new Error("Missing or invalid inputs for collision-Ea, collision-T, collision-p, collision-k");
+            }
+            if (T <= 0) {
+                throw new Error("Temperature must be positive");
+            }
+            if (p <= 0) {
+                throw new Error("Steric factor must be positive");
+            }
+            if (k <= 0) {
+                throw new Error("Rate constant k must be positive");
+            }
+            let denominator = p * Math.exp(-EaJ / (R * T));
+            if (denominator === 0) {
+                throw new Error("Cannot compute collision frequency: denominator is zero");
+            }
+            result = k / denominator;
+            unit = "s\u207B\u00B9";
+            formula = "Z = k / (p\u00B7e^(-Ea/RT))";
+        } else if (solveFor === "p") {
+            if (isNaN(Ea) || isNaN(T) || isNaN(Z) || isNaN(k)) {
+                throw new Error("Missing or invalid inputs for collision-Ea, collision-T, collision-Z, collision-k");
+            }
+            if (T <= 0) {
+                throw new Error("Temperature must be positive");
+            }
+            if (Z <= 0) {
+                throw new Error("Collision frequency must be positive");
+            }
+            if (k <= 0) {
+                throw new Error("Rate constant k must be positive");
+            }
+            let denominator = Z * Math.exp(-EaJ / (R * T));
+            if (denominator === 0) {
+                throw new Error("Cannot compute steric factor: denominator is zero");
+            }
+            result = k / denominator;
+            unit = "";
+            formula = "p = k / (Z\u00B7e^(-Ea/RT))";
+        } else {
+            throw new Error("Invalid solveFor value");
+        }
+        let fractionEffective = Math.exp(-EaJ / (R * T));
+        let formatted = this.numberFormatter.format(result, 6);
+        let value = unit ? formatted + " " + unit : formatted;
+        let explanation = formula + " = " + formatted + (unit ? " " + unit : "");
+        explanation += "; Fraction of effective collisions (e^(-Ea/RT)): " + this.numberFormatter.format(fractionEffective, 6);
+        return {
+            value: value,
+            explanation: explanation,
+            metadata: {
+                fractionEffective: fractionEffective,
+                formula: formula,
+                unit: unit
+            }
+        };
     }
 }
 

@@ -5,6 +5,11 @@ import {
     calculateIntegratedRateLaw,
     calculateReactionOrder,
     calculateCollisionTheory,
+    ArrheniusCalculator,
+    RateLawCalculator,
+    IntegratedRateLawCalculator,
+    ReactionOrderCalculator,
+    CollisionTheoryCalculator,
 } from "./kineticsCalculators.js";
 import {createContainer, createInput, createSelect, createResultDiv, getResultText} from "../test/helpers.js";
 
@@ -604,5 +609,217 @@ describe("CollisionTheoryCalculator", () => {
 
         const text = getResultText("collision-theory-result");
         expect(text).toContain("Error");
+    });
+});
+
+describe("ArrheniusCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "arrhenius-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("solves for k (A=1e13, Ea=75, T=298)", () => {
+        const calc = new ArrheniusCalculator();
+        const result = calc.calculatePure({
+            "arrhenius-solve-for": "k",
+            "arrhenius-A": "1e13",
+            "arrhenius-Ea": "75",
+            "arrhenius-T": "298",
+            "arrhenius-k": ""
+        });
+        expect(result.value).toContain("s\u207B\u00B9");
+        const match = result.value.match(/^([\d.eE+-]+)/);
+        expect(match).not.toBeNull();
+        expect(parseFloat(match![1])).toBeCloseTo(0.7132, 2);
+        expect(result.explanation).toContain("k = A\u00B7e^(-Ea/RT)");
+    });
+
+    it("returns an error result when T<=0", () => {
+        const calc = new ArrheniusCalculator();
+        const result = calc.calculatePure({
+            "arrhenius-solve-for": "k",
+            "arrhenius-A": "1e13",
+            "arrhenius-Ea": "75",
+            "arrhenius-T": "0",
+            "arrhenius-k": ""
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("positive");
+    });
+});
+
+describe("RateLawCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "rate-law-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("determines order m=1 in A when B is constant", () => {
+        const calc = new RateLawCalculator();
+        const result = calc.calculatePure({
+            "ratelaw-A1": "0.1",
+            "ratelaw-B1": "0.2",
+            "ratelaw-rate1": "0.004",
+            "ratelaw-A2": "0.2",
+            "ratelaw-B2": "0.2",
+            "ratelaw-rate2": "0.008"
+        });
+        expect(result.value).toContain("rate = ");
+        const meta = result.metadata as { orderA: number; orderB: number; k: number; rateLaw: string };
+        expect(meta.orderA).toBe(1);
+        expect(meta.orderB).toBe(0);
+        expect(meta.rateLaw).toContain("[A]");
+    });
+
+    it("returns an error result with negative concentrations", () => {
+        const calc = new RateLawCalculator();
+        const result = calc.calculatePure({
+            "ratelaw-A1": "-0.1",
+            "ratelaw-B1": "0.2",
+            "ratelaw-rate1": "0.004",
+            "ratelaw-A2": "0.2",
+            "ratelaw-B2": "0.2",
+            "ratelaw-rate2": "0.008"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("positive");
+    });
+});
+
+describe("IntegratedRateLawCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "integrated-rate-law-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("calculates first order concentration ([A]0=1, k=0.05, t=10)", () => {
+        const calc = new IntegratedRateLawCalculator();
+        const result = calc.calculatePure({
+            "irl-solve-for": "concentration",
+            "irl-order": "1",
+            "irl-A0": "1",
+            "irl-k": "0.05",
+            "irl-t": "10",
+            "irl-A": ""
+        });
+        expect(result.value).toContain("M");
+        const match = result.value.match(/^([\d.eE+-]+)/);
+        expect(match).not.toBeNull();
+        expect(parseFloat(match![1])).toBeCloseTo(0.6065, 3);
+        expect(Array.isArray(result.chartData)).toBe(true);
+    });
+
+    it("returns an error result when A0<=0", () => {
+        const calc = new IntegratedRateLawCalculator();
+        const result = calc.calculatePure({
+            "irl-solve-for": "concentration",
+            "irl-order": "1",
+            "irl-A0": "0",
+            "irl-k": "0.05",
+            "irl-t": "10",
+            "irl-A": ""
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("positive");
+    });
+});
+
+describe("ReactionOrderCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "reaction-order-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("identifies first order from exponential decay data", () => {
+        const calc = new ReactionOrderCalculator();
+        const result = calc.calculatePure({
+            "reaction-order-data": "0,1.0; 100,0.3679; 200,0.1353; 300,0.0498"
+        });
+        expect(result.value).toContain("Best-fit reaction order");
+        const meta = result.metadata as { bestOrder: number; r2Zero: number; r2First: number; r2Second: number; k: number };
+        expect(meta.bestOrder).toBe(1);
+        expect(meta.r2First).toBeGreaterThan(meta.r2Zero);
+        expect(meta.r2First).toBeGreaterThan(meta.r2Second);
+    });
+
+    it("returns an error result when data is empty", () => {
+        const calc = new ReactionOrderCalculator();
+        const result = calc.calculatePure({
+            "reaction-order-data": ""
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("time-concentration");
+    });
+});
+
+describe("CollisionTheoryCalculator.calculatePure", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "collision-theory-result";
+        document.body.appendChild(result);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("solves for k (Ea=50, T=298, Z=1e11, p=0.01)", () => {
+        const calc = new CollisionTheoryCalculator();
+        const result = calc.calculatePure({
+            "collision-solve-for": "k",
+            "collision-Ea": "50",
+            "collision-T": "298",
+            "collision-Z": "1e11",
+            "collision-p": "0.01",
+            "collision-k": ""
+        });
+        expect(result.value).toContain("s\u207B\u00B9");
+        const match = result.value.match(/^([\d.eE+-]+)/);
+        expect(match).not.toBeNull();
+        const R = 8.314;
+        const expected = 1e11 * 0.01 * Math.exp(-(50 * 1000) / (R * 298));
+        expect(parseFloat(match![1])).toBeCloseTo(expected, 4);
+        const meta = result.metadata as { fractionEffective: number };
+        expect(meta.fractionEffective).toBeGreaterThan(0);
+        expect(meta.fractionEffective).toBeLessThan(1);
+    });
+
+    it("returns an error result when T<=0", () => {
+        const calc = new CollisionTheoryCalculator();
+        const result = calc.calculatePure({
+            "collision-solve-for": "k",
+            "collision-Ea": "50",
+            "collision-T": "0",
+            "collision-Z": "1e11",
+            "collision-p": "0.01",
+            "collision-k": ""
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
+        expect(result.explanation).toContain("positive");
     });
 });
