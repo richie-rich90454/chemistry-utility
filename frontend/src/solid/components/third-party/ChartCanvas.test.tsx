@@ -1,4 +1,6 @@
 import {render, cleanup} from "@solidjs/testing-library";
+import type {JSX} from "solid-js";
+import {createSignal} from "solid-js";
 import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 import {ChartRenderer} from "../../../modules/chartRenderer.js";
 import type {ChartData, ChartOptions} from "../../../modules/chartRenderer.js";
@@ -23,6 +25,12 @@ function createSampleOptions(): ChartOptions {
         "showLegend": true
     };
 }
+let externalSetData: (data: ChartData) => void = function (): void { return; };
+function ReactiveHost(props: {options: ChartOptions}): JSX.Element {
+    let [data, setData] = createSignal<ChartData>(createSampleData());
+    externalSetData = setData;
+    return <ChartCanvas type="line" data={data()} options={props.options} canvasId="effect-test" />;
+}
 describe("ChartCanvas lifecycle", function (): void {
     let renderLineChartSpy: ReturnType<typeof vi.spyOn>;
     let destroyChartSpy: ReturnType<typeof vi.spyOn>;
@@ -34,8 +42,17 @@ describe("ChartCanvas lifecycle", function (): void {
     });
     afterEach(function (): void {
         cleanup();
+        externalSetData = function (): void { return; };
         ChartRenderer.resetInstance();
         vi.restoreAllMocks();
+    });
+    it("renders a canvas element inside the chart container", function (): void {
+        let result = render(function () {
+            return <ChartCanvas type="line" data={createSampleData()} options={createSampleOptions()} canvasId="canvas-exists" />;
+        });
+        let canvas = result.container.querySelector("canvas");
+        expect(canvas).not.toBeNull();
+        expect(canvas && canvas.getAttribute("id")).toBe("canvas-exists");
     });
     it("calls renderLineChart on mount with the provided canvasId, data, and options", function (): void {
         let data = createSampleData();
@@ -53,5 +70,23 @@ describe("ChartCanvas lifecycle", function (): void {
         });
         cleanup();
         expect(destroyChartSpy).toHaveBeenCalledWith("lifecycle-cleanup");
+    });
+    it("re-renders the chart when data changes via createEffect", async function (): Promise<void> {
+        let options = createSampleOptions();
+        render(function () { return <ReactiveHost options={options} />; });
+        renderLineChartSpy.mockClear();
+        let newData: ChartData = {
+            "labels": ["x", "y"],
+            "datasets": [{
+                "label": "New Series",
+                "data": [10, 20],
+                "color": "#000000",
+                "borderColor": "#000000",
+                "backgroundColor": "rgba(0,0,0,0.1)"
+            }]
+        };
+        externalSetData(newData);
+        await Promise.resolve();
+        expect(renderLineChartSpy).toHaveBeenCalledWith("effect-test", newData, options);
     });
 });
