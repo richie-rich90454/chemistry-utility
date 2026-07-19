@@ -4,6 +4,10 @@ import {
 	calculateCombinedGasLaw,
 	calculateVanDerWaals,
 	calculateHalfLife,
+	IdealGasLawCalculator,
+	CombinedGasLawCalculator,
+	VanDerWaalsCalculator,
+	HalfLifeCalculator,
 } from "./gasLawCalculators.js";
 import {createContainer, createInput, createSelect, createResultDiv, getResultText} from "../test/helpers.js";
 
@@ -322,5 +326,175 @@ describe("calculateHalfLife", () => {
 		const text = getResultText("half-life-result");
 		expect(text).toContain("Error");
 		expect(text).toContain("positive");
+	});
+});
+
+describe("IdealGasLawCalculator.calculatePure", () => {
+	beforeEach(() => {
+		document.body.innerHTML = "";
+		// Legacy DOM hooks are still constructed by the calculator; supply
+		// a result element so the constructor does not throw.
+		const result = document.createElement("div");
+		result.id = "ideal-result";
+		document.body.appendChild(result);
+	});
+	afterEach(() => {
+		document.body.innerHTML = "";
+	});
+
+	it("solves for P (n=1, V=22.4, T=273, atm-L → P≈1 atm)", () => {
+		const calc = new IdealGasLawCalculator();
+		const result = calc.calculatePure({
+			"ideal-solve-for": "P",
+			"ideal-R-units": "atm-L",
+			"ideal-P": "",
+			"ideal-V": "22.4",
+			"ideal-n": "1",
+			"ideal-T": "273"
+		});
+		expect(result.value).toContain("atm");
+		const match = result.value.match(/^([\d.]+)/);
+		expect(match).not.toBeNull();
+		expect(parseFloat(match![1])).toBeCloseTo(1, 1);
+		expect(result.explanation).toContain("P=(nRT)/V");
+	});
+
+	it("returns an error result when a required input is missing", () => {
+		const calc = new IdealGasLawCalculator();
+		const result = calc.calculatePure({
+			"ideal-solve-for": "P",
+			"ideal-R-units": "atm-L",
+			"ideal-P": "",
+			"ideal-V": "",
+			"ideal-n": "1",
+			"ideal-T": "273"
+		});
+		expect(result.value).toBe("");
+		expect(result.explanation).toContain("Error");
+	});
+});
+
+describe("CombinedGasLawCalculator.calculatePure", () => {
+	beforeEach(() => {
+		document.body.innerHTML = "";
+		const result = document.createElement("div");
+		result.id = "combined-result";
+		document.body.appendChild(result);
+	});
+	afterEach(() => {
+		document.body.innerHTML = "";
+	});
+
+	it("solves for T2 (P1=1, V1=1, T1=273, P2=2, V2=1 → T2=546)", () => {
+		const calc = new CombinedGasLawCalculator();
+		const result = calc.calculatePure({
+			"combined-solve-for": "T2",
+			"combined-P1": "1",
+			"combined-V1": "1",
+			"combined-T1": "273",
+			"combined-P2": "2",
+			"combined-V2": "1",
+			"combined-T2": ""
+		});
+		expect(result.value).toContain("K");
+		const match = result.value.match(/^([\d.]+)/);
+		expect(match).not.toBeNull();
+		expect(parseFloat(match![1])).toBeCloseTo(546, 0);
+	});
+
+	it("returns an error result when a required input is missing", () => {
+		const calc = new CombinedGasLawCalculator();
+		const result = calc.calculatePure({
+			"combined-solve-for": "T2",
+			"combined-P1": "",
+			"combined-V1": "1",
+			"combined-T1": "273",
+			"combined-P2": "2",
+			"combined-V2": "1",
+			"combined-T2": ""
+		});
+		expect(result.value).toBe("");
+		expect(result.explanation).toContain("Error");
+	});
+});
+
+describe("VanDerWaalsCalculator.calculatePure", () => {
+	beforeEach(() => {
+		document.body.innerHTML = "";
+		const result = document.createElement("div");
+		result.id = "vdw-result";
+		document.body.appendChild(result);
+	});
+	afterEach(() => {
+		document.body.innerHTML = "";
+	});
+
+	it("calculates pressure with Van der Waals equation", () => {
+		const calc = new VanDerWaalsCalculator();
+		const result = calc.calculatePure({
+			"vdw-V": "22.4",
+			"vdw-n": "1",
+			"vdw-T": "273",
+			"vdw-a": "1.39",
+			"vdw-b": "0.0391"
+		});
+		expect(result.value).toContain("atm");
+		expect(result.value).toContain("P=");
+		const match = result.value.match(/P=\s*([\d.]+)/);
+		expect(match).not.toBeNull();
+		expect(parseFloat(match![1])).toBeCloseTo(0.9991, 2);
+	});
+
+	it("returns an error result when V<=0", () => {
+		const calc = new VanDerWaalsCalculator();
+		const result = calc.calculatePure({
+			"vdw-V": "0",
+			"vdw-n": "1",
+			"vdw-T": "273",
+			"vdw-a": "1.39",
+			"vdw-b": "0.0391"
+		});
+		expect(result.value).toBe("");
+		expect(result.explanation).toContain("positive");
+	});
+});
+
+describe("HalfLifeCalculator.calculatePure", () => {
+	beforeEach(() => {
+		document.body.innerHTML = "";
+		const result = document.createElement("div");
+		result.id = "half-life-result";
+		document.body.appendChild(result);
+	});
+	afterEach(() => {
+		document.body.innerHTML = "";
+	});
+
+	it("solves for remaining (N0=100, t=10, t_half=5 → Nt≈25)", () => {
+		const calc = new HalfLifeCalculator();
+		const result = calc.calculatePure({
+			"half-life-solve-for": "remaining",
+			"initial-quantity": "100",
+			"time-input": "10",
+			"half-life-input": "5",
+			"remaining-quantity": ""
+		});
+		expect(result.value).toContain("Remaining:");
+		const match = result.value.match(/Remaining:\s*([\d.]+)/);
+		expect(match).not.toBeNull();
+		expect(parseFloat(match![1])).toBeCloseTo(25, 0);
+	});
+
+	it("returns an error result when t_half<=0 (solving for remaining)", () => {
+		const calc = new HalfLifeCalculator();
+		const result = calc.calculatePure({
+			"half-life-solve-for": "remaining",
+			"initial-quantity": "100",
+			"time-input": "10",
+			"half-life-input": "0",
+			"remaining-quantity": ""
+		});
+		expect(result.value).toBe("");
+		expect(result.explanation).toContain("positive");
 	});
 });
