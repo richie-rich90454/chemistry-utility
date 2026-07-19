@@ -531,4 +531,47 @@ class MolecularViewer {
     }
 }
 
-export { MolecularViewer };
+/**
+ * Pure syntactic SMILES validator. Returns true when `smiles` is non-empty
+ * after trimming, contains only characters that are valid in SMILES
+ * notation, and has balanced parentheses and square brackets. Does NOT
+ * consult SmilesDrawer — callers use this to decide whether a render
+ * should be attempted before constructing a Drawer.
+ */
+function validateSmiles(smiles: string): boolean {
+    let trimmed: string = (smiles || "").trim();
+    if (trimmed.length === 0) {
+        return false;
+    }
+    let parenDepth: number = 0;
+    let bracketDepth: number = 0;
+    let i: number;
+    for (i = 0; i < trimmed.length; i++) {
+        let ch: string = trimmed.charAt(i);
+        if (ch === "(") {
+            parenDepth = parenDepth + 1;
+        } else if (ch === ")") {
+            parenDepth = parenDepth - 1;
+            if (parenDepth < 0) {
+                return false;
+            }
+        } else if (ch === "[") {
+            bracketDepth = bracketDepth + 1;
+        } else if (ch === "]") {
+            bracketDepth = bracketDepth - 1;
+            if (bracketDepth < 0) {
+                return false;
+            }
+        }
+    }
+    if (parenDepth !== 0 || bracketDepth !== 0) {
+        return false;
+    }
+    let validPattern: RegExp = /^[A-Za-z0-9()[\].\-=#$\/\\:+@%*]+$/;
+    if (validPattern.test(trimmed) === false) {
+        return false;
+    }
+    return true;
+}
+
+export { MolecularViewer, validateSmiles };

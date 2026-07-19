@@ -21,7 +21,7 @@ vi.mock("smiles-drawer", function () {
     };
 });
 
-import { MolecularViewer, MoleculePreset, DrawerOptions } from "./molecularViewer.js";
+import { MolecularViewer, MoleculePreset, DrawerOptions, validateSmiles } from "./molecularViewer.js";
 
 function createCanvas(id: string): HTMLCanvasElement {
     let canvas: HTMLCanvasElement = document.createElement("canvas");
@@ -518,5 +518,83 @@ describe("MolecularViewer", function () {
             let after: number = stateAfter ? stateAfter.scale : 0;
             expect(after).toBeGreaterThan(before);
         });
+    });
+});
+
+describe("validateSmiles", function () {
+    it("should return false for an empty string", function () {
+        expect(validateSmiles("")).toBe(false);
+    });
+    it("should return false for a whitespace-only string", function () {
+        expect(validateSmiles("   ")).toBe(false);
+    });
+    it("should return true for ethanol (CCO)", function () {
+        expect(validateSmiles("CCO")).toBe(true);
+    });
+    it("should return true for benzene (c1ccccc1)", function () {
+        expect(validateSmiles("c1ccccc1")).toBe(true);
+    });
+    it("should return true for aspirin", function () {
+        expect(validateSmiles("CC(=O)OC1=CC=CC=C1C(=O)O")).toBe(true);
+    });
+    it("should return true for glucose with chirality", function () {
+        expect(validateSmiles("OC[C@H]1OC(O)[C@H](O)[C@@H](O)[C@@H]1O")).toBe(true);
+    });
+    it("should return true for caffeine", function () {
+        expect(validateSmiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")).toBe(true);
+    });
+    it("should return true for a charged atom specification", function () {
+        expect(validateSmiles("[NH4+]")).toBe(true);
+    });
+    it("should return true for a directional bond", function () {
+        expect(validateSmiles("C/C=C/C")).toBe(true);
+    });
+    it("should return false for unbalanced opening parenthesis", function () {
+        expect(validateSmiles("CC(O")).toBe(false);
+    });
+    it("should return false for unbalanced closing parenthesis", function () {
+        expect(validateSmiles("CC)O")).toBe(false);
+    });
+    it("should return false for unbalanced opening bracket", function () {
+        expect(validateSmiles("[NH4")).toBe(false);
+    });
+    it("should return false for unbalanced closing bracket", function () {
+        expect(validateSmiles("NH4]")).toBe(false);
+    });
+    it("should return false for invalid characters", function () {
+        expect(validateSmiles("CC?O")).toBe(false);
+    });
+    it("should return false for spaces inside the string", function () {
+        expect(validateSmiles("CC O")).toBe(false);
+    });
+    it("should trim leading and trailing whitespace before validating", function () {
+        expect(validateSmiles("   CCO   ")).toBe(true);
+    });
+    it("should return true for a single atom (methane)", function () {
+        expect(validateSmiles("C")).toBe(true);
+    });
+    it("should return true for a ring closure with percent notation", function () {
+        expect(validateSmiles("C%12CC%12")).toBe(true);
+    });
+    it("should return true for a disconnected structure", function () {
+        expect(validateSmiles("CCO.O")).toBe(true);
+    });
+    it("should return true for an aromatic atom specification", function () {
+        expect(validateSmiles("[nH]")).toBe(true);
+    });
+    it("should return true for a complex molecule with multiple branches", function () {
+        expect(validateSmiles("CC(=O)OC1=CC=CC=C1C(=O)O")).toBe(true);
+    });
+    it("should return false for a string with only invalid characters", function () {
+        expect(validateSmiles("???")).toBe(false);
+    });
+    it("should return false for a tab character inside the string", function () {
+        expect(validateSmiles("CC\tO")).toBe(false);
+    });
+    it("should return true for a SMILES with a triple bond", function () {
+        expect(validateSmiles("C#N")).toBe(true);
+    });
+    it("should return true for a SMILES with a backslash bond", function () {
+        expect(validateSmiles("C\\C=C\\C")).toBe(true);
     });
 });
