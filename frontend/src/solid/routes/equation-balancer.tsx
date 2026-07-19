@@ -14,6 +14,35 @@ import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import styles from "./equation-balancer.module.css";
+interface EquationTerm {
+    coefficient: string;
+    formula: string;
+}
+function parseSide(side: string): EquationTerm[] {
+    let terms = side.split(" + ");
+    let result: EquationTerm[] = [];
+    for (let i = 0; i < terms.length; i++) {
+        let term = terms[i];
+        let match = term.match(/^(\d+)(.*)$/);
+        if (match !== null) {
+            result.push({coefficient: match[1], formula: match[2]});
+        }
+        else {
+            result.push({coefficient: "", formula: term});
+        }
+    }
+    return result;
+}
+function parseBalancedEquation(equation: string): {reactants: EquationTerm[], products: EquationTerm[]} {
+    let sides = equation.split(" -> ");
+    if (sides.length !== 2) {
+        sides = equation.split(" = ");
+    }
+    if (sides.length !== 2) {
+        return {reactants: [{coefficient: "", formula: equation}], products: []};
+    }
+    return {reactants: parseSide(sides[0]), products: parseSide(sides[1])};
+}
 function EquationBalancer(): JSX.Element {
     let state = useEquationBalancer();
     let equation = state.equation;
@@ -44,6 +73,34 @@ function EquationBalancer(): JSX.Element {
         let target = e.currentTarget as HTMLSelectElement;
         setMedium(target.value as "acidic" | "basic");
     }
+    function renderTerm(term: EquationTerm): JSX.Element {
+        return (
+            <span class={styles.term}>
+                {term.coefficient !== "" && <span class={styles.coefficient}>{term.coefficient}</span>}
+                {term.formula}
+            </span>
+        );
+    }
+    function renderEquation(eq: string): JSX.Element {
+        let parsed = parseBalancedEquation(eq);
+        let parts: JSX.Element[] = [];
+        for (let i = 0; i < parsed.reactants.length; i++) {
+            if (i > 0) {
+                parts.push(<span class={styles.operator}>{" + "}</span>);
+            }
+            parts.push(renderTerm(parsed.reactants[i]));
+        }
+        if (parsed.products.length > 0) {
+            parts.push(<span class={styles.operator}>{" → "}</span>);
+            for (let i = 0; i < parsed.products.length; i++) {
+                if (i > 0) {
+                    parts.push(<span class={styles.operator}>{" + "}</span>);
+                }
+                parts.push(renderTerm(parsed.products[i]));
+            }
+        }
+        return <div class={styles.equation}>{parts}</div>;
+    }
     function renderResult(): JSX.Element {
         let res = result();
         if (res === null) {
@@ -54,7 +111,7 @@ function EquationBalancer(): JSX.Element {
         return (
             <div class={styles.result}>
                 <p><strong>Balanced Equation:</strong></p>
-                <div class={styles.equation}>{res.equation}</div>
+                {renderEquation(res.equation)}
                 <details class={styles.explanationDetails}>
                     <summary>Show Explanation</summary>
                     <div class={styles.explanationBody}>
