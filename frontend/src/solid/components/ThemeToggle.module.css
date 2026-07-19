@@ -1,0 +1,33 @@
+.themeToggle{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--md-shape-full);
+    border: none;
+    background: transparent;
+    color: var(--md-on-surface-variant);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.themeToggle:hover{
+    background: var(--md-state-hover);
+}
+.themeToggle:active{
+    background: var(--md-state-pressed);
+}
+.themeToggle:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.themeToggle:focus:not(:focus-visible){
+    outline: none;
+}
+.themeToggle svg{
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
