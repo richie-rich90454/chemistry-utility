@@ -496,4 +496,215 @@ describe("StoichiometryCalculator.calculatePure", () => {
         expect(result.explanation).toContain("Error:");
         expect(result.explanation).toContain("Invalid moles input");
     });
+
+    it("computes reactant-from-product: 4 mol H2O -> 4 mol H2", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "reactant-from-product",
+            "product-select": "H2O",
+            "product-moles": "4",
+            "reactant-select": "H2"
+        });
+        // molesReactant = (4/2)*2 = 4.00
+        expect(result.value).toContain("H2");
+        expect(result.value).toContain("4.00");
+        expect(result.metadata).toHaveProperty("molesReactant");
+        expect(result.metadata).toHaveProperty("calculationType", "reactant-from-product");
+    });
+
+    it("returns an error result when product moles is invalid (reactant-from-product)", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "reactant-from-product",
+            "product-select": "H2O",
+            "product-moles": "-1",
+            "reactant-select": "H2"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid moles input");
+    });
+
+    it("computes limiting-reactant: 2 mol H2 + 2 mol O2 -> H2 limiting, 2 mol H2O", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "limiting-reactant",
+            "moles-H2": "2",
+            "moles-O2": "2",
+            "product-select": "H2O"
+        });
+        // H2 ratio = 2/2 = 1, O2 ratio = 2/1 = 2 -> H2 limiting
+        // molesProduct = 1 * 2 = 2.00
+        expect(result.value).toContain("Limiting reactant: H2");
+        expect(result.value).toContain("2.00");
+        expect(result.metadata).toHaveProperty("limitingReactant", "H2");
+        expect(result.metadata).toHaveProperty("calculationType", "limiting-reactant");
+    });
+
+    it("returns an error result when a reactant moles is invalid (limiting-reactant)", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "limiting-reactant",
+            "moles-H2": "0",
+            "moles-O2": "2",
+            "product-select": "H2O"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid moles for H2");
+    });
+
+    it("returns an error result for invalid calculation type", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "invalid",
+            "reactant-select": "H2",
+            "reactant-moles": "2",
+            "product-select": "H2O"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid calculation type");
+    });
+
+    it("returns an error result when selected reactant is not in equation (product-from-reactant)", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "product-from-reactant",
+            "reactant-select": "Xx",
+            "reactant-moles": "2",
+            "product-select": "H2O"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Selected compound not found");
+    });
+
+    it("returns an error result when selected product is not in equation (reactant-from-product)", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "reactant-from-product",
+            "product-select": "Xx",
+            "product-moles": "4",
+            "reactant-select": "H2"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Selected compound not found");
+    });
+
+    it("returns an error result when selected product is not in equation (limiting-reactant)", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "limiting-reactant",
+            "moles-H2": "2",
+            "moles-O2": "2",
+            "product-select": "Xx"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Selected product not found");
+    });
+
+    it("exercises ?? fallback when equation key is missing", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "calculation-type": "product-from-reactant"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+
+    it("exercises ?? fallback when calculation-type key is missing", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid calculation type");
+    });
+
+    it("exercises ?? fallback for reactant-select/reactant-moles/product-select in product-from-reactant", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "product-from-reactant"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid moles input");
+    });
+
+    it("exercises ?? fallback for product-select/product-moles/reactant-select in reactant-from-product", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "reactant-from-product"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid moles input");
+    });
+
+    it("exercises ?? fallback for moles-<id> keys in limiting-reactant", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "limiting-reactant",
+            "product-select": "H2O"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid moles for H2");
+    });
+
+    it("exercises ?? fallback for product-select in limiting-reactant after valid moles", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "limiting-reactant",
+            "moles-H2": "2",
+            "moles-O2": "2"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Selected product not found");
+    });
+
+    it("returns an error result when selected product is not in equation (product-from-reactant)", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "product-from-reactant",
+            "reactant-select": "H2",
+            "reactant-moles": "2",
+            "product-select": "Xx"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Selected compound not found");
+    });
+
+    it("returns an error result when selected reactant is not in equation (reactant-from-product)", () => {
+        const calc = new StoichiometryCalculator();
+        const result = calc.calculatePure({
+            "equation": "2H2 + O2 -> 2H2O",
+            "calculation-type": "reactant-from-product",
+            "product-select": "H2O",
+            "product-moles": "4",
+            "reactant-select": "Xx"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Selected compound not found");
+    });
 });
