@@ -1,0 +1,71 @@
+import {render, fireEvent, cleanup} from "@solidjs/testing-library";
+import {describe, it, expect, afterEach} from "vitest";
+import {BufferSolution} from "./buffer";
+afterEach(function (): void {
+    cleanup();
+});
+describe("BufferSolution route", function (): void {
+    it("renders the card with pKa, HA, Aminus, pH, ratio inputs and solve-for select", function (): void {
+        let result = render(function () { return <BufferSolution />; });
+        let pKa = result.getByLabelText("pKa value") as HTMLInputElement;
+        let ha = result.getByLabelText("Acid concentration") as HTMLInputElement;
+        let aminus = result.getByLabelText("Conjugate base concentration") as HTMLInputElement;
+        let pH = result.getByLabelText("pH value") as HTMLInputElement;
+        let ratio = result.getByLabelText("Ratio value") as HTMLInputElement;
+        expect(pKa).toBeTruthy();
+        expect(ha).toBeTruthy();
+        expect(aminus).toBeTruthy();
+        expect(pH).toBeTruthy();
+        expect(ratio).toBeTruthy();
+        let solveFor = result.getByLabelText("Select buffer parameter to solve for") as HTMLSelectElement;
+        expect(solveFor).toBeTruthy();
+        expect(solveFor.value).toBe("pH");
+        expect(result.getByText("Calculate")).toBeTruthy();
+        expect(result.getByText("Clear")).toBeTruthy();
+    });
+    it("solves for pH given pKa=4.74, HA=1, A-=1 and displays 4.7400", async function (): Promise<void> {
+        let result = render(function () { return <BufferSolution />; });
+        let pKa = result.getByLabelText("pKa value") as HTMLInputElement;
+        pKa.value = "4.74";
+        fireEvent.input(pKa);
+        let ha = result.getByLabelText("Acid concentration") as HTMLInputElement;
+        ha.value = "1";
+        fireEvent.input(ha);
+        let aminus = result.getByLabelText("Conjugate base concentration") as HTMLInputElement;
+        aminus.value = "1";
+        fireEvent.input(aminus);
+        fireEvent.click(result.getByText("Calculate"));
+        let text = await result.findByText(/4\.7400/);
+        expect(text).toBeTruthy();
+    });
+    it("shows an error when solving for pH without pKa", async function (): Promise<void> {
+        let result = render(function () { return <BufferSolution />; });
+        let ha = result.getByLabelText("Acid concentration") as HTMLInputElement;
+        ha.value = "1";
+        fireEvent.input(ha);
+        let aminus = result.getByLabelText("Conjugate base concentration") as HTMLInputElement;
+        aminus.value = "1";
+        fireEvent.input(aminus);
+        fireEvent.click(result.getByText("Calculate"));
+        let errorText = await result.findByText(/Error/);
+        expect(errorText).toBeTruthy();
+    });
+    it("clears the result when the Clear button is clicked", async function (): Promise<void> {
+        let result = render(function () { return <BufferSolution />; });
+        let pKa = result.getByLabelText("pKa value") as HTMLInputElement;
+        pKa.value = "4.74";
+        fireEvent.input(pKa);
+        let ha = result.getByLabelText("Acid concentration") as HTMLInputElement;
+        ha.value = "1";
+        fireEvent.input(ha);
+        let aminus = result.getByLabelText("Conjugate base concentration") as HTMLInputElement;
+        aminus.value = "1";
+        fireEvent.input(aminus);
+        fireEvent.click(result.getByText("Calculate"));
+        let text = await result.findByText(/4\.7400/);
+        expect(text).toBeTruthy();
+        fireEvent.click(result.getByText("Clear"));
+        expect(pKa.value).toBe("");
+        expect(result.container.textContent).not.toMatch(/4\.7400/);
+    });
+});
