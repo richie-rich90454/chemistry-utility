@@ -5,6 +5,19 @@ import { ExportManager } from "./exportManager.js";
 import { PluginManager } from "./pluginManager.js";
 
 /**
+ * Result returned by the DOM-free {@link Calculator.calculatePure} entry
+ * point. The pure API keeps the legacy DOM-coupled {@link Calculator.calculate}
+ * path intact while exposing a structured return value for Solid components
+ * and other consumers that do not (and should not) read from the DOM.
+ */
+export interface CalculatorResult {
+	value: string;
+	explanation?: string;
+	chartData?: unknown;
+	metadata?: Record<string, unknown>;
+}
+
+/**
  * Shape of the payload passed through the "beforeCalculation" hook.
  */
 interface BeforeCalculationPayload {
