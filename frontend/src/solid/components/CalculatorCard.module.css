@@ -1,0 +1,52 @@
+.card{
+    background: var(--md-surface-container-low);
+    border-radius: var(--md-shape-lg);
+    border: 1px solid var(--md-outline-variant);
+    margin-bottom: var(--md-space-6);
+    overflow: hidden;
+    box-shadow: var(--md-elevation-1);
+    transition: box-shadow var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
+                border-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
+                transform var(--md-motion-duration-medium2) var(--md-motion-easing-standard);
+}
+.card:hover{
+    box-shadow: var(--md-elevation-2);
+    border-color: var(--md-outline);
+}
+.card h2{
+    font-size: clamp(1.05rem, 1rem + 0.3vw, 1.3rem);
+    font-weight: 600;
+    padding: var(--md-space-5) var(--md-space-5) var(--md-space-3);
+    margin-bottom: 0;
+    color: var(--md-on-surface);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-3);
+}
+.card h2::before{
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 24px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--md-primary), var(--md-tertiary));
+    flex-shrink: 0;
+}
+.card p{
+    padding: 0 var(--md-space-5);
+    margin-bottom: var(--md-space-3);
+    color: var(--md-on-surface-variant);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.toolContainer{
+    /* Wrapper div for tool description — no base styles in legacy */
+}
+.toolDescription{
+    padding: 0 var(--md-space-5);
+    margin-bottom: var(--md-space-3);
+    color: var(--md-on-surface-variant);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
