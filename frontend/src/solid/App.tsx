@@ -23,6 +23,7 @@ import {Electrochemistry} from "./routes/electrochemistry";
 import {Thermodynamics} from "./routes/thermodynamics";
 import {Kinetics} from "./routes/kinetics";
 import {QuantumAtomic} from "./routes/quantum-atomic";
+import {Stoichiometry} from "./routes/stoichiometry";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -169,6 +170,9 @@ function App(): JSX.Element {
         if (window.location.hash === "#heisenberg-calc") {
             window.location.replace("/quantum-atomic");
         }
+        if (window.location.hash === "#stoichiometry") {
+            window.location.replace("/stoichiometry");
+        }
     });
     return (
         <Router>
@@ -195,6 +199,7 @@ function App(): JSX.Element {
             <Route path="/thermodynamics" component={Thermodynamics} />
             <Route path="/kinetics" component={Kinetics} />
             <Route path="/quantum-atomic" component={QuantumAtomic} />
+            <Route path="/stoichiometry" component={Stoichiometry} />
         </Router>
     );
 }
