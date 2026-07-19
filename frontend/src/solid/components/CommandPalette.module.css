@@ -1,0 +1,102 @@
+.paletteBackdrop{
+    position: fixed;
+    inset: 0;
+    background: var(--md-scrim);
+    z-index: 100;
+    opacity: 1;
+    visibility: visible;
+}
+.commandPalette{
+    display: flex;
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 480px;
+    max-width: calc(100vw - 32px);
+    max-height: 60vh;
+    background: var(--md-surface-container-high);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-xl);
+    box-shadow: var(--md-elevation-5);
+    z-index: 101;
+    overflow: hidden;
+    flex-direction: column;
+}
+.paletteInputWrap{
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-2);
+    padding: var(--md-space-3) var(--md-space-4);
+    border-bottom: 1px solid var(--md-outline-variant);
+}
+.paletteSearchIcon{
+    width: 20px;
+    height: 20px;
+    color: var(--md-on-surface-variant);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+}
+.paletteInputWrap input{
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+    color: var(--md-on-surface);
+    outline: none;
+    padding: 0;
+    min-height: 32px;
+    min-width: 0;
+}
+.paletteInputWrap input::placeholder{
+    color: var(--md-on-surface-variant);
+}
+.paletteList{
+    overflow-y: auto;
+    padding: var(--md-space-1);
+    max-height: calc(60vh - 56px);
+    list-style: none;
+    margin: 0;
+}
+.paletteList li{
+    list-style: none;
+}
+.paletteItem{
+    display: flex;
+    align-items: center;
+    gap: var(--md-space-3);
+    padding: var(--md-space-2) var(--md-space-3);
+    border-radius: var(--md-shape-md);
+    cursor: pointer;
+    color: var(--md-on-surface-variant);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard),
+                color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+.paletteItem:hover, .paletteItem.selected{
+    background: var(--md-secondary-container);
+    color: var(--md-on-secondary-container);
+}
+.paletteItem:active{
+    background: var(--md-state-pressed);
+}
+.paletteItem:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.paletteItemName{
+    flex: 1;
+}
+.paletteItemCategory{
+    font-size: 0.6875rem;
+    color: var(--md-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
