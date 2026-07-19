@@ -114,3 +114,44 @@ describe("CalculatorFactory", () => {
         }
     });
 });
+
+describe("CalculatorFactory - calculatePure support", () => {
+    let factory: CalculatorFactory;
+
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        factory = new CalculatorFactory([]);
+    });
+
+    it("creates calculators that expose calculatePure for the 'dilution' id", () => {
+        const calc = factory.create("dilution");
+        expect(calc).toBeDefined();
+        expect(typeof calc!.calculatePure).toBe("function");
+    });
+
+    it("creates calculators that expose calculatePure for the 'ideal-gas' id", () => {
+        const calc = factory.create("ideal-gas");
+        expect(calc).toBeDefined();
+        expect(typeof calc!.calculatePure).toBe("function");
+    });
+
+    it("creates calculators that expose calculatePure for the 'bond-type' id", () => {
+        const calc = factory.create("bond-type");
+        expect(calc).toBeDefined();
+        expect(typeof calc!.calculatePure).toBe("function");
+    });
+
+    it("creates calculators that expose calculatePure for every known id", () => {
+        const ids = [
+            "dilution", "mass-percent", "mixing",
+            "ideal-gas", "combined-gas", "vdw", "half-life",
+            "cell-potential", "nernst", "electrolysis",
+            "bond-type", "stoichiometry",
+        ];
+        for (const id of ids) {
+            const calc = factory.create(id);
+            expect(calc).toBeDefined();
+            expect(typeof calc!.calculatePure).toBe("function");
+        }
+    });
+});
