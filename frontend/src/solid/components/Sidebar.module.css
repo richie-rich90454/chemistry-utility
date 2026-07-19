@@ -11,6 +11,9 @@
     overflow-x: hidden;
     z-index: 10;
     flex-shrink: 0;
+    transition: width var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate),
+                background-color 300ms ease,
+                color 300ms ease;
 }
 .sidebarHeader{
     padding: var(--md-space-4) var(--md-space-4) var(--md-space-2);
@@ -23,6 +26,18 @@
     align-items: center;
     gap: var(--md-space-3);
 }
+.sidebarHeader h1{
+    font-size: clamp(1.05rem, 1rem + 0.2vw, 1.25rem);
+    font-weight: 600;
+    color: var(--md-on-surface);
+    margin: 0;
+    letter-spacing: -0.01em;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 .logoIcon{
     width: 40px;
     height: 40px;
@@ -33,6 +48,11 @@
     justify-content: center;
     flex-shrink: 0;
     box-shadow: var(--md-elevation-1);
+}
+.logoIcon svg{
+    color: var(--md-on-primary);
+    width: 24px;
+    height: 24px;
 }
 .sidebarToggle{
     display: inline-flex;
@@ -45,10 +65,57 @@
     background: transparent;
     color: var(--md-on-surface-variant);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.sidebarToggle:hover{
+    background: var(--md-state-hover);
+    color: var(--md-on-surface);
+}
+.sidebarToggle:active{
+    background: var(--md-state-pressed);
+}
+.sidebarToggle:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.sidebarToggle svg{
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
 }
 .sidebarSearch{
     padding: var(--md-space-3) var(--md-space-4) var(--md-space-2);
     position: relative;
+}
+.sidebarSearch input{
+    width: 100%;
+    padding: var(--md-space-3) var(--md-space-4) var(--md-space-3) 36px;
+    min-height: 42px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: var(--md-on-surface);
+    border-radius: var(--md-shape-full);
+    background: var(--md-surface-container-high);
+    border: 1px solid transparent;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.sidebarSearch input::placeholder{
+    color: var(--md-on-surface-variant);
+}
+.sidebarSearch input:hover{
+    background: var(--md-surface-container-highest);
+    border-color: var(--md-outline-variant);
+}
+.sidebarSearch input:focus{
+    background: var(--md-surface-container-lowest);
+    border-color: var(--md-primary);
+    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+    outline: none;
+}
+.sidebarSearch input:focus-visible{
+    outline: none;
 }
 .searchIcon{
     position: absolute;
@@ -59,6 +126,10 @@
     pointer-events: none;
     width: 16px;
     height: 16px;
+    transition: color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.sidebarSearch:focus-within .searchIcon{
+    color: var(--md-primary);
 }
 .sidebarWorkspaces{
     padding: var(--md-space-2) var(--md-space-4);
@@ -105,21 +176,45 @@
     border-radius: var(--md-shape-full);
     white-space: nowrap;
     position: relative;
+    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard),
+                color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
 }
-.navLink:hover{
+.navLink::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--md-shape-full);
+    background: transparent;
+    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    z-index: -1;
+}
+.navLink:hover::before{
     background: var(--md-state-hover);
-    color: var(--md-on-surface);
 }
-.navLink.active{
+.navLink:active::before{
+    background: var(--md-state-pressed);
+}
+.navLink.active::before{
     background: var(--md-primary-container);
-    color: var(--md-on-primary-container);
-    font-weight: 600;
 }
 .navIcon{
     width: 24px;
     height: 24px;
     flex-shrink: 0;
     opacity: 0.7;
+}
+.navLink:hover{
+    color: var(--md-on-surface);
+}
+.navLink:hover .navIcon{
+    opacity: 1;
+}
+.navLink.active{
+    color: var(--md-on-primary-container);
+    font-weight: 600;
+}
+.navLink.active .navIcon{
+    opacity: 1;
 }
 .navLabel{
     flex: 1;
@@ -133,10 +228,14 @@
     font-size: 0.6875rem;
     color: var(--md-on-surface-variant);
     text-align: center;
+    position: relative;
 }
 .sidebarFooter a{
     color: var(--md-primary);
     text-decoration: none;
+}
+.sidebarFooter a:hover{
+    text-decoration: underline;
 }
 .sidebarFooterActions{
     display: flex;
@@ -158,9 +257,21 @@
     font-weight: 500;
     font-family: inherit;
     cursor: pointer;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
 }
 .sidebarFooterButton:hover{
     background: var(--md-state-hover);
     border-color: var(--md-primary);
     color: var(--md-primary);
+}
+.sidebarFooterButton:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.sidebarFooterButton:active{
+    background: var(--md-state-pressed);
+}
+.sidebarFooterButton svg{
+    pointer-events: none;
+    flex-shrink: 0;
 }
