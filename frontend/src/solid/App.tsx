@@ -21,6 +21,7 @@ import {NuclearChemistry} from "./routes/nuclear";
 import {GasLaws} from "./routes/gas-laws";
 import {Electrochemistry} from "./routes/electrochemistry";
 import {Thermodynamics} from "./routes/thermodynamics";
+import {Kinetics} from "./routes/kinetics";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -128,6 +129,24 @@ function App(): JSX.Element {
         if (window.location.hash === "#born-haber") {
             window.location.replace("/thermodynamics");
         }
+        if (window.location.hash === "#kinetics") {
+            window.location.replace("/kinetics");
+        }
+        if (window.location.hash === "#arrhenius-calc") {
+            window.location.replace("/kinetics");
+        }
+        if (window.location.hash === "#rate-law-calc") {
+            window.location.replace("/kinetics");
+        }
+        if (window.location.hash === "#integrated-rate-law-calc") {
+            window.location.replace("/kinetics");
+        }
+        if (window.location.hash === "#reaction-order-calc") {
+            window.location.replace("/kinetics");
+        }
+        if (window.location.hash === "#collision-theory-calc") {
+            window.location.replace("/kinetics");
+        }
     });
     return (
         <Router>
@@ -152,6 +171,7 @@ function App(): JSX.Element {
             <Route path="/gas-laws" component={GasLaws} />
             <Route path="/electrochemistry" component={Electrochemistry} />
             <Route path="/thermodynamics" component={Thermodynamics} />
+            <Route path="/kinetics" component={Kinetics} />
         </Router>
     );
 }
