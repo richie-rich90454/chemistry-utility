@@ -27,6 +27,18 @@ const CATEGORY_CLASS_MAP: Record<string, string> = {
     "lanthanide": styles.catLanthanide,
     "actinide": styles.catActinide
 };
+const CATEGORIES: {label: string; type: string; cls: string}[] = [
+    {label: "Alkali metal", type: "alkali metal", cls: styles.catAlkaliMetal},
+    {label: "Alkaline earth", type: "alkaline earth metal", cls: styles.catAlkalineEarth},
+    {label: "Transition metal", type: "transition metal", cls: styles.catTransitionMetal},
+    {label: "Post-transition", type: "post-transition metal", cls: styles.catPostTransition},
+    {label: "Metalloid", type: "metalloid", cls: styles.catMetalloid},
+    {label: "Nonmetal", type: "non-metal", cls: styles.catNonmetal},
+    {label: "Halogen", type: "halogen", cls: styles.catHalogen},
+    {label: "Noble gas", type: "noble gas", cls: styles.catNobleGas},
+    {label: "Lanthanide", type: "lanthanide", cls: styles.catLanthanide},
+    {label: "Actinide", type: "actinide", cls: styles.catActinide}
+];
 function getCategoryClass(type: string): string {
     let cls = CATEGORY_CLASS_MAP[type];
     if (cls === undefined) {
@@ -80,6 +92,7 @@ function PeriodicTable(): JSX.Element {
     let [loading, setLoading] = createSignal(true);
     let [loadError, setLoadError] = createSignal("");
     let [selected, setSelected] = createSignal<ChemicalElement | null>(null);
+    let [activeCategory, setActiveCategory] = createSignal<string | null>(null);
     onMount(function (): void {
         loadElements();
     });
@@ -124,17 +137,36 @@ function PeriodicTable(): JSX.Element {
         return "";
     }
     function getCellClass(element: ChemicalElement): string {
-        return styles.cell + " " + getCategoryClass(element.type);
+        let cls = styles.cell + " " + getCategoryClass(element.type);
+        let active = activeCategory();
+        if (active !== null && element.type !== active) {
+            cls = cls + " " + styles.cellDimmed;
+        }
+        return cls;
     }
     function getCellStyle(element: ChemicalElement): string {
         let pos = computeCellPosition(element);
         return "grid-column: " + pos.col + "; grid-row: " + pos.row + ";";
+    }
+    function getLegendClass(type: string): string {
+        if (activeCategory() === type) {
+            return styles.legendItem + " " + styles.legendItemActive;
+        }
+        return styles.legendItem;
     }
     function handleSelectElement(element: ChemicalElement): void {
         setSelected(element);
     }
     function handleCloseDetail(): void {
         setSelected(null);
+    }
+    function handleToggleCategory(type: string): void {
+        if (activeCategory() === type) {
+            setActiveCategory(null);
+        }
+        else {
+            setActiveCategory(type);
+        }
     }
     function renderDetailPanel(): JSX.Element {
         let el = selected();
@@ -188,6 +220,23 @@ function PeriodicTable(): JSX.Element {
                 {getStatusText() && (
                     <div class={loadError() !== "" ? styles.status + " " + styles.statusError : styles.status}>
                         <p>{getStatusText()}</p>
+                    </div>
+                )}
+                {!loading() && loadError() === "" && (
+                    <div class={styles.legend} role="group" aria-label="Filter elements by category">
+                        <For each={CATEGORIES}>
+                            {(cat) => (
+                                <button
+                                    type="button"
+                                    class={getLegendClass(cat.type)}
+                                    onClick={function () { handleToggleCategory(cat.type); }}
+                                    aria-pressed={activeCategory() === cat.type}
+                                >
+                                    <span class={styles.legendSwatch + " " + cat.cls}></span>
+                                    <span>{cat.label}</span>
+                                </button>
+                            )}
+                        </For>
                     </div>
                 )}
                 {!loading() && loadError() === "" && (
