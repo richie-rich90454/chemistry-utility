@@ -3,12 +3,12 @@ import path from "path";
 import solid from "vite-plugin-solid";
 
 export default defineConfig({
-    plugins: [solid()],
+    plugins: [solid({hot: false})],
     test: {
         globals: true,
         environment: "jsdom",
         setupFiles: ["./src/test/setup.ts"],
-        include: ["src/**/*.test.ts"],
+        include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
         coverage: {
             provider: "v8",
             reporter: ["text", "html", "lcov"],
