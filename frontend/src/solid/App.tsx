@@ -28,6 +28,7 @@ import {BondType} from "./routes/bond-type";
 import {MolecularViewerRoute} from "./routes/molecular-viewer";
 import {CompoundSearch} from "./routes/compound-search";
 import {BatchCalc} from "./routes/batch-calc";
+import {Dashboard} from "./routes/dashboard";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -189,6 +190,15 @@ function App(): JSX.Element {
         if (window.location.hash === "#batch-calc") {
             window.location.replace("/batch-calc");
         }
+        if (window.location.hash === "#dashboard-view") {
+            window.location.replace("/dashboard");
+        }
+        if (window.location.hash === "#dashboard") {
+            window.location.replace("/dashboard");
+        }
+        if (window.location.hash === "#home") {
+            window.location.replace("/dashboard");
+        }
     });
     return (
         <Router>
@@ -220,6 +230,7 @@ function App(): JSX.Element {
             <Route path="/molecular-viewer" component={MolecularViewerRoute} />
             <Route path="/compound-search" component={CompoundSearch} />
             <Route path="/batch-calc" component={BatchCalc} />
+            <Route path="/dashboard" component={Dashboard} />
         </Router>
     );
 }
