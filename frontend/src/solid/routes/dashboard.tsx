@@ -9,14 +9,18 @@
  * and favorites signals from getLastCalculations. The manager's render*
  * methods are no-ops when its container is null (we never call
  * init/render), so calling loadDashboardData is safe and only populates
- * the data cache. The weekly activity chart is wired in a later subtask.
+ * the data cache. The weekly activity chart is rendered via the
+ * ChartCanvas Solid wrapper (bar type) using ActivityPoint data from the
+ * store, mirroring the legacy ChartRenderer.renderActivityChart output.
  * No Playwright screenshot test is added per task spec; parity is
  * verified by manual diff of the rendered DOM against the legacy markup.
  */
 import type {JSX} from "solid-js";
 import type {CalculationRecord} from "../../modules/dashboardManager.js";
-import {onMount, For, Show} from "solid-js";
+import type {ChartData, ChartOptions} from "../../modules/chartRenderer.js";
+import {onMount, createMemo, For, Show} from "solid-js";
 import {useDashboard} from "../stores/dashboard";
+import {ChartCanvas} from "../components/third-party/ChartCanvas";
 import styles from "./dashboard.module.css";
 function formatDate(iso: string): string {
     let d: Date = new Date(iso);
@@ -34,6 +38,34 @@ function Dashboard(): JSX.Element {
     let store = useDashboard();
     onMount(function (): void {
         void store.refresh();
+    });
+    let activityData = createMemo(function (): ChartData {
+        let points = store.activity();
+        let labels: string[] = [];
+        let values: number[] = [];
+        let i: number;
+        for (i = 0; i < points.length; i++) {
+            labels.push(points[i].day);
+            values.push(points[i].count);
+        }
+        return {
+            "labels": labels,
+            "datasets": [{
+                "label": "Calculations",
+                "data": values,
+                "color": "#0d652d",
+                "borderColor": "#0d652d",
+                "backgroundColor": "rgba(13,101,45,0.6)"
+            }]
+        };
+    });
+    let activityOptions = createMemo(function (): ChartOptions {
+        return {
+            "title": "Weekly Activity",
+            "xLabel": "Day",
+            "yLabel": "Calculations",
+            "showLegend": false
+        };
     });
     function renderStatCards(): JSX.Element {
         let stats = store.stats();
@@ -81,7 +113,9 @@ function Dashboard(): JSX.Element {
         return (
             <div class={styles.section}>
                 <h3 class={styles.sectionTitle}>Weekly Activity</h3>
-                <p class={styles.empty}>Weekly activity chart will be available here.</p>
+                <Show when={store.activity().length > 0} fallback={<p class={styles.empty}>Weekly activity chart unavailable.</p>}>
+                    <ChartCanvas type="bar" data={activityData()} options={activityOptions()} canvasId="dashboard-activity-chart" />
+                </Show>
             </div>
         );
     }
