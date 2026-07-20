@@ -1,12 +1,71 @@
 import type {JSX} from "solid-js";
-
+import {createMemo, For} from "solid-js";
+import {A} from "@solidjs/router";
+import type {CalculatorInfo} from "../../modules/navigationManager.js";
+import {NavigationManager} from "../../modules/navigationManager.js";
+import {calculatorIdToRoute} from "../components/Sidebar";
+import styles from "./HomePage.module.css";
+interface GroupedCalculators {
+    category: string;
+    items: CalculatorInfo[];
+}
+function groupByCategory(calculators: CalculatorInfo[]): GroupedCalculators[] {
+    let groups: GroupedCalculators[] = [];
+    let i: number;
+    for (i = 0; i < calculators.length; i++) {
+        let calc = calculators[i];
+        let last: GroupedCalculators | null;
+        if (groups.length > 0) {
+            last = groups[groups.length - 1];
+        }
+        else {
+            last = null;
+        }
+        if (last !== null && last.category === calc.category) {
+            last.items.push(calc);
+        }
+        else {
+            groups.push({category: calc.category, items: [calc]});
+        }
+    }
+    return groups;
+}
 function HomePage(): JSX.Element {
+    let calculators = createMemo(function (): CalculatorInfo[] {
+        let nav = NavigationManager.getInstance();
+        return nav.getCalculators();
+    });
+    let groups = createMemo(function (): GroupedCalculators[] {
+        return groupByCategory(calculators());
+    });
     return (
-        <div>
-            <h1>Chemistry Utility</h1>
-            <p>Solid app shell placeholder</p>
-        </div>
+        <section class={styles.home} aria-label="Chemistry Utility home">
+            <div class={styles.container}>
+                <h1 class={styles.header}>Chemistry Utility</h1>
+                <p class={styles.subtitle}>A collection of chemistry calculators, reference tools, and data lookups. Pick a calculator below or use the sidebar to navigate.</p>
+                <div class={styles.intro}>
+                    <h2 class={styles.introTitle}>Getting Started</h2>
+                    <p class={styles.introText}>Use the Molar Mass calculator for any formula, the Equation Balancer to balance reactions, the Periodic Table for element data, or the Compound Database Search to look up substances by name, formula, CAS, or SMILES. The Batch Calculator can process many inputs at once from a CSV file.</p>
+                </div>
+                <For each={groups()}>
+                    {(group) => (
+                        <div class={styles.group}>
+                            <h2 class={styles.groupTitle}>{group.category}</h2>
+                            <div class={styles.grid}>
+                                <For each={group.items}>
+                                    {(calc) => (
+                                        <A href={calculatorIdToRoute(calc.id)} class={styles.card}>
+                                            <span class={styles.cardName}>{calc.name}</span>
+                                            <span class={styles.cardDescription}>{calc.description}</span>
+                                        </A>
+                                    )}
+                                </For>
+                            </div>
+                        </div>
+                    )}
+                </For>
+            </div>
+        </section>
     );
 }
-
 export {HomePage};
