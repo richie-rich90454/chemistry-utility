@@ -3,57 +3,21 @@
  * legacy #dashboard-view section in frontend/index.html. Intentional diff:
  * the legacy DashboardManager imperatively built DOM nodes for stats,
  * recent, activity, and favorites into a container it owned; this route
- * owns the DOM via JSX and calls the manager only for its read APIs
- * (loadDashboardData populates lastCalculations; getLastCalculations
- * returns the cached array). The manager's render* methods are no-ops
- * when its container is null (we never call init/render), so calling
- * loadDashboardData is safe and only populates the data cache. The
- * weekly activity chart is wired in a later subtask. No Playwright
- * screenshot test is added per task spec; parity is verified by manual
- * diff of the rendered DOM against the legacy markup.
+ * owns the DOM via JSX and reads reactive state from the useDashboard
+ * store wrapper, which calls DashboardManager.loadDashboardData to
+ * populate lastCalculations and then derives stats, recent, activity,
+ * and favorites signals from getLastCalculations. The manager's render*
+ * methods are no-ops when its container is null (we never call
+ * init/render), so calling loadDashboardData is safe and only populates
+ * the data cache. The weekly activity chart is wired in a later subtask.
+ * No Playwright screenshot test is added per task spec; parity is
+ * verified by manual diff of the rendered DOM against the legacy markup.
  */
 import type {JSX} from "solid-js";
-import type {CalculationRecord, DashboardStats} from "../../modules/dashboardManager.js";
-import {createSignal, onMount, For, Show} from "solid-js";
-import {DashboardManager} from "../../modules/dashboardManager.js";
+import type {CalculationRecord} from "../../modules/dashboardManager.js";
+import {onMount, For, Show} from "solid-js";
+import {useDashboard} from "../stores/dashboard";
 import styles from "./dashboard.module.css";
-function computeStats(calculations: CalculationRecord[]): DashboardStats {
-    let totalCalculations: number = calculations.length;
-    let favoriteCount: number = 0;
-    let thisWeekCount: number = 0;
-    let calculatorTypes: Record<string, boolean> = {};
-    let now: number = Date.now();
-    let weekAgo: number = now - 7 * 24 * 60 * 60 * 1000;
-    let i: number;
-    for (i = 0; i < calculations.length; i++) {
-        let calc: CalculationRecord = calculations[i];
-        if (calc.Starred) {
-            favoriteCount++;
-        }
-        let created: number = new Date(calc.CreatedAt).getTime();
-        if (!isNaN(created) && created >= weekAgo) {
-            thisWeekCount++;
-        }
-        calculatorTypes[calc.CalculatorType] = true;
-    }
-    let calculatorsUsed: number = Object.keys(calculatorTypes).length;
-    return {
-        "totalCalculations": totalCalculations,
-        "favoriteCount": favoriteCount,
-        "thisWeekCount": thisWeekCount,
-        "calculatorsUsed": calculatorsUsed
-    };
-}
-function filterFavorites(calculations: CalculationRecord[]): CalculationRecord[] {
-    let favorites: CalculationRecord[] = [];
-    let i: number;
-    for (i = 0; i < calculations.length; i++) {
-        if (calculations[i].Starred) {
-            favorites.push(calculations[i]);
-        }
-    }
-    return favorites;
-}
 function formatDate(iso: string): string {
     let d: Date = new Date(iso);
     if (isNaN(d.getTime())) {
@@ -67,33 +31,12 @@ function formatDate(iso: string): string {
     return year + "-" + monthStr + "-" + dayStr;
 }
 function Dashboard(): JSX.Element {
-    let manager = DashboardManager.getInstance();
-    let [calculations, setCalculations] = createSignal<CalculationRecord[]>([]);
-    let [loading, setLoading] = createSignal(false);
-    let [error, setError] = createSignal("");
+    let store = useDashboard();
     onMount(function (): void {
-        void refresh();
+        void store.refresh();
     });
-    async function refresh(): Promise<void> {
-        if (loading()) {
-            return;
-        }
-        setLoading(true);
-        setError("");
-        try {
-            await manager.loadDashboardData();
-            setCalculations(manager.getLastCalculations());
-        }
-        catch (e: unknown) {
-            let message: string = e instanceof Error ? e.message : "Unknown error";
-            setError("Failed to load dashboard: " + message);
-        }
-        finally {
-            setLoading(false);
-        }
-    }
     function renderStatCards(): JSX.Element {
-        let stats: DashboardStats = computeStats(calculations());
+        let stats = store.stats();
         let cards: {"label": string; "value": string}[] = [
             {"label": "Total Calculations", "value": String(stats.totalCalculations)},
             {"label": "Favorites", "value": String(stats.favoriteCount)},
@@ -114,7 +57,7 @@ function Dashboard(): JSX.Element {
         );
     }
     function renderRecent(): JSX.Element {
-        let recents: CalculationRecord[] = calculations();
+        let recents: CalculationRecord[] = store.recent();
         return (
             <div class={styles.section}>
                 <h3 class={styles.sectionTitle}>Recent Calculations</h3>
@@ -143,13 +86,13 @@ function Dashboard(): JSX.Element {
         );
     }
     function renderFavorites(): JSX.Element {
-        let favorites: CalculationRecord[] = filterFavorites(calculations());
+        let favs: CalculationRecord[] = store.favorites();
         return (
             <div class={styles.section}>
                 <h3 class={styles.sectionTitle}>Favorites</h3>
-                <Show when={favorites.length > 0} fallback={<p class={styles.empty}>No favorite calculations yet. Star a calculation to pin it here.</p>}>
+                <Show when={favs.length > 0} fallback={<p class={styles.empty}>No favorite calculations yet. Star a calculation to pin it here.</p>}>
                     <ul class={styles.list}>
-                        <For each={favorites}>
+                        <For each={favs}>
                             {(calc) => (
                                 <li class={styles.listItem}>
                                     <span class={styles.listType}>{calc.CalculatorType}</span>
@@ -167,11 +110,11 @@ function Dashboard(): JSX.Element {
         <section class={styles.dashboard} aria-label="User dashboard">
             <div class={styles.container}>
                 <h2 class={styles.header}>Dashboard</h2>
-                <Show when={loading()}>
+                <Show when={store.loading()}>
                     <div class={styles.loading}>Loading dashboard...</div>
                 </Show>
-                <Show when={error() !== ""}>
-                    <div class={styles.error} role="alert">{error()}</div>
+                <Show when={store.error() !== ""}>
+                    <div class={styles.error} role="alert">{store.error()}</div>
                 </Show>
                 {renderStatCards()}
                 {renderRecent()}
