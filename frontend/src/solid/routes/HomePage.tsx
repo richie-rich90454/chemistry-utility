@@ -41,8 +41,10 @@ function HomePage(): JSX.Element {
     return (
         <section class={styles.home} aria-label="Chemistry Utility home">
             <div class={styles.container}>
-                <h1 class={styles.header}>Chemistry Utility</h1>
-                <p class={styles.subtitle}>A collection of chemistry calculators, reference tools, and data lookups. Pick a calculator below or use the sidebar to navigate.</p>
+                <div class={styles.hero}>
+                    <h1 class={styles.heroTitle}>Chemistry Utility</h1>
+                    <p class={styles.heroSubtitle}>A collection of chemistry calculators, reference tools, and data lookups. Pick a calculator below or use the sidebar to navigate.</p>
+                </div>
                 <div class={styles.intro}>
                     <h2 class={styles.introTitle}>Getting Started</h2>
                     <p class={styles.introText}>Use the Molar Mass calculator for any formula, the Equation Balancer to balance reactions, the Periodic Table for element data, or the Compound Database Search to look up substances by name, formula, CAS, or SMILES. The Batch Calculator can process many inputs at once from a CSV file.</p>

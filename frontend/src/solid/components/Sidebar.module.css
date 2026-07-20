@@ -1,7 +1,13 @@
-.sidebar{
+/* ============================================================
+   Sidebar — CGUI V3.0
+   Flat design, zero rounded corners, interactive token active states.
+   No gradients, no box-shadows on nav items, no --md-* references.
+   ============================================================ */
+
+.sidebar {
     width: var(--sidebar-width);
-    background: var(--md-surface);
-    border-right: 1px solid var(--md-outline-variant);
+    background: var(--cgui-pane);
+    border-right: 1px solid var(--cgui-border);
     display: flex;
     flex-direction: column;
     position: sticky;
@@ -11,25 +17,29 @@
     overflow-x: hidden;
     z-index: 10;
     flex-shrink: 0;
-    transition: width var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate),
-                background-color 300ms ease,
-                color 300ms ease;
+    transition: width var(--cgui-duration-normal) var(--cgui-easing),
+                background-color var(--cgui-duration-slow) var(--cgui-easing),
+                color var(--cgui-duration-slow) var(--cgui-easing);
 }
-.sidebarHeader{
-    padding: var(--md-space-4) var(--md-space-4) var(--md-space-2);
+
+/* ---- Header ---- */
+.sidebarHeader {
+    padding: var(--cgui-space-4) var(--cgui-space-4) var(--cgui-space-2);
     display: flex;
     flex-direction: column;
-    gap: var(--md-space-2);
+    gap: var(--cgui-space-2);
 }
-.headerTop{
+
+.headerTop {
     display: flex;
     align-items: center;
-    gap: var(--md-space-3);
+    gap: var(--cgui-space-3);
 }
-.sidebarHeader h1{
+
+.sidebarHeader h1 {
     font-size: clamp(1.05rem, 1rem + 0.2vw, 1.25rem);
     font-weight: 600;
-    color: var(--md-on-surface);
+    color: var(--cgui-text);
     margin: 0;
     letter-spacing: -0.01em;
     flex: 1;
@@ -38,107 +48,121 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.logoIcon{
+
+/* ---- Logo icon — flat square, accent background, no gradient ---- */
+.logoIcon {
     width: 40px;
     height: 40px;
-    border-radius: var(--md-shape-sm);
-    background: linear-gradient(135deg, var(--md-primary), var(--md-secondary));
+    background: var(--cgui-accent);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: var(--md-elevation-1);
 }
-.logoIcon svg{
-    color: var(--md-on-primary);
+
+.logoIcon svg {
+    color: var(--cgui-on-accent);
     width: 24px;
     height: 24px;
 }
-.sidebarToggle{
+
+/* ---- Sidebar toggle — icon-style flat button ---- */
+.sidebarToggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 44px;
     height: 44px;
-    border-radius: var(--md-shape-full);
     border: none;
     background: transparent;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: background var(--cgui-duration-fast) var(--cgui-easing),
+                color var(--cgui-duration-fast) var(--cgui-easing);
 }
-.sidebarToggle:hover{
-    background: var(--md-state-hover);
-    color: var(--md-on-surface);
+
+.sidebarToggle:hover {
+    background: var(--cgui-state-hover);
+    color: var(--cgui-text);
 }
-.sidebarToggle:active{
-    background: var(--md-state-pressed);
+
+.sidebarToggle:active {
+    background: var(--cgui-state-active);
 }
-.sidebarToggle:focus-visible{
-    outline: 2px solid var(--md-primary);
+
+.sidebarToggle:focus-visible {
+    outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }
-.sidebarToggle svg{
+
+.sidebarToggle svg {
     width: 20px;
     height: 20px;
     pointer-events: none;
 }
-.sidebarSearch{
-    padding: var(--md-space-3) var(--md-space-4) var(--md-space-2);
+
+/* ---- Search — border-bottom only, flat input ---- */
+.sidebarSearch {
+    padding: var(--cgui-space-3) var(--cgui-space-4) var(--cgui-space-2);
     position: relative;
 }
-.sidebarSearch input{
+
+.sidebarSearch input {
     width: 100%;
-    padding: var(--md-space-3) var(--md-space-4) var(--md-space-3) 36px;
+    padding: var(--cgui-space-3) var(--cgui-space-4) var(--cgui-space-3) 36px;
     min-height: 42px;
     font-size: 0.875rem;
     font-family: inherit;
-    color: var(--md-on-surface);
-    border-radius: var(--md-shape-full);
-    background: var(--md-surface-container-high);
-    border: 1px solid transparent;
-    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    font-weight: 300;
+    color: var(--cgui-text);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--cgui-border);
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing);
 }
-.sidebarSearch input::placeholder{
-    color: var(--md-on-surface-variant);
+
+.sidebarSearch input::placeholder {
+    color: var(--cgui-text-secondary);
+    font-weight: 300;
 }
-.sidebarSearch input:hover{
-    background: var(--md-surface-container-highest);
-    border-color: var(--md-outline-variant);
-}
-.sidebarSearch input:focus{
-    background: var(--md-surface-container-lowest);
-    border-color: var(--md-primary);
-    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+
+.sidebarSearch input:focus {
+    border-bottom-color: var(--cgui-accent);
     outline: none;
 }
-.sidebarSearch input:focus-visible{
+
+.sidebarSearch input:focus-visible {
     outline: none;
 }
-.searchIcon{
+
+.searchIcon {
     position: absolute;
-    left: calc(var(--md-space-4) + 12px);
+    left: calc(var(--cgui-space-4) + 12px);
     top: 50%;
     transform: translateY(-50%);
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     pointer-events: none;
     width: 16px;
     height: 16px;
-    transition: color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: color var(--cgui-duration-fast) var(--cgui-easing);
 }
-.sidebarSearch:focus-within .searchIcon{
-    color: var(--md-primary);
+
+.sidebarSearch:focus-within .searchIcon {
+    color: var(--cgui-accent);
 }
-.navRecent{
-    padding: var(--md-space-2) var(--md-space-4);
+
+/* ---- Recent section ---- */
+.navRecent {
+    padding: var(--cgui-space-2) var(--cgui-space-4);
 }
-.sidebarNav{
+
+/* ---- Nav list ---- */
+.sidebarNav {
     flex: 1;
-    padding: var(--md-space-1) var(--md-space-2);
+    padding: var(--cgui-space-1) var(--cgui-space-2);
 }
-.sidebarNav ul{
+
+.sidebarNav ul {
     list-style: none;
     display: flex;
     flex-direction: column;
@@ -146,124 +170,147 @@
     margin: 0;
     padding: 0;
 }
-.navCategory{
-    font-size: 0.6875rem;
-    font-weight: 600;
+
+/* ---- Category headers — uppercase micro-labels ---- */
+.navCategory {
+    font: var(--cgui-font-label);
+    letter-spacing: var(--cgui-label-tracking);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--md-on-surface-variant);
-    padding: var(--md-space-6) var(--md-space-5) var(--md-space-2);
+    color: var(--cgui-text-secondary);
+    padding: var(--cgui-space-6) var(--cgui-space-5) var(--cgui-space-2);
     list-style: none;
 }
-.navLink{
+
+/* ---- Nav link — flat rectangle, interactive token active state ---- */
+.navLink {
     display: flex;
     align-items: center;
-    gap: var(--md-space-3);
-    padding: 0 var(--md-space-4);
+    gap: var(--cgui-space-3);
+    padding: 0 var(--cgui-space-4);
     height: 52px;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
-    border-radius: var(--md-shape-full);
     white-space: nowrap;
-    position: relative;
-    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: background var(--cgui-duration-fast) var(--cgui-easing),
+                color var(--cgui-duration-fast) var(--cgui-easing);
 }
-.navLink::before{
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: var(--md-shape-full);
-    background: transparent;
-    transition: background var(--md-motion-duration-short4) var(--md-motion-easing-standard);
-    z-index: -1;
+
+.navLink:hover {
+    background: var(--cgui-state-hover);
+    color: var(--cgui-text);
 }
-.navLink:hover::before{
-    background: var(--md-state-hover);
+
+.navLink:active {
+    background: var(--cgui-state-active);
 }
-.navLink:active::before{
-    background: var(--md-state-pressed);
+
+/* Active nav item — solid accent background (CGUI interactive token) */
+.navLink.active {
+    background: var(--cgui-accent);
+    color: var(--cgui-on-accent);
+    font-weight: 700;
 }
-.navLink.active::before{
-    background: var(--md-primary-container);
+
+.navLink.active:hover {
+    background: var(--cgui-accent-hover);
+    color: var(--cgui-on-accent);
 }
-.navIcon{
+
+.navIcon {
     width: 24px;
     height: 24px;
     flex-shrink: 0;
     opacity: 0.7;
+    transition: opacity var(--cgui-duration-fast) var(--cgui-easing);
 }
-.navLink:hover{
-    color: var(--md-on-surface);
-}
-.navLink:hover .navIcon{
+
+.navLink:hover .navIcon {
     opacity: 1;
 }
-.navLink.active{
-    color: var(--md-on-primary-container);
-    font-weight: 600;
-}
-.navLink.active .navIcon{
+
+.navLink.active .navIcon {
     opacity: 1;
 }
-.navLabel{
+
+.navLabel {
     flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.sidebarFooter{
-    padding: var(--md-space-3) var(--md-space-4);
-    border-top: 1px solid var(--md-outline-variant);
+
+/* ---- Footer — flat, border-top only ---- */
+.sidebarFooter {
+    padding: var(--cgui-space-3) var(--cgui-space-4);
+    border-top: 1px solid var(--cgui-border);
     font-size: 0.6875rem;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     text-align: center;
-    position: relative;
 }
-.sidebarFooter a{
-    color: var(--md-primary);
+
+.sidebarFooter a {
+    color: var(--cgui-accent);
     text-decoration: none;
+    transition: opacity var(--cgui-duration-fast) var(--cgui-easing);
 }
-.sidebarFooter a:hover{
+
+.sidebarFooter a:hover {
+    opacity: 0.8;
     text-decoration: underline;
 }
-.sidebarFooterActions{
+
+/* ---- Footer actions row ---- */
+.sidebarFooterActions {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--md-space-2);
+    gap: var(--cgui-space-2);
     justify-content: center;
-    margin-bottom: var(--md-space-2);
+    margin-bottom: var(--cgui-space-2);
 }
-.sidebarFooterButton{
+
+/* ---- Footer action button — flat, no border-radius ---- */
+.sidebarFooterButton {
     display: inline-flex;
     align-items: center;
-    gap: var(--md-space-2);
-    padding: var(--md-space-2) var(--md-space-3);
-    border: 1px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-sm);
+    gap: var(--cgui-space-2);
+    padding: var(--cgui-space-2) var(--cgui-space-3);
+    border: 1px solid var(--cgui-border);
     background: transparent;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     font-size: 0.75rem;
     font-weight: 500;
     font-family: inherit;
     cursor: pointer;
-    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: background var(--cgui-duration-fast) var(--cgui-easing),
+                border-color var(--cgui-duration-fast) var(--cgui-easing),
+                color var(--cgui-duration-fast) var(--cgui-easing);
 }
-.sidebarFooterButton:hover{
-    background: var(--md-state-hover);
-    border-color: var(--md-primary);
-    color: var(--md-primary);
+
+.sidebarFooterButton:hover {
+    background: var(--cgui-state-hover);
+    border-color: var(--cgui-accent);
+    color: var(--cgui-accent);
 }
-.sidebarFooterButton:focus-visible{
-    outline: 2px solid var(--md-primary);
+
+.sidebarFooterButton:focus-visible {
+    outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }
-.sidebarFooterButton:active{
-    background: var(--md-state-pressed);
+
+.sidebarFooterButton:active {
+    background: var(--cgui-state-active);
 }
-.sidebarFooterButton svg{
+
+.sidebarFooterButton svg {
     pointer-events: none;
     flex-shrink: 0;
+}
+
+/* ---- Mobile: hide sidebar, show mobile nav banner ---- */
+@media (max-width: 767px) {
+    .sidebar {
+        display: none;
+    }
 }

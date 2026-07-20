@@ -11,12 +11,18 @@ function CalculatorCard(props: CalculatorCardProps): JSX.Element {
     return (
         <section class={styles.card}>
             <h2>{props.title}</h2>
-            <div class={styles.toolContainer}>
-                <p class={styles.toolDescription}>{props.description}</p>
-            </div>
+            <p class={styles.cardDescription}>{props.description}</p>
             {props.children}
-            {props.exampleDetails}
-            {props.seeAlso}
+            {props.exampleDetails && (
+                <div class={styles.cardProse}>
+                    {props.exampleDetails}
+                </div>
+            )}
+            {props.seeAlso && (
+                <div class={styles.cardSeeAlso}>
+                    {props.seeAlso}
+                </div>
+            )}
         </section>
     );
 }

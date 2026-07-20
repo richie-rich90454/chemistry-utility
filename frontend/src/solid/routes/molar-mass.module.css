@@ -1,108 +1,108 @@
 .card{
-    background: var(--md-surface-container-low);
-    border-radius: var(--md-shape-lg);
-    border: 1px solid var(--md-outline-variant);
-    margin-bottom: var(--md-space-6);
+    background: var(--cgui-pane);
+    border-radius: 0;
+    border: 1px solid var(--cgui-border);
+    margin-bottom: var(--cgui-space-6);
     overflow: hidden;
-    box-shadow: var(--md-elevation-1);
-    transition: box-shadow var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                border-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                transform var(--md-motion-duration-medium2) var(--md-motion-easing-standard);
+    box-shadow: none;
+    transition: box-shadow var(--cgui-duration-normal) var(--cgui-easing),
+                border-color var(--cgui-duration-normal) var(--cgui-easing),
+                transform var(--cgui-duration-normal) var(--cgui-easing);
 }
 .card:hover{
-    box-shadow: var(--md-elevation-2);
-    border-color: var(--md-outline);
+    box-shadow: none;
+    border-color: var(--cgui-text-secondary);
 }
 .card h2{
     font-size: clamp(1.05rem, 1rem + 0.3vw, 1.3rem);
     font-weight: 600;
-    padding: var(--md-space-5) var(--md-space-5) var(--md-space-3);
+    padding: var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-3);
     margin-bottom: 0;
-    color: var(--md-on-surface);
+    color: var(--cgui-text);
     letter-spacing: -0.01em;
     display: flex;
     align-items: center;
-    gap: var(--md-space-3);
+    gap: var(--cgui-space-3);
 }
 .card h2::before{
     content: "";
     display: inline-block;
     width: 4px;
     height: 24px;
-    border-radius: 2px;
-    background: linear-gradient(180deg, var(--md-primary), var(--md-tertiary));
+    border-radius: 0;
+    background: var(--cgui-accent);
     flex-shrink: 0;
 }
 .toolDescription{
-    padding: 0 var(--md-space-5);
-    margin-bottom: var(--md-space-3);
-    color: var(--md-on-surface-variant);
+    padding: 0 var(--cgui-space-5);
+    margin-bottom: var(--cgui-space-3);
+    color: var(--cgui-text-secondary);
     font-size: 0.9rem;
     line-height: 1.6;
 }
 .input{
-    margin: 0 var(--md-space-5) var(--md-space-3) var(--md-space-5);
-    width: calc(100% - 2 * var(--md-space-5));
-    padding: 10px var(--md-space-4);
+    margin: 0 var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
+    width: calc(100% - 2 * var(--cgui-space-5));
+    padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
     color-scheme: light !important;
-    background: var(--md-input-bg) !important;
-    color: var(--md-input-text) !important;
-    border: 1.5px solid var(--md-input-border);
-    border-radius: var(--md-shape-sm);
-    transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                color var(--md-motion-duration-medium2) var(--md-motion-easing-standard);
+    background: var(--cgui-pane) !important;
+    color: var(--cgui-text) !important;
+    border: 1.5px solid var(--cgui-border);
+    border-radius: 0;
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
+                box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-normal) var(--cgui-easing),
+                color var(--cgui-duration-normal) var(--cgui-easing);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     min-height: 48px;
-    -webkit-text-fill-color: var(--md-input-text) !important;
+    -webkit-text-fill-color: var(--cgui-text) !important;
 }
 .input::placeholder{
-    color: var(--md-input-placeholder) !important;
+    color: var(--cgui-text-secondary) !important;
     opacity: 1 !important;
-    -webkit-text-fill-color: var(--md-input-placeholder) !important;
+    -webkit-text-fill-color: var(--cgui-text-secondary) !important;
 }
 .input:hover{
-    border-color: var(--md-input-hover-border);
+    border-color: var(--cgui-text);
 }
 .input:focus{
-    border-color: var(--md-input-focus-border);
-    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+    border-color: var(--cgui-accent);
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
 }
 .button{
-    margin: var(--md-space-3) var(--md-space-5) var(--md-space-5) var(--md-space-5);
+    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--md-space-2);
-    padding: 0 var(--md-space-6);
+    gap: var(--cgui-space-2);
+    padding: 0 var(--cgui-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--md-on-primary) !important;
-    background-color: var(--md-primary) !important;
+    color: var(--cgui-on-accent) !important;
+    background-color: var(--cgui-accent) !important;
     border: none;
-    border-radius: var(--md-shape-full);
+    border-radius: 0;
     cursor: pointer;
-    transition: box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                transform var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+    transition: box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-fast) var(--cgui-easing),
+                transform var(--cgui-duration-fast) var(--cgui-easing);
     min-height: 42px;
     width: auto;
     position: relative;
     overflow: hidden;
-    box-shadow: var(--md-elevation-1);
+    box-shadow: none;
 }
 .button:hover{
-    box-shadow: var(--md-elevation-2);
+    box-shadow: none;
     filter: brightness(1.08);
 }
 .button:active{
@@ -114,68 +114,68 @@
     pointer-events: none;
 }
 .button:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }
 .result{
-    margin: var(--md-space-3) var(--md-space-5) var(--md-space-5) var(--md-space-5);
+    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
     position: relative;
-    padding: var(--md-space-4) var(--md-space-5);
-    background: var(--md-surface-container);
-    border: 1px solid var(--md-outline-variant);
-    border-left: 4px solid var(--md-primary);
-    border-radius: var(--md-shape-sm);
+    padding: var(--cgui-space-4) var(--cgui-space-5);
+    background: var(--cgui-pane);
+    border: 1px solid var(--cgui-border);
+    border-left: 4px solid var(--cgui-accent);
+    border-radius: 0;
     font-family: "Noto Sans", sans-serif;
     font-size: 0.95rem;
     overflow-wrap: break-word;
     line-height: 1.6;
-    transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-normal) var(--cgui-easing),
+                box-shadow var(--cgui-duration-fast) var(--cgui-easing);
 }
 .result:hover{
-    box-shadow: var(--md-elevation-1);
+    box-shadow: none;
 }
 .result:empty{
     display: none;
 }
 .result p{
     margin: 0.125rem 0;
-    color: var(--md-on-surface);
+    color: var(--cgui-text);
     padding: 0;
 }
 .result.error{
-    border-color: var(--md-error-container);
-    border-left-color: var(--md-error);
-    background: var(--md-error-container);
+    border-color: transparent;
+    border-left-color: var(--cgui-error);
+    background: transparent;
 }
 .result.error p{
-    color: var(--md-on-error-container);
+    color: var(--cgui-error);
 }
 .exampleDetails{
-    margin: var(--md-space-4) var(--md-space-5) 0 var(--md-space-5);
-    border: 1px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-md);
+    margin: var(--cgui-space-4) var(--cgui-space-5) 0 var(--cgui-space-5);
+    border: 1px solid var(--cgui-border);
+    border-radius: 0;
     overflow: hidden;
-    background: var(--md-surface-container-low);
-    transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    background: var(--cgui-pane);
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
+                box-shadow var(--cgui-duration-fast) var(--cgui-easing);
 }
 .exampleDetails[open]{
-    border-color: var(--md-outline);
-    box-shadow: var(--md-elevation-1);
+    border-color: var(--cgui-text-secondary);
+    box-shadow: none;
 }
 .exampleDetails summary{
-    padding: var(--md-space-3) var(--md-space-4);
+    padding: var(--cgui-space-3) var(--cgui-space-4);
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     cursor: pointer;
     background: transparent;
     list-style: none;
     display: flex;
     align-items: center;
-    gap: var(--md-space-3);
+    gap: var(--cgui-space-3);
 }
 .exampleDetails summary::-webkit-details-marker{
     display: none;
@@ -188,33 +188,33 @@
     border-left: 6px solid currentColor;
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
-    transition: transform var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate);
+    transition: transform var(--cgui-duration-normal) var(--cgui-easing);
     flex-shrink: 0;
 }
 .exampleDetails[open] summary::before{
     transform: rotate(90deg);
 }
 .exampleDetails summary:hover{
-    background: var(--md-state-hover);
-    color: var(--md-on-surface);
+    background: var(--cgui-state-hover);
+    color: var(--cgui-text);
 }
 .exampleDetails summary:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--cgui-accent);
     outline-offset: -2px;
 }
 .exampleDetails[open] summary{
-    color: var(--md-on-surface);
-    border-bottom: 1px solid var(--md-outline-variant);
+    color: var(--cgui-text);
+    border-bottom: 1px solid var(--cgui-border);
 }
 .exampleDetails p{
-    padding: var(--md-space-4);
+    padding: var(--cgui-space-4);
     margin: 0;
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
 }
 .exampleDetails p strong{
-    color: var(--md-primary);
+    color: var(--cgui-accent);
     cursor: pointer;
     font-weight: 600;
 }

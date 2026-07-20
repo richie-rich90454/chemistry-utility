@@ -29,11 +29,26 @@ import {MolecularViewerRoute} from "./routes/molecular-viewer";
 import {CompoundSearch} from "./routes/compound-search";
 import {BatchCalc} from "./routes/batch-calc";
 import {Dashboard} from "./routes/dashboard";
+import {Sidebar} from "./components/Sidebar";
+import {MobileBottomTabs} from "./components/MobileBottomTabs";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
 function CatchAllRedirect(): JSX.Element {
     return <Navigate href="/" />;
+}
+function AppShell(props: {children?: JSX.Element}): JSX.Element {
+    return (
+        <div class="cgui-app-shell">
+            <aside class="cgui-nav-pane">
+                <Sidebar />
+                <MobileBottomTabs />
+            </aside>
+            <main class="cgui-content">
+                {props.children}
+            </main>
+        </div>
+    );
 }
 function App(): JSX.Element {
     onMount(function (): void {
@@ -205,36 +220,38 @@ function App(): JSX.Element {
     });
     return (
         <Router>
-            <Route path="/" component={HomePage} />
-            <Route path="/molar-mass" component={MolarMass} />
-            <Route path="/mass-calc" component={MassCalcRedirect} />
-            <Route path="/element-lookup" component={ElementLookup} />
-            <Route path="/periodic-table" component={PeriodicTable} />
-            <Route path="/equation-balancer" component={EquationBalancer} />
-            <Route path="/unit-converter" component={UnitConverter} />
-            <Route path="/dilution" component={Dilution} />
-            <Route path="/mass-percent" component={MassPercent} />
-            <Route path="/solution-mixing" component={SolutionMixing} />
-            <Route path="/buffer" component={BufferSolution} />
-            <Route path="/pka-pkb" component={PKaPKb} />
-            <Route path="/ksp" component={Ksp} />
-            <Route path="/colligative" component={Colligative} />
-            <Route path="/titration" component={Titration} />
-            <Route path="/debye-huckel" component={DebyeHuckel} />
-            <Route path="/common-ion" component={CommonIonEffect} />
-            <Route path="/nuclear" component={NuclearChemistry} />
-            <Route path="/gas-laws" component={GasLaws} />
-            <Route path="/electrochemistry" component={Electrochemistry} />
-            <Route path="/thermodynamics" component={Thermodynamics} />
-            <Route path="/kinetics" component={Kinetics} />
-            <Route path="/quantum-atomic" component={QuantumAtomic} />
-            <Route path="/stoichiometry" component={Stoichiometry} />
-            <Route path="/bond-type" component={BondType} />
-            <Route path="/molecular-viewer" component={MolecularViewerRoute} />
-            <Route path="/compound-search" component={CompoundSearch} />
-            <Route path="/batch-calc" component={BatchCalc} />
-            <Route path="/dashboard" component={Dashboard} />
-            <Route path="*" component={CatchAllRedirect} />
+            <Route path="/" component={AppShell}>
+                <Route path="/" component={HomePage} />
+                <Route path="/molar-mass" component={MolarMass} />
+                <Route path="/mass-calc" component={MassCalcRedirect} />
+                <Route path="/element-lookup" component={ElementLookup} />
+                <Route path="/periodic-table" component={PeriodicTable} />
+                <Route path="/equation-balancer" component={EquationBalancer} />
+                <Route path="/unit-converter" component={UnitConverter} />
+                <Route path="/dilution" component={Dilution} />
+                <Route path="/mass-percent" component={MassPercent} />
+                <Route path="/solution-mixing" component={SolutionMixing} />
+                <Route path="/buffer" component={BufferSolution} />
+                <Route path="/pka-pkb" component={PKaPKb} />
+                <Route path="/ksp" component={Ksp} />
+                <Route path="/colligative" component={Colligative} />
+                <Route path="/titration" component={Titration} />
+                <Route path="/debye-huckel" component={DebyeHuckel} />
+                <Route path="/common-ion" component={CommonIonEffect} />
+                <Route path="/nuclear" component={NuclearChemistry} />
+                <Route path="/gas-laws" component={GasLaws} />
+                <Route path="/electrochemistry" component={Electrochemistry} />
+                <Route path="/thermodynamics" component={Thermodynamics} />
+                <Route path="/kinetics" component={Kinetics} />
+                <Route path="/quantum-atomic" component={QuantumAtomic} />
+                <Route path="/stoichiometry" component={Stoichiometry} />
+                <Route path="/bond-type" component={BondType} />
+                <Route path="/molecular-viewer" component={MolecularViewerRoute} />
+                <Route path="/compound-search" component={CompoundSearch} />
+                <Route path="/batch-calc" component={BatchCalc} />
+                <Route path="/dashboard" component={Dashboard} />
+                <Route path="*" component={CatchAllRedirect} />
+            </Route>
         </Router>
     );
 }

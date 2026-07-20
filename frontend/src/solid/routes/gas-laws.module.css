@@ -1,7 +1,7 @@
 .subGroup{
-    padding-bottom: var(--md-space-4);
-    border-bottom: 1px solid var(--md-outline-variant);
-    margin-bottom: var(--md-space-4);
+    padding-bottom: var(--cgui-space-4);
+    border-bottom: 1px solid var(--cgui-border);
+    margin-bottom: var(--cgui-space-4);
 }
 .subGroup:last-child{
     border-bottom: none;
@@ -9,25 +9,25 @@
     padding-bottom: 0;
 }
 .vdwDetails{
-    margin: var(--md-space-4) 0 0;
-    border: 1px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-sm);
+    margin: var(--cgui-space-4) 0 0;
+    border: 1px solid var(--cgui-border);
+    border-radius: 0;
     overflow: hidden;
 }
 .vdwDetails summary{
-    padding: var(--md-space-3) var(--md-space-4);
+    padding: var(--cgui-space-3) var(--cgui-space-4);
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     cursor: pointer;
-    background: var(--md-surface-container);
-    border-bottom: 1px solid var(--md-outline-variant);
+    background: var(--cgui-pane);
+    border-bottom: 1px solid var(--cgui-border);
     list-style: none;
     display: flex;
     align-items: center;
-    gap: var(--md-space-2);
-    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    gap: var(--cgui-space-2);
+    transition: background-color var(--cgui-duration-fast) var(--cgui-easing),
+                color var(--cgui-duration-fast) var(--cgui-easing);
 }
 .vdwDetails summary::-webkit-details-marker{
     display: none;
@@ -40,13 +40,13 @@
     border-left: 5px solid currentColor;
     border-top: 4px solid transparent;
     border-bottom: 4px solid transparent;
-    transition: transform var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: transform var(--cgui-duration-fast) var(--cgui-easing);
     flex-shrink: 0;
 }
 .vdwDetails[open] summary::before{
     transform: rotate(90deg);
 }
 .vdwDetails summary:hover{
-    background: var(--md-state-hover);
-    color: var(--md-on-surface);
+    background: var(--cgui-state-hover);
+    color: var(--cgui-text);
 }

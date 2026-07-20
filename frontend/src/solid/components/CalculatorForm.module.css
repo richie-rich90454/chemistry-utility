@@ -1,22 +1,22 @@
 .inputGroup{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: var(--md-space-2);
-    margin: var(--md-space-2) var(--md-space-5);
+    gap: var(--cgui-space-2);
+    margin: var(--cgui-space-2) var(--cgui-space-5);
 }
 .input{
-    padding: 10px var(--md-space-4);
+    padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
     color-scheme: light !important;
     background: var(--md-input-bg) !important;
     color: var(--md-input-text) !important;
     border: 1.5px solid var(--md-input-border);
-    border-radius: var(--md-shape-sm);
-    transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                color var(--md-motion-duration-medium2) var(--md-motion-easing-standard);
+    border-radius: 0;
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
+                box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-normal) var(--cgui-easing),
+                color var(--cgui-duration-normal) var(--cgui-easing);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -33,22 +33,22 @@
 }
 .input:focus{
     border-color: var(--md-input-focus-border);
-    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
 }
 .select{
-    margin: 0 var(--md-space-5) var(--md-space-3) var(--md-space-5);
-    width: calc(100% - 2 * var(--md-space-5));
-    padding: 10px var(--md-space-4);
+    margin: 0 var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
+    width: calc(100% - 2 * var(--cgui-space-5));
+    padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
     color-scheme: light !important;
     background: var(--md-input-bg) !important;
     color: var(--md-input-text) !important;
     border: 1.5px solid var(--md-input-border);
-    border-radius: var(--md-shape-sm);
+    border-radius: 0;
     min-height: 48px;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -56,43 +56,43 @@
 }
 .select:focus{
     border-color: var(--md-input-focus-border);
-    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
 }
 .buttonRow{
-    margin: var(--md-space-3) var(--md-space-5) var(--md-space-3) var(--md-space-5);
+    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
     display: flex;
-    gap: var(--md-space-3);
+    gap: var(--cgui-space-3);
     flex-wrap: wrap;
 }
 .button{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--md-space-2);
-    padding: 0 var(--md-space-6);
+    gap: var(--cgui-space-2);
+    padding: 0 var(--cgui-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--md-on-primary) !important;
-    background-color: var(--md-primary) !important;
+    color: var(--cgui-on-accent) !important;
+    background-color: var(--cgui-accent) !important;
     border: none;
-    border-radius: var(--md-shape-full);
+    border-radius: 0;
     cursor: pointer;
-    transition: box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                transform var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+    transition: box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-fast) var(--cgui-easing),
+                transform var(--cgui-duration-fast) var(--cgui-easing);
     min-height: 42px;
     width: auto;
     position: relative;
     overflow: hidden;
-    box-shadow: var(--md-elevation-1);
+    box-shadow: none;
 }
 .button:hover{
-    box-shadow: var(--md-elevation-2);
+    box-shadow: none;
     filter: brightness(1.08);
 }
 .button:active{
@@ -104,33 +104,33 @@
     pointer-events: none;
 }
 .button:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }
 .secondaryButton{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--md-space-2);
-    padding: 0 var(--md-space-6);
+    gap: var(--cgui-space-2);
+    padding: 0 var(--cgui-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--md-on-surface) !important;
-    background-color: var(--md-surface-container) !important;
-    border: 1.5px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-full);
+    color: var(--cgui-text) !important;
+    background-color: var(--cgui-pane) !important;
+    border: 1.5px solid var(--cgui-border);
+    border-radius: 0;
     cursor: pointer;
-    transition: box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-fast) var(--cgui-easing),
+                border-color var(--cgui-duration-fast) var(--cgui-easing);
     min-height: 42px;
     width: auto;
 }
 .secondaryButton:hover{
-    box-shadow: var(--md-elevation-1);
-    border-color: var(--md-outline);
+    box-shadow: none;
+    border-color: var(--cgui-text-secondary);
     filter: brightness(1.04);
 }
 .secondaryButton:disabled{
@@ -139,48 +139,48 @@
     pointer-events: none;
 }
 .secondaryButton:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }
 .result{
-    margin: var(--md-space-3) var(--md-space-5) var(--md-space-5) var(--md-space-5);
+    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
     position: relative;
-    padding: var(--md-space-4) var(--md-space-5);
-    background: var(--md-surface-container);
-    border: 1px solid var(--md-outline-variant);
-    border-left: 4px solid var(--md-primary);
-    border-radius: var(--md-shape-sm);
+    padding: var(--cgui-space-4) var(--cgui-space-5);
+    background: var(--cgui-pane);
+    border: 1px solid var(--cgui-border);
+    border-left: 4px solid var(--cgui-accent);
+    border-radius: 0;
     font-family: "Noto Sans", sans-serif;
     font-size: 0.95rem;
     overflow-wrap: break-word;
     line-height: 1.6;
-    transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-normal) var(--cgui-easing),
+                box-shadow var(--cgui-duration-fast) var(--cgui-easing);
 }
 .result:hover{
-    box-shadow: var(--md-elevation-1);
+    box-shadow: none;
 }
 .result p{
     margin: 0.125rem 0;
-    color: var(--md-on-surface);
+    color: var(--cgui-text);
     padding: 0;
 }
 .result.error{
-    border-color: var(--md-error-container);
-    border-left-color: var(--md-error);
-    background: var(--md-error-container);
+    border-color: transparent;
+    border-left-color: var(--cgui-error);
+    background: transparent;
 }
 .result.error p{
-    color: var(--md-on-error-container);
+    color: var(--cgui-error);
 }
 .labelText{
     display: block;
-    margin: var(--md-space-3) var(--md-space-5) var(--md-space-1) var(--md-space-5);
+    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-1) var(--cgui-space-5);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
 }
 @media (max-width: 720px){
     .buttonRow{

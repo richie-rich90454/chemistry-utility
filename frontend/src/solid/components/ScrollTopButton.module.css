@@ -4,30 +4,30 @@
     right: 24px;
     width: 48px;
     height: 48px;
-    border-radius: var(--md-shape-full);
-    background: var(--md-primary);
+    border-radius: 0;
+    background: var(--cgui-accent);
     border: none;
-    color: var(--md-on-primary);
+    color: var(--cgui-on-accent);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 1;
     pointer-events: auto;
-    transition: opacity var(--md-motion-duration-medium1) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                transform var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: opacity var(--cgui-duration-normal) var(--cgui-easing),
+                box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                transform var(--cgui-duration-fast) var(--cgui-easing);
     z-index: 20;
-    box-shadow: var(--md-elevation-2);
+    box-shadow: none;
 }
 .scrollTop:hover{
-    box-shadow: var(--md-elevation-3);
+    box-shadow: none;
     transform: translateY(-2px);
 }
 .scrollTop:active{
-    box-shadow: var(--md-elevation-1);
+    box-shadow: none;
 }
 .scrollTop:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }

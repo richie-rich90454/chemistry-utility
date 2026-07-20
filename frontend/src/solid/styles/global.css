@@ -1,6 +1,8 @@
-/* Lab Parchment Design System — Global Styles
-   Forest-green primary, burnt-sienna accent, parchment surfaces. */
-@font-face{
+/* Core-Grid UI (CGUI) V3.0 — Global Design Tokens
+   Flat palette, zero rounded edges, asymmetric layout. */
+
+/* Font loading */
+@font-face {
     font-family: "Noto Sans";
     src: url("/NotoSans-VariableFont_wdth,wght.woff2") format("woff2-variations");
     font-weight: 100 900;
@@ -8,394 +10,560 @@
     font-style: normal;
     font-display: swap;
 }
-@font-face{
-    font-family: "EB Garamond";
+@font-face {
+    font-family: "Noto Serif";
     src: url("/EBGaramond-VariableFont_wght.woff2") format("woff2-variations");
     font-weight: 400 800;
     font-style: normal;
     font-display: swap;
 }
-/* Lab Parchment Light Theme Tokens */
-:root{
+
+/* ============================================================
+   CGUI V3.0 LIGHT THEME TOKENS
+   ============================================================ */
+:root {
     color-scheme: light;
-    /* Primary — Forest Green */
-    --md-primary: #2d5a3d;
-    --md-on-primary: #f5f1e8;
-    --md-primary-container: #c8e6d4;
-    --md-on-primary-container: #0a2415;
-    /* Secondary — Deep Teal */
-    --md-secondary: #0f3a3a;
-    --md-on-secondary: #f5f1e8;
-    --md-secondary-container: #d0e8e8;
-    --md-on-secondary-container: #051a1a;
-    /* Tertiary — Burnt Sienna */
-    --md-tertiary: #c8553d;
-    --md-on-tertiary: #ffffff;
-    --md-tertiary-container: #f4d5cc;
-    --md-on-tertiary-container: #3d1208;
-    /* Error */
-    --md-error: #b3261e;
-    --md-on-error: #ffffff;
-    --md-error-container: #f9dedc;
-    --md-on-error-container: #410e0b;
-    /* Success — Forest Green */
-    --md-success: #2d5a3d;
-    --md-on-success: #f5f1e8;
-    --md-success-container: #c8e6d4;
-    --md-on-success-container: #0a2415;
-    /* Warning — Amber */
-    --md-warning: #e0a458;
-    --md-on-warning: #1a1a1a;
-    --md-warning-container: #faecd0;
-    --md-on-warning-container: #3d2a05;
-    /* Surfaces — Parchment */
-    --md-surface: #ffffff;
-    --md-surface-dim: #e8e3d6;
-    --md-surface-bright: #fffdf8;
-    --md-surface-container-lowest: #ffffff;
-    --md-surface-container-low: #f5f1e8;
-    --md-surface-container: #efeadd;
-    --md-surface-container-high: #e8e3d6;
-    --md-surface-container-highest: #e2ddcf;
-    --md-on-surface: #1a1a1a;
-    --md-on-surface-variant: #4a4640;
-    --md-surface-variant: #d6cfc0;
-    --md-inverse-surface: #2a2620;
-    --md-inverse-on-surface: #f0ebde;
-    /* Outlines */
-    --md-outline: #8a8478;
-    --md-outline-variant: #d6cfc0;
-    /* Background — Parchment */
-    --md-background: #f5f1e8;
-    --md-on-background: #1a1a1a;
-    /* Form element overrides — explicit colors that bypass color-scheme */
-    --md-input-bg: #ffffff;
-    --md-input-text: #1a1a1a;
-    --md-input-border: #8a8478;
-    --md-input-placeholder: #4a4640;
-    --md-input-focus-border: #2d5a3d;
-    --md-input-hover-border: #1a1a1a;
-    /* Scrim */
-    --md-scrim: rgba(0,0,0,0.4);
-    /* Elevation shadows (MD3) */
-    --md-elevation-1: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
-    --md-elevation-2: 0 1px 2px rgba(0,0,0,.3), 0 2px 6px 2px rgba(0,0,0,.15);
-    --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.3);
-    --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,.15), 0 2px 3px rgba(0,0,0,.3);
-    --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,.15), 0 4px 4px rgba(0,0,0,.3);
-    /* Shape */
-    --md-shape-xs: 4px;
-    --md-shape-sm: 8px;
-    --md-shape-md: 12px;
-    --md-shape-lg: 16px;
-    --md-shape-xl: 28px;
-    --md-shape-full: 9999px;
-    /* Spacing (4dp grid) */
-    --md-space-1: 4px;
-    --md-space-2: 8px;
-    --md-space-3: 12px;
-    --md-space-4: 16px;
-    --md-space-5: 20px;
-    --md-space-6: 24px;
-    --md-space-8: 32px;
-    --md-space-10: 40px;
-    --md-space-12: 48px;
-    /* Motion (MD3) */
-    --md-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
-    --md-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
-    --md-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
-    --md-motion-easing-decelerated: cubic-bezier(0, 0, 0, 1);
-    --md-motion-easing-accelerated: cubic-bezier(0.3, 0, 1, 1);
-    --md-motion-duration-short1: 50ms;
-    --md-motion-duration-short2: 100ms;
-    --md-motion-duration-short3: 150ms;
-    --md-motion-duration-short4: 200ms;
-    --md-motion-duration-medium1: 250ms;
-    --md-motion-duration-medium2: 300ms;
-    --md-motion-duration-medium3: 350ms;
-    --md-motion-duration-medium4: 400ms;
-    --md-motion-duration-long1: 450ms;
-    --md-motion-duration-long2: 500ms;
+
+    /* App canvas base — lowest visual layer */
+    --cgui-canvas: #F8F9FA;
+    /* Workspace panes — solid surfaces for inputs/outputs */
+    --cgui-pane: #FFFFFF;
+    /* Borders & rules — structural lines only, never box individual fields */
+    --cgui-border: #E4E7EB;
+    /* Text primary — maximum readability */
+    --cgui-text: #111827;
+    --cgui-text-secondary: #6B7280;
+    /* Active accent — focused states, buttons, system actions */
+    --cgui-accent: #0052FF;
+    --cgui-accent-hover: #003DCC;
+    --cgui-on-accent: #FFFFFF;
+
+    /* Success / Warning / Error */
+    --cgui-success: #059669;
+    --cgui-on-success: #FFFFFF;
+    --cgui-warning: #D97706;
+    --cgui-on-warning: #FFFFFF;
+    --cgui-error: #DC2626;
+    --cgui-on-error: #FFFFFF;
+
+    /* State layers */
+    --cgui-state-hover: rgba(0, 0, 0, 0.05);
+    --cgui-state-active: rgba(0, 82, 255, 0.12);
+    --cgui-state-selected: rgba(0, 82, 255, 0.08);
+
+    /* Scrim / overlay */
+    --cgui-scrim: rgba(15, 15, 17, 0.5);
+
     /* Layout */
-    --sidebar-width: 256px;
-    --sidebar-collapsed-width: 80px;
-    /* State layers (MD3) */
-    --md-state-hover: rgba(26,26,26,0.08);
-    --md-state-focus: rgba(26,26,26,0.12);
-    --md-state-pressed: rgba(26,26,26,0.12);
-    --md-state-dragged: rgba(26,26,26,0.16);
+    --cgui-nav-width: 15%;
+    --cgui-input-width: 35%;
+    --cgui-output-width: 50%;
+    --cgui-mobile-header-height: 48px;
+
+    /* Spacing grid (4px base) */
+    --cgui-space-1: 4px;
+    --cgui-space-2: 8px;
+    --cgui-space-3: 12px;
+    --cgui-space-4: 16px;
+    --cgui-space-5: 20px;
+    --cgui-space-6: 24px;
+    --cgui-space-8: 32px;
+    --cgui-space-10: 40px;
+    --cgui-space-12: 48px;
+
+    /* Typography scale */
+    --cgui-font-display: 900 48px/1.1 "Noto Sans", sans-serif;
+    --cgui-font-heading: 700 20px/1.3 "Noto Sans", sans-serif;
+    --cgui-font-subheading: 700 14px/1.4 "Noto Sans", sans-serif;
+    --cgui-font-body: 400 14px/1.6 "Noto Sans", sans-serif;
+    --cgui-font-label: 700 10px/1.4 "Noto Sans", sans-serif;
+    --cgui-font-input: 300 14px/1.5 "Noto Sans", sans-serif;
+    --cgui-font-mono: 400 13px/1.5 "Consolas", "Monaco", monospace;
+    --cgui-font-prose: 400 15px/1.7 "Noto Serif", serif;
+
+    /* Micro-label tracking */
+    --cgui-label-tracking: 0.06em;
+
+    /* Zero radius — no rounded corners anywhere */
+    --cgui-radius: 0px;
+
+    /* Motion */
+    --cgui-easing: cubic-bezier(0.2, 0, 0, 1);
+    --cgui-duration-fast: 100ms;
+    --cgui-duration-normal: 200ms;
+    --cgui-duration-slow: 300ms;
+
+    /* Shadows — minimal, only for overlays */
+    --cgui-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
-/* Lab Parchment Dark Theme Tokens */
-.dark{
+
+/* ============================================================
+   CGUI V3.0 DARK THEME TOKENS
+   ============================================================ */
+.dark {
     color-scheme: dark;
-    /* Primary — Forest Green (lightened for dark surfaces) */
-    --md-primary: #7fb89a;
-    --md-on-primary: #0a2415;
-    --md-primary-container: #1f4530;
-    --md-on-primary-container: #c8e6d4;
-    /* Secondary — Deep Teal (lightened for dark surfaces) */
-    --md-secondary: #7ab8b8;
-    --md-on-secondary: #051a1a;
-    --md-secondary-container: #1f4d4d;
-    --md-on-secondary-container: #d0e8e8;
-    /* Tertiary — Burnt Sienna (lightened for dark surfaces) */
-    --md-tertiary: #e8967f;
-    --md-on-tertiary: #3d1208;
-    --md-tertiary-container: #5d2618;
-    --md-on-tertiary-container: #f4d5cc;
-    /* Error */
-    --md-error: #f2b8b5;
-    --md-on-error: #601410;
-    --md-error-container: #8c1d18;
-    --md-on-error-container: #f9dedc;
-    /* Success — Forest Green (lightened) */
-    --md-success: #7fb89a;
-    --md-on-success: #0a2415;
-    --md-success-container: #1f4530;
-    --md-on-success-container: #c8e6d4;
-    /* Warning — Amber (lightened) */
-    --md-warning: #e8c896;
-    --md-on-warning: #3d2a05;
-    --md-warning-container: #5d4108;
-    --md-on-warning-container: #faecd0;
-    /* Surfaces — Charcoal with parchment undertone */
-    --md-surface: #1a1a1a;
-    --md-surface-dim: #141414;
-    --md-surface-bright: #2a2620;
-    --md-surface-container-lowest: #0f0f0f;
-    --md-surface-container-low: #1a1a1a;
-    --md-surface-container: #1f1f1d;
-    --md-surface-container-high: #252523;
-    --md-surface-container-highest: #2a2a28;
-    --md-on-surface: #f5f1e8;
-    --md-on-surface-variant: #d6cfc0;
-    --md-surface-variant: #4a4640;
-    --md-inverse-surface: #f5f1e8;
-    --md-inverse-on-surface: #2a2620;
-    /* Outlines */
-    --md-outline: #938f99;
-    --md-outline-variant: #4a4640;
-    /* Background — Charcoal */
-    --md-background: #1a1a1a;
-    --md-on-background: #f5f1e8;
-    /* Form element overrides — explicit dark colors */
-    --md-input-bg: #1a1a1a;
-    --md-input-text: #f5f1e8;
-    --md-input-border: #938f99;
-    --md-input-placeholder: #d6cfc0;
-    --md-input-focus-border: #7fb89a;
-    --md-input-hover-border: #f5f1e8;
-    /* Scrim */
-    --md-scrim: rgba(0,0,0,0.6);
-    /* Elevation shadows (MD3) */
-    --md-elevation-1: 0 1px 3px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
-    --md-elevation-2: 0 2px 6px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
-    --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.5);
-    --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,.4), 0 2px 3px rgba(0,0,0,.5);
-    --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,.4), 0 4px 4px rgba(0,0,0,.5);
-    /* State layers (MD3) */
-    --md-state-hover: rgba(245,241,232,0.08);
-    --md-state-focus: rgba(245,241,232,0.12);
-    --md-state-pressed: rgba(245,241,232,0.12);
-    --md-state-dragged: rgba(245,241,232,0.16);
+
+    --cgui-canvas: #0F0F11;
+    --cgui-pane: #16161A;
+    --cgui-border: #2A2A32;
+    --cgui-text: #F3F4F6;
+    --cgui-text-secondary: #9CA3AF;
+    --cgui-accent: #3B82F6;
+    --cgui-accent-hover: #2563EB;
+    --cgui-on-accent: #FFFFFF;
+
+    --cgui-success: #10B981;
+    --cgui-on-success: #FFFFFF;
+    --cgui-warning: #F59E0B;
+    --cgui-on-warning: #111827;
+    --cgui-error: #EF4444;
+    --cgui-on-error: #FFFFFF;
+
+    --cgui-state-hover: rgba(255, 255, 255, 0.06);
+    --cgui-state-active: rgba(59, 130, 246, 0.2);
+    --cgui-state-selected: rgba(59, 130, 246, 0.12);
+
+    --cgui-scrim: rgba(0, 0, 0, 0.7);
+    --cgui-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
-/* Lab Parchment AMOLED Black Theme Tokens */
-.amoled{
+
+/* AMOLED variant */
+.amoled {
     color-scheme: dark;
-    /* Primary — Forest Green (lightened for AMOLED surfaces) */
-    --md-primary: #7fb89a;
-    --md-on-primary: #0a2415;
-    --md-primary-container: #1f4530;
-    --md-on-primary-container: #c8e6d4;
-    /* Secondary — Deep Teal (lightened for AMOLED surfaces) */
-    --md-secondary: #7ab8b8;
-    --md-on-secondary: #051a1a;
-    --md-secondary-container: #1f4d4d;
-    --md-on-secondary-container: #d0e8e8;
-    /* Tertiary — Burnt Sienna (lightened for AMOLED surfaces) */
-    --md-tertiary: #e8967f;
-    --md-on-tertiary: #3d1208;
-    --md-tertiary-container: #5d2618;
-    --md-on-tertiary-container: #f4d5cc;
-    /* Error */
-    --md-error: #f2b8b5;
-    --md-on-error: #601410;
-    --md-error-container: #8c1d18;
-    --md-on-error-container: #f9dedc;
-    /* Success — Forest Green (lightened) */
-    --md-success: #7fb89a;
-    --md-on-success: #0a2415;
-    --md-success-container: #1f4530;
-    --md-on-success-container: #c8e6d4;
-    /* Warning — Amber (lightened) */
-    --md-warning: #e8c896;
-    --md-on-warning: #3d2a05;
-    --md-warning-container: #5d4108;
-    --md-on-warning-container: #faecd0;
-    /* Surfaces — Pure black for AMOLED displays */
-    --md-surface: #000000;
-    --md-surface-dim: #000000;
-    --md-surface-bright: #1a1a1a;
-    --md-surface-container-lowest: #000000;
-    --md-surface-container-low: #000000;
-    --md-surface-container: #0a0a0a;
-    --md-surface-container-high: #141414;
-    --md-surface-container-highest: #1e1e1e;
-    --md-on-surface: #f5f1e8;
-    --md-on-surface-variant: #d6cfc0;
-    --md-surface-variant: #4a4640;
-    --md-inverse-surface: #f5f1e8;
-    --md-inverse-on-surface: #2a2620;
-    /* Outlines */
-    --md-outline: #938f99;
-    --md-outline-variant: #4a4640;
-    /* Background — Pure black */
-    --md-background: #000000;
-    --md-on-background: #f5f1e8;
-    /* Form element overrides — AMOLED black colors */
-    --md-input-bg: #000000;
-    --md-input-text: #f5f1e8;
-    --md-input-border: #938f99;
-    --md-input-placeholder: #d6cfc0;
-    --md-input-focus-border: #7fb89a;
-    --md-input-hover-border: #f5f1e8;
-    /* Scrim */
-    --md-scrim: rgba(0,0,0,0.8);
-    /* Elevation shadows (MD3) */
-    --md-elevation-1: 0 1px 3px rgba(0,0,0,.7), 0 1px 2px rgba(0,0,0,.6);
-    --md-elevation-2: 0 2px 6px rgba(0,0,0,.7), 0 1px 2px rgba(0,0,0,.6);
-    --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,.6), 0 1px 3px rgba(0,0,0,.7);
-    --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,.6), 0 2px 3px rgba(0,0,0,.7);
-    --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,.6), 0 4px 4px rgba(0,0,0,.7);
-    /* State layers (MD3) */
-    --md-state-hover: rgba(245,241,232,0.08);
-    --md-state-focus: rgba(245,241,232,0.12);
-    --md-state-pressed: rgba(245,241,232,0.12);
-    --md-state-dragged: rgba(245,241,232,0.16);
+
+    --cgui-canvas: #000000;
+    --cgui-pane: #0A0A0A;
+    --cgui-border: #1F1F24;
+    --cgui-text: #F3F4F6;
+    --cgui-text-secondary: #9CA3AF;
+    --cgui-accent: #3B82F6;
+    --cgui-accent-hover: #2563EB;
+    --cgui-on-accent: #FFFFFF;
+
+    --cgui-success: #10B981;
+    --cgui-on-success: #FFFFFF;
+    --cgui-warning: #F59E0B;
+    --cgui-on-warning: #111827;
+    --cgui-error: #EF4444;
+    --cgui-on-error: #FFFFFF;
+
+    --cgui-state-hover: rgba(255, 255, 255, 0.06);
+    --cgui-state-active: rgba(59, 130, 246, 0.2);
+    --cgui-state-selected: rgba(59, 130, 246, 0.12);
+
+    --cgui-scrim: rgba(0, 0, 0, 0.85);
+    --cgui-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
-/* Explicit light mode class */
-.light{
+
+/* Explicit light override */
+.light {
     color-scheme: light;
 }
-/* System dark mode preference (only when no explicit class) */
-@media (prefers-color-scheme: dark){
-    :root:not(.light){
+
+/* System dark preference (no explicit class) */
+@media (prefers-color-scheme: dark) {
+    :root:not(.light):not(.dark):not(.amoled) {
         color-scheme: dark;
-        /* Primary — Forest Green (lightened for dark surfaces) */
-        --md-primary: #7fb89a;
-        --md-on-primary: #0a2415;
-        --md-primary-container: #1f4530;
-        --md-on-primary-container: #c8e6d4;
-        /* Secondary — Deep Teal (lightened for dark surfaces) */
-        --md-secondary: #7ab8b8;
-        --md-on-secondary: #051a1a;
-        --md-secondary-container: #1f4d4d;
-        --md-on-secondary-container: #d0e8e8;
-        /* Tertiary — Burnt Sienna (lightened for dark surfaces) */
-        --md-tertiary: #e8967f;
-        --md-on-tertiary: #3d1208;
-        --md-tertiary-container: #5d2618;
-        --md-on-tertiary-container: #f4d5cc;
-        /* Error */
-        --md-error: #f2b8b5;
-        --md-on-error: #601410;
-        --md-error-container: #8c1d18;
-        --md-on-error-container: #f9dedc;
-        /* Success — Forest Green (lightened) */
-        --md-success: #7fb89a;
-        --md-on-success: #0a2415;
-        --md-success-container: #1f4530;
-        --md-on-success-container: #c8e6d4;
-        /* Warning — Amber (lightened) */
-        --md-warning: #e8c896;
-        --md-on-warning: #3d2a05;
-        --md-warning-container: #5d4108;
-        --md-on-warning-container: #faecd0;
-        /* Surfaces — Charcoal with parchment undertone */
-        --md-surface: #1a1a1a;
-        --md-surface-dim: #141414;
-        --md-surface-bright: #2a2620;
-        --md-surface-container-lowest: #0f0f0f;
-        --md-surface-container-low: #1a1a1a;
-        --md-surface-container: #1f1f1d;
-        --md-surface-container-high: #252523;
-        --md-surface-container-highest: #2a2a28;
-        --md-on-surface: #f5f1e8;
-        --md-on-surface-variant: #d6cfc0;
-        --md-surface-variant: #4a4640;
-        --md-inverse-surface: #f5f1e8;
-        --md-inverse-on-surface: #2a2620;
-        /* Outlines */
-        --md-outline: #938f99;
-        --md-outline-variant: #4a4640;
-        /* Background — Charcoal */
-        --md-background: #1a1a1a;
-        --md-on-background: #f5f1e8;
-        /* Form element overrides — explicit dark colors */
-        --md-input-bg: #1a1a1a;
-        --md-input-text: #f5f1e8;
-        --md-input-border: #938f99;
-        --md-input-placeholder: #d6cfc0;
-        --md-input-focus-border: #7fb89a;
-        --md-input-hover-border: #f5f1e8;
-        /* Scrim */
-        --md-scrim: rgba(0,0,0,0.6);
-        /* Elevation shadows (MD3) */
-        --md-elevation-1: 0 1px 3px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
-        --md-elevation-2: 0 2px 6px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
-        --md-elevation-3: 0 4px 8px 3px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.5);
-        --md-elevation-4: 0 6px 10px 4px rgba(0,0,0,.4), 0 2px 3px rgba(0,0,0,.5);
-        --md-elevation-5: 0 8px 12px 6px rgba(0,0,0,.4), 0 4px 4px rgba(0,0,0,.5);
-        /* State layers (MD3) */
-        --md-state-hover: rgba(245,241,232,0.08);
-        --md-state-focus: rgba(245,241,232,0.12);
-        --md-state-pressed: rgba(245,241,232,0.12);
-        --md-state-dragged: rgba(245,241,232,0.16);
+
+        --cgui-canvas: #0F0F11;
+        --cgui-pane: #16161A;
+        --cgui-border: #2A2A32;
+        --cgui-text: #F3F4F6;
+        --cgui-text-secondary: #9CA3AF;
+        --cgui-accent: #3B82F6;
+        --cgui-accent-hover: #2563EB;
+        --cgui-on-accent: #FFFFFF;
+
+        --cgui-success: #10B981;
+        --cgui-on-success: #FFFFFF;
+        --cgui-warning: #F59E0B;
+        --cgui-on-warning: #111827;
+        --cgui-error: #EF4444;
+        --cgui-on-error: #FFFFFF;
+
+        --cgui-state-hover: rgba(255, 255, 255, 0.06);
+        --cgui-state-active: rgba(59, 130, 246, 0.2);
+        --cgui-state-selected: rgba(59, 130, 246, 0.12);
+
+        --cgui-scrim: rgba(0, 0, 0, 0.7);
+        --cgui-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
 }
-/* Reset */
-*{
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    border-radius: var(--cgui-radius);
 }
-html{
+
+html {
     font-size: clamp(13px, 0.8rem + 0.3vw, 16px);
-    background: var(--md-background);
+    background: var(--cgui-canvas);
     min-height: 100%;
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
 }
-body{
-    font-family: "Noto Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--md-background);
-    color: var(--md-on-surface);
-    line-height: 1.6;
+
+body {
+    font: var(--cgui-font-body);
+    background: var(--cgui-canvas);
+    color: var(--cgui-text);
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background-color 300ms ease,
-                color 300ms ease;
+    transition: background-color var(--cgui-duration-slow) var(--cgui-easing),
+                color var(--cgui-duration-slow) var(--cgui-easing);
     text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
-h1, h2, h3, h4{
-    font-family: "EB Garamond", "Noto Sans", Georgia, serif;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+
+/* ============================================================
+   TYPOGRAPHY (CGUI — Noto Sans Only for UI)
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Noto Sans", sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
 }
-/* Global scrollbar */
-*{
+
+h1 { font-size: 32px; font-weight: 900; }
+h2 { font-size: 24px; }
+h3 { font-size: 18px; }
+h4 { font-size: 14px; }
+
+/* Hero metric — Noto Sans Black, minimum 36pt/48px */
+.cgui-hero-metric {
+    font-family: "Noto Sans", sans-serif;
+    font-weight: 900;
+    font-size: 48px;
+    line-height: 1.1;
+    color: var(--cgui-text);
+}
+
+/* Editorial micro-label */
+.cgui-micro-label {
+    font: var(--cgui-font-label);
+    letter-spacing: var(--cgui-label-tracking);
+    text-transform: uppercase;
+    color: var(--cgui-text-secondary);
+}
+
+/* Prose / documentation — Noto Serif only */
+.cgui-prose {
+    font: var(--cgui-font-prose);
+    color: var(--cgui-text);
+}
+
+/* ============================================================
+   INTERACTIVE TOKENS (CGUI — no borders, no rounded corners)
+   ============================================================ */
+.cgui-token {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    font: var(--cgui-font-input);
+    font-weight: 400;
+    color: var(--cgui-text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background var(--cgui-duration-fast) var(--cgui-easing),
+                color var(--cgui-duration-fast) var(--cgui-easing);
+}
+
+.cgui-token:hover {
+    color: var(--cgui-text);
+    background: var(--cgui-state-hover);
+}
+
+.cgui-token.active,
+.cgui-token[aria-selected="true"],
+.cgui-token[aria-pressed="true"] {
+    background: var(--cgui-accent);
+    color: var(--cgui-on-accent);
+    font-weight: 700;
+}
+
+/* ============================================================
+   FORM ELEMENTS (no individual borders, margin separation only)
+   ============================================================ */
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+textarea,
+select {
+    font: var(--cgui-font-input);
+    color: var(--cgui-text);
+    background: var(--cgui-pane);
+    padding: 10px 14px;
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--cgui-border);
+    outline: none;
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-bottom-color: var(--cgui-accent);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--cgui-text-secondary);
+    font-weight: 300;
+}
+
+/* Buttons — flat, no rounded corners */
+button,
+.cgui-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font: 700 13px/1 "Noto Sans", sans-serif;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--cgui-on-accent);
+    background: var(--cgui-accent);
+    border: none;
+    cursor: pointer;
+    transition: background var(--cgui-duration-fast) var(--cgui-easing),
+                opacity var(--cgui-duration-fast) var(--cgui-easing);
+}
+
+button:hover,
+.cgui-btn:hover {
+    background: var(--cgui-accent-hover);
+}
+
+button:active,
+.cgui-btn:active {
+    opacity: 0.85;
+}
+
+button:focus-visible,
+.cgui-btn:focus-visible {
+    outline: 2px solid var(--cgui-accent);
+    outline-offset: 2px;
+}
+
+button:disabled,
+.cgui-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Secondary / ghost button */
+.cgui-btn-ghost {
+    background: transparent;
+    color: var(--cgui-text);
+    font-weight: 400;
+}
+
+.cgui-btn-ghost:hover {
+    background: var(--cgui-state-hover);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+* {
     scrollbar-width: thin;
-    scrollbar-color: var(--md-outline-variant) transparent;
+    scrollbar-color: var(--cgui-border) transparent;
 }
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:var(--md-outline-variant);border-radius:4px}
-::-webkit-scrollbar-track{background:transparent}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: var(--cgui-border); }
+::-webkit-scrollbar-track { background: transparent; }
+
 /* Selection */
-::selection{
-    background: var(--md-primary-container);
-    color: var(--md-on-primary-container);
+::selection {
+    background: var(--cgui-accent);
+    color: var(--cgui-on-accent);
+}
+
+/* ============================================================
+   LINKS
+   ============================================================ */
+a {
+    color: var(--cgui-accent);
+    text-decoration: none;
+    transition: opacity var(--cgui-duration-fast) var(--cgui-easing);
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* ============================================================
+   CGUI LAYOUT: THREE-COLUMN DESKTOP
+   ============================================================ */
+.cgui-app-shell {
+    display: grid;
+    grid-template-columns: var(--cgui-nav-width) var(--cgui-input-width) var(--cgui-output-width);
+    min-height: 100vh;
+    background: var(--cgui-canvas);
+}
+
+.cgui-nav-pane {
+    background: var(--cgui-pane);
+    border-right: 1px solid var(--cgui-border);
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+.cgui-input-pane {
+    background: var(--cgui-pane);
+    border-right: 1px solid var(--cgui-border);
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+.cgui-output-pane {
+    background: var(--cgui-pane);
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+/* Content area — spans columns 2+ in the three-column grid */
+.cgui-content {
+    grid-column: 2 / -1;
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+/* ============================================================
+   CGUI LAYOUT: SINGLE-COLUMN MOBILE (<768px)
+   ============================================================ */
+@media (max-width: 767px) {
+    .cgui-app-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .cgui-nav-pane {
+        height: var(--cgui-mobile-header-height);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-right: none;
+        border-bottom: 1px solid var(--cgui-border);
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .cgui-input-pane {
+        height: auto;
+        min-height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--cgui-border);
+    }
+
+    .cgui-output-pane {
+        height: auto;
+        min-height: auto;
+        position: relative;
+    }
+
+    .cgui-content {
+        grid-column: 1;
+        height: auto;
+        min-height: auto;
+        position: relative;
+        overflow: visible;
+    }
+
+    /* Hide desktop sidebar on mobile; show mobile nav banner */
+    .cgui-nav-pane > .sidebar {
+        display: none;
+    }
+
+    .mobile-nav {
+        display: flex;
+    }
+}
+
+/* ============================================================
+   CGUI CARD (flat, no rounded corners, margin-based separation)
+   ============================================================ */
+.cgui-card {
+    background: var(--cgui-pane);
+    padding: var(--cgui-space-6);
+    margin-bottom: 1px;
+    border: none;
+}
+
+.cgui-card + .cgui-card {
+    margin-top: var(--cgui-space-4);
+}
+
+/* ============================================================
+   ANIMATIONS (minimal, no GSAP-style heavy motion)
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+    .cgui-fade-in {
+        animation: cguiFadeIn var(--cgui-duration-normal) var(--cgui-easing) both;
+    }
+
+    @keyframes cguiFadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .cgui-slide-up {
+        animation: cguiSlideUp var(--cgui-duration-normal) var(--cgui-easing) both;
+    }
+
+    @keyframes cguiSlideUp {
+        from { opacity: 0; transform: translateY(4px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+}
+
+/* ============================================================
+   LEGACY ALIASES — map old --md-* tokens to --cgui-* for
+   backward compatibility during migration
+   ============================================================ */
+:root {
+    --md-primary: var(--cgui-accent);
+    --md-on-primary: var(--cgui-on-accent);
+    --md-surface: var(--cgui-pane);
+    --md-on-surface: var(--cgui-text);
+    --md-surface-variant: var(--cgui-pane);
+    --md-on-surface-variant: var(--cgui-text-secondary);
+    --md-outline: var(--cgui-border);
+    --md-outline-variant: var(--cgui-border);
+    --md-background: var(--cgui-canvas);
+    --md-on-background: var(--cgui-text);
+    /* Custom input field tokens from legacy MD3 system */
+    --md-input-bg: var(--cgui-pane);
+    --md-input-text: var(--cgui-text);
+    --md-input-border: var(--cgui-border);
+    --md-input-placeholder: var(--cgui-text-secondary);
+    --md-input-focus-border: var(--cgui-accent);
+    --md-input-hover-border: var(--cgui-text);
 }

@@ -1,17 +1,15 @@
 /**
- * Visual verification: The Solid-rendered Element Lookup card should match the
- * legacy #element-lookup card in frontend/index.html. Intentional diff: this
- * route adds a "Look Up" button (legacy relied on keyup only) and accepts
- * atomic number as a query (legacy matched symbol/name only). No Playwright
- * screenshot test is added per task spec; parity is verified by manual diff of
- * the rendered DOM against the legacy markup.
+ * Element Lookup — CGUI V3.0
+ * Auto-searches on input with 300ms debounce. No button needed.
  */
 import type {JSX} from "solid-js";
+import {onCleanup} from "solid-js";
 import {useElementLookup} from "../lib/useElementLookup";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import styles from "./element-lookup.module.css";
+
 function ElementLookup(): JSX.Element {
     let state = useElementLookup();
     let query = state.query;
@@ -21,24 +19,33 @@ function ElementLookup(): JSX.Element {
     let loading = state.loading;
     let loadError = state.loadError;
     let search = state.search;
-    function handleSearch(): void {
-        search();
-    }
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    onCleanup(function (): void {
+        if (debounceTimer !== null) {
+            clearTimeout(debounceTimer);
+        }
+    });
+
     function handleInput(e: Event): void {
         let target = e.currentTarget as HTMLInputElement;
-        setQuery(target.value);
-    }
-    function handleKeyDown(e: KeyboardEvent): void {
-        if (e.key === "Enter") {
-            search();
+        let value = target.value;
+        setQuery(value);
+        if (debounceTimer !== null) {
+            clearTimeout(debounceTimer);
         }
+        debounceTimer = setTimeout(function (): void {
+            search();
+        }, 300);
     }
+
     function formatOptional(value: number | null | undefined, suffix: string): string {
         if (value === null || value === undefined) {
             return "N/A";
         }
         return String(value) + suffix;
     }
+
     function renderResult(): JSX.Element {
         let el = result();
         if (el === null) {
@@ -62,6 +69,7 @@ function ElementLookup(): JSX.Element {
             </div>
         );
     }
+
     function getStatusText(): string {
         if (loading()) {
             return "Loading elements…";
@@ -71,33 +79,34 @@ function ElementLookup(): JSX.Element {
         }
         return "";
     }
+
     return (
         <CalculatorCard
-            title="Element Information Lookup - Atomic Number, Mass, Electron Configuration and more"
-            description="Quickly look up any chemical element to find its atomic number, mass, electron configuration, and group on the periodic table. This tool is perfect for students, teachers, or hobbyists who need fast reference information. Just type the element name, symbol, or atomic number and get accurate, reliable data instantly."
+            title="Element Lookup"
+            description="Type an element symbol, name, or atomic number and properties appear automatically. No button needed — just type. Supports all 118 elements with full property data."
             exampleDetails={
                 <ExampleDetails>
-                    <p>Try typing <strong>H</strong> for Hydrogen, <strong>Fe</strong> for Iron, or <strong>6</strong> for Carbon to see element properties.</p>
+                    <p>Try <strong>H</strong> for Hydrogen, <strong>Fe</strong> for Iron, <strong>Au</strong> for Gold, or <strong>6</strong> for Carbon.</p>
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#mass-calc">To compute masses using this elemental data, try the Molar Mass Calculator.</SeeAlsoLink>
+                <SeeAlsoLink href="/molar-mass">Use the Molar Mass Calculator once you know your elements.</SeeAlsoLink>
             }
         >
-            <label for="element-input">Element symbol, name, or atomic number</label>
+            <label for="element-input" class={styles.label}>Element symbol, name, or atomic number</label>
             <input
                 type="text"
                 class={styles.input}
                 id="element-input"
-                placeholder="E.g., H, Hydrogen, or 1"
+                placeholder="E.g., H, Hydrogen, Fe, Au, or 6"
                 aria-label="Element symbol, name, or atomic number"
                 value={query()}
                 onInput={handleInput}
-                onKeyDown={handleKeyDown}
+                autocomplete="off"
+                spellcheck={false}
             />
-            <button class={styles.button} onClick={handleSearch}>Look Up</button>
             {getStatusText() && <div class={styles.result}><p>{getStatusText()}</p></div>}
-            {error() !== "" && <div class={styles.result + " " + styles.error}><p>{error()}</p></div>}
+            {error() !== "" && result() === null && <div class={styles.result + " " + styles.error}><p>{error()}</p></div>}
             {renderResult()}
         </CalculatorCard>
     );

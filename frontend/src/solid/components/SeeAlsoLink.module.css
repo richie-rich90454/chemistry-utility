@@ -1,12 +1,12 @@
 .seeAlso{
-    padding: 0 var(--md-space-5);
-    margin-bottom: var(--md-space-3);
-    color: var(--md-on-surface-variant);
+    padding: 0 var(--cgui-space-5);
+    margin-bottom: var(--cgui-space-3);
+    color: var(--cgui-text-secondary);
     font-size: 0.9rem;
     line-height: 1.6;
 }
 .seeAlso a{
-    color: var(--md-primary);
+    color: var(--cgui-accent);
     text-decoration: none;
 }
 .seeAlso a:hover{

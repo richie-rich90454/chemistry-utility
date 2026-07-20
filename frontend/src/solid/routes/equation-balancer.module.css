@@ -1,94 +1,94 @@
 .input{
-    margin: 0 var(--md-space-5) var(--md-space-3) var(--md-space-5);
-    width: calc(100% - 2 * var(--md-space-5));
-    padding: 10px var(--md-space-4);
+    margin: 0 var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
+    width: calc(100% - 2 * var(--cgui-space-5));
+    padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
     color-scheme: light !important;
-    background: var(--md-input-bg) !important;
-    color: var(--md-input-text) !important;
-    border: 1.5px solid var(--md-input-border);
-    border-radius: var(--md-shape-sm);
-    transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                color var(--md-motion-duration-medium2) var(--md-motion-easing-standard);
+    background: var(--cgui-pane) !important;
+    color: var(--cgui-text) !important;
+    border: 1.5px solid var(--cgui-border);
+    border-radius: 0;
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
+                box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-normal) var(--cgui-easing),
+                color var(--cgui-duration-normal) var(--cgui-easing);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     min-height: 48px;
-    -webkit-text-fill-color: var(--md-input-text) !important;
+    -webkit-text-fill-color: var(--cgui-text) !important;
 }
 .input::placeholder{
-    color: var(--md-input-placeholder) !important;
+    color: var(--cgui-text-secondary) !important;
     opacity: 1 !important;
-    -webkit-text-fill-color: var(--md-input-placeholder) !important;
+    -webkit-text-fill-color: var(--cgui-text-secondary) !important;
 }
 .input:hover{
-    border-color: var(--md-input-hover-border);
+    border-color: var(--cgui-text);
 }
 .input:focus{
-    border-color: var(--md-input-focus-border);
-    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+    border-color: var(--cgui-accent);
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
 }
 .select{
-    margin: 0 var(--md-space-5) var(--md-space-3) var(--md-space-5);
-    width: calc(100% - 2 * var(--md-space-5));
-    padding: 10px var(--md-space-4);
+    margin: 0 var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
+    width: calc(100% - 2 * var(--cgui-space-5));
+    padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
     color-scheme: light !important;
-    background: var(--md-input-bg) !important;
-    color: var(--md-input-text) !important;
-    border: 1.5px solid var(--md-input-border);
-    border-radius: var(--md-shape-sm);
+    background: var(--cgui-pane) !important;
+    color: var(--cgui-text) !important;
+    border: 1.5px solid var(--cgui-border);
+    border-radius: 0;
     min-height: 48px;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
 }
 .select:focus{
-    border-color: var(--md-input-focus-border);
-    box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.12);
+    border-color: var(--cgui-accent);
+    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
 }
 .buttonRow{
-    margin: var(--md-space-3) var(--md-space-5) var(--md-space-3) var(--md-space-5);
+    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
     display: flex;
-    gap: var(--md-space-3);
+    gap: var(--cgui-space-3);
     flex-wrap: wrap;
 }
 .button{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--md-space-2);
-    padding: 0 var(--md-space-6);
+    gap: var(--cgui-space-2);
+    padding: 0 var(--cgui-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--md-on-primary) !important;
-    background-color: var(--md-primary) !important;
+    color: var(--cgui-on-accent) !important;
+    background-color: var(--cgui-accent) !important;
     border: none;
-    border-radius: var(--md-shape-full);
+    border-radius: 0;
     cursor: pointer;
-    transition: box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                transform var(--md-motion-duration-short3) var(--md-motion-easing-standard);
+    transition: box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-fast) var(--cgui-easing),
+                transform var(--cgui-duration-fast) var(--cgui-easing);
     min-height: 42px;
     width: auto;
     position: relative;
     overflow: hidden;
-    box-shadow: var(--md-elevation-1);
+    box-shadow: none;
 }
 .button:hover{
-    box-shadow: var(--md-elevation-2);
+    box-shadow: none;
     filter: brightness(1.08);
 }
 .button:active{
@@ -100,33 +100,33 @@
     pointer-events: none;
 }
 .button:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }
 .secondaryButton{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--md-space-2);
-    padding: 0 var(--md-space-6);
+    gap: var(--cgui-space-2);
+    padding: 0 var(--cgui-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--md-on-surface) !important;
-    background-color: var(--md-surface-container) !important;
-    border: 1.5px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-full);
+    color: var(--cgui-text) !important;
+    background-color: var(--cgui-pane) !important;
+    border: 1.5px solid var(--cgui-border);
+    border-radius: 0;
     cursor: pointer;
-    transition: box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: box-shadow var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-fast) var(--cgui-easing),
+                border-color var(--cgui-duration-fast) var(--cgui-easing);
     min-height: 42px;
     width: auto;
 }
 .secondaryButton:hover{
-    box-shadow: var(--md-elevation-1);
-    border-color: var(--md-outline);
+    box-shadow: none;
+    border-color: var(--cgui-text-secondary);
     filter: brightness(1.04);
 }
 .secondaryButton:disabled{
@@ -135,50 +135,50 @@
     pointer-events: none;
 }
 .secondaryButton:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }
 .result{
-    margin: var(--md-space-3) var(--md-space-5) var(--md-space-5) var(--md-space-5);
+    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
     position: relative;
-    padding: var(--md-space-4) var(--md-space-5);
-    background: var(--md-surface-container);
-    border: 1px solid var(--md-outline-variant);
-    border-left: 4px solid var(--md-primary);
-    border-radius: var(--md-shape-sm);
+    padding: var(--cgui-space-4) var(--cgui-space-5);
+    background: var(--cgui-pane);
+    border: 1px solid var(--cgui-border);
+    border-left: 4px solid var(--cgui-accent);
+    border-radius: 0;
     font-family: "Noto Sans", sans-serif;
     font-size: 0.95rem;
     overflow-wrap: break-word;
     line-height: 1.6;
-    transition: border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard),
-                background-color var(--md-motion-duration-medium2) var(--md-motion-easing-standard),
-                box-shadow var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
+                background-color var(--cgui-duration-normal) var(--cgui-easing),
+                box-shadow var(--cgui-duration-fast) var(--cgui-easing);
 }
 .result:hover{
-    box-shadow: var(--md-elevation-1);
+    box-shadow: none;
 }
 .result:empty{
     display: none;
 }
 .result p{
     margin: 0.125rem 0;
-    color: var(--md-on-surface);
+    color: var(--cgui-text);
     padding: 0;
 }
 .result.error{
-    border-color: var(--md-error-container);
-    border-left-color: var(--md-error);
-    background: var(--md-error-container);
+    border-color: transparent;
+    border-left-color: var(--cgui-error);
+    background: transparent;
 }
 .result.error p{
-    color: var(--md-on-error-container);
+    color: var(--cgui-error);
 }
 .equation{
     font-family: "Noto Sans", sans-serif;
     font-size: 1.15rem;
     line-height: 1.8;
-    color: var(--md-on-surface);
-    padding: var(--md-space-2) 0;
+    color: var(--cgui-text);
+    padding: var(--cgui-space-2) 0;
     overflow-wrap: break-word;
 }
 .term{
@@ -188,44 +188,44 @@
 .coefficient{
     display: inline-block;
     min-width: 1ch;
-    padding: 0 var(--md-space-1);
+    padding: 0 var(--cgui-space-1);
     margin-right: 2px;
-    border-radius: var(--md-shape-xs);
-    background: var(--md-primary-container);
-    color: var(--md-on-primary-container);
+    border-radius: 0;
+    background: var(--cgui-state-active);
+    color: var(--cgui-accent);
     font-weight: 700;
     font-size: 1rem;
     line-height: 1.4;
-    box-shadow: 0 0 0 1px var(--md-outline-variant);
+    box-shadow: 0 0 0 1px var(--cgui-border);
 }
 .operator{
     display: inline;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     font-weight: 600;
-    margin: 0 var(--md-space-1);
+    margin: 0 var(--cgui-space-1);
 }
 .explanationDetails{
-    margin-top: var(--md-space-3);
-    border: 1px solid var(--md-outline-variant);
-    border-radius: var(--md-shape-md);
+    margin-top: var(--cgui-space-3);
+    border: 1px solid var(--cgui-border);
+    border-radius: 0;
     overflow: hidden;
-    background: var(--md-surface-container-low);
+    background: var(--cgui-pane);
 }
 .explanationDetails[open]{
-    border-color: var(--md-outline);
-    box-shadow: var(--md-elevation-1);
+    border-color: var(--cgui-text-secondary);
+    box-shadow: none;
 }
 .explanationDetails summary{
-    padding: var(--md-space-3) var(--md-space-4);
+    padding: var(--cgui-space-3) var(--cgui-space-4);
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
     cursor: pointer;
     background: transparent;
     list-style: none;
     display: flex;
     align-items: center;
-    gap: var(--md-space-3);
+    gap: var(--cgui-space-3);
 }
 .explanationDetails summary::-webkit-details-marker{
     display: none;
@@ -238,36 +238,36 @@
     border-left: 6px solid currentColor;
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
-    transition: transform var(--md-motion-duration-medium2) var(--md-motion-easing-emphasized-decelerate);
+    transition: transform var(--cgui-duration-normal) var(--cgui-easing);
     flex-shrink: 0;
 }
 .explanationDetails[open] summary::before{
     transform: rotate(90deg);
 }
 .explanationDetails summary:hover{
-    background: var(--md-state-hover);
-    color: var(--md-on-surface);
+    background: var(--cgui-state-hover);
+    color: var(--cgui-text);
 }
 .explanationDetails summary:focus-visible{
-    outline: 2px solid var(--md-primary);
+    outline: 2px solid var(--cgui-accent);
     outline-offset: -2px;
 }
 .explanationDetails[open] summary{
-    color: var(--md-on-surface);
-    border-bottom: 1px solid var(--md-outline-variant);
+    color: var(--cgui-text);
+    border-bottom: 1px solid var(--cgui-border);
 }
 .explanationBody{
-    padding: var(--md-space-4);
+    padding: var(--cgui-space-4);
     margin: 0;
 }
 .explanationBody p{
     margin: 0.25rem 0;
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
 }
 .explanationBody p strong{
-    color: var(--md-on-surface);
+    color: var(--cgui-text);
     font-weight: 600;
 }
 .explanationBody ol{
@@ -275,18 +275,18 @@
     padding-left: 1.5rem;
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
 }
 .explanationBody ol li{
     margin: 0.125rem 0;
 }
 .labelText{
     display: block;
-    margin: var(--md-space-3) var(--md-space-5) var(--md-space-1) var(--md-space-5);
+    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-1) var(--cgui-space-5);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--md-on-surface-variant);
+    color: var(--cgui-text-secondary);
 }
 @media (max-width: 720px){
     .buttonRow{

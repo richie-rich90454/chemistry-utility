@@ -1,45 +1,68 @@
 import type {JSX} from "solid-js";
-import {For} from "solid-js";
-import {A} from "@solidjs/router";
+import {createSignal, onCleanup, onMount} from "solid-js";
 import {useNavSheet} from "../stores/navSheet";
+import {NavigationManager} from "../../modules/navigationManager.js";
+import {ThemeToggle} from "./ThemeToggle";
 import styles from "./MobileBottomTabs.module.css";
-interface TabDef {
-    label: string;
-    href: string;
-    ariaLabel: string;
-}
-const TABS: TabDef[] = [
-    {label: "Elements", href: "/element-lookup", ariaLabel: "Element lookup"},
-    {label: "Molar Mass", href: "/molar-mass", ariaLabel: "Molar mass calculator"},
-    {label: "Balancer", href: "/equation-balancer", ariaLabel: "Equation balancer"},
-    {label: "Dilution", href: "/dilution", ariaLabel: "Dilution calculator"}
-];
+
+let nameById: Map<string, string> = new Map();
+
 function MobileBottomTabs(): JSX.Element {
     let sheet = useNavSheet();
-    function handleMore(): void {
+    let [activeName, setActiveName] = createSignal("");
+
+    onMount(function (): void {
+        if (nameById.size === 0) {
+            let nav = NavigationManager.getInstance();
+            for (let calc of nav.getCalculators()) {
+                nameById.set(calc.id, calc.name);
+            }
+        }
+        updateActiveName();
+
+        let popListener = function (): void {
+            updateActiveName();
+        };
+        window.addEventListener("popstate", popListener);
+
+        let nav = NavigationManager.getInstance();
+        let navListener = function (id: string | null): void {
+            if (id !== null) {
+                setActiveName(nameById.get(id) ?? "");
+            }
+        };
+        nav.subscribe(navListener);
+
+        onCleanup(function (): void {
+            window.removeEventListener("popstate", popListener);
+            nav.unsubscribe(navListener);
+        });
+    });
+
+    function updateActiveName(): void {
+        let pathname = window.location.pathname;
+        let id = pathname.replace(/^\//, "");
+        if (id === "") {
+            id = "dashboard";
+        }
+        setActiveName(nameById.get(id) ?? "Chemistry Utility");
+    }
+
+    function handleMenu(): void {
         sheet.open();
     }
+
     return (
-        <nav class={styles.bottomTabs} aria-label="Quick access">
-            <For each={TABS}>
-                {(tab) => (
-                    <A href={tab.href} class={styles.tabItem} activeClass={styles.active} aria-label={tab.ariaLabel}>
-                        <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="24" height="24">
-                            <circle cx="12" cy="12" r="4" fill="currentColor" />
-                        </svg>
-                        <span class={styles.tabLabel}>{tab.label}</span>
-                    </A>
-                )}
-            </For>
-            <button type="button" class={styles.tabItem} aria-label="More calculators" onClick={handleMore}>
-                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="24" height="24">
-                    <circle cx="5" cy="12" r="2" fill="currentColor" />
-                    <circle cx="12" cy="12" r="2" fill="currentColor" />
-                    <circle cx="19" cy="12" r="2" fill="currentColor" />
+        <header class={styles.topBanner} aria-label="Navigation">
+            <button type="button" class={styles.menuBtn} aria-label="Open navigation menu" onClick={handleMenu}>
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" />
                 </svg>
-                <span class={styles.tabLabel}>More</span>
             </button>
-        </nav>
+            <span class={styles.toolName}>{activeName()}</span>
+            <ThemeToggle />
+        </header>
     );
 }
+
 export {MobileBottomTabs};

@@ -390,7 +390,7 @@ export class CompoundSearchUI {
 
     public openInMolarMassCalculator(formula: string): void {
         let manager: NavigationManager = NavigationManager.getInstance();
-        manager.navigate("mass-calc");
+        manager.navigate("molar-mass");
         let input: HTMLInputElement | null = document.getElementById("formula-input") as HTMLInputElement | null;
         if (input) {
             input.value = formula;

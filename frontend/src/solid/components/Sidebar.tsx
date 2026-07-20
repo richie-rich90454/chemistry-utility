@@ -13,9 +13,6 @@ interface GroupedCalculators {
     items: CalculatorInfo[];
 }
 function calculatorIdToRoute(id: string): string {
-    if (id === "mass-calc") {
-        return "/molar-mass";
-    }
     return "/" + id;
 }
 function groupByCategory(calculators: CalculatorInfo[]): GroupedCalculators[] {

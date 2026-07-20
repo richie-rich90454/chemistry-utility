@@ -22,13 +22,13 @@ describe("MobileNavSheet", function (): void {
     });
     it("does not render the sheet when closed", function (): void {
         let result = renderHost();
-        expect(result.queryByRole("dialog", {name: "More calculators"})).toBeNull();
+        expect(result.queryByRole("dialog", {name: "Navigation menu"})).toBeNull();
     });
     it("renders the sheet with calculator list when opened", function (): void {
         let sheet = useNavSheet();
         let result = renderHost();
         sheet.open();
-        expect(result.getByRole("dialog", {name: "More calculators"})).toBeTruthy();
+        expect(result.getByRole("dialog", {name: "Navigation menu"})).toBeTruthy();
         expect(result.getByText("Molar Mass")).toBeTruthy();
     });
     it("renders all calculators in the list when opened", function (): void {
@@ -44,8 +44,15 @@ describe("MobileNavSheet", function (): void {
         let sheet = useNavSheet();
         let result = renderHost();
         sheet.open();
-        expect(result.queryByRole("dialog", {name: "More calculators"})).toBeTruthy();
+        expect(result.queryByRole("dialog", {name: "Navigation menu"})).toBeTruthy();
         sheet.close();
-        expect(result.queryByRole("dialog", {name: "More calculators"})).toBeNull();
+        expect(result.queryByRole("dialog", {name: "Navigation menu"})).toBeNull();
+    });
+    it("renders calculators grouped by category", function (): void {
+        let sheet = useNavSheet();
+        let result = renderHost();
+        sheet.open();
+        expect(result.getByText("General")).toBeTruthy();
+        expect(result.getByText("Solutions")).toBeTruthy();
     });
 });
