@@ -419,3 +419,40 @@ export class CompoundSearchUI {
         }
     }
 }
+export interface FormulaSegment {
+    text: string;
+    isSubscript: boolean;
+}
+export function buildFormulaSegments(formula: string): FormulaSegment[] {
+    let segments: FormulaSegment[] = [];
+    let buffer: string = "";
+    let i: number;
+    for (i = 0; i < formula.length; i++) {
+        let ch: string = formula.charAt(i);
+        if (ch >= "0" && ch <= "9") {
+            if (buffer.length > 0) {
+                segments.push({"text": buffer, "isSubscript": false});
+                buffer = "";
+            }
+            segments.push({"text": ch, "isSubscript": true});
+        }
+        else {
+            buffer = buffer + ch;
+        }
+    }
+    if (buffer.length > 0) {
+        segments.push({"text": buffer, "isSubscript": false});
+    }
+    return segments;
+}
+export async function searchCompounds(query: string, type: string): Promise<CompoundResult[]> {
+    let client: ApiClient = ApiClient.getInstance();
+    let path: string = "/api/v1/compounds/search?q=" + encodeURIComponent(query) + "&type=" + type;
+    let response: CompoundSearchResponse = await client.get<CompoundSearchResponse>(path);
+    return (response && response.compounds) ? response.compounds : [];
+}
+export async function fetchCompoundDetail(id: string): Promise<CompoundDetail> {
+    let client: ApiClient = ApiClient.getInstance();
+    let path: string = "/api/v1/compounds/" + id;
+    return await client.get<CompoundDetail>(path);
+}

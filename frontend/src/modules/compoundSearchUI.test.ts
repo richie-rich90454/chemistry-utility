@@ -34,7 +34,7 @@ vi.mock("./navigationManager.js", function () {
     };
 });
 
-import { CompoundSearchUI, CompoundResult, CompoundDetail } from "./compoundSearchUI.js";
+import { CompoundSearchUI, CompoundResult, CompoundDetail, buildFormulaSegments, searchCompounds, fetchCompoundDetail } from "./compoundSearchUI.js";
 import { ApiError } from "./apiClient.js";
 
 function setupSection(): HTMLElement {
@@ -517,6 +517,90 @@ describe("CompoundSearchUI", function () {
                 await vi.waitFor(function (): void {
                     expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/detail-id");
                 });
+            }
+        });
+    });
+    describe("buildFormulaSegments (pure)", function () {
+        it("should split formula into text and subscript segments", function () {
+            let segments = buildFormulaSegments("H2O");
+            expect(segments.length).toBe(3);
+            expect(segments[0]).toEqual({"text": "H", "isSubscript": false});
+            expect(segments[1]).toEqual({"text": "2", "isSubscript": true});
+            expect(segments[2]).toEqual({"text": "O", "isSubscript": false});
+        });
+        it("should handle consecutive digits as separate subscript segments", function () {
+            let segments = buildFormulaSegments("C12H22O11");
+            expect(segments[0]).toEqual({"text": "C", "isSubscript": false});
+            expect(segments[1]).toEqual({"text": "1", "isSubscript": true});
+            expect(segments[2]).toEqual({"text": "2", "isSubscript": true});
+            expect(segments[3]).toEqual({"text": "H", "isSubscript": false});
+        });
+        it("should return a single text segment when formula has no digits", function () {
+            let segments = buildFormulaSegments("NaCl");
+            expect(segments.length).toBe(1);
+            expect(segments[0]).toEqual({"text": "NaCl", "isSubscript": false});
+        });
+        it("should return empty array for empty string", function () {
+            let segments = buildFormulaSegments("");
+            expect(segments.length).toBe(0);
+        });
+        it("should handle formula starting with a digit", function () {
+            let segments = buildFormulaSegments("2H2O");
+            expect(segments[0]).toEqual({"text": "2", "isSubscript": true});
+            expect(segments[1]).toEqual({"text": "H", "isSubscript": false});
+            expect(segments[2]).toEqual({"text": "2", "isSubscript": true});
+            expect(segments[3]).toEqual({"text": "O", "isSubscript": false});
+        });
+    });
+    describe("searchCompounds (pure)", function () {
+        it("should call ApiClient.get with encoded query and type", async function () {
+            mockGet.mockResolvedValue({"compounds": [makeCompound()], "query": "water"});
+            let results = await searchCompounds("water & co", "name");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/search?q=water%20%26%20co&type=name");
+            expect(results.length).toBe(1);
+            expect(results[0].name).toBe("Water");
+        });
+        it("should return empty array when response has no compounds field", async function () {
+            mockGet.mockResolvedValue({});
+            let results = await searchCompounds("foo", "name");
+            expect(results.length).toBe(0);
+        });
+        it("should return empty array when response compounds is null", async function () {
+            mockGet.mockResolvedValue({"compounds": null, "query": "foo"});
+            let results = await searchCompounds("foo", "name");
+            expect(results.length).toBe(0);
+        });
+        it("should propagate errors from ApiClient", async function () {
+            mockGet.mockRejectedValue(new Error("network down"));
+            try {
+                await searchCompounds("foo", "name");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                expect((e as Error).message).toBe("network down");
+            }
+        });
+    });
+    describe("fetchCompoundDetail (pure)", function () {
+        it("should call ApiClient.get with the compound id path", async function () {
+            let detail: CompoundDetail = makeCompound() as CompoundDetail;
+            detail.inchi = "InChI=1S/H2O/h1H2";
+            detail.properties = {"melting_point": "0"};
+            detail.source = "pubchem";
+            mockGet.mockResolvedValue(detail);
+            let result = await fetchCompoundDetail("c1");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/c1");
+            expect(result.name).toBe("Water");
+            expect(result.inchi).toBe("InChI=1S/H2O/h1H2");
+            expect(result.properties["melting_point"]).toBe("0");
+            expect(result.source).toBe("pubchem");
+        });
+        it("should propagate errors from ApiClient", async function () {
+            mockGet.mockRejectedValue(new Error("not found"));
+            try {
+                await fetchCompoundDetail("missing");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                expect((e as Error).message).toBe("not found");
             }
         });
     });
