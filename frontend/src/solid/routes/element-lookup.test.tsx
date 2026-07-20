@@ -81,9 +81,10 @@ describe("ElementLookup", function (): void {
         });
         let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
         input.value = "Xyz";
+        vi.useFakeTimers();
         fireEvent.input(input);
-        let button = result.getByText("Look Up");
-        fireEvent.click(button);
+        await vi.advanceTimersByTimeAsync(350);
+        vi.useRealTimers();
         let errorText = await result.findByText(/Element not found/);
         expect(errorText).toBeTruthy();
     });
@@ -92,8 +93,12 @@ describe("ElementLookup", function (): void {
         await waitFor(function (): void {
             expect(result.queryByText(/Loading elements/)).toBeNull();
         });
-        let button = result.getByText("Look Up");
-        fireEvent.click(button);
+        let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
+        input.value = "";
+        vi.useFakeTimers();
+        fireEvent.input(input);
+        await vi.advanceTimersByTimeAsync(350);
+        vi.useRealTimers();
         let promptText = await result.findByText(/Please enter/);
         expect(promptText).toBeTruthy();
     });
@@ -104,8 +109,11 @@ describe("ElementLookup", function (): void {
         });
         let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
         input.value = "Fe";
+        vi.useFakeTimers();
         fireEvent.input(input);
         fireEvent.keyDown(input, {key: "Enter"});
+        await vi.advanceTimersByTimeAsync(350);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/Name: Iron/);
         });
