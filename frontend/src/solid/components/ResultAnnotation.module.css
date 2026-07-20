@@ -1,0 +1,71 @@
+.annotation{
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--md-outline-variant);
+}
+.favoriteToggle{
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--md-on-surface-variant);
+    border-radius: 50%;
+    font-size: 1.25rem;
+    line-height: 1;
+}
+.favoriteToggle:hover{
+    background-color: var(--md-surface-container-high);
+}
+.favoriteToggle[aria-pressed="true"]{
+    color: var(--md-warning);
+}
+.favoriteToggle:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.noteInput{
+    flex: 1;
+    min-height: 60px;
+    padding: 8px 12px;
+    border: 1px solid var(--md-outline);
+    border-radius: 8px;
+    background-color: var(--md-surface-container-low);
+    color: var(--md-on-surface);
+    font-size: 0.875rem;
+    font-family: inherit;
+    resize: vertical;
+}
+.noteInput:focus{
+    outline: 2px solid var(--md-primary);
+    outline-offset: -1px;
+    border-color: var(--md-primary);
+}
+.saveButton{
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border: none;
+    padding: 6px 16px;
+    border-radius: var(--md-shape-full);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    align-self: flex-start;
+}
+.saveButton:hover{
+    box-shadow: var(--md-elevation-1);
+}
+.saveButton:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.savedIndicator{
+    color: var(--md-primary);
+    font-size: 0.75rem;
+    align-self: center;
+}
