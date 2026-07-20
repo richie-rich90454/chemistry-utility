@@ -32,6 +32,9 @@ import {Dashboard} from "./routes/dashboard";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
+function CatchAllRedirect(): JSX.Element {
+    return <Navigate href="/" />;
+}
 function App(): JSX.Element {
     onMount(function (): void {
         if (window.location.hash === "#mass-calc") {
@@ -231,6 +234,7 @@ function App(): JSX.Element {
             <Route path="/compound-search" component={CompoundSearch} />
             <Route path="/batch-calc" component={BatchCalc} />
             <Route path="/dashboard" component={Dashboard} />
+            <Route path="*" component={CatchAllRedirect} />
         </Router>
     );
 }
