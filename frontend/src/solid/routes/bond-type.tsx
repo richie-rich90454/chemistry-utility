@@ -16,18 +16,8 @@ import {DataCache} from "../../modules/dataCache.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
+import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./bond-type.module.css";
-function resolveResult(res: {"value": string; "explanation"?: string}, setResult: (v: string) => void, setError: (v: string) => void): void {
-    let value: string = res.value;
-    let explanation: string = res.explanation !== undefined ? res.explanation : "";
-    if (value === "" || explanation.indexOf("Error") !== -1) {
-        setError(explanation !== "" ? explanation : "Calculation failed");
-        setResult("");
-        return;
-    }
-    setError("");
-    setResult(explanation !== "" ? explanation : value);
-}
 function BondType(): JSX.Element {
     let [element1, setElement1] = createSignal("");
     let [element2, setElement2] = createSignal("");

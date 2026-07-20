@@ -23,6 +23,7 @@ import type {CalculatorField, CalculatorSelect} from "../components/CalculatorFo
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import {ChartCanvas} from "../components/third-party/ChartCanvas";
+import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./kinetics.module.css";
 let arrheniusCalculator = new ArrheniusCalculator();
 let rateLawCalculator = new RateLawCalculator();
@@ -129,17 +130,6 @@ function buildConcentrationChartData(points: ConcentrationTimePoint[]): ChartDat
             "backgroundColor": "rgba(15,58,58,0.1)"
         }]
     };
-}
-function resolveResult(res: {value: string; explanation?: string}, setResult: (v: string) => void, setError: (v: string) => void): void {
-    let value: string = res.value;
-    let explanation: string = res.explanation !== undefined ? res.explanation : "";
-    if (value === "" || explanation.indexOf("Error") !== -1) {
-        setError(explanation !== "" ? explanation : "Calculation failed");
-        setResult("");
-        return;
-    }
-    setError("");
-    setResult(explanation !== "" ? explanation : value);
 }
 function Kinetics(): JSX.Element {
     let [arrheniusResult, setArrheniusResult] = createSignal("");

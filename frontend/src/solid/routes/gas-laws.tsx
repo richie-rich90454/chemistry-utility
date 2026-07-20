@@ -20,6 +20,7 @@ import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
+import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./gas-laws.module.css";
 let idealCalculator = new IdealGasLawCalculator();
 let combinedCalculator = new CombinedGasLawCalculator();
@@ -83,17 +84,6 @@ let vdwFields: CalculatorField[] = [
     {"id": "vdw-a", "label": "a", "placeholder": "a (L² atm mol⁻²)", "ariaLabel": "Van der Waals constant a"},
     {"id": "vdw-b", "label": "b", "placeholder": "b (L mol⁻¹)", "ariaLabel": "Van der Waals constant b"}
 ];
-function resolveResult(res: {value: string; explanation?: string}, setResult: (v: string) => void, setError: (v: string) => void): void {
-    let value: string = res.value;
-    let explanation: string = res.explanation !== undefined ? res.explanation : "";
-    if (value === "" || explanation.indexOf("Error") !== -1) {
-        setError(explanation !== "" ? explanation : "Calculation failed");
-        setResult("");
-        return;
-    }
-    setError("");
-    setResult(explanation !== "" ? explanation : value);
-}
 function GasLaws(): JSX.Element {
     let [idealResult, setIdealResult] = createSignal("");
     let [idealError, setIdealError] = createSignal("");

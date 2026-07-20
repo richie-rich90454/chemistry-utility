@@ -3,33 +3,8 @@ import {createMemo, For} from "solid-js";
 import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
-import {calculatorIdToRoute} from "../components/Sidebar";
+import {GroupedCalculators, groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
 import styles from "./HomePage.module.css";
-interface GroupedCalculators {
-    category: string;
-    items: CalculatorInfo[];
-}
-function groupByCategory(calculators: CalculatorInfo[]): GroupedCalculators[] {
-    let groups: GroupedCalculators[] = [];
-    let i: number;
-    for (i = 0; i < calculators.length; i++) {
-        let calc = calculators[i];
-        let last: GroupedCalculators | null;
-        if (groups.length > 0) {
-            last = groups[groups.length - 1];
-        }
-        else {
-            last = null;
-        }
-        if (last !== null && last.category === calc.category) {
-            last.items.push(calc);
-        }
-        else {
-            groups.push({category: calc.category, items: [calc]});
-        }
-    }
-    return groups;
-}
 function HomePage(): JSX.Element {
     let calculators = createMemo(function (): CalculatorInfo[] {
         let nav = NavigationManager.getInstance();

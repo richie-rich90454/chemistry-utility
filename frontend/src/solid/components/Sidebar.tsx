@@ -3,39 +3,12 @@ import {For, createSignal, onMount} from "solid-js";
 import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
+import {GroupedCalculators, groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
 import {ThemeToggle} from "./ThemeToggle";
 import {WorkspaceList} from "./WorkspaceList";
 import {ExportImportButtons} from "./ExportImportButtons";
 import {PluginManagerPanel} from "./PluginManagerPanel";
 import styles from "./Sidebar.module.css";
-interface GroupedCalculators {
-    category: string;
-    items: CalculatorInfo[];
-}
-function calculatorIdToRoute(id: string): string {
-    return "/" + id;
-}
-function groupByCategory(calculators: CalculatorInfo[]): GroupedCalculators[] {
-    let groups: GroupedCalculators[] = [];
-    let i: number;
-    for (i = 0; i < calculators.length; i++) {
-        let calc = calculators[i];
-        let last: GroupedCalculators | null;
-        if (groups.length > 0) {
-            last = groups[groups.length - 1];
-        }
-        else {
-            last = null;
-        }
-        if (last !== null && last.category === calc.category) {
-            last.items.push(calc);
-        }
-        else {
-            groups.push({category: calc.category, items: [calc]});
-        }
-    }
-    return groups;
-}
 function Sidebar(): JSX.Element {
     let [calculators, setCalculators] = createSignal<CalculatorInfo[]>([]);
     let [searchQuery, setSearchQuery] = createSignal("");
@@ -126,4 +99,6 @@ function Sidebar(): JSX.Element {
         </aside>
     );
 }
-export {Sidebar, calculatorIdToRoute};
+export {Sidebar};
+// Re-export for backward compatibility with files that import calculatorIdToRoute from Sidebar
+export {calculatorIdToRoute} from "../../modules/calculatorHelper.js";

@@ -8,6 +8,7 @@ import {useElementLookup} from "../lib/useElementLookup";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
+import {formatOptional} from "../../modules/elementFormatter.js";
 import styles from "./element-lookup.module.css";
 
 function ElementLookup(): JSX.Element {
@@ -37,13 +38,6 @@ function ElementLookup(): JSX.Element {
         debounceTimer = setTimeout(function (): void {
             search();
         }, 300);
-    }
-
-    function formatOptional(value: number | null | undefined, suffix: string): string {
-        if (value === null || value === undefined) {
-            return "N/A";
-        }
-        return String(value) + suffix;
     }
 
     function renderResult(): JSX.Element {

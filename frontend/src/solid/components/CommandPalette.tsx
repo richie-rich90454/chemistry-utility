@@ -5,7 +5,7 @@ import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {fuzzyMatch} from "../lib/fuzzySearch";
 import {usePalette} from "../stores/palette";
-import {calculatorIdToRoute} from "./Sidebar";
+import {calculatorIdToRoute} from "../../modules/calculatorHelper.js";
 import styles from "./CommandPalette.module.css";
 function CommandPalette(): JSX.Element {
     let palette = usePalette();

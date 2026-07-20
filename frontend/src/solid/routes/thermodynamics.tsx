@@ -24,6 +24,7 @@ import type {CalculatorField, CalculatorSelect} from "../components/CalculatorFo
 import {BondEditor} from "../components/BondEditor";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
+import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./thermodynamics.module.css";
 let gibbsCalculator = new GibbsFreeEnergyCalculator();
 let hessCalculator = new HessLawCalculator();
@@ -69,17 +70,6 @@ let bornHaberFields: CalculatorField[] = [
     {"id": "born-haber-dHdiss", "label": "ΔHdiss", "placeholder": "ΔHdiss (kJ/mol)", "ariaLabel": "Enthalpy of dissociation"},
     {"id": "born-haber-EA", "label": "EA", "placeholder": "EA (kJ/mol)", "ariaLabel": "Electron affinity"}
 ];
-function resolveResult(res: {value: string; explanation?: string}, setResult: (v: string) => void, setError: (v: string) => void): void {
-    let value: string = res.value;
-    let explanation: string = res.explanation !== undefined ? res.explanation : "";
-    if (value === "" || explanation.indexOf("Error") !== -1) {
-        setError(explanation !== "" ? explanation : "Calculation failed");
-        setResult("");
-        return;
-    }
-    setError("");
-    setResult(explanation !== "" ? explanation : value);
-}
 function Thermodynamics(): JSX.Element {
     let [gibbsResult, setGibbsResult] = createSignal("");
     let [gibbsError, setGibbsError] = createSignal("");

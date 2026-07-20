@@ -4,27 +4,8 @@ import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {useNavSheet} from "../stores/navSheet";
-import {calculatorIdToRoute} from "./Sidebar";
+import {groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
 import styles from "./MobileNavSheet.module.css";
-
-interface GroupedCalculators {
-    category: string;
-    items: CalculatorInfo[];
-}
-
-function groupByCategory(calculators: CalculatorInfo[]): GroupedCalculators[] {
-    let groups: GroupedCalculators[] = [];
-    for (let i = 0; i < calculators.length; i++) {
-        let calc = calculators[i];
-        let last = groups.length > 0 ? groups[groups.length - 1] : null;
-        if (last !== null && last.category === calc.category) {
-            last.items.push(calc);
-        } else {
-            groups.push({category: calc.category, items: [calc]});
-        }
-    }
-    return groups;
-}
 
 function MobileNavSheet(): JSX.Element {
     let sheet = useNavSheet();

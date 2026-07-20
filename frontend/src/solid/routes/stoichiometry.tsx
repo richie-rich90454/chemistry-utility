@@ -15,6 +15,8 @@ import {StoichiometryCalculator, parseBalancedEquation} from "../../modules/stoi
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
+import {sanitizeId} from "../../modules/equationFormatter.js";
+import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./stoichiometry.module.css";
 interface TermObject {
     formula: string;
@@ -30,20 +32,6 @@ let calculationTypeOptions: {"value": string; "label": string}[] = [
     {"value": "reactant-from-product", "label": "Reactant from Product"},
     {"value": "limiting-reactant", "label": "Limiting Reactant"}
 ];
-function sanitizeId(formula: string): string {
-    return formula.replace(/[\(\)\[\]\{\}\,\s]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-}
-function resolveResult(res: {"value": string; "explanation"?: string}, setResult: (v: string) => void, setError: (v: string) => void): void {
-    let value: string = res.value;
-    let explanation: string = res.explanation !== undefined ? res.explanation : "";
-    if (value === "" || explanation.indexOf("Error") !== -1) {
-        setError(explanation !== "" ? explanation : "Calculation failed");
-        setResult("");
-        return;
-    }
-    setError("");
-    setResult(explanation !== "" ? explanation : value);
-}
 function Stoichiometry(): JSX.Element {
     let [equation, setEquation] = createSignal("");
     let [calcType, setCalcType] = createSignal("product-from-reactant");
