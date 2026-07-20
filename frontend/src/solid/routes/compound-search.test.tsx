@@ -5,8 +5,7 @@ import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 const mocks = vi.hoisted(function () {
     return {
         "mockSearchCompounds": vi.fn(),
-        "mockFetchCompoundDetail": vi.fn(),
-        "mockIsWebMode": vi.fn()
+        "mockFetchCompoundDetail": vi.fn()
     };
 });
 vi.mock("../../modules/compoundSearchUI.js", function () {
@@ -34,17 +33,6 @@ vi.mock("../../modules/compoundSearchUI.js", function () {
                 segments.push({"text": buffer, "isSubscript": false});
             }
             return segments;
-        }
-    };
-});
-vi.mock("../../modules/webModeGuard.js", function () {
-    return {
-        "WebModeGuard": {
-            "getInstance": function () {
-                return {
-                    "isWebMode": mocks.mockIsWebMode()
-                };
-            }
         }
     };
 });
@@ -84,14 +72,12 @@ describe("CompoundSearch", function (): void {
     beforeEach(function (): void {
         mocks.mockSearchCompounds.mockReset();
         mocks.mockFetchCompoundDetail.mockReset();
-        mocks.mockIsWebMode.mockReset();
-        mocks.mockIsWebMode.mockReturnValue(false);
     });
     afterEach(function (): void {
         cleanup();
         vi.restoreAllMocks();
     });
-    it("renders the card with search input, type select, and search button in desktop mode", function (): void {
+    it("renders the card with search input, type select, and search button", function (): void {
         let result = renderWithRouter();
         let input = result.getByLabelText("Compound search query") as HTMLInputElement;
         expect(input).toBeTruthy();
@@ -99,13 +85,6 @@ describe("CompoundSearch", function (): void {
         expect(typeSelect).toBeTruthy();
         let button = result.getByText("Search Compounds");
         expect(button).toBeTruthy();
-    });
-    it("renders web mode placeholder when isWebMode is true", function (): void {
-        mocks.mockIsWebMode.mockReturnValue(true);
-        let result = renderWithRouter();
-        let placeholder = result.getByText(/Compound search is unavailable in web mode/);
-        expect(placeholder).toBeTruthy();
-        expect(result.queryByLabelText("Compound search query")).toBeNull();
     });
     it("shows error when Search is clicked with empty query", function (): void {
         let result = renderWithRouter();
