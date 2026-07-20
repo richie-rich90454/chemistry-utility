@@ -1,13 +1,13 @@
 /**
  * Visual verification: The Solid-rendered Compound Database Search card
  * should match the legacy #compound-search card in frontend/index.html.
- * Intentional diff: this route is gated by WebModeGuard — in web mode
- * (browser without Wails) it renders a "web mode unavailable" placeholder
- * instead of initializing the CompoundSearchUI singleton. In desktop mode
- * it calls the pure searchCompounds / fetchCompoundDetail helpers and owns
- * the loading, error, and detail-panel state via Solid signals. Formula
- * subscripts are rendered via buildFormulaSegments (legacy built DOM
- * nodes imperatively). Cross-calculator prefill (Open in Molar Mass /
+ * Intentional diff: this route is always enabled — the Go backend
+ * server (cmd/server/main.go) serves both the API (/api/v1/*) and the
+ * static frontend in browser environments, so the searchCompounds /
+ * fetchCompoundDetail HTTP calls succeed. It owns the loading, error,
+ * and detail-panel state via Solid signals. Formula subscripts are
+ * rendered via buildFormulaSegments (legacy built DOM nodes
+ * imperatively). Cross-calculator prefill (Open in Molar Mass /
  * Stoichiometry) navigates to the target route without prefilling the
  * input — prefill requires a cross-route store and is deferred. No
  * Playwright screenshot test is added per task spec; parity is verified
@@ -17,7 +17,6 @@ import type {JSX} from "solid-js";
 import type {CompoundResult, CompoundDetail, FormulaSegment} from "../../modules/compoundSearchUI.js";
 import {createSignal, For} from "solid-js";
 import {useNavigate} from "@solidjs/router";
-import {WebModeGuard} from "../../modules/webModeGuard.js";
 import {searchCompounds, fetchCompoundDetail, buildFormulaSegments} from "../../modules/compoundSearchUI.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
@@ -39,7 +38,6 @@ function renderFormula(formula: string): JSX.Element {
 }
 function CompoundSearch(): JSX.Element {
     let navigate = useNavigate();
-    let guard = WebModeGuard.getInstance();
     let [query, setQuery] = createSignal("");
     let [searchType, setSearchType] = createSignal("name");
     let [results, setResults] = createSignal<CompoundResult[]>([]);
@@ -168,24 +166,6 @@ function CompoundSearch(): JSX.Element {
                     <button class={styles.secondaryButton} onClick={handleCloseDetail}>Close</button>
                 </div>
             </div>
-        );
-    }
-    if (guard.isWebMode) {
-        return (
-            <CalculatorCard
-                title="Compound Database Search - Search Compounds by Name, Formula, CAS, or SMILES"
-                description="Look up chemical compounds by name, molecular formula, CAS number, or SMILES string. View detailed information including molar mass, InChI, and additional properties, then jump directly to the Molar Mass or Stoichiometry calculators with the formula pre-filled."
-                exampleDetails={
-                    <ExampleDetails>
-                        <p>Try searching by <strong>name</strong> for "water", by <strong>formula</strong> for "H2O", or by <strong>CAS</strong> for "7732-18-5".</p>
-                    </ExampleDetails>
-                }
-                seeAlso={
-                    <SeeAlsoLink href="#molar-mass">Need a quick molar mass? Use the Molar Mass Calculator for any formula.</SeeAlsoLink>
-                }
-            >
-                <div class={styles.placeholder}>Compound search is unavailable in web mode. Run the desktop app to access the compound database.</div>
-            </CalculatorCard>
         );
     }
     return (
