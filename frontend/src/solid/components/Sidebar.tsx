@@ -3,9 +3,9 @@ import {For, createSignal, onMount} from "solid-js";
 import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
-import {DataPortabilityManager} from "../../modules/dataPortabilityManager.js";
 import {ThemeToggle} from "./ThemeToggle";
 import {WorkspaceList} from "./WorkspaceList";
+import {ExportImportButtons} from "./ExportImportButtons";
 import styles from "./Sidebar.module.css";
 interface GroupedCalculators {
     category: string;
@@ -40,30 +40,10 @@ function groupByCategory(calculators: CalculatorInfo[]): GroupedCalculators[] {
 }
 function Sidebar(): JSX.Element {
     let [calculators, setCalculators] = createSignal<CalculatorInfo[]>([]);
-    let fileInputRef: HTMLInputElement | undefined;
     onMount(function (): void {
         let nav = NavigationManager.getInstance();
         setCalculators(nav.getCalculators());
     });
-    function handleExport(): void {
-        DataPortabilityManager.getInstance().exportToFile();
-    }
-    function handleImportClick(): void {
-        if (fileInputRef !== undefined) {
-            fileInputRef.click();
-        }
-    }
-    function handleFileChange(e: Event): void {
-        let target = e.currentTarget as HTMLInputElement;
-        if (target.files === null) {
-            return;
-        }
-        if (target.files.length === 0) {
-            return;
-        }
-        let file = target.files[0];
-        DataPortabilityManager.getInstance().importFromFile(file);
-    }
     return (
         <aside class={styles.sidebar} role="navigation" aria-label="Calculator sidebar">
             <div class={styles.sidebarHeader}>
@@ -117,25 +97,7 @@ function Sidebar(): JSX.Element {
                 </ul>
             </nav>
             <div class={styles.sidebarFooter}>
-                <div class={styles.sidebarFooterActions}>
-                    <button type="button" class={styles.sidebarFooterButton} onClick={handleExport}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="7 10 12 15 17 10" />
-                            <line x1="12" y1="15" x2="12" y2="3" />
-                        </svg>
-                        <span>Export Data</span>
-                    </button>
-                    <button type="button" class={styles.sidebarFooterButton} onClick={handleImportClick}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                            <polyline points="17 8 12 3 7 8" />
-                            <line x1="12" y1="3" x2="12" y2="15" />
-                        </svg>
-                        <span>Import Data</span>
-                    </button>
-                    <input type="file" ref={fileInputRef} style={{display: "none"}} accept=".chemutil,.json,application/json" onChange={handleFileChange} />
-                </div>
+                <ExportImportButtons />
                 <p>&copy; 2026 Richard's Blogs</p>
                 <p>Main site: <a href="https://www.richardsblogs.com" target="_blank" rel="noopener noreferrer">www.richardsblogs.com</a></p>
             </div>
