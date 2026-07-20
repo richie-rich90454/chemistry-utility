@@ -1,9 +1,9 @@
-interface ComparisonItem {
+export interface ComparisonItem {
     calculationId: string;
     data: unknown;
 }
 
-interface ComparisonField {
+export interface ComparisonField {
     label: string;
     value: string;
     section: string;
@@ -199,7 +199,7 @@ export class ComparisonManager {
         return list;
     }
 
-    private extractFields(data: unknown): ComparisonField[] {
+    public extractFields(data: unknown): ComparisonField[] {
         let fields: ComparisonField[] = [];
         if (!data || typeof data !== "object") {
             return fields;
@@ -260,7 +260,7 @@ export class ComparisonManager {
         }
     }
 
-    private mergeKeys(fieldsA: ComparisonField[], fieldsB: ComparisonField[]): string[] {
+    public mergeKeys(fieldsA: ComparisonField[], fieldsB: ComparisonField[]): string[] {
         let keys: string[] = [];
         let seen: Record<string, boolean> = {};
         let i: number;
@@ -281,7 +281,7 @@ export class ComparisonManager {
         return keys;
     }
 
-    private findValue(fields: ComparisonField[], key: string): string {
+    public findValue(fields: ComparisonField[], key: string): string {
         let i: number;
         for (i = 0; i < fields.length; i++) {
             if (fields[i].label === key) {
@@ -291,7 +291,7 @@ export class ComparisonManager {
         return "";
     }
 
-    private percentageDifference(a: string, b: string): string {
+    public percentageDifference(a: string, b: string): string {
         let numA: number = parseFloat(a);
         let numB: number = parseFloat(b);
         if (isNaN(numA) || isNaN(numB)) {
@@ -318,6 +318,10 @@ export class ComparisonManager {
         if (this.modal) {
             this.modal.style.display = "none";
         }
+    }
+
+    public getItems(): ComparisonItem[] {
+        return this.items.slice();
     }
 
     public getCount(): number {
