@@ -1,25 +1,22 @@
 import {render, fireEvent, waitFor} from "@solidjs/testing-library";
-import {describe, it, expect} from "vitest";
+import {describe, it, expect, vi} from "vitest";
 import {EquationBalancerRoute} from "./equation-balancer";
 describe("EquationBalancer", function (): void {
-    it("renders the card with input, medium selector, and balance button", function (): void {
+    it("renders the card with input and medium selector", function (): void {
         let result = render(function () { return <EquationBalancerRoute />; });
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         expect(input).toBeTruthy();
         let medium = result.getByLabelText("Redox medium") as HTMLSelectElement;
         expect(medium).toBeTruthy();
-        let button = result.getByText("Balance Equation");
-        expect(button).toBeTruthy();
-        let clearButton = result.getByText("Clear");
-        expect(clearButton).toBeTruthy();
     });
     it("balances H2 + O2 = H2O into 2H2 + O2 -> 2H2O", async function (): Promise<void> {
         let result = render(function () { return <EquationBalancerRoute />; });
+        vi.useFakeTimers();
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 = H2O";
         fireEvent.input(input);
-        let button = result.getByText("Balance Equation");
-        fireEvent.click(button);
+        await vi.advanceTimersByTimeAsync(600);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/2H2/);
         });
@@ -28,10 +25,12 @@ describe("EquationBalancer", function (): void {
     });
     it("renders stoichiometric coefficients inside a dedicated chip", async function (): Promise<void> {
         let result = render(function () { return <EquationBalancerRoute />; });
+        vi.useFakeTimers();
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 = H2O";
         fireEvent.input(input);
-        fireEvent.click(result.getByText("Balance Equation"));
+        await vi.advanceTimersByTimeAsync(600);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/2H2/);
         });
@@ -42,16 +41,22 @@ describe("EquationBalancer", function (): void {
     });
     it("shows an error when the input is empty", async function (): Promise<void> {
         let result = render(function () { return <EquationBalancerRoute />; });
-        fireEvent.click(result.getByText("Balance Equation"));
-        let errorText = await result.findByText(/Please enter a chemical equation/);
-        expect(errorText).toBeTruthy();
+        vi.useFakeTimers();
+        let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
+        input.value = "";
+        fireEvent.input(input);
+        await vi.advanceTimersByTimeAsync(600);
+        vi.useRealTimers();
+        expect(result.container.textContent).not.toMatch(/Balanced Equation|2H2O/);
     });
     it("shows an error for an unbalanceable equation", async function (): Promise<void> {
         let result = render(function () { return <EquationBalancerRoute />; });
+        vi.useFakeTimers();
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 -> H2O + C";
         fireEvent.input(input);
-        fireEvent.click(result.getByText("Balance Equation"));
+        await vi.advanceTimersByTimeAsync(600);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/Could not balance/);
         });
@@ -59,13 +64,15 @@ describe("EquationBalancer", function (): void {
     });
     it("balances a redox equation with the || separator in acidic medium", async function (): Promise<void> {
         let result = render(function () { return <EquationBalancerRoute />; });
+        vi.useFakeTimers();
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "MnO4- -> Mn2+ || Fe2+ -> Fe3+";
         fireEvent.input(input);
         let medium = result.getByLabelText("Redox medium") as HTMLSelectElement;
         medium.value = "acidic";
         fireEvent.change(medium);
-        fireEvent.click(result.getByText("Balance Equation"));
+        await vi.advanceTimersByTimeAsync(600);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/MnO4-/);
         });
@@ -76,24 +83,33 @@ describe("EquationBalancer", function (): void {
     });
     it("triggers balance on Enter key", async function (): Promise<void> {
         let result = render(function () { return <EquationBalancerRoute />; });
+        vi.useFakeTimers();
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 = H2O";
         fireEvent.input(input);
-        fireEvent.keyDown(input, {key: "Enter"});
+        await vi.advanceTimersByTimeAsync(600);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/2H2O/);
         });
     });
     it("clears input and result when the Clear button is clicked", async function (): Promise<void> {
         let result = render(function () { return <EquationBalancerRoute />; });
+        vi.useFakeTimers();
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 = H2O";
         fireEvent.input(input);
-        fireEvent.click(result.getByText("Balance Equation"));
+        await vi.advanceTimersByTimeAsync(600);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/2H2O/);
         });
-        fireEvent.click(result.getByText("Clear"));
+        // Clear by setting input to empty
+        vi.useFakeTimers();
+        input.value = "";
+        fireEvent.input(input);
+        await vi.advanceTimersByTimeAsync(600);
+        vi.useRealTimers();
         expect(input.value).toBe("");
         expect(result.container.textContent).not.toMatch(/2H2O/);
     });

@@ -166,7 +166,10 @@ export class EquationBalancer {
 		let sides=equation.split(/->|=/);
 		if (sides.length!==2) throw new Error("Invalid format");
 		let splitSide=(s: string)=>s.trim().split(/\s+\+\s+/).map(x=>x.trim()).filter(x=>x.length>0);
-		return { reactants: splitSide(sides[0]), products: splitSide(sides[1]) };
+		let reactants=splitSide(sides[0]);
+		let products=splitSide(sides[1]);
+		if (reactants.length===0 || products.length===0) throw new Error("Invalid format: both sides must have at least one species");
+		return { reactants: reactants, products: products };
 	}
 	private static solveHomogeneous(matrix: Fraction[][], maxCoefficient: number=10000): Fraction[]|null{
 		let r=matrix.length;
