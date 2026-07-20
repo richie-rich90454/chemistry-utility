@@ -5,6 +5,7 @@ import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {DataPortabilityManager} from "../../modules/dataPortabilityManager.js";
 import {ThemeToggle} from "./ThemeToggle";
+import {WorkspaceList} from "./WorkspaceList";
 import styles from "./Sidebar.module.css";
 interface GroupedCalculators {
     category: string;
@@ -90,9 +91,7 @@ function Sidebar(): JSX.Element {
                 </span>
                 <input type="text" placeholder="Search calculators..." aria-label="Search calculators" />
             </div>
-            <section class={styles.sidebarWorkspaces} aria-label="Workspaces" style={{display: "none"}}>
-                <ul class={styles.workspaceList} />
-            </section>
+            <WorkspaceList />
             <div class={styles.navRecent} />
             <nav class={styles.sidebarNav}>
                 <ul>

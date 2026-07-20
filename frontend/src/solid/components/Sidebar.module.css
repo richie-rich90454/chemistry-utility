@@ -131,14 +131,6 @@
 .sidebarSearch:focus-within .searchIcon{
     color: var(--md-primary);
 }
-.sidebarWorkspaces{
-    padding: var(--md-space-2) var(--md-space-4);
-}
-.workspaceList{
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
 .navRecent{
     padding: var(--md-space-2) var(--md-space-4);
 }
