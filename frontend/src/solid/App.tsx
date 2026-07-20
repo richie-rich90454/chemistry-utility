@@ -5,7 +5,7 @@ import {HomePage} from "./routes/HomePage";
 import {MolarMass} from "./routes/molar-mass";
 import {ElementLookup} from "./routes/element-lookup";
 import {PeriodicTable} from "./routes/periodic-table";
-import {EquationBalancer} from "./routes/equation-balancer";
+import {EquationBalancerRoute} from "./routes/equation-balancer";
 import UnitConverter from "./routes/unit-converter";
 import {Dilution} from "./routes/dilution";
 import {MassPercent} from "./routes/mass-percent";
@@ -226,7 +226,7 @@ function App(): JSX.Element {
                 <Route path="/mass-calc" component={MassCalcRedirect} />
                 <Route path="/element-lookup" component={ElementLookup} />
                 <Route path="/periodic-table" component={PeriodicTable} />
-                <Route path="/equation-balancer" component={EquationBalancer} />
+                <Route path="/equation-balancer" component={EquationBalancerRoute} />
                 <Route path="/unit-converter" component={UnitConverter} />
                 <Route path="/dilution" component={Dilution} />
                 <Route path="/mass-percent" component={MassPercent} />

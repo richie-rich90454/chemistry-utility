@@ -5,7 +5,8 @@
    ============================================================ */
 
 .sidebar {
-    width: var(--sidebar-width);
+    width: var(--cgui-nav-width, 15%);
+    min-width: 200px;
     background: var(--cgui-pane);
     border-right: 1px solid var(--cgui-border);
     display: flex;
@@ -237,8 +238,17 @@
 .navLabel {
     flex: 1;
     min-width: 0;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.navLink:hover .navLabel,
+.navLink.active .navLabel {
+    overflow: visible;
+    white-space: normal;
+    word-break: break-word;
+    z-index: 1;
 }
 
 /* ---- Footer — flat, border-top only ---- */

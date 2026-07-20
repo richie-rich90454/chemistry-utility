@@ -1,9 +1,9 @@
 import {render, fireEvent, waitFor} from "@solidjs/testing-library";
 import {describe, it, expect} from "vitest";
-import {EquationBalancer} from "./equation-balancer";
+import {EquationBalancerRoute} from "./equation-balancer";
 describe("EquationBalancer", function (): void {
     it("renders the card with input, medium selector, and balance button", function (): void {
-        let result = render(function () { return <EquationBalancer />; });
+        let result = render(function () { return <EquationBalancerRoute />; });
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         expect(input).toBeTruthy();
         let medium = result.getByLabelText("Redox medium") as HTMLSelectElement;
@@ -14,7 +14,7 @@ describe("EquationBalancer", function (): void {
         expect(clearButton).toBeTruthy();
     });
     it("balances H2 + O2 = H2O into 2H2 + O2 -> 2H2O", async function (): Promise<void> {
-        let result = render(function () { return <EquationBalancer />; });
+        let result = render(function () { return <EquationBalancerRoute />; });
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 = H2O";
         fireEvent.input(input);
@@ -27,7 +27,7 @@ describe("EquationBalancer", function (): void {
         expect(result.container.textContent).toMatch(/Balanced Equation/);
     });
     it("renders stoichiometric coefficients inside a dedicated chip", async function (): Promise<void> {
-        let result = render(function () { return <EquationBalancer />; });
+        let result = render(function () { return <EquationBalancerRoute />; });
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 = H2O";
         fireEvent.input(input);
@@ -41,13 +41,13 @@ describe("EquationBalancer", function (): void {
         expect(firstText).toBe("2");
     });
     it("shows an error when the input is empty", async function (): Promise<void> {
-        let result = render(function () { return <EquationBalancer />; });
+        let result = render(function () { return <EquationBalancerRoute />; });
         fireEvent.click(result.getByText("Balance Equation"));
         let errorText = await result.findByText(/Please enter a chemical equation/);
         expect(errorText).toBeTruthy();
     });
     it("shows an error for an unbalanceable equation", async function (): Promise<void> {
-        let result = render(function () { return <EquationBalancer />; });
+        let result = render(function () { return <EquationBalancerRoute />; });
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 -> H2O + C";
         fireEvent.input(input);
@@ -58,7 +58,7 @@ describe("EquationBalancer", function (): void {
         expect(result.container.textContent).not.toMatch(/Balanced Equation:/);
     });
     it("balances a redox equation with the || separator in acidic medium", async function (): Promise<void> {
-        let result = render(function () { return <EquationBalancer />; });
+        let result = render(function () { return <EquationBalancerRoute />; });
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "MnO4- -> Mn2+ || Fe2+ -> Fe3+";
         fireEvent.input(input);
@@ -75,7 +75,7 @@ describe("EquationBalancer", function (): void {
         expect(result.container.textContent).toMatch(/Half-reaction method/);
     });
     it("triggers balance on Enter key", async function (): Promise<void> {
-        let result = render(function () { return <EquationBalancer />; });
+        let result = render(function () { return <EquationBalancerRoute />; });
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 = H2O";
         fireEvent.input(input);
@@ -85,7 +85,7 @@ describe("EquationBalancer", function (): void {
         });
     });
     it("clears input and result when the Clear button is clicked", async function (): Promise<void> {
-        let result = render(function () { return <EquationBalancer />; });
+        let result = render(function () { return <EquationBalancerRoute />; });
         let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
         input.value = "H2 + O2 = H2O";
         fireEvent.input(input);

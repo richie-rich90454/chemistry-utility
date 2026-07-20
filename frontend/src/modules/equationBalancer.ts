@@ -197,6 +197,13 @@ export class EquationBalancer {
 		for (let i=0;i<pivotCount;i++) isPivot[pivotCol[i]]=true;
 		let free:number[]=[];
 		for (let i=0;i<c;i++) if (!isPivot[i]) free.push(i);
+		if (free.length===0 && c>0){
+			// All columns are pivot columns — full rank. In balancing,
+			// we need one free variable. Treat the last species as free.
+			free.push(c-1);
+			isPivot[c-1]=false;
+			pivotCount=pivotCount-1;
+		}
 		if (free.length===0) return null;
 		let basis: Fraction[][]=[];
 		for (let fi=0;fi<free.length;fi++){
@@ -296,6 +303,56 @@ export class EquationBalancer {
 		for (let j=0;j<solution.length;j++) out[j]=new Fraction(solution[j], 1);
 		return out;
 	}
+	private static bruteForceBalance(matrix: Fraction[][], maxCoefficient: number=10000): Fraction[]|null{
+		let r=matrix.length;
+		let c=matrix[0].length;
+		// Try coefficient combinations up to sqrt(maxCoefficient) each
+		let limit=Math.min(Math.floor(Math.sqrt(maxCoefficient)), 100);
+		for (let c0=1;c0<=limit;c0++){
+			for (let c1=1;c1<=limit;c1++){
+				let coeffs: number[]|null=null;
+				if (c===2){
+					// 2 species: check if c0 * col0 + c1 * col1 = 0 for all rows
+					let ok=true;
+					for (let i=0;i<r;i++){
+						let val=c0*matrix[i][0].n/1+c1*matrix[i][1].n/1;
+						if (val!==0){ok=false;break;}
+					}
+					if (ok) coeffs=[c0,c1];
+				} else {
+					// Try 3 species: fix c0,c1, solve for c2
+					for (let c2=1;c2<=limit;c2++){
+						let ok=true;
+						for (let i=0;i<r;i++){
+							let val=0;
+							for (let j=0;j<c;j++){
+								let v=matrix[i][j];
+								let coeff=(j===0?c0:j===1?c1:c2);
+								val+=coeff*(v.n/v.d);
+							}
+							if (Math.abs(val)>1e-9){ok=false;break;}
+						}
+						if (ok){coeffs=[c0,c1,c2];break;}
+					}
+				}
+				if (coeffs!==null){
+					let allPos=true;
+					for (let j=0;j<coeffs.length;j++){
+						if (coeffs[j]<=0){allPos=false;break;}
+					}
+					if (allPos){
+						let g=0;
+						for (let j=0;j<coeffs.length;j++) g=EquationBalancer.gcd(g,coeffs[j]);
+						for (let j=0;j<coeffs.length;j++) coeffs[j]=coeffs[j]/g;
+						let out: Fraction[]=new Array(coeffs.length);
+						for (let j=0;j<coeffs.length;j++) out[j]=new Fraction(coeffs[j], 1);
+						return out;
+					}
+				}
+			}
+		}
+		return null;
+	}
 	public static balanceEquation(equation: string, maxCoefficient: number=10000, explain: boolean=false): string|BalanceResult{
 		let { reactants, products }=EquationBalancer.parseEquation(equation);
 		let all=reactants.concat(products);
@@ -312,6 +369,10 @@ export class EquationBalancer {
 			});
 		});
 		let sol=EquationBalancer.solveHomogeneous(A, maxCoefficient);
+		if (!sol){
+			// Fallback: try brute-force small coefficient search
+			sol=EquationBalancer.bruteForceBalance(A, maxCoefficient);
+		}
 		if (!sol) throw new Error("Could not balance");
 		let coeffs=sol.map(f=>f.n);
 		if (coeffs.some(c=>c<=0||c>maxCoefficient)) throw new Error("Could not balance");

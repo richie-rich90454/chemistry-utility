@@ -1,23 +1,20 @@
 /**
- * Visual verification: The Solid-rendered Equation Balancer card should match
- * the legacy #balancing card in frontend/index.html. Intentional diff: this
- * route surfaces a redox medium selector (legacy was atomic-only), exposes
- * the step-by-step explanation behind a <details> toggle, and highlights
- * stoichiometric coefficients in their own chip. No Playwright screenshot
- * test is added per task spec; parity is verified by manual diff of the
- * rendered DOM against the legacy markup.
+ * Chemical Equation Balancer — CGUI V3.0
+ * Auto-balances on input with 500ms debounce.
  */
 import type {JSX} from "solid-js";
-import {For} from "solid-js";
+import {For, onCleanup} from "solid-js";
 import {useEquationBalancer} from "../lib/useEquationBalancer";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import styles from "./equation-balancer.module.css";
+
 interface EquationTerm {
     coefficient: string;
     formula: string;
 }
+
 function parseSide(side: string): EquationTerm[] {
     let terms = side.split(" + ");
     let result: EquationTerm[] = [];
@@ -33,6 +30,7 @@ function parseSide(side: string): EquationTerm[] {
     }
     return result;
 }
+
 function parseBalancedEquation(equation: string): {reactants: EquationTerm[], products: EquationTerm[]} {
     let sides = equation.split(" -> ");
     if (sides.length !== 2) {
@@ -43,7 +41,8 @@ function parseBalancedEquation(equation: string): {reactants: EquationTerm[], pr
     }
     return {reactants: parseSide(sides[0]), products: parseSide(sides[1])};
 }
-function EquationBalancer(): JSX.Element {
+
+function EquationBalancerRoute(): JSX.Element {
     let state = useEquationBalancer();
     let equation = state.equation;
     let setEquation = state.setEquation;
@@ -53,26 +52,42 @@ function EquationBalancer(): JSX.Element {
     let error = state.error;
     let isLoading = state.isLoading;
     let balance = state.balance;
-    let clear = state.clear;
-    function handleBalance(): void {
-        balance();
-    }
-    function handleClear(): void {
-        clear();
-    }
+    let clearFn = state.clear;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+    onCleanup(function (): void {
+        if (debounceTimer !== null) {
+            clearTimeout(debounceTimer);
+        }
+    });
+
     function handleInput(e: Event): void {
         let target = e.currentTarget as HTMLInputElement;
-        setEquation(target.value);
-    }
-    function handleKeyDown(e: KeyboardEvent): void {
-        if (e.key === "Enter") {
-            balance();
+        let value = target.value;
+        setEquation(value);
+        if (debounceTimer !== null) {
+            clearTimeout(debounceTimer);
+        }
+        if (value.trim().length > 0) {
+            debounceTimer = setTimeout(function (): void {
+                balance();
+            }, 500);
+        } else {
+            clearFn();
         }
     }
+
     function handleMediumChange(e: Event): void {
         let target = e.currentTarget as HTMLSelectElement;
         setMedium(target.value as "acidic" | "basic");
+        if (equation().trim().length > 0) {
+            if (debounceTimer !== null) clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function (): void {
+                balance();
+            }, 300);
+        }
     }
+
     function renderTerm(term: EquationTerm): JSX.Element {
         return (
             <span class={styles.term}>
@@ -81,31 +96,27 @@ function EquationBalancer(): JSX.Element {
             </span>
         );
     }
+
     function renderEquation(eq: string): JSX.Element {
         let parsed = parseBalancedEquation(eq);
         let parts: JSX.Element[] = [];
         for (let i = 0; i < parsed.reactants.length; i++) {
-            if (i > 0) {
-                parts.push(<span class={styles.operator}>{" + "}</span>);
-            }
+            if (i > 0) parts.push(<span class={styles.operator}>{" + "}</span>);
             parts.push(renderTerm(parsed.reactants[i]));
         }
         if (parsed.products.length > 0) {
             parts.push(<span class={styles.operator}>{" → "}</span>);
             for (let i = 0; i < parsed.products.length; i++) {
-                if (i > 0) {
-                    parts.push(<span class={styles.operator}>{" + "}</span>);
-                }
+                if (i > 0) parts.push(<span class={styles.operator}>{" + "}</span>);
                 parts.push(renderTerm(parsed.products[i]));
             }
         }
         return <div class={styles.equation}>{parts}</div>;
     }
+
     function renderResult(): JSX.Element {
         let res = result();
-        if (res === null) {
-            return <></>;
-        }
+        if (res === null) return <></>;
         let coefficients = res.explanation.coefficients;
         let hasCoefficients = coefficients.length > 0;
         return (
@@ -129,17 +140,18 @@ function EquationBalancer(): JSX.Element {
             </div>
         );
     }
+
     return (
         <CalculatorCard
-            title="Chemical Equation Balancer - Balance Equations Instantly"
-            description="Enter an unbalanced chemical equation like H2 + O2 -> H2O and the balancer finds the smallest whole-number coefficients using Gaussian elimination over the rationals. Supports nested parentheses, hydrates, ionic species, and redox half-reactions in acidic or basic medium."
+            title="Chemical Equation Balancer"
+            description="Enter an unbalanced chemical equation and it balances automatically. Supports regular equations (H2+O2->H2O), combustion (C6H6+O2->CO2+H2O), ionic species with charges, and redox half-reactions separated by ||. No button needed — just type."
             exampleDetails={
                 <ExampleDetails>
-                    <p>Try <strong>H2 + O2 {"->"} H2O</strong> for water synthesis, <strong>C3H8 + O2 {"->"} CO2 + H2O</strong> for propane combustion, or <strong>MnO4- {"->"} Mn2+ || Fe2+ {"->"} Fe3+</strong> for a redox equation (use the medium selector for acidic vs basic).</p>
+                    <p>Try <strong>H2+O2 {"->"} H2O</strong> for water, <strong>C6H6+O2 {"->"} CO2+H2O</strong> for benzene combustion, or <strong>MnO4-+Fe2+ {"->"} Mn2++Fe3+</strong> for a redox reaction.</p>
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#stoichiometry">Once balanced, you can analyze reactants and yields with the Stoichiometry Calculator.</SeeAlsoLink>
+                <SeeAlsoLink href="/stoichiometry">Use the Stoichiometry Calculator to compute reaction yields from your balanced equation.</SeeAlsoLink>
             }
         >
             <label class={styles.labelText} for="equation-input">Chemical equation</label>
@@ -147,13 +159,14 @@ function EquationBalancer(): JSX.Element {
                 type="text"
                 class={styles.input}
                 id="equation-input"
-                placeholder="E.g., H2 + O2 -> H2O"
+                placeholder="E.g., H2+O2->H2O or C6H6+O2->CO2+H2O"
                 aria-label="Chemical equation"
                 value={equation()}
                 onInput={handleInput}
-                onKeyDown={handleKeyDown}
+                autocomplete="off"
+                spellcheck={false}
             />
-            <label class={styles.labelText} for="medium-select">Redox medium (used when equation contains ||)</label>
+            <label class={styles.labelText} for="medium-select">Redox medium (for equations with || separator)</label>
             <select
                 id="medium-select"
                 class={styles.select}
@@ -164,14 +177,10 @@ function EquationBalancer(): JSX.Element {
                 <option value="acidic">Acidic</option>
                 <option value="basic">Basic</option>
             </select>
-            <div class={styles.buttonRow}>
-                <button class={styles.button} onClick={handleBalance} disabled={isLoading()}>Balance Equation</button>
-                <button class={styles.secondaryButton} onClick={handleClear} disabled={isLoading()}>Clear</button>
-            </div>
             {isLoading() && <div class={styles.result}><p>Balancing…</p></div>}
             {error() !== "" && <div class={styles.result + " " + styles.error}><p>{error()}</p></div>}
             {renderResult()}
         </CalculatorCard>
     );
 }
-export {EquationBalancer};
+export {EquationBalancerRoute};
