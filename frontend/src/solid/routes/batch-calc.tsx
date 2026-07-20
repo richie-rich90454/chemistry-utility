@@ -1,21 +1,21 @@
 /**
  * Visual verification: The Solid-rendered Batch Calculation card should
  * match the legacy #batch-calc card in frontend/index.html. Intentional
- * diff: this route is gated by WebModeGuard — in web mode (browser
- * without Wails) it renders a "web mode unavailable" placeholder instead
- * of initializing the BatchCalculator singleton's DOM listeners. In
- * desktop mode it calls the pure processCsvText helper and owns the file
- * input, progress bar, download button, and preview table via Solid
- * signals. The legacy singleton's progressCallback is bypassed (the
- * component supplies its own onProgress) so progress UI is reactive. No
- * Playwright screenshot test is added per task spec; parity is verified
- * by manual diff of the rendered DOM against the legacy markup.
+ * diff: this route is always enabled — the Go backend server
+ * (cmd/server/main.go) serves both the API (/api/v1/*) and the static
+ * frontend in browser environments, so the BatchCalculator singleton's
+ * HTTP calls succeed. It calls the pure processCsvText helper and owns
+ * the file input, progress bar, download button, and preview table via
+ * Solid signals. The legacy singleton's progressCallback is bypassed
+ * (the component supplies its own onProgress) so progress UI is
+ * reactive. No Playwright screenshot test is added per task spec;
+ * parity is verified by manual diff of the rendered DOM against the
+ * legacy markup.
  */
 import type {JSX} from "solid-js";
 import type {BatchResult, ProgressInfo} from "../../modules/batchCalculator.js";
 import {createSignal, For, Show} from "solid-js";
 import {BatchCalculator} from "../../modules/batchCalculator.js";
-import {WebModeGuard} from "../../modules/webModeGuard.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
@@ -32,7 +32,7 @@ let calculatorTypeOptions: {"value": string; "label": string}[] = [
     {"value": "cell-potential", "label": "Cell Potential"},
     {"value": "nernst", "label": "Nernst Equation"},
     {"value": "electrolysis", "label": "Electrolysis"},
-    {"value": "bond-type", "label": "Bond Type"},
+    {"value": "bond-type", "label": "Bond type"},
     {"value": "gibbs-free-energy", "label": "Gibbs Free Energy"},
     {"value": "hess-law", "label": "Hess's Law"},
     {"value": "entropy", "label": "Entropy"},
@@ -52,7 +52,6 @@ let calculatorTypeOptions: {"value": string; "label": string}[] = [
     {"value": "heisenberg-uncertainty", "label": "Heisenberg Uncertainty"}
 ];
 function BatchCalc(): JSX.Element {
-    let guard = WebModeGuard.getInstance();
     let calc = BatchCalculator.getInstance();
     let [calculatorType, setCalculatorType] = createSignal("molar-mass");
     let [file, setFile] = createSignal<File | null>(null);
@@ -163,24 +162,6 @@ function BatchCalc(): JSX.Element {
                     </table>
                 </div>
             </div>
-        );
-    }
-    if (guard.isWebMode) {
-        return (
-            <CalculatorCard
-                title="Batch Calculation - Process Multiple Inputs from CSV"
-                description="Upload a CSV file to run the same calculator across many rows of inputs at once. The first row must contain headers matching the calculator's input field names; each subsequent row is processed independently and appended to the results CSV."
-                exampleDetails={
-                    <ExampleDetails>
-                        <p>Prepare a CSV like <strong>formula\nH2O\nNaCl\n</strong>, pick <em>Molar Mass</em>, and click Process. A results CSV with molar_mass/unit/status columns is generated for download.</p>
-                    </ExampleDetails>
-                }
-                seeAlso={
-                    <SeeAlsoLink href="#molar-mass">Need a single calculation? Use the Molar Mass Calculator for one-off formulas.</SeeAlsoLink>
-                }
-            >
-                <div class={styles.placeholder}>Batch calculation is unavailable in web mode. Run the desktop app to process CSV files against the calculator backend.</div>
-            </CalculatorCard>
         );
     }
     return (
