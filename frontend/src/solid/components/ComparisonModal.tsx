@@ -1,39 +1,36 @@
 import type {JSX} from "solid-js";
 import {createMemo, onMount, onCleanup, Show, For} from "solid-js";
 import {ComparisonManager} from "../../modules/comparisonManager.js";
-import type {ComparisonItem, ComparisonField} from "../../modules/comparisonManager.js";
+import type {ComparisonField} from "../../modules/comparisonManager.js";
+import {useComparison} from "../stores/comparison";
 import styles from "./ComparisonModal.module.css";
-interface ComparisonModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    items: ComparisonItem[];
-}
-function ComparisonModal(props: ComparisonModalProps): JSX.Element {
+function ComparisonModal(): JSX.Element {
+    let store = useComparison();
     let manager = ComparisonManager.getInstance();
     let fieldsA = createMemo(function (): ComparisonField[] {
-        let list = props.items;
+        let list = store.items();
         if (list.length > 0) {
             return manager.extractFields(list[0].data);
         }
         return [];
     });
     let fieldsB = createMemo(function (): ComparisonField[] {
-        let list = props.items;
+        let list = store.items();
         if (list.length > 1) {
             return manager.extractFields(list[1].data);
         }
         return [];
     });
     let keys = createMemo(function (): string[] {
-        if (props.items.length === 2) {
+        if (store.items().length === 2) {
             return manager.mergeKeys(fieldsA(), fieldsB());
         }
         return [];
     });
     onMount(function (): void {
         function handleKey(e: KeyboardEvent): void {
-            if (props.isOpen && e.key === "Escape") {
-                props.onClose();
+            if (store.isModalOpen() && e.key === "Escape") {
+                store.closeModal();
             }
         }
         window.addEventListener("keydown", handleKey);
@@ -43,8 +40,11 @@ function ComparisonModal(props: ComparisonModalProps): JSX.Element {
     });
     function handleBackdropClick(e: MouseEvent): void {
         if (e.target === e.currentTarget) {
-            props.onClose();
+            store.closeModal();
         }
+    }
+    function handleClose(): void {
+        store.closeModal();
     }
     function cellClass(same: boolean): string {
         if (same) {
@@ -62,16 +62,17 @@ function ComparisonModal(props: ComparisonModalProps): JSX.Element {
         }
         return pct;
     }
+    let items = store.items;
     return (
-        <Show when={props.isOpen}>
+        <Show when={store.isModalOpen()}>
             <div class={styles.comparisonModal} role="dialog" aria-modal="true" aria-label="Comparison" onClick={handleBackdropClick}>
                 <div class={styles.comparisonModalContent}>
-                    <button type="button" class={styles.comparisonClose} aria-label="Close comparison dialog" onClick={function (): void {props.onClose();}}>&times;</button>
+                    <button type="button" class={styles.comparisonClose} aria-label="Close comparison dialog" onClick={handleClose}>&times;</button>
                     <h2 class={styles.comparisonTitle}>Comparison</h2>
-                    <Show when={props.items.length === 0}>
+                    <Show when={items().length === 0}>
                         <p class={styles.comparisonEmpty}>Select calculations to compare.</p>
                     </Show>
-                    <Show when={props.items.length === 1}>
+                    <Show when={items().length === 1}>
                         <p class={styles.comparisonEmpty}>Add one more calculation to compare.</p>
                         <div class={styles.comparisonColumn}>
                             <h3 class={styles.comparisonColumnTitle}>Calculation 1</h3>
@@ -85,7 +86,7 @@ function ComparisonModal(props: ComparisonModalProps): JSX.Element {
                             </For>
                         </div>
                     </Show>
-                    <Show when={props.items.length === 2}>
+                    <Show when={items().length === 2}>
                         <table class={styles.comparisonTable}>
                             <thead>
                                 <tr>

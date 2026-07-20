@@ -314,6 +314,16 @@ export class ComparisonManager {
         this.hideComparison();
     }
 
+    public removeFromComparison(calculationId: string): void {
+        let i: number;
+        for (i = 0; i < this.items.length; i++) {
+            if (this.items[i].calculationId === calculationId) {
+                this.items.splice(i, 1);
+                return;
+            }
+        }
+    }
+
     public hideComparison(): void {
         if (this.modal) {
             this.modal.style.display = "none";

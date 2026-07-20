@@ -1,18 +1,17 @@
 import type {JSX} from "solid-js";
 import {createSignal, onMount, Show} from "solid-js";
-import {ResultAnnotationManager} from "../../modules/resultAnnotation.js";
+import {useResultAnnotation} from "../stores/resultAnnotation";
 import styles from "./ResultAnnotation.module.css";
 interface ResultAnnotationProps {
     resultId: string;
 }
 function ResultAnnotation(props: ResultAnnotationProps): JSX.Element {
-    let manager = ResultAnnotationManager.getInstance();
+    let store = useResultAnnotation();
     let [note, setNote] = createSignal("");
-    let [favorite, setFavorite] = createSignal(false);
     let [saved, setSaved] = createSignal(false);
     onMount(function (): void {
-        setNote(manager.loadAnnotation(props.resultId));
-        setFavorite(manager.isStarred(props.resultId));
+        store.loadAnnotation(props.resultId);
+        setNote(store.currentNote());
     });
     function handleNoteInput(e: InputEvent): void {
         let target = e.currentTarget as HTMLTextAreaElement;
@@ -20,12 +19,11 @@ function ResultAnnotation(props: ResultAnnotationProps): JSX.Element {
         setSaved(false);
     }
     function handleSave(): void {
-        void manager.saveAnnotation(props.resultId, note());
+        void store.saveAnnotation(props.resultId, note(), store.currentFavorite());
         setSaved(true);
     }
     function handleToggleFavorite(): void {
-        let next: boolean = manager.toggleStar(props.resultId);
-        setFavorite(next);
+        store.toggleFavorite(props.resultId);
     }
     return (
         <div class={styles.annotation}>
@@ -33,7 +31,7 @@ function ResultAnnotation(props: ResultAnnotationProps): JSX.Element {
                 type="button"
                 class={styles.favoriteToggle}
                 aria-label="Toggle favorite"
-                aria-pressed={favorite()}
+                aria-pressed={store.currentFavorite()}
                 onClick={handleToggleFavorite}
             >
                 <span aria-hidden="true">{"\u2605"}</span>
