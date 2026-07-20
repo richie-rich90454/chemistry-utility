@@ -5,17 +5,15 @@
     margin: var(--cgui-space-2) var(--cgui-space-5);
 }
 .input{
-    padding: 10px var(--cgui-space-4);
+    padding: 10px 14px;
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
     background: var(--cgui-pane);
     color: var(--cgui-text);
-    border: 1.5px solid var(--cgui-border);
+    border: none;
+    border-bottom: 2px solid var(--cgui-border);
     border-radius: 0;
-    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
-                box-shadow var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-normal) var(--cgui-easing),
-                color var(--cgui-duration-normal) var(--cgui-easing);
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -26,14 +24,11 @@
     opacity: 1;
 }
 .input:hover{
-    border-color: var(--cgui-text);
+    border-bottom-color: var(--cgui-text);
 }
 .input:focus{
-    border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px var(--cgui-state-active);
+    border-bottom-color: var(--cgui-accent);
     outline: none;
-    border-width: 2px;
-    padding: 9px 15px;
 }
 .select{
     margin: 0 var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
@@ -43,19 +38,18 @@
     font-size: 0.9rem;
     background: var(--cgui-pane);
     color: var(--cgui-text);
-    border: 1.5px solid var(--cgui-border);
+    border: none;
+    border-bottom: 2px solid var(--cgui-border);
     border-radius: 0;
+    transition: border-color var(--cgui-duration-fast) var(--cgui-easing);
     min-height: 48px;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
 }
 .select:focus{
-    border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px var(--cgui-state-active);
+    border-bottom-color: var(--cgui-accent);
     outline: none;
-    border-width: 2px;
-    padding: 9px 15px;
 }
 .buttonRow{
     margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
@@ -151,15 +145,12 @@
     overflow-wrap: break-word;
     line-height: 1.6;
     transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-normal) var(--cgui-easing),
-                box-shadow var(--cgui-duration-fast) var(--cgui-easing);
-}
-.result:hover{
-    box-shadow: none;
+                background-color var(--cgui-duration-normal) var(--cgui-easing);
 }
 .result p{
     margin: 0.125rem 0;
     color: var(--cgui-text);
+    font-weight: 900;
     padding: 0;
 }
 .result.error{
@@ -169,13 +160,16 @@
 }
 .result.error p{
     color: var(--cgui-error);
+    font-weight: 400;
 }
 .labelText{
     display: block;
     margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-1) var(--cgui-space-5);
     font-family: "Noto Sans", sans-serif;
-    font-size: 0.875rem;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
     color: var(--cgui-text-secondary);
 }
 @media (max-width: 720px){

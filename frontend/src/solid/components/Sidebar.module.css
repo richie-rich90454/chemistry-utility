@@ -39,10 +39,9 @@
 
 .sidebarHeader h1 {
     font-size: clamp(1.05rem, 1rem + 0.2vw, 1.25rem);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--cgui-text);
     margin: 0;
-    letter-spacing: -0.01em;
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -192,7 +191,7 @@
     color: var(--cgui-text-secondary);
     text-decoration: none;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 400;
     white-space: nowrap;
     transition: background var(--cgui-duration-fast) var(--cgui-easing),
                 color var(--cgui-duration-fast) var(--cgui-easing);
@@ -225,6 +224,12 @@
     flex-shrink: 0;
     opacity: 0.7;
     transition: opacity var(--cgui-duration-fast) var(--cgui-easing);
+    margin-right: 0;
+}
+
+.navIcon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .navLink:hover .navIcon {
@@ -241,14 +246,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.navLink:hover .navLabel,
-.navLink.active .navLabel {
-    overflow: visible;
-    white-space: normal;
-    word-break: break-word;
-    z-index: 1;
 }
 
 /* ---- Footer — flat, border-top only ---- */

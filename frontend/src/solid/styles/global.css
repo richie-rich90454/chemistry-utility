@@ -335,9 +335,10 @@ button,
     justify-content: center;
     gap: 8px;
     padding: 10px 20px;
-    font: 700 13px/1 "Noto Sans", sans-serif;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1;
+    font-family: "Noto Sans", sans-serif;
     color: var(--cgui-on-accent);
     background: var(--cgui-accent);
     border: none;
