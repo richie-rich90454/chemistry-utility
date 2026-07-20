@@ -224,6 +224,13 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Ensure theme transitions propagate to all elements */
+.dark *, .light *, .amoled * {
+    transition: background-color var(--cgui-duration-slow) var(--cgui-easing),
+                color var(--cgui-duration-slow) var(--cgui-easing),
+                border-color var(--cgui-duration-slow) var(--cgui-easing);
+}
+
 /* ============================================================
    TYPOGRAPHY (CGUI — Noto Sans Only for UI)
    ============================================================ */

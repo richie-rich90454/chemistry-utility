@@ -41,7 +41,7 @@ function ThemeToggle(): JSX.Element {
     }
     return (
         <button class={styles.themeToggle} type="button" aria-label={getAriaLabel()} aria-pressed={getAriaPressed()} onClick={handleClick}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d={getIconPath()} />
             </svg>
         </button>

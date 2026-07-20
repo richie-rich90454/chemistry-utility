@@ -96,8 +96,8 @@
 }
 
 .sidebarToggle svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     pointer-events: none;
 }
 
@@ -109,7 +109,7 @@
 
 .sidebarSearch input {
     width: 100%;
-    padding: var(--cgui-space-3) var(--cgui-space-4) var(--cgui-space-3) 36px;
+    padding: var(--cgui-space-3) var(--cgui-space-4) var(--cgui-space-3) 40px;
     min-height: 42px;
     font-size: 0.875rem;
     font-family: inherit;
@@ -137,7 +137,7 @@
 
 .searchIcon {
     position: absolute;
-    left: calc(var(--cgui-space-4) + 12px);
+    left: calc(var(--cgui-space-4) + 8px);
     top: 50%;
     transform: translateY(-50%);
     color: var(--cgui-text-secondary);
@@ -317,9 +317,9 @@
 
 /* ---- Collapsed state — narrow sidebar via data attribute ---- */
 .sidebar[data-collapsed] {
-    width: 52px;
-    min-width: 52px;
-    overflow: hidden;
+    width: 56px;
+    min-width: 56px;
+    overflow: visible;
 }
 
 .sidebar[data-collapsed] .sidebarHeader h1,
@@ -333,16 +333,19 @@
 
 .sidebar[data-collapsed] .headerTop {
     justify-content: center;
+    align-items: center;
+    gap: 4px;
     padding: var(--cgui-space-2) 0;
 }
 
 .sidebar[data-collapsed] .sidebarHeader {
-    padding: var(--cgui-space-2);
+    padding: var(--cgui-space-1);
 }
 
-.sidebar[data-collapsed] .sidebarToggle {
-    width: 44px;
-    height: 44px;
+.sidebar[data-collapsed] .sidebarToggle,
+.sidebar[data-collapsed] .themeToggle {
+    width: 40px;
+    height: 40px;
 }
 
 /* ---- Mobile: hide sidebar, show mobile nav banner ---- */
