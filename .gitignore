@@ -197,3 +197,4 @@ test-results/
 # Editor/IDE
 .idea/
 .vscode/
+.omo
