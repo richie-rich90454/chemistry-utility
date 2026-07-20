@@ -4,8 +4,7 @@ const mocks = vi.hoisted(function () {
     return {
         "mockProcessCsvText": vi.fn(),
         "mockParseCsv": vi.fn(),
-        "mockDownloadResults": vi.fn(),
-        "mockIsWebMode": vi.fn()
+        "mockDownloadResults": vi.fn()
     };
 });
 vi.mock("../../modules/batchCalculator.js", function () {
@@ -16,17 +15,6 @@ vi.mock("../../modules/batchCalculator.js", function () {
                     "processCsvText": mocks.mockProcessCsvText,
                     "parseCsv": mocks.mockParseCsv,
                     "downloadResults": mocks.mockDownloadResults
-                };
-            }
-        }
-    };
-});
-vi.mock("../../modules/webModeGuard.js", function () {
-    return {
-        "WebModeGuard": {
-            "getInstance": function () {
-                return {
-                    "isWebMode": mocks.mockIsWebMode()
                 };
             }
         }
@@ -47,8 +35,6 @@ describe("BatchCalc", function (): void {
         mocks.mockProcessCsvText.mockReset();
         mocks.mockParseCsv.mockReset();
         mocks.mockDownloadResults.mockReset();
-        mocks.mockIsWebMode.mockReset();
-        mocks.mockIsWebMode.mockReturnValue(false);
         mocks.mockParseCsv.mockImplementation(function (text: string): string[][] {
             let rows: string[][] = [];
             let lines: string[] = text.split("\n");
@@ -65,7 +51,7 @@ describe("BatchCalc", function (): void {
         cleanup();
         vi.restoreAllMocks();
     });
-    it("renders the card with calculator type select, file input, and process button in desktop mode", function (): void {
+    it("renders the card with calculator type select, file input, and process button", function (): void {
         let result = render(function () { return <BatchCalc />; });
         let typeSelect = result.getByLabelText("Select calculator type for batch processing") as HTMLSelectElement;
         expect(typeSelect).toBeTruthy();
@@ -73,13 +59,6 @@ describe("BatchCalc", function (): void {
         expect(fileInput).toBeTruthy();
         let processButton = result.getByText("Process") as HTMLButtonElement;
         expect(processButton).toBeTruthy();
-    });
-    it("renders web mode placeholder when isWebMode is true", function (): void {
-        mocks.mockIsWebMode.mockReturnValue(true);
-        let result = render(function () { return <BatchCalc />; });
-        let placeholder = result.getByText(/Batch calculation is unavailable in web mode/);
-        expect(placeholder).toBeTruthy();
-        expect(result.queryByLabelText("Choose CSV file")).toBeNull();
     });
     it("disables Process button when no file is selected", function (): void {
         let result = render(function () { return <BatchCalc />; });
