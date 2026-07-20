@@ -188,7 +188,7 @@ function CompoundSearch(): JSX.Element {
                 </For>
             </select>
             <label class={styles.labelText} for="compound-search-input">Search query</label>
-            <input type="text" id="compound-search-input" class={styles.input} placeholder="E.g., water or H2O" aria-label="Compound search query" value={query()} onInput={handleQueryInput} onKeyDown={handleKeyDown} />
+            <input type="text" id="compound-search-input" class={styles.input} placeholder="E.g., water or H2O" aria-label="Compound search query" value={query()} onInput={handleQueryInput} onKeyDown={handleKeyDown} autocomplete="off" spellcheck={false} />
             <div class={styles.buttonRow}>
                 <button class={styles.button} onClick={handleSearch} disabled={loading()}>Search Compounds</button>
             </div>

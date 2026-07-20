@@ -99,7 +99,7 @@ function CommandPalette(): JSX.Element {
                             <line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="2" />
                         </svg>
                     </span>
-                    <input type="text" ref={inputRef} placeholder="Search calculators..." aria-label="Search calculators" onInput={handleInput} onKeyDown={handleKeyDown} />
+                    <input type="text" ref={inputRef} placeholder="Search calculators..." aria-label="Search calculators" onInput={handleInput} onKeyDown={handleKeyDown} autocomplete="off" spellcheck={false} />
                 </div>
                 <ul class={styles.paletteList}>
                     <For each={filtered()}>

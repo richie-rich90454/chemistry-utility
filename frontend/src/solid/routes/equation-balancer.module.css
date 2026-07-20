@@ -4,9 +4,8 @@
     padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    color-scheme: light !important;
-    background: var(--cgui-pane) !important;
-    color: var(--cgui-text) !important;
+    background: var(--cgui-pane);
+    color: var(--cgui-text);
     border: 1.5px solid var(--cgui-border);
     border-radius: 0;
     transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
@@ -17,19 +16,17 @@
     -moz-appearance: none;
     appearance: none;
     min-height: 48px;
-    -webkit-text-fill-color: var(--cgui-text) !important;
 }
 .input::placeholder{
-    color: var(--cgui-text-secondary) !important;
-    opacity: 1 !important;
-    -webkit-text-fill-color: var(--cgui-text-secondary) !important;
+    color: var(--cgui-text-secondary);
+    opacity: 1;
 }
 .input:hover{
     border-color: var(--cgui-text);
 }
 .input:focus{
     border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
+    box-shadow: 0 0 0 3px var(--cgui-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
@@ -40,9 +37,8 @@
     padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    color-scheme: light !important;
-    background: var(--cgui-pane) !important;
-    color: var(--cgui-text) !important;
+    background: var(--cgui-pane);
+    color: var(--cgui-text);
     border: 1.5px solid var(--cgui-border);
     border-radius: 0;
     min-height: 48px;
@@ -52,7 +48,7 @@
 }
 .select:focus{
     border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
+    box-shadow: 0 0 0 3px var(--cgui-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
@@ -89,10 +85,10 @@
 }
 .button:hover{
     box-shadow: none;
-    filter: brightness(1.08);
+    background-color: var(--cgui-accent-hover);
 }
 .button:active{
-    box-shadow: none;
+    opacity: 0.85;
 }
 .button:disabled{
     opacity: 0.38;
@@ -127,7 +123,7 @@
 .secondaryButton:hover{
     box-shadow: none;
     border-color: var(--cgui-text-secondary);
-    filter: brightness(1.04);
+    background: var(--cgui-state-hover);
 }
 .secondaryButton:disabled{
     opacity: 0.38;

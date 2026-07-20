@@ -318,6 +318,36 @@
     flex-shrink: 0;
 }
 
+/* ---- Collapsed state — narrow sidebar via data attribute ---- */
+.sidebar[data-collapsed] {
+    width: 52px;
+    min-width: 52px;
+    overflow: hidden;
+}
+
+.sidebar[data-collapsed] .sidebarHeader h1,
+.sidebar[data-collapsed] .sidebarSearch,
+.sidebar[data-collapsed] .sidebarNav,
+.sidebar[data-collapsed] .sidebarFooter,
+.sidebar[data-collapsed] .navRecent,
+.sidebar[data-collapsed] .logoIcon {
+    display: none;
+}
+
+.sidebar[data-collapsed] .headerTop {
+    justify-content: center;
+    padding: var(--cgui-space-2) 0;
+}
+
+.sidebar[data-collapsed] .sidebarHeader {
+    padding: var(--cgui-space-2);
+}
+
+.sidebar[data-collapsed] .sidebarToggle {
+    width: 44px;
+    height: 44px;
+}
+
 /* ---- Mobile: hide sidebar, show mobile nav banner ---- */
 @media (max-width: 767px) {
     .sidebar {

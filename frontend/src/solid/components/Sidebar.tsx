@@ -39,6 +39,7 @@ function groupByCategory(calculators: CalculatorInfo[]): GroupedCalculators[] {
 function Sidebar(): JSX.Element {
     let [calculators, setCalculators] = createSignal<CalculatorInfo[]>([]);
     let [searchQuery, setSearchQuery] = createSignal("");
+    let [collapsed, setCollapsed] = createSignal(false);
     onMount(function (): void {
         let nav = NavigationManager.getInstance();
         setCalculators(nav.getCalculators());
@@ -60,8 +61,12 @@ function Sidebar(): JSX.Element {
         let target = e.currentTarget as HTMLInputElement;
         setSearchQuery(target.value);
     }
+
+    function handleToggleSidebar(): void {
+        setCollapsed(!collapsed());
+    }
     return (
-        <aside class={styles.sidebar} role="navigation" aria-label="Calculator sidebar">
+        <aside class={styles.sidebar} role="navigation" aria-label="Calculator sidebar" data-collapsed={collapsed() || undefined}>
             <div class={styles.sidebarHeader}>
                 <h1>Chemistry Utility</h1>
                 <div class={styles.headerTop}>
@@ -70,7 +75,7 @@ function Sidebar(): JSX.Element {
                             <circle cx="12" cy="12" r="6" fill="currentColor" />
                         </svg>
                     </div>
-                    <button class={styles.sidebarToggle} type="button" aria-label="Toggle sidebar">
+                    <button class={styles.sidebarToggle} type="button" aria-label={collapsed() ? "Expand sidebar" : "Collapse sidebar"} onClick={handleToggleSidebar}>
                         <svg width="16" height="16" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
                             <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" />
                         </svg>
@@ -85,7 +90,7 @@ function Sidebar(): JSX.Element {
                         <line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="2" />
                     </svg>
                 </span>
-                <input type="text" placeholder="Search calculators..." aria-label="Search calculators" value={searchQuery()} onInput={handleSearchInput} />
+                <input type="text" placeholder="Search calculators..." aria-label="Search calculators" value={searchQuery()} onInput={handleSearchInput} autocomplete="off" spellcheck={false} />
             </div>
             <WorkspaceList />
             <div class={styles.navRecent} />

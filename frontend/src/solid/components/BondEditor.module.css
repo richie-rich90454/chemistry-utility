@@ -10,10 +10,9 @@
     padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    color-scheme: light !important;
-    background: var(--md-input-bg) !important;
-    color: var(--md-input-text) !important;
-    border: 1.5px solid var(--md-input-border);
+    background: var(--cgui-pane);
+    color: var(--cgui-text);
+    border: 1.5px solid var(--cgui-border);
     border-radius: 0;
     min-height: 48px;
     -webkit-appearance: none;
@@ -21,8 +20,8 @@
     appearance: none;
 }
 .rowSelect:focus{
-    border-color: var(--md-input-focus-border);
-    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
+    border-color: var(--cgui-accent);
+    box-shadow: 0 0 0 3px var(--cgui-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
@@ -33,20 +32,18 @@
     padding: 10px var(--cgui-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    color-scheme: light !important;
-    background: var(--md-input-bg) !important;
-    color: var(--md-input-text) !important;
-    border: 1.5px solid var(--md-input-border);
+    background: var(--cgui-pane);
+    color: var(--cgui-text);
+    border: 1.5px solid var(--cgui-border);
     border-radius: 0;
     min-height: 48px;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    -webkit-text-fill-color: var(--md-input-text) !important;
 }
 .rowInput:focus{
-    border-color: var(--md-input-focus-border);
-    box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.12);
+    border-color: var(--cgui-accent);
+    box-shadow: 0 0 0 3px var(--cgui-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;

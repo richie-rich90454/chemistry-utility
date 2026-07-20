@@ -127,7 +127,7 @@ function CalculatorForm(props: CalculatorFormProps): JSX.Element {
                 <label class={styles.labelText}>{props.inputGroupLabel}</label>
             </Show>
             <div class={styles.inputGroup}>
-                <For each={props.fields}>
+                    <For each={props.fields}>
                     {(f) => (
                         <input
                             type={f.type !== undefined ? f.type : "number"}
@@ -138,6 +138,8 @@ function CalculatorForm(props: CalculatorFormProps): JSX.Element {
                             value={fieldSignals[f.id]()}
                             onInput={function (e: Event): void { handleFieldInput(f.id, e); }}
                             onKeyDown={handleKeyDown}
+                            autocomplete="off"
+                            spellcheck={false}
                         />
                     )}
                 </For>

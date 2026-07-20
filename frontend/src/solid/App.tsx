@@ -31,6 +31,9 @@ import {BatchCalc} from "./routes/batch-calc";
 import {Dashboard} from "./routes/dashboard";
 import {Sidebar} from "./components/Sidebar";
 import {MobileBottomTabs} from "./components/MobileBottomTabs";
+import {MobileNavSheet} from "./components/MobileNavSheet";
+import {SkipLink} from "./components/SkipLink";
+import {ScrollTopButton} from "./components/ScrollTopButton";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -45,8 +48,11 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
                 <MobileBottomTabs />
             </aside>
             <main class="cgui-content">
+                <SkipLink />
                 {props.children}
+                <ScrollTopButton />
             </main>
+            <MobileNavSheet />
         </div>
     );
 }

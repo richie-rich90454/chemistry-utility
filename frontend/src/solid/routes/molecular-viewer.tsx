@@ -75,7 +75,7 @@ function MolecularViewerRoute(): JSX.Element {
             }
         >
             <label class={styles.labelText} for="molecular-viewer-smiles">SMILES string</label>
-            <input type="text" id="molecular-viewer-smiles" class={styles.input} placeholder="e.g., CCO for ethanol" aria-label="SMILES string" value={smilesInput()} onInput={handleSmilesInput} />
+            <input type="text" id="molecular-viewer-smiles" class={styles.input} placeholder="e.g., CCO for ethanol" aria-label="SMILES string" value={smilesInput()} onInput={handleSmilesInput} autocomplete="off" spellcheck={false} />
             <label class={styles.labelText} for="molecular-viewer-preset">Preset molecules</label>
             <select id="molecular-viewer-preset" class={styles.select} aria-label="Preset molecules" onChange={handlePresetChange}>
                 <option value="">Select a preset...</option>

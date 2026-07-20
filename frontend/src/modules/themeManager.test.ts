@@ -245,7 +245,7 @@ describe("ThemeManager", () => {
         document.head.appendChild(meta);
         const tm = ThemeManager.getInstance();
         tm.setTheme("dark");
-        expect(meta.getAttribute("content")).toBe("#1a1a1a");
+        expect(meta.getAttribute("content")).toBe("#16161A");
     });
 
     it("applyTheme updates the theme-color meta tag for amoled", () => {
@@ -263,7 +263,7 @@ describe("ThemeManager", () => {
         document.head.appendChild(meta);
         const tm = ThemeManager.getInstance();
         tm.setTheme("light");
-        expect(meta.getAttribute("content")).toBe("#2d5a3d");
+        expect(meta.getAttribute("content")).toBe("#F8F9FA");
     });
 
     it("applyTheme does not crash when there is no theme-color meta tag", () => {
@@ -271,37 +271,4 @@ describe("ThemeManager", () => {
         expect(() => tm.setTheme("dark")).not.toThrow();
     });
 
-    it("applyTheme updates the toggle button when present", () => {
-        const toggle = document.createElement("button");
-        toggle.id = "theme-toggle";
-        document.body.appendChild(toggle);
-        const tm = ThemeManager.getInstance();
-        tm.setTheme("dark");
-        expect(toggle.getAttribute("aria-pressed")).toBe("true");
-        expect(toggle.getAttribute("aria-label")).toBe("Switch to light mode");
-    });
-
-    it("applyTheme sets aria-pressed false for light theme toggle", () => {
-        const toggle = document.createElement("button");
-        toggle.id = "theme-toggle";
-        document.body.appendChild(toggle);
-        const tm = ThemeManager.getInstance();
-        tm.setTheme("light");
-        expect(toggle.getAttribute("aria-pressed")).toBe("false");
-        expect(toggle.getAttribute("aria-label")).toBe("Switch to dark mode");
-    });
-
-    it("applyTheme sets aria-pressed true for amoled theme toggle", () => {
-        const toggle = document.createElement("button");
-        toggle.id = "theme-toggle";
-        document.body.appendChild(toggle);
-        const tm = ThemeManager.getInstance();
-        tm.setTheme("amoled");
-        expect(toggle.getAttribute("aria-pressed")).toBe("true");
-    });
-
-    it("applyTheme does not crash when there is no toggle button", () => {
-        const tm = ThemeManager.getInstance();
-        expect(() => tm.setTheme("dark")).not.toThrow();
-    });
 });

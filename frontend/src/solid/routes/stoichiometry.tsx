@@ -181,7 +181,7 @@ function Stoichiometry(): JSX.Element {
                         </For>
                     </select>
                     <label class={styles.labelText} for="reactant-moles">Moles of reactant</label>
-                    <input type="number" id="reactant-moles" class={styles.input} placeholder="Moles of reactant" aria-label="Moles of reactant" value={reactantMoles()} onInput={handleReactantMolesInput} min="0" step="any" />
+                    <input type="number" id="reactant-moles" class={styles.input} placeholder="Moles of reactant" aria-label="Moles of reactant" value={reactantMoles()} onInput={handleReactantMolesInput} min="0" step="any" autocomplete="off" spellcheck={false} />
                     <label class={styles.labelText} for="product-select">Select product</label>
                     <select id="product-select" class={styles.select} aria-label="Select product" value={productSelect()} onChange={handleProductSelectChange}>
                         <For each={parsed.products}>
@@ -201,7 +201,7 @@ function Stoichiometry(): JSX.Element {
                         </For>
                     </select>
                     <label class={styles.labelText} for="product-moles">Moles of product</label>
-                    <input type="number" id="product-moles" class={styles.input} placeholder="Moles of product" aria-label="Moles of product" value={productMoles()} onInput={handleProductMolesInput} min="0" step="any" />
+                    <input type="number" id="product-moles" class={styles.input} placeholder="Moles of product" aria-label="Moles of product" value={productMoles()} onInput={handleProductMolesInput} min="0" step="any" autocomplete="off" spellcheck={false} />
                     <label class={styles.labelText} for="reactant-select">Select reactant</label>
                     <select id="reactant-select" class={styles.select} aria-label="Select reactant" value={reactantSelect()} onChange={handleReactantSelectChange}>
                         <For each={parsed.reactants}>
@@ -217,7 +217,7 @@ function Stoichiometry(): JSX.Element {
                     {(term) => (
                         <div>
                             <label class={styles.labelText} for={"moles-" + sanitizeId(term.formula)}>Moles of {term.formula}</label>
-                            <input type="number" id={"moles-" + sanitizeId(term.formula)} class={styles.input} placeholder={"Moles of " + term.formula} aria-label={"Moles of " + term.formula} value={reactantMolesMap()[term.formula] !== undefined ? reactantMolesMap()[term.formula] : ""} onInput={function (e: Event): void { handleLimitingReactantMolesInput(term.formula, e); }} min="0" step="any" />
+                            <input type="number" id={"moles-" + sanitizeId(term.formula)} class={styles.input} placeholder={"Moles of " + term.formula} aria-label={"Moles of " + term.formula} value={reactantMolesMap()[term.formula] !== undefined ? reactantMolesMap()[term.formula] : ""} onInput={function (e: Event): void { handleLimitingReactantMolesInput(term.formula, e); }} min="0" step="any" autocomplete="off" spellcheck={false} />
                         </div>
                     )}
                 </For>
@@ -244,7 +244,7 @@ function Stoichiometry(): JSX.Element {
             }
         >
             <label class={styles.labelText} for="stoich-equation-input">Balanced chemical equation</label>
-            <input type="text" id="stoich-equation-input" class={styles.input} placeholder="E.g., 2H2 + O2 -> 2H2O" aria-label="Balanced chemical equation" value={equation()} onInput={handleEquationInput} />
+            <input type="text" id="stoich-equation-input" class={styles.input} placeholder="E.g., 2H2 + O2 -> 2H2O" aria-label="Balanced chemical equation" value={equation()} onInput={handleEquationInput} autocomplete="off" spellcheck={false} />
             <label class={styles.labelText} for="calculation-type">Calculation type</label>
             <select id="calculation-type" class={styles.select} aria-label="Select stoichiometry calculation type" value={calcType()} onChange={handleCalcTypeChange}>
                 <For each={calculationTypeOptions}>

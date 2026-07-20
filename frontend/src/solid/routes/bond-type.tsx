@@ -118,8 +118,8 @@ function BondType(): JSX.Element {
         >
             <label class={styles.labelText}>Element symbols</label>
             <div class={styles.inputGroup}>
-                <input type="text" id="element1-input" class={styles.input} placeholder="First element (e.g., Na)" aria-label="First element symbol" value={element1()} onInput={handleElement1Input} />
-                <input type="text" id="element2-input" class={styles.input} placeholder="Second element (e.g., Cl)" aria-label="Second element symbol" value={element2()} onInput={handleElement2Input} />
+                <input type="text" id="element1-input" class={styles.input} placeholder="First element (e.g., Na)" aria-label="First element symbol" value={element1()} onInput={handleElement1Input} autocomplete="off" spellcheck={false} />
+                <input type="text" id="element2-input" class={styles.input} placeholder="Second element (e.g., Cl)" aria-label="Second element symbol" value={element2()} onInput={handleElement2Input} autocomplete="off" spellcheck={false} />
             </div>
             <div class={styles.buttonRow}>
                 <button class={styles.button} onClick={handleCalculate} disabled={loading()}>Predict Bond Type</button>
