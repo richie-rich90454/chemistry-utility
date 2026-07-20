@@ -6,6 +6,7 @@ import {NavigationManager} from "../../modules/navigationManager.js";
 import {ThemeToggle} from "./ThemeToggle";
 import {WorkspaceList} from "./WorkspaceList";
 import {ExportImportButtons} from "./ExportImportButtons";
+import {PluginManagerPanel} from "./PluginManagerPanel";
 import styles from "./Sidebar.module.css";
 interface GroupedCalculators {
     category: string;
@@ -98,6 +99,7 @@ function Sidebar(): JSX.Element {
             </nav>
             <div class={styles.sidebarFooter}>
                 <ExportImportButtons />
+                <PluginManagerPanel />
                 <p>&copy; 2026 Richard's Blogs</p>
                 <p>Main site: <a href="https://www.richardsblogs.com" target="_blank" rel="noopener noreferrer">www.richardsblogs.com</a></p>
             </div>

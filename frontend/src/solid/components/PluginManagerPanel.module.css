@@ -1,0 +1,181 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--md-space-2);
+}
+.trigger{
+    display: inline-flex;
+    align-items: center;
+    gap: var(--md-space-2);
+    padding: var(--md-space-2) var(--md-space-3);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-sm);
+    background: transparent;
+    color: var(--md-on-surface-variant);
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), border-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.trigger:hover{
+    background: var(--md-state-hover);
+    border-color: var(--md-primary);
+    color: var(--md-primary);
+}
+.trigger:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.trigger:active{
+    background: var(--md-state-pressed);
+}
+.trigger svg{
+    pointer-events: none;
+    flex-shrink: 0;
+}
+.modal{
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--md-scrim);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: var(--md-space-4);
+}
+.modalContent{
+    background-color: var(--md-surface);
+    color: var(--md-on-surface);
+    border-radius: var(--md-shape-lg);
+    padding: var(--md-space-6);
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow: auto;
+    position: relative;
+    box-shadow: var(--md-elevation-5);
+    border: 1px solid var(--md-outline-variant);
+}
+.close{
+    position: absolute;
+    top: var(--md-space-3);
+    right: var(--md-space-4);
+    font-size: 28px;
+    cursor: pointer;
+    color: var(--md-on-surface-variant);
+    line-height: 1;
+    user-select: none;
+    background: transparent;
+    border: none;
+    padding: var(--md-space-2);
+    border-radius: var(--md-shape-full);
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.close:hover{
+    color: var(--md-on-surface);
+    background: var(--md-state-hover);
+}
+.close:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+.title{
+    margin: 0 0 var(--md-space-3) 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--md-on-surface);
+}
+.empty{
+    color: var(--md-on-surface-variant);
+    margin: 0 0 12px 0;
+}
+.list{
+    display: flex;
+    flex-direction: column;
+    gap: var(--md-space-3);
+}
+.card{
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--md-shape-md);
+    padding: var(--md-space-4);
+    background: var(--md-surface-container-low);
+}
+.cardHeader{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--md-space-2);
+    gap: var(--md-space-2);
+}
+.version{
+    margin-left: var(--md-space-2);
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+    font-weight: 400;
+}
+.author{
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+}
+.desc{
+    margin: 0 0 var(--md-space-2) 0;
+    font-size: 0.875rem;
+    color: var(--md-on-surface);
+}
+.permissions,
+.hooks{
+    font-size: 0.75rem;
+    color: var(--md-on-surface-variant);
+    margin-bottom: var(--md-space-1);
+}
+.actions{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--md-space-3);
+    gap: var(--md-space-2);
+}
+.toggleLabel{
+    display: inline-flex;
+    align-items: center;
+    gap: var(--md-space-2);
+    font-size: 0.8125rem;
+    color: var(--md-on-surface);
+    cursor: pointer;
+}
+.toggle{
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+.uninstall{
+    padding: var(--md-space-1) var(--md-space-3);
+    border: 1px solid var(--md-error);
+    border-radius: var(--md-shape-sm);
+    background: transparent;
+    color: var(--md-error);
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color var(--md-motion-duration-short4) var(--md-motion-easing-standard), color var(--md-motion-duration-short4) var(--md-motion-easing-standard);
+}
+.uninstall:hover{
+    background: var(--md-error-container);
+}
+.uninstall:focus-visible{
+    outline: 2px solid var(--md-primary);
+    outline-offset: 2px;
+}
+@media (max-width: 768px){
+    .modal{
+        padding: var(--md-space-2);
+    }
+    .modalContent{
+        padding: var(--md-space-4);
+    }
+}
