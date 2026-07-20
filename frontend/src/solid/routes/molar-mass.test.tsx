@@ -5,6 +5,7 @@ import {mockElements} from "../../test/elementsData.js";
 describe("MolarMass", function (): void {
     let fetchSpy: ReturnType<typeof vi.spyOn>;
     beforeEach(function (): void {
+        vi.useFakeTimers();
         localStorage.clear();
         fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
             ok: true,
@@ -12,6 +13,7 @@ describe("MolarMass", function (): void {
         } as Response);
     });
     afterEach(function (): void {
+        vi.useRealTimers();
         fetchSpy.mockRestore();
     });
     it("calculates molar mass for H2O", async function (): Promise<void> {
@@ -22,8 +24,7 @@ describe("MolarMass", function (): void {
         let input = result.getByLabelText("Chemical formula") as HTMLInputElement;
         input.value = "H2O";
         fireEvent.input(input);
-        let button = result.getByText("Calculate");
-        fireEvent.click(button);
+        vi.advanceTimersByTime(350);
         let massText = await result.findByText(/Molar Mass: 18\.015/);
         expect(massText).toBeTruthy();
     });
@@ -35,8 +36,7 @@ describe("MolarMass", function (): void {
         let input = result.getByLabelText("Chemical formula") as HTMLInputElement;
         input.value = "Xyz123";
         fireEvent.input(input);
-        let button = result.getByText("Calculate");
-        fireEvent.click(button);
+        vi.advanceTimersByTime(350);
         let errorText = await result.findByText(/Element not found/);
         expect(errorText).toBeTruthy();
     });

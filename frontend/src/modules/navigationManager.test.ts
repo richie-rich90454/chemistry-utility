@@ -63,35 +63,35 @@ describe("NavigationManager", () => {
         it("calls strategy.navigate with the target id", () => {
             const strategy = new MockStrategy();
             manager.setStrategy(strategy);
-            manager.navigate("mass-calc");
-            expect(strategy.navigateCalls).toContain("mass-calc");
+            manager.navigate("molar-mass");
+            expect(strategy.navigateCalls).toContain("molar-mass");
         });
 
         it("does nothing when targetId equals activeViewId", () => {
             const strategy = new MockStrategy();
             manager.setStrategy(strategy);
-            manager.setActiveViewId("mass-calc");
-            manager.navigate("mass-calc");
+            manager.setActiveViewId("molar-mass");
+            manager.navigate("molar-mass");
             expect(strategy.navigateCalls.length).toBe(0);
         });
 
         it("pushes to history when navigating from an active view", () => {
             const strategy = new MockStrategy();
             manager.setStrategy(strategy);
-            manager.setActiveViewId("mass-calc");
-            manager.navigate("balancing");
+            manager.setActiveViewId("molar-mass");
+            manager.navigate("equation-balancer");
             expect(manager.canGoBack()).toBe(true);
         });
 
         it("does not push to history when there is no active view", () => {
             const strategy = new MockStrategy();
             manager.setStrategy(strategy);
-            manager.navigate("mass-calc");
+            manager.navigate("molar-mass");
             expect(manager.canGoBack()).toBe(false);
         });
 
         it("does not throw when no strategy is set", () => {
-            expect(() => manager.navigate("mass-calc")).not.toThrow();
+            expect(() => manager.navigate("molar-mass")).not.toThrow();
         });
     });
 
@@ -99,11 +99,11 @@ describe("NavigationManager", () => {
         it("navigates to the previous view when history exists", () => {
             const strategy = new MockStrategy();
             manager.setStrategy(strategy);
-            manager.setActiveViewId("mass-calc");
-            manager.navigate("balancing");
+            manager.setActiveViewId("molar-mass");
+            manager.navigate("equation-balancer");
             manager.navigateBack();
-            // goBack returns "mass-calc" (the previous view from history)
-            expect(strategy.navigateCalls[strategy.navigateCalls.length - 1]).toBe("mass-calc");
+            // goBack returns "molar-mass" (the previous view from history)
+            expect(strategy.navigateCalls[strategy.navigateCalls.length - 1]).toBe("molar-mass");
         });
 
         it("does nothing when there is no history", () => {
@@ -118,13 +118,13 @@ describe("NavigationManager", () => {
         it("navigates forward after going back", () => {
             const strategy = new MockStrategy();
             manager.setStrategy(strategy);
-            manager.setActiveViewId("mass-calc");
-            manager.navigate("balancing");
-            manager.setActiveViewId("balancing");
+            manager.setActiveViewId("molar-mass");
+            manager.navigate("equation-balancer");
+            manager.setActiveViewId("equation-balancer");
             manager.navigateBack();
             manager.navigateForward();
-            // The last navigation should be back to "balancing"
-            expect(strategy.navigateCalls[strategy.navigateCalls.length - 1]).toBe("balancing");
+            // The last navigation should be back to "equation-balancer"
+            expect(strategy.navigateCalls[strategy.navigateCalls.length - 1]).toBe("equation-balancer");
         });
 
         it("does nothing when there is no forward history", () => {
@@ -153,17 +153,17 @@ describe("NavigationManager", () => {
             expect(calcs.some(c => c.id === "element-lookup")).toBe(true);
         });
 
-        it("includes mass-calc calculator", () => {
+        it("includes molar-mass calculator", () => {
             const calcs = manager.getCalculators();
-            expect(calcs.some(c => c.id === "mass-calc")).toBe(true);
+            expect(calcs.some(c => c.id === "molar-mass")).toBe(true);
         });
     });
 
     describe("getCalculatorById", () => {
         it("returns the calculator when id exists", () => {
-            const calc = manager.getCalculatorById("mass-calc");
+            const calc = manager.getCalculatorById("molar-mass");
             expect(calc).toBeDefined();
-            expect(calc!.id).toBe("mass-calc");
+            expect(calc!.id).toBe("molar-mass");
             expect(calc!.name).toBe("Molar Mass");
         });
 
@@ -175,15 +175,15 @@ describe("NavigationManager", () => {
 
     describe("getBreadcrumbCategory", () => {
         it("returns the category for a known id", () => {
-            expect(manager.getBreadcrumbCategory("mass-calc")).toBe("Reference");
+            expect(manager.getBreadcrumbCategory("molar-mass")).toBe("Reference");
         });
 
         it("returns empty string for an unknown id", () => {
             expect(manager.getBreadcrumbCategory("nonexistent")).toBe("");
         });
 
-        it("returns Solutions for dilution-calc", () => {
-            expect(manager.getBreadcrumbCategory("dilution-calc")).toBe("Solutions");
+        it("returns Solutions for dilution", () => {
+            expect(manager.getBreadcrumbCategory("dilution")).toBe("Solutions");
         });
 
         it("returns Reactions for stoichiometry", () => {
@@ -197,12 +197,12 @@ describe("NavigationManager", () => {
         });
 
         it("setActiveViewId sets the active view", () => {
-            manager.setActiveViewId("mass-calc");
-            expect(manager.getActiveViewId()).toBe("mass-calc");
+            manager.setActiveViewId("molar-mass");
+            expect(manager.getActiveViewId()).toBe("molar-mass");
         });
 
         it("setActiveViewId can set null", () => {
-            manager.setActiveViewId("mass-calc");
+            manager.setActiveViewId("molar-mass");
             manager.setActiveViewId(null);
             expect(manager.getActiveViewId()).toBeNull();
         });
@@ -333,7 +333,7 @@ describe("NavigationManager", () => {
             const list = document.createElement("ol");
             list.id = "breadcrumb-list";
             document.body.appendChild(list);
-            manager.updateBreadcrumbs("mass-calc");
+            manager.updateBreadcrumbs("molar-mass");
             expect(list.innerHTML).toContain("Home");
             expect(list.innerHTML).toContain("Molar Mass");
             expect(list.innerHTML).toContain("Reference");
@@ -343,7 +343,7 @@ describe("NavigationManager", () => {
             const list = document.createElement("ol");
             list.id = "breadcrumb-list";
             document.body.appendChild(list);
-            manager.updateBreadcrumbs("dilution-calc");
+            manager.updateBreadcrumbs("dilution");
             expect(list.innerHTML).toContain("Solutions");
         });
 
@@ -357,7 +357,7 @@ describe("NavigationManager", () => {
         });
 
         it("does nothing when there is no breadcrumb-list element", () => {
-            expect(() => manager.updateBreadcrumbs("mass-calc")).not.toThrow();
+            expect(() => manager.updateBreadcrumbs("molar-mass")).not.toThrow();
         });
     });
 
@@ -367,8 +367,8 @@ describe("NavigationManager", () => {
         });
 
         it("getFavorites returns stored favorites", () => {
-            localStorage.setItem("favorites", JSON.stringify(["mass-calc", "balancing"]));
-            expect(manager.getFavorites()).toEqual(["mass-calc", "balancing"]);
+            localStorage.setItem("favorites", JSON.stringify(["molar-mass", "equation-balancer"]));
+            expect(manager.getFavorites()).toEqual(["molar-mass", "equation-balancer"]);
         });
 
         it("getFavorites returns empty array when localStorage has invalid JSON", () => {
@@ -377,30 +377,30 @@ describe("NavigationManager", () => {
         });
 
         it("isFavorite returns false when id is not in favorites", () => {
-            expect(manager.isFavorite("mass-calc")).toBe(false);
+            expect(manager.isFavorite("molar-mass")).toBe(false);
         });
 
         it("isFavorite returns true when id is in favorites", () => {
-            localStorage.setItem("favorites", JSON.stringify(["mass-calc"]));
-            expect(manager.isFavorite("mass-calc")).toBe(true);
+            localStorage.setItem("favorites", JSON.stringify(["molar-mass"]));
+            expect(manager.isFavorite("molar-mass")).toBe(true);
         });
 
         it("toggleFavorite adds an id to favorites", () => {
-            manager.toggleFavorite("mass-calc");
-            expect(manager.isFavorite("mass-calc")).toBe(true);
+            manager.toggleFavorite("molar-mass");
+            expect(manager.isFavorite("molar-mass")).toBe(true);
         });
 
         it("toggleFavorite removes an id from favorites", () => {
-            manager.toggleFavorite("mass-calc");
-            manager.toggleFavorite("mass-calc");
-            expect(manager.isFavorite("mass-calc")).toBe(false);
+            manager.toggleFavorite("molar-mass");
+            manager.toggleFavorite("molar-mass");
+            expect(manager.isFavorite("molar-mass")).toBe(false);
         });
 
         it("toggleFavorite persists to localStorage", () => {
-            manager.toggleFavorite("mass-calc");
+            manager.toggleFavorite("molar-mass");
             const stored = localStorage.getItem("favorites");
             expect(stored).not.toBeNull();
-            expect(JSON.parse(stored!)).toContain("mass-calc");
+            expect(JSON.parse(stored!)).toContain("molar-mass");
         });
     });
 
@@ -418,7 +418,7 @@ describe("NavigationManager", () => {
             const container = document.createElement("div");
             container.className = "nav-favorites";
             document.body.appendChild(container);
-            localStorage.setItem("favorites", JSON.stringify(["mass-calc"]));
+            localStorage.setItem("favorites", JSON.stringify(["molar-mass"]));
             manager.renderFavorites();
             expect(container.innerHTML).toContain("Molar Mass");
             expect(container.innerHTML).toContain("fav-star");
@@ -433,9 +433,9 @@ describe("NavigationManager", () => {
         it("adds is-favorite class to starred elements", () => {
             const star = document.createElement("span");
             star.className = "fav-star-icon";
-            star.setAttribute("data-fav", "mass-calc");
+            star.setAttribute("data-fav", "molar-mass");
             document.body.appendChild(star);
-            localStorage.setItem("favorites", JSON.stringify(["mass-calc"]));
+            localStorage.setItem("favorites", JSON.stringify(["molar-mass"]));
             manager.updateFavoriteStars();
             expect(star.classList.contains("is-favorite")).toBe(true);
             expect(star.getAttribute("aria-label")).toBe("Remove from favorites");
@@ -444,7 +444,7 @@ describe("NavigationManager", () => {
         it("removes is-favorite class from unstarred elements", () => {
             const star = document.createElement("span");
             star.className = "fav-star-icon is-favorite";
-            star.setAttribute("data-fav", "mass-calc");
+            star.setAttribute("data-fav", "molar-mass");
             document.body.appendChild(star);
             manager.updateFavoriteStars();
             expect(star.classList.contains("is-favorite")).toBe(false);
@@ -507,13 +507,13 @@ describe("NavigationManager", () => {
 
     describe("subscribe / unsubscribe", () => {
         it("calls the listener immediately with the current active view id", () => {
-            manager.setActiveViewId("mass-calc");
+            manager.setActiveViewId("molar-mass");
             const calls: Array<string | null> = [];
             manager.subscribe((id: string | null): void => {
                 calls.push(id);
             });
             expect(calls.length).toBe(1);
-            expect(calls[0]).toBe("mass-calc");
+            expect(calls[0]).toBe("molar-mass");
         });
 
         it("calls the listener with null when no active view is set", () => {
@@ -530,13 +530,13 @@ describe("NavigationManager", () => {
             manager.subscribe((id: string | null): void => {
                 calls.push(id);
             });
-            manager.setActiveViewId("balancing");
+            manager.setActiveViewId("equation-balancer");
             expect(calls.length).toBe(2);
-            expect(calls[1]).toBe("balancing");
+            expect(calls[1]).toBe("equation-balancer");
         });
 
         it("notifies the listener when setActiveViewId is set to null", () => {
-            manager.setActiveViewId("mass-calc");
+            manager.setActiveViewId("molar-mass");
             const calls: Array<string | null> = [];
             manager.subscribe((id: string | null): void => {
                 calls.push(id);
@@ -552,12 +552,12 @@ describe("NavigationManager", () => {
             };
             manager.subscribe(listener);
             manager.unsubscribe(listener);
-            manager.setActiveViewId("balancing");
+            manager.setActiveViewId("equation-balancer");
             expect(calls.length).toBe(1);
         });
 
         it("does not add the same listener twice", () => {
-            manager.setActiveViewId("mass-calc");
+            manager.setActiveViewId("molar-mass");
             const calls: Array<string | null> = [];
             const listener = (id: string | null): void => {
                 calls.push(id);
@@ -583,9 +583,9 @@ describe("NavigationManager", () => {
             manager.subscribe((id: string | null): void => {
                 callsB.push(id);
             });
-            manager.setActiveViewId("balancing");
-            expect(callsA[callsA.length - 1]).toBe("balancing");
-            expect(callsB[callsB.length - 1]).toBe("balancing");
+            manager.setActiveViewId("equation-balancer");
+            expect(callsA[callsA.length - 1]).toBe("equation-balancer");
+            expect(callsB[callsB.length - 1]).toBe("equation-balancer");
         });
 
         it("keeps other listeners working after one unsubscribes", () => {
@@ -599,9 +599,9 @@ describe("NavigationManager", () => {
                 callsB.push(id);
             });
             manager.unsubscribe(listenerA);
-            manager.setActiveViewId("balancing");
+            manager.setActiveViewId("equation-balancer");
             expect(callsA.length).toBe(1);
-            expect(callsB[callsB.length - 1]).toBe("balancing");
+            expect(callsB[callsB.length - 1]).toBe("equation-balancer");
         });
     });
 });

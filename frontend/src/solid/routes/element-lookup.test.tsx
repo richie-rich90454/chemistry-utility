@@ -13,6 +13,7 @@ describe("ElementLookup", function (): void {
     });
     afterEach(function (): void {
         fetchSpy.mockRestore();
+        vi.useRealTimers();
     });
     it("renders the card with input and look up button", async function (): Promise<void> {
         let result = render(function () { return <ElementLookup />; });

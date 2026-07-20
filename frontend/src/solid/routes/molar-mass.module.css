@@ -117,6 +117,14 @@
     outline: 2px solid var(--cgui-accent);
     outline-offset: 2px;
 }
+.label {
+    display: block;
+    font: var(--cgui-font-label);
+    letter-spacing: var(--cgui-label-tracking);
+    text-transform: uppercase;
+    color: var(--cgui-text-secondary);
+    margin-bottom: var(--cgui-space-2);
+}
 .result{
     margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
     position: relative;

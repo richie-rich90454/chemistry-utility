@@ -38,10 +38,28 @@ function groupByCategory(calculators: CalculatorInfo[]): GroupedCalculators[] {
 }
 function Sidebar(): JSX.Element {
     let [calculators, setCalculators] = createSignal<CalculatorInfo[]>([]);
+    let [searchQuery, setSearchQuery] = createSignal("");
     onMount(function (): void {
         let nav = NavigationManager.getInstance();
         setCalculators(nav.getCalculators());
     });
+
+    function filteredCalculators(): CalculatorInfo[] {
+        let q = searchQuery().toLowerCase().trim();
+        if (q === "") {
+            return calculators();
+        }
+        return calculators().filter(function (calc: CalculatorInfo): boolean {
+            return calc.name.toLowerCase().indexOf(q) !== -1 ||
+                calc.category.toLowerCase().indexOf(q) !== -1 ||
+                calc.description.toLowerCase().indexOf(q) !== -1;
+        });
+    }
+
+    function handleSearchInput(e: Event): void {
+        let target = e.currentTarget as HTMLInputElement;
+        setSearchQuery(target.value);
+    }
     return (
         <aside class={styles.sidebar} role="navigation" aria-label="Calculator sidebar">
             <div class={styles.sidebarHeader}>
@@ -67,13 +85,13 @@ function Sidebar(): JSX.Element {
                         <line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="2" />
                     </svg>
                 </span>
-                <input type="text" placeholder="Search calculators..." aria-label="Search calculators" />
+                <input type="text" placeholder="Search calculators..." aria-label="Search calculators" value={searchQuery()} onInput={handleSearchInput} />
             </div>
             <WorkspaceList />
             <div class={styles.navRecent} />
             <nav class={styles.sidebarNav}>
                 <ul>
-                    <For each={groupByCategory(calculators())}>
+                    <For each={groupByCategory(filteredCalculators())}>
                         {(group) => (
                             <>
                                 <li class={styles.navCategory}>{group.category}</li>

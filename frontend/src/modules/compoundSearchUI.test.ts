@@ -461,7 +461,7 @@ describe("CompoundSearchUI", function () {
 
         it("should navigate to molar mass calculator", function () {
             ui.openInMolarMassCalculator("H2O");
-            expect(mockNavigate).toHaveBeenCalledWith("mass-calc");
+            expect(mockNavigate).toHaveBeenCalledWith("molar-mass");
         });
 
         it("should pre-fill molar mass formula input", function () {
