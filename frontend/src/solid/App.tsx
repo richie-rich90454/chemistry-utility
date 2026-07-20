@@ -27,6 +27,7 @@ import {Stoichiometry} from "./routes/stoichiometry";
 import {BondType} from "./routes/bond-type";
 import {MolecularViewerRoute} from "./routes/molecular-viewer";
 import {CompoundSearch} from "./routes/compound-search";
+import {BatchCalc} from "./routes/batch-calc";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -185,6 +186,9 @@ function App(): JSX.Element {
         if (window.location.hash === "#compound-search") {
             window.location.replace("/compound-search");
         }
+        if (window.location.hash === "#batch-calc") {
+            window.location.replace("/batch-calc");
+        }
     });
     return (
         <Router>
@@ -215,6 +219,7 @@ function App(): JSX.Element {
             <Route path="/bond-type" component={BondType} />
             <Route path="/molecular-viewer" component={MolecularViewerRoute} />
             <Route path="/compound-search" component={CompoundSearch} />
+            <Route path="/batch-calc" component={BatchCalc} />
         </Router>
     );
 }

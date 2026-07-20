@@ -351,6 +351,122 @@ describe("BatchCalculator", function () {
         });
     });
 
+    describe("processCsvText", function () {
+        it("should process a molar-mass CSV and produce results CSV", async function () {
+            mockPost.mockResolvedValue({ "Value": 18.015, "Unit": "g/mol" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            let result: { csvString: string; totalRows: number; successCount: number; errorCount: number } = await calc.processCsvText("formula\nH2O\nNaCl\n", "molar-mass");
+            expect(result.totalRows).toBe(2);
+            expect(result.successCount).toBe(2);
+            expect(result.errorCount).toBe(0);
+            let lines: string[] = result.csvString.split("\n");
+            expect(lines[0]).toBe("formula,molar_mass,unit,status");
+            expect(lines[1]).toBe("H2O,18.015,g/mol,ok");
+            expect(lines[2]).toBe("NaCl,18.015,g/mol,ok");
+            expect(mockPost).toHaveBeenCalledTimes(2);
+            expect(mockPost.mock.calls[0][0]).toBe("/api/v1/calculators/molar-mass");
+        });
+        it("should not touch lastResults (purity check)", async function () {
+            mockPost.mockResolvedValue({ "Value": 18.015, "Unit": "g/mol" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            expect(calc.getLastResults()).toBe(null);
+            await calc.processCsvText("formula\nH2O\n", "molar-mass");
+            expect(calc.getLastResults()).toBe(null);
+        });
+        it("should invoke onProgress callback for each row when provided", async function () {
+            mockPost.mockResolvedValue({ "Value": 1, "Unit": "g/mol" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            let progress: { current: number; total: number }[] = [];
+            await calc.processCsvText("formula\nA\nB\nC\n", "molar-mass", function (info: { current: number; total: number }): void {
+                progress.push(info);
+            });
+            expect(progress.length).toBe(3);
+            expect(progress[0]).toEqual({ "current": 1, "total": 3 });
+            expect(progress[2]).toEqual({ "current": 3, "total": 3 });
+        });
+        it("should fall back to instance progressCallback when onProgress omitted", async function () {
+            mockPost.mockResolvedValue({ "Value": 1, "Unit": "g/mol" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            let progress: { current: number; total: number }[] = [];
+            calc.setProgressCallback(function (info: { current: number; total: number }): void {
+                progress.push(info);
+            });
+            await calc.processCsvText("formula\nA\nB\n", "molar-mass");
+            expect(progress.length).toBe(2);
+            expect(progress[0]).toEqual({ "current": 1, "total": 2 });
+        });
+        it("should prefer onProgress over instance progressCallback when both set", async function () {
+            mockPost.mockResolvedValue({ "Value": 1, "Unit": "g/mol" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            let instanceProgress: { current: number; total: number }[] = [];
+            let onProgressCalls: number = 0;
+            calc.setProgressCallback(function (): void {
+                instanceProgress.push({"current": 0, "total": 0});
+            });
+            await calc.processCsvText("formula\nA\n", "molar-mass", function (): void {
+                onProgressCalls = onProgressCalls + 1;
+            });
+            expect(onProgressCalls).toBe(1);
+            expect(instanceProgress.length).toBe(0);
+        });
+        it("should coerce numeric cells to numbers in the request body", async function () {
+            mockPost.mockResolvedValue({ "Value": 1, "Unit": "M" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            await calc.processCsvText("M1,V1\n1.5,2\n", "dilution");
+            let body: Record<string, unknown> = mockPost.mock.calls[0][1] as Record<string, unknown>;
+            expect(body["M1"]).toBe(1.5);
+            expect(typeof body["M1"]).toBe("number");
+            expect(body["V1"]).toBe(2);
+            expect(typeof body["V1"]).toBe("number");
+        });
+        it("should count errors when API rejects a row", async function () {
+            mockPost.mockRejectedValueOnce(new Error("invalid formula"));
+            mockPost.mockResolvedValueOnce({ "Value": 58.44, "Unit": "g/mol" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            let result: { csvString: string; totalRows: number; successCount: number; errorCount: number } = await calc.processCsvText("formula\nBAD\nNaCl\n", "molar-mass");
+            expect(result.successCount).toBe(1);
+            expect(result.errorCount).toBe(1);
+            let lines: string[] = result.csvString.split("\n");
+            expect(lines[1]).toBe("BAD,,,invalid formula");
+            expect(lines[2]).toBe("NaCl,58.44,g/mol,ok");
+        });
+        it("should throw on empty CSV text", async function () {
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            try {
+                await calc.processCsvText("", "molar-mass");
+                expect.fail("Should have thrown on empty CSV");
+            } catch (e) {
+                expect((e as Error).message).toBe("CSV file is empty");
+            }
+        });
+        it("should throw on invalid headers for molar-mass", async function () {
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            try {
+                await calc.processCsvText("name\nH2O\n", "molar-mass");
+                expect.fail("Should have thrown on invalid headers");
+            } catch (e) {
+                expect((e as Error).message).toContain("CSV headers are invalid");
+            }
+            expect(mockPost).not.toHaveBeenCalled();
+        });
+        it("should preserve input columns in output", async function () {
+            mockPost.mockResolvedValue({ "Value": 0.5, "Unit": "M" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            let result: { csvString: string } = await calc.processCsvText("M1,V1,M2,V2\n1,2,3,4\n", "dilution");
+            let lines: string[] = result.csvString.split("\n");
+            expect(lines[0]).toBe("M1,V1,M2,V2,value,unit,status");
+            expect(lines[1]).toBe("1,2,3,4,0.5,M,ok");
+        });
+        it("should accept quoted CSV fields with embedded commas", async function () {
+            mockPost.mockResolvedValue({ "Value": 18.015, "Unit": "g/mol" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            let result: { csvString: string; totalRows: number } = await calc.processCsvText("formula,note\n\"H2O, water\",wet\n", "molar-mass");
+            expect(result.totalRows).toBe(1);
+            let lines: string[] = result.csvString.split("\n");
+            expect(lines[1]).toBe("\"H2O, water\",wet,18.015,g/mol,ok");
+        });
+    });
+
     describe("init", function () {
         it("should show authorized box and enable inputs after init", function () {
             document.body.innerHTML = "<div id=\"batch-authorized\"></div>" +

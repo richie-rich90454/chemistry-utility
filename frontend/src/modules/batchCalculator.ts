@@ -500,6 +500,22 @@ export class BatchCalculator {
      */
     public async processFile(file: File, calculatorType: string): Promise<BatchResult> {
         let text: string = await file.text();
+        let result: BatchResult = await this.processCsvText(text, calculatorType);
+        this.lastResults = result.csvString;
+        return result;
+    }
+    /**
+     * Pure CSV-processing entry point: parses the supplied CSV text,
+     * validates headers for the chosen calculator type, dispatches each
+     * data row to the appropriate calculator endpoint, and returns the
+     * results as a CSV string along with success/error counts. Accepts an
+     * optional onProgress callback; when omitted, falls back to the
+     * instance's progressCallback set via setProgressCallback. Does not
+     * touch lastResults — callers that need to cache the result (e.g.
+     * processFile) do so themselves. Solid components pass their own
+     * onProgress so they own the progress UI.
+     */
+    public async processCsvText(text: string, calculatorType: string, onProgress?: (info: ProgressInfo) => void): Promise<BatchResult> {
         let rows: string[][] = this.parseCsv(text);
         if (rows.length === 0) {
             throw new Error("CSV file is empty");
@@ -560,12 +576,14 @@ export class BatchCalculator {
             }
             outRow.push(status);
             outputRows.push(outRow);
-            if (this.progressCallback) {
-                this.progressCallback({ "current": d + 1, "total": totalRows });
+            if (onProgress) {
+                onProgress({"current": d + 1, "total": totalRows});
+            }
+            else if (this.progressCallback) {
+                this.progressCallback({"current": d + 1, "total": totalRows});
             }
         }
         let csvString: string = this.toCsv(outputRows);
-        this.lastResults = csvString;
         return {
             "csvString": csvString,
             "totalRows": totalRows,
