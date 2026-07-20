@@ -72,6 +72,21 @@ export class ExperimentLogManager {
             }
         }
     }
+    public async loadLogs(): Promise<ExperimentLog[]> {
+        this.logs = this.readLogs();
+        let i: number;
+        let logIds: string[] = Object.keys(this.logs);
+        for (i = 0; i < logIds.length; i++) {
+            let logId: string = this.logs[i].id;
+            this.stepsByLog[logId] = this.readSteps(logId);
+            let j: number;
+            let steps: ExperimentStep[] = this.stepsByLog[logId];
+            for (j = 0; j < steps.length; j++) {
+                this.stepById[steps[j].id] = steps[j];
+            }
+        }
+        return this.logs.slice();
+    }
 
     private renderView(): HTMLElement {
         let existing: HTMLElement | null = document.getElementById("experiment-log-view");

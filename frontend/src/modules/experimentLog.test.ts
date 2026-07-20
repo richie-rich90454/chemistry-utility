@@ -84,6 +84,58 @@ describe("ExperimentLogManager", function () {
         });
     });
 
+    describe("loadLogs", function () {
+        it("should read logs from localStorage and populate in-memory state without rendering", async function () {
+            let stored: ExperimentLog[] = [
+                { "id": "log-a", "title": "Log A", "workspaceId": "ws-1", "createdAt": "2026-07-10T10:00:00Z" },
+                { "id": "log-b", "title": "Log B", "workspaceId": "ws-1", "createdAt": "2026-07-11T10:00:00Z" }
+            ];
+            localStorage.setItem("chemutil_experiment_logs", JSON.stringify(stored));
+            let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
+            let result: ExperimentLog[] = await manager.loadLogs();
+            expect(result.length).toBe(2);
+            expect(result[0].id).toBe("log-a");
+            expect(result[1].id).toBe("log-b");
+            expect(manager.getLogs().length).toBe(2);
+            let view: HTMLElement | null = document.getElementById("experiment-log-view");
+            expect(view).toBeNull();
+        });
+
+        it("should load persisted steps for each log", async function () {
+            let storedLogs: ExperimentLog[] = [
+                { "id": "log-1", "title": "Log One", "workspaceId": "ws-1", "createdAt": "2026-07-10T10:00:00Z" }
+            ];
+            let storedSteps: ExperimentStep[] = [
+                { "id": "step-1", "logId": "log-1", "title": "Step One", "data": "first", "annotation": "", "createdAt": "2026-07-10T10:05:00Z" }
+            ];
+            localStorage.setItem("chemutil_experiment_logs", JSON.stringify(storedLogs));
+            localStorage.setItem("chemutil_experiment_steps_log-1", JSON.stringify(storedSteps));
+            let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
+            await manager.loadLogs();
+            expect(manager.getSteps("log-1").length).toBe(1);
+            expect(manager.getSteps("log-1")[0].id).toBe("step-1");
+        });
+
+        it("should return empty array when no logs are stored", async function () {
+            let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
+            let result: ExperimentLog[] = await manager.loadLogs();
+            expect(result.length).toBe(0);
+            expect(manager.getLogs().length).toBe(0);
+        });
+
+        it("should refresh in-memory state when called after logs are added", async function () {
+            let manager: ExperimentLogManager = ExperimentLogManager.getInstance();
+            await manager.loadLogs();
+            expect(manager.getLogs().length).toBe(0);
+            localStorage.setItem("chemutil_experiment_logs", JSON.stringify([
+                { "id": "log-late", "title": "Late Log", "workspaceId": "ws-1", "createdAt": "2026-07-12T10:00:00Z" }
+            ]));
+            await manager.loadLogs();
+            expect(manager.getLogs().length).toBe(1);
+            expect(manager.getLogs()[0].id).toBe("log-late");
+        });
+    });
+
     describe("createLog", function () {
         it("should create a log with generated id and persist to localStorage", async function () {
             setupDOM();
