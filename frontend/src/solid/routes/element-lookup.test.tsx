@@ -15,15 +15,13 @@ describe("ElementLookup", function (): void {
         fetchSpy.mockRestore();
         vi.useRealTimers();
     });
-    it("renders the card with input and look up button", async function (): Promise<void> {
+    it("renders the card with input field", async function (): Promise<void> {
         let result = render(function () { return <ElementLookup />; });
         await waitFor(function (): void {
             expect(result.queryByText(/Loading elements/)).toBeNull();
         });
         let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
         expect(input).toBeTruthy();
-        let button = result.getByText("Look Up");
-        expect(button).toBeTruthy();
     });
     it("searches by symbol H and shows Hydrogen details", async function (): Promise<void> {
         let result = render(function () { return <ElementLookup />; });
@@ -32,9 +30,10 @@ describe("ElementLookup", function (): void {
         });
         let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
         input.value = "H";
+        vi.useFakeTimers();
         fireEvent.input(input);
-        let button = result.getByText("Look Up");
-        fireEvent.click(button);
+        await vi.advanceTimersByTimeAsync(350);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/Name: Hydrogen/);
         });
@@ -49,9 +48,10 @@ describe("ElementLookup", function (): void {
         });
         let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
         input.value = "oxygen";
+        vi.useFakeTimers();
         fireEvent.input(input);
-        let button = result.getByText("Look Up");
-        fireEvent.click(button);
+        await vi.advanceTimersByTimeAsync(350);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/Name: Oxygen/);
         });
@@ -64,9 +64,10 @@ describe("ElementLookup", function (): void {
         });
         let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
         input.value = "6";
+        vi.useFakeTimers();
         fireEvent.input(input);
-        let button = result.getByText("Look Up");
-        fireEvent.click(button);
+        await vi.advanceTimersByTimeAsync(350);
+        vi.useRealTimers();
         await waitFor(function (): void {
             expect(result.container.textContent).toMatch(/Name: Carbon/);
         });
