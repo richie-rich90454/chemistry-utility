@@ -1,22 +1,12 @@
 import type {JSX} from "solid-js";
-import {createSignal, Show} from "solid-js";
-import {DataPortabilityManager} from "../../modules/dataPortabilityManager.js";
+import {Show} from "solid-js";
+import {useDataPortability} from "../stores/dataPortability";
 import styles from "./ExportImportButtons.module.css";
 function ExportImportButtons(): JSX.Element {
-    let [status, setStatus] = createSignal("");
-    let [error, setError] = createSignal("");
+    let store = useDataPortability();
     let fileInputRef: HTMLInputElement | undefined;
     function handleExport(): void {
-        try {
-            DataPortabilityManager.getInstance().exportToFile();
-            setStatus("Data exported successfully");
-            setError("");
-        }
-        catch (e: unknown) {
-            let message: string = e instanceof Error ? e.message : "Unknown error";
-            setError("Export failed: " + message);
-            setStatus("");
-        }
+        store.exportData();
     }
     function handleImportClick(): void {
         if (fileInputRef !== undefined) {
@@ -32,14 +22,11 @@ function ExportImportButtons(): JSX.Element {
             return;
         }
         let file = target.files[0];
-        let manager = DataPortabilityManager.getInstance();
-        manager.importFromFile(file).then(function (): void {
-            setStatus("Data imported successfully");
-            setError("");
+        file.text().then(function (text: string): void {
+            store.importData(text);
         }).catch(function (err: unknown): void {
             let message: string = err instanceof Error ? err.message : "Unknown error";
-            setError("Import failed: " + message);
-            setStatus("");
+            window.console.error("Failed to read import file: " + message);
         });
         target.value = "";
     }
@@ -64,11 +51,11 @@ function ExportImportButtons(): JSX.Element {
                 </button>
                 <input type="file" ref={fileInputRef} style={{display: "none"}} accept=".chemutil,.json,application/json" onChange={handleFileChange} />
             </div>
-            <Show when={status() !== ""}>
-                <p class={styles.status} role="status">{status()}</p>
+            <Show when={store.status() !== ""}>
+                <p class={styles.status} role="status">{store.status()}</p>
             </Show>
-            <Show when={error() !== ""}>
-                <p class={styles.error} role="alert">{error()}</p>
+            <Show when={store.error() !== ""}>
+                <p class={styles.error} role="alert">{store.error()}</p>
             </Show>
         </div>
     );
