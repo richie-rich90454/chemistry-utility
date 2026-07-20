@@ -120,11 +120,8 @@ export class CompoundSearchUI {
         this.showLoading(true);
         this.showError("");
         this.clearResults();
-        let client: ApiClient = ApiClient.getInstance();
-        let path: string = "/api/v1/compounds/search?q=" + encodeURIComponent(query) + "&type=" + type;
         try {
-            let response: CompoundSearchResponse = await client.get<CompoundSearchResponse>(path);
-            let compounds: CompoundResult[] = (response && response.compounds) ? response.compounds : [];
+            let compounds: CompoundResult[] = await searchCompounds(query, type);
             this.renderResults(compounds);
         } catch (e) {
             this.handleError(e);
@@ -244,24 +241,18 @@ export class CompoundSearchUI {
     private buildFormulaWithSubscripts(formula: string): Node {
         let container: HTMLElement = document.createElement("span");
         container.className = "compound-formula";
-        let buffer: string = "";
+        let segments: FormulaSegment[] = buildFormulaSegments(formula);
         let i: number;
-        for (i = 0; i < formula.length; i++) {
-            let ch: string = formula.charAt(i);
-            if (ch >= "0" && ch <= "9") {
-                if (buffer.length > 0) {
-                    container.appendChild(document.createTextNode(buffer));
-                    buffer = "";
-                }
+        for (i = 0; i < segments.length; i++) {
+            let segment: FormulaSegment = segments[i];
+            if (segment.isSubscript) {
                 let sub: HTMLElement = document.createElement("sub");
-                sub.textContent = ch;
+                sub.textContent = segment.text;
                 container.appendChild(sub);
-            } else {
-                buffer = buffer + ch;
             }
-        }
-        if (buffer.length > 0) {
-            container.appendChild(document.createTextNode(buffer));
+            else {
+                container.appendChild(document.createTextNode(segment.text));
+            }
         }
         return container;
     }
@@ -272,10 +263,8 @@ export class CompoundSearchUI {
         }
         this.clearDetail();
         this.showDetailLoading(true);
-        let client: ApiClient = ApiClient.getInstance();
-        let path: string = "/api/v1/compounds/" + id;
         try {
-            let detail: CompoundDetail = await client.get<CompoundDetail>(path);
+            let detail: CompoundDetail = await fetchCompoundDetail(id);
             this.renderDetail(detail);
         } catch (e) {
             this.handleDetailError(e);
