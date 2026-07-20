@@ -201,11 +201,80 @@ export class EquationBalancer {
 		let free:number[]=[];
 		for (let i=0;i<c;i++) if (!isPivot[i]) free.push(i);
 		if (free.length===0 && c>0){
-			// All columns are pivot columns — full rank. In balancing,
-			// we need one free variable. Treat the last species as free.
-			free.push(c-1);
-			isPivot[c-1]=false;
-			pivotCount=pivotCount-1;
+			// Full rank — try each column as free variable.
+			for (let tryFree=0;tryFree<c;tryFree++){
+				let origIsPivot=[...isPivot];
+				origIsPivot[tryFree]=false;
+				let tryPivotCount=pivotCount-1;
+				let tryFreeList=[tryFree];
+				// Compute basis
+				let basis:Fraction[][]=[];
+				for (let fi=0;fi<tryFreeList.length;fi++){
+					let f=tryFreeList[fi];
+					let vec:Fraction[]=new Array(c);
+					for (let j=0;j<c;j++) vec[j]=new Fraction(0);
+					vec[f]=new Fraction(1);
+					for (let pr=0;pr<tryPivotCount;pr++){
+						let pc=pivotCol[pr];
+						vec[pc]=m[pr][f].multiply(new Fraction(-1));
+					}
+					basis.push(vec);
+				}
+				// Compute intBasis
+				let intBasis:number[][]=[];
+				for (let i=0;i<basis.length;i++){
+					let den=1;
+					for (let j=0;j<c;j++) den=EquationBalancer.lcm(den,Math.abs(basis[i][j].d));
+					let intVec:number[]=new Array(c);
+					for (let j=0;j<c;j++) intVec[j]=basis[i][j].n*(den/basis[i][j].d);
+					let g=0;
+					for (let j=0;j<c;j++) g=EquationBalancer.gcd(g,Math.abs(intVec[j]));
+					if (g>1) for (let j=0;j<c;j++) intVec[j]=intVec[j]/g;
+					intBasis.push(intVec);
+				}
+				// Find best solution
+				let k=intBasis.length;
+				let best:number[]|null=null;
+				let bestSum=0;
+				function trySolution(result:number[]):void{
+					let g=0;
+					for (let j=0;j<c;j++) g=EquationBalancer.gcd(g,Math.abs(result[j]));
+					if (g===0) return;
+					let reduced=new Array(c);
+					for (let j=0;j<c;j++) reduced[j]=result[j]/g;
+					for (let j=0;j<c;j++) if (reduced[j]<=0||reduced[j]>maxCoefficient) return;
+					let sum=0;
+					for (let j=0;j<c;j++) sum=sum+reduced[j];
+					if (best===null||sum<bestSum){best=reduced;bestSum=sum;}
+				}
+				if (k===1){
+					let result=new Array(c);
+					for (let j=0;j<c;j++) result[j]=intBasis[0][j];
+					let allPos=true,allNeg=true;
+					for (let j=0;j<c;j++){if (result[j]<=0) allPos=false;if (result[j]>=0) allNeg=false;}
+					if (allPos) trySolution(result);
+					else if (allNeg){let flipped=new Array(c);for (let j=0;j<c;j++) flipped[j]=-result[j];trySolution(flipped);}
+				}else{
+					function dfs(idx:number,current:number[]):void{
+						if (best!==null&&bestSum<=c+1) return;
+						if (idx===k){trySolution(current);return;}
+						let ciMax=maxCoefficient;
+						for (let j=0;j<c;j++) if (intBasis[idx][j]>0){let headroom=maxCoefficient-current[j];let bound=Math.floor(headroom/intBasis[idx][j]);if (bound<ciMax) ciMax=bound;}
+						if (best!==null&&bestSum<ciMax) ciMax=bestSum;
+						for (let ci=1;ci<=ciMax;ci++){let newCurrent=new Array(c);for (let jj=0;jj<c;jj++) newCurrent[jj]=current[jj]+ci*intBasis[idx][jj];dfs(idx+1,newCurrent);}
+					}
+					let initial=new Array(c);
+					for (let j=0;j<c;j++) initial[j]=0;
+					dfs(0,initial);
+				}
+				if (best!==null){
+					let solution:number[]=best as number[];
+					let out:Fraction[]=new Array(solution.length);
+					for (let j=0;j<solution.length;j++) out[j]=new Fraction(solution[j],1);
+					return out;
+				}
+			}
+			return null;
 		}
 		if (free.length===0) return null;
 		let basis: Fraction[][]=[];

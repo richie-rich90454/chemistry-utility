@@ -20,12 +20,12 @@ function parseSide(side: string): EquationTerm[] {
     let result: EquationTerm[] = [];
     for (let i = 0; i < terms.length; i++) {
         let term = terms[i];
-        let match = term.match(/^(\d+)(.*)$/);
+        let match = term.match(/^(\d+)\s+(.+)$/);
         if (match !== null) {
             result.push({coefficient: match[1], formula: match[2]});
         }
         else {
-            result.push({coefficient: "", formula: term});
+            result.push({coefficient: "", formula: term.trim()});
         }
     }
     return result;

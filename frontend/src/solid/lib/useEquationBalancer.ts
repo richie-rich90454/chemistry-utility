@@ -1,5 +1,21 @@
 import {createSignal} from "solid-js";
-import {balanceEquation, balanceIonic, balanceRedox, BalanceResult} from "../../modules/equationBalancer.js";
+import {balance as fastBalance} from "fast-balance";
+
+export interface BalancedSpecies {
+    coefficient: number;
+    formula: string;
+}
+export interface BalanceResult {
+    equation: string;
+    reactants: BalancedSpecies[];
+    products: BalancedSpecies[];
+    explanation: {
+        method: string;
+        steps: string[];
+        coefficients: number[];
+    };
+}
+
 function useEquationBalancer(): {
     equation: () => string;
     setEquation: (next: string) => void;
@@ -16,6 +32,7 @@ function useEquationBalancer(): {
     let [result, setResult] = createSignal<BalanceResult | null>(null);
     let [error, setError] = createSignal("");
     let [isLoading, setLoading] = createSignal(false);
+
     function setEquation(next: string): void {
         setEquationSignal(next);
     }
@@ -28,35 +45,7 @@ function useEquationBalancer(): {
         setError("");
         setLoading(false);
     }
-    function buildRedoxResult(balanced: string, mediumValue: "acidic" | "basic"): BalanceResult {
-        let steps: string[] = [];
-        steps.push("Detected || separator; balancing as redox half-reaction in " + mediumValue + " medium.");
-        steps.push("Balanced each half-reaction (atoms then charge via electrons).");
-        steps.push("Scaled half-reactions to cancel electrons and combined.");
-        steps.push("Final balanced equation: " + balanced);
-        return {
-            equation: balanced,
-            explanation: {
-                method: "Half-reaction method for redox equations (" + mediumValue + " medium)",
-                steps: steps,
-                coefficients: []
-            }
-        };
-    }
-    function buildIonicFallback(balanced: string, reason: string): BalanceResult {
-        let steps: string[] = [];
-        steps.push("Standard atomic balancing failed: " + reason + ".");
-        steps.push("Fell back to charge-conserving ionic balancing.");
-        steps.push("Final balanced equation: " + balanced);
-        return {
-            equation: balanced,
-            explanation: {
-                method: "Ionic balancing with charge conservation",
-                steps: steps,
-                coefficients: []
-            }
-        };
-    }
+
     function balance(): void {
         setError("");
         setResult(null);
@@ -68,33 +57,57 @@ function useEquationBalancer(): {
         setLoading(true);
         try {
             if (trimmed.indexOf("||") !== -1) {
-                let balanced = balanceRedox(trimmed, medium());
-                setResult(buildRedoxResult(balanced, medium()));
-            }
-            else {
-                let res = balanceEquation(trimmed, 10000, true) as BalanceResult;
-                setResult(res);
-            }
-        }
-        catch (err) {
-            let message = err instanceof Error ? err.message : String(err);
-            if (trimmed.indexOf("||") === -1) {
+                // Remove || and try as single equation
+                let cleaned = trimmed.replace(/\|\|/g, " + ");
                 try {
-                    let balanced = balanceIonic(trimmed);
-                    setResult(buildIonicFallback(balanced, message));
+                    let res = fastBalance(cleaned, {showOne: false, format: "text"});
+                    setResult({
+                        equation: res.equation,
+                        reactants: res.reactants.map(function (s) { return {coefficient: s.coefficient, formula: s.formula}; }),
+                        products: res.products.map(function (s) { return {coefficient: s.coefficient, formula: s.formula}; }),
+                        explanation: {
+                            method: "Rational nullspace computation via Gaussian elimination",
+                            steps: [
+                                "Parsed " + res.reactants.length + " reactants and " + res.products.length + " products",
+                                "Built element conservation matrix with charge accounting",
+                                "Solved homogeneous linear system over rational numbers",
+                                "Scaled to smallest integer coefficients"
+                            ],
+                            coefficients: res.reactants.map(function (s: BalancedSpecies): number { return s.coefficient; })
+                                .concat(res.products.map(function (s: BalancedSpecies): number { return s.coefficient; }))
+                        }
+                    });
                     setLoading(false);
                     return;
-                }
-                catch {
-                    // Fall through to error display below.
-                }
+                } catch { /* fall through to standard balance */ }
             }
+            let res = fastBalance(trimmed, {showOne: false, format: "text"});
+            setResult({
+                equation: res.equation,
+                reactants: res.reactants.map(function (s) { return {coefficient: s.coefficient, formula: s.formula}; }),
+                products: res.products.map(function (s) { return {coefficient: s.coefficient, formula: s.formula}; }),
+                explanation: {
+                    method: "Rational nullspace computation via Gaussian elimination",
+                    steps: [
+                        "Parsed " + res.reactants.length + " reactants and " + res.products.length + " products",
+                        "Built element conservation matrix with charge accounting",
+                        "Solved homogeneous linear system over rational numbers",
+                        "Scaled to smallest integer coefficients"
+                    ],
+                    coefficients: res.reactants.map(function (s: BalancedSpecies): number { return s.coefficient; })
+                        .concat(res.products.map(function (s: BalancedSpecies): number { return s.coefficient; }))
+                }
+            });
+        }
+        catch (err: unknown) {
+            let message = err instanceof Error ? err.message : String(err);
             setError(message);
         }
         finally {
             setLoading(false);
         }
     }
+
     return {
         equation: equation,
         setEquation: setEquation,
