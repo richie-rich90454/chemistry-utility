@@ -224,13 +224,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ensure theme transitions propagate to all elements */
-.dark *, .light *, .amoled * {
-    transition: background-color var(--cgui-duration-slow) var(--cgui-easing),
-                color var(--cgui-duration-slow) var(--cgui-easing),
-                border-color var(--cgui-duration-slow) var(--cgui-easing);
-}
-
 /* ============================================================
    TYPOGRAPHY (CGUI — Noto Sans Only for UI)
    ============================================================ */
@@ -435,6 +428,8 @@ a:hover {
     height: 100vh;
     position: sticky;
     top: 0;
+    transition: background-color var(--cgui-duration-slow) var(--cgui-easing),
+                border-color var(--cgui-duration-slow) var(--cgui-easing);
 }
 
 .cgui-input-pane {
@@ -444,6 +439,8 @@ a:hover {
     height: 100vh;
     position: sticky;
     top: 0;
+    transition: background-color var(--cgui-duration-slow) var(--cgui-easing),
+                border-color var(--cgui-duration-slow) var(--cgui-easing);
 }
 
 .cgui-output-pane {
@@ -452,6 +449,7 @@ a:hover {
     height: 100vh;
     position: sticky;
     top: 0;
+    transition: background-color var(--cgui-duration-slow) var(--cgui-easing);
 }
 
 /* Content area — spans columns 2+ in the three-column grid */
@@ -461,6 +459,7 @@ a:hover {
     height: 100vh;
     position: sticky;
     top: 0;
+    transition: background-color var(--cgui-duration-slow) var(--cgui-easing);
 }
 
 /* ============================================================
