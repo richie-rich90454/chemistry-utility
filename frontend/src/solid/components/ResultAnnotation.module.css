@@ -4,7 +4,7 @@
     gap: 8px;
     margin-top: 12px;
     padding-top: 12px;
-    border-top: 1px solid var(--cgui-border);
+    border-top: 1px solid var(--app-border);
 }
 .favoriteToggle{
     background: none;
@@ -14,41 +14,41 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     border-radius: 0;
     font-size: 1.25rem;
     line-height: 1;
 }
 .favoriteToggle:hover{
-    background-color: var(--cgui-pane);
+    background-color: var(--app-pane);
 }
 .favoriteToggle[aria-pressed="true"]{
-    color: var(--cgui-warning);
+    color: var(--app-warning);
 }
 .favoriteToggle:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
 }
 .noteInput{
     flex: 1;
     min-height: 60px;
     padding: 8px 12px;
-    border: 1px solid var(--cgui-text-secondary);
+    border: 1px solid var(--app-text-secondary);
     border-radius: 0;
-    background-color: var(--cgui-pane);
-    color: var(--cgui-text);
+    background-color: var(--app-pane);
+    color: var(--app-text);
     font-size: 0.875rem;
     font-family: inherit;
     resize: vertical;
 }
 .noteInput:focus{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: -1px;
-    border-color: var(--cgui-accent);
+    border-color: var(--app-accent);
 }
 .saveButton{
-    background: var(--cgui-accent);
-    color: var(--cgui-on-accent);
+    background: var(--app-accent);
+    color: var(--app-on-accent);
     border: none;
     padding: 6px 16px;
     border-radius: 0;
@@ -61,11 +61,11 @@
     box-shadow: none;
 }
 .saveButton:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
 }
 .savedIndicator{
-    color: var(--cgui-accent);
+    color: var(--app-accent);
     font-size: 0.75rem;
     align-self: center;
 }

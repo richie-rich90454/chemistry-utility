@@ -1,17 +1,17 @@
 .input{
-    margin: 0 var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
-    width: calc(100% - 2 * var(--cgui-space-5));
-    padding: 10px var(--cgui-space-4);
+    margin: 0 var(--app-space-5) var(--app-space-3) var(--app-space-5);
+    width: calc(100% - 2 * var(--app-space-5));
+    padding: 10px var(--app-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    background: var(--cgui-pane);
-    color: var(--cgui-text);
-    border: 1.5px solid var(--cgui-border);
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
     border-radius: 0;
-    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
-                box-shadow var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-normal) var(--cgui-easing),
-                color var(--cgui-duration-normal) var(--cgui-easing);
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-normal) var(--app-easing),
+                color var(--app-duration-normal) var(--app-easing);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -19,28 +19,28 @@
 
 }
 .input::placeholder{
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     opacity: 1;
 }
 .input:hover{
-    border-color: var(--cgui-text);
+    border-color: var(--app-text);
 }
 .input:focus{
-    border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px var(--cgui-state-active);
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
 }
 .select{
-    margin: 0 var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
-    width: calc(100% - 2 * var(--cgui-space-5));
-    padding: 10px var(--cgui-space-4);
+    margin: 0 var(--app-space-5) var(--app-space-3) var(--app-space-5);
+    width: calc(100% - 2 * var(--app-space-5));
+    padding: 10px var(--app-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    background: var(--cgui-pane);
-    color: var(--cgui-text);
-    border: 1.5px solid var(--cgui-border);
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
     border-radius: 0;
     min-height: 48px;
     -webkit-appearance: none;
@@ -48,36 +48,36 @@
     appearance: none;
 }
 .select:focus{
-    border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px var(--cgui-state-active);
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
 }
 .buttonRow{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-3) var(--app-space-5);
     display: flex;
-    gap: var(--cgui-space-3);
+    gap: var(--app-space-3);
     flex-wrap: wrap;
 }
 .button{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--cgui-space-2);
-    padding: 0 var(--cgui-space-6);
+    gap: var(--app-space-2);
+    padding: 0 var(--app-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--cgui-on-accent);
-    background-color: var(--cgui-accent);
+    color: var(--app-on-accent);
+    background-color: var(--app-accent);
     border: none;
     border-radius: 0;
     cursor: pointer;
-    transition: box-shadow var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-fast) var(--cgui-easing),
-                transform var(--cgui-duration-fast) var(--cgui-easing);
+    transition: box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-fast) var(--app-easing),
+                transform var(--app-duration-fast) var(--app-easing);
     min-height: 42px;
     width: auto;
     position: relative;
@@ -86,13 +86,13 @@
 }
 .button:hover{
     box-shadow: none;
-    background-color: var(--cgui-accent-hover);
+    background-color: var(--app-accent-hover);
 }
 .button:active{
     opacity: 0.85;
 }
 .button:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
 }
 .button:disabled{
@@ -103,138 +103,138 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--cgui-space-2);
-    padding: 0 var(--cgui-space-6);
+    gap: var(--app-space-2);
+    padding: 0 var(--app-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--cgui-text);
-    background-color: var(--cgui-pane);
-    border: 1.5px solid var(--cgui-border);
+    color: var(--app-text);
+    background-color: var(--app-pane);
+    border: 1.5px solid var(--app-border);
     border-radius: 0;
     cursor: pointer;
-    transition: box-shadow var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-fast) var(--cgui-easing),
-                border-color var(--cgui-duration-fast) var(--cgui-easing);
+    transition: box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-fast) var(--app-easing),
+                border-color var(--app-duration-fast) var(--app-easing);
     min-height: 42px;
     width: auto;
 }
 .secondaryButton:hover{
     box-shadow: none;
-    border-color: var(--cgui-text-secondary);
-    background: var(--cgui-state-hover);
+    border-color: var(--app-text-secondary);
+    background: var(--app-state-hover);
 }
 .secondaryButton:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
 }
 .labelText{
     display: block;
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-1) var(--cgui-space-5);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-1) var(--app-space-5);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
 }
 .status{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
-    padding: var(--cgui-space-3) var(--cgui-space-4);
-    background: var(--cgui-pane);
-    border: 1px solid var(--cgui-border);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-3) var(--app-space-5);
+    padding: var(--app-space-3) var(--app-space-4);
+    background: var(--app-pane);
+    border: 1px solid var(--app-border);
     border-radius: 0;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
 }
 .error{
-    border-color: var(--cgui-error);
-    color: var(--cgui-error);
+    border-color: var(--app-error);
+    color: var(--app-error);
     background: transparent;
 }
 .results{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
     display: flex;
     flex-direction: column;
-    gap: var(--cgui-space-3);
+    gap: var(--app-space-3);
 }
 .resultCard{
-    padding: var(--cgui-space-4);
-    background: var(--cgui-pane);
-    border: 1px solid var(--cgui-border);
+    padding: var(--app-space-4);
+    background: var(--app-pane);
+    border: 1px solid var(--app-border);
     border-radius: 0;
 }
 .resultName{
-    margin: 0 0 var(--cgui-space-2) 0;
+    margin: 0 0 var(--app-space-2) 0;
     font-family: "EB Garamond", serif;
     font-size: 1.15rem;
     font-weight: 600;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 .resultRow{
     display: flex;
     flex-wrap: wrap;
-    gap: var(--cgui-space-2);
-    margin: var(--cgui-space-1) 0;
+    gap: var(--app-space-2);
+    margin: var(--app-space-1) 0;
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
 }
 .resultLabel{
     font-weight: 600;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 .resultValue{
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
 }
 .resultActions{
     display: flex;
-    gap: var(--cgui-space-2);
+    gap: var(--app-space-2);
     flex-wrap: wrap;
-    margin-top: var(--cgui-space-3);
+    margin-top: var(--app-space-3);
 }
 .emptyState{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
-    padding: var(--cgui-space-4);
-    background: var(--cgui-pane);
-    border: 1px dashed var(--cgui-border);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
+    padding: var(--app-space-4);
+    background: var(--app-pane);
+    border: 1px dashed var(--app-border);
     border-radius: 0;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     text-align: center;
 }
 .placeholder{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
-    padding: var(--cgui-space-6);
-    background: var(--cgui-pane);
-    border: 1px dashed var(--cgui-border);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
+    padding: var(--app-space-6);
+    background: var(--app-pane);
+    border: 1px dashed var(--app-border);
     border-radius: 0;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.95rem;
     text-align: center;
 }
 .detailCard{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
-    padding: var(--cgui-space-4);
-    background: var(--cgui-pane);
-    border: 1px solid var(--cgui-border);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
+    padding: var(--app-space-4);
+    background: var(--app-pane);
+    border: 1px solid var(--app-border);
     border-radius: 0;
 }
 .detailTitle{
-    margin: 0 0 var(--cgui-space-3) 0;
+    margin: 0 0 var(--app-space-3) 0;
     font-family: "EB Garamond", serif;
     font-size: 1.3rem;
     font-weight: 600;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 .detailPropertiesTitle{
-    margin: var(--cgui-space-3) 0 var(--cgui-space-1) 0;
+    margin: var(--app-space-3) 0 var(--app-space-1) 0;
     font-family: "EB Garamond", serif;
     font-size: 1.05rem;
     font-weight: 600;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 @media (max-width: 720px){
     .buttonRow,

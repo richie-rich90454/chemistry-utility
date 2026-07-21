@@ -1,13 +1,13 @@
 .pageOverlay{
     position: fixed;
     inset: 0;
-    background: var(--cgui-canvas);
+    background: var(--app-canvas);
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity var(--cgui-duration-normal) var(--cgui-easing),
-                visibility var(--cgui-duration-normal) var(--cgui-easing);
+    transition: opacity var(--app-duration-normal) var(--app-easing),
+                visibility var(--app-duration-normal) var(--app-easing);
 }
 .pageOverlay.loaded{
     opacity: 0;
@@ -17,9 +17,9 @@
 .loader{
     width: 40px;
     height: 40px;
-    border: 3px solid var(--cgui-border);
-    border-top-color: var(--cgui-accent);
-    border-right-color: var(--cgui-accent);
+    border: 3px solid var(--app-border);
+    border-top-color: var(--app-accent);
+    border-right-color: var(--app-accent);
     border-radius: 0;
     animation: spin 0.8s linear infinite;
     will-change: transform;

@@ -1,5 +1,5 @@
 /**
- * Element Lookup — CGUI V3.0
+ * Element Lookup — App Design System
  * Auto-searches on input with 300ms debounce. No button needed.
  */
 import type {JSX} from "solid-js";

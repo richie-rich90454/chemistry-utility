@@ -1,18 +1,18 @@
 .row{
     display: flex;
-    gap: var(--cgui-space-2);
+    gap: var(--app-space-2);
     align-items: center;
-    margin: var(--cgui-space-2) var(--cgui-space-5);
+    margin: var(--app-space-2) var(--app-space-5);
 }
 .rowSelect{
     flex: 2;
     margin: 0;
-    padding: 10px var(--cgui-space-4);
+    padding: 10px var(--app-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    background: var(--cgui-pane);
-    color: var(--cgui-text);
-    border: 1.5px solid var(--cgui-border);
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
     border-radius: 0;
     min-height: 48px;
     -webkit-appearance: none;
@@ -20,8 +20,8 @@
     appearance: none;
 }
 .rowSelect:focus{
-    border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px var(--cgui-state-active);
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
@@ -29,12 +29,12 @@
 .rowInput{
     flex: 1;
     margin: 0;
-    padding: 10px var(--cgui-space-4);
+    padding: 10px var(--app-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    background: var(--cgui-pane);
-    color: var(--cgui-text);
-    border: 1.5px solid var(--cgui-border);
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
     border-radius: 0;
     min-height: 48px;
     -webkit-appearance: none;
@@ -42,8 +42,8 @@
     appearance: none;
 }
 .rowInput:focus{
-    border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px var(--cgui-state-active);
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
@@ -52,13 +52,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 var(--cgui-space-4);
+    padding: 0 var(--app-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--cgui-accent) !important;
+    color: var(--app-accent) !important;
     background-color: transparent !important;
-    border: 1.5px solid var(--cgui-border);
+    border: 1.5px solid var(--app-border);
     border-radius: 0;
     cursor: pointer;
     min-height: 42px;
@@ -66,14 +66,14 @@
 }
 .removeButton:hover{
     box-shadow: none;
-    border-color: var(--cgui-text-secondary);
+    border-color: var(--app-text-secondary);
 }
 .addButtonRow{
-    margin: 0 var(--cgui-space-5) var(--cgui-space-3);
+    margin: 0 var(--app-space-5) var(--app-space-3);
 }
 .emptyHint{
-    margin: var(--cgui-space-2) var(--cgui-space-5);
+    margin: var(--app-space-2) var(--app-space-5);
     font-size: 0.85rem;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     font-style: italic;
 }

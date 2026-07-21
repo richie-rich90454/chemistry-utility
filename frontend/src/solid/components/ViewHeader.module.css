@@ -3,41 +3,41 @@
     max-width: 720px;
     display: flex;
     align-items: center;
-    gap: var(--cgui-space-3);
-    padding-bottom: var(--cgui-space-4);
-    margin-bottom: var(--cgui-space-4);
-    border-bottom: 1px solid var(--cgui-border);
+    gap: var(--app-space-3);
+    padding-bottom: var(--app-space-4);
+    margin-bottom: var(--app-space-4);
+    border-bottom: 1px solid var(--app-border);
 }
 .backButton{
     background: transparent;
     border: none;
     cursor: pointer;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     width: 44px;
     height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 0;
-    transition: background var(--cgui-duration-fast) var(--cgui-easing), color var(--cgui-duration-fast) var(--cgui-easing);
+    transition: background var(--app-duration-fast) var(--app-easing), color var(--app-duration-fast) var(--app-easing);
     flex-shrink: 0;
 }
 .backButton:hover{
-    background: var(--cgui-state-hover);
-    color: var(--cgui-text);
+    background: var(--app-state-hover);
+    color: var(--app-text);
 }
 .backButton:active{
-    background: var(--cgui-state-hover);
+    background: var(--app-state-hover);
 }
 .backButton:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
     border-radius: 0;
 }
 .viewTitle{
     font-size: clamp(0.95rem, 0.9rem + 0.2vw, 1.1rem);
     font-weight: 600;
-    color: var(--cgui-text);
+    color: var(--app-text);
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -50,9 +50,9 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--cgui-accent);
-    background: var(--cgui-state-active);
-    padding: var(--cgui-space-1) var(--cgui-space-3);
+    color: var(--app-accent);
+    background: var(--app-state-active);
+    padding: var(--app-space-1) var(--app-space-3);
     border-radius: 0;
     white-space: nowrap;
     flex-shrink: 0;

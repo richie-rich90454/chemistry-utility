@@ -44,12 +44,12 @@ function CatchAllRedirect(): JSX.Element {
 function AppShell(props: {children?: JSX.Element}): JSX.Element {
     let [collapsed, setCollapsed] = createSignal(false);
     return (
-        <div class={"cgui-app-shell" + (collapsed() ? " nav-collapsed" : "")}>
-            <aside class="cgui-nav-pane">
+        <div class={"app-shell" + (collapsed() ? " nav-collapsed" : "")}>
+            <aside class="nav-pane">
                 <Sidebar collapsed={collapsed()} onToggle={() => setCollapsed(!collapsed())} />
                 <MobileBottomTabs />
             </aside>
-            <main class="cgui-content">
+            <main class="app-content">
                 <SkipLink />
                 {props.children}
                 <ScrollTopButton />

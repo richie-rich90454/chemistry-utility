@@ -1,32 +1,32 @@
 .dashboard{
-    padding: var(--cgui-space-6);
+    padding: var(--app-space-6);
     max-width: 1200px;
     margin: 0 auto;
 }
 .container{
     display: flex;
     flex-direction: column;
-    gap: var(--cgui-space-6);
+    gap: var(--app-space-6);
 }
 .header{
     margin: 0;
     font-size: 1.75rem;
     font-weight: 500;
-    color: var(--cgui-text);
+    color: var(--app-text);
     letter-spacing: 0;
 }
 .loading{
-    padding: var(--cgui-space-6);
+    padding: var(--app-space-6);
     text-align: center;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     font-size: 0.875rem;
-    background: var(--cgui-pane);
+    background: var(--app-pane);
     border-radius: 0;
     box-shadow: none;
 }
 .error{
-    padding: var(--cgui-space-4);
-    color: var(--cgui-error);
+    padding: var(--app-space-4);
+    color: var(--app-error);
     background: transparent;
     border-radius: 0;
     font-size: 0.875rem;
@@ -34,42 +34,42 @@
 .stats{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--cgui-space-4);
+    gap: var(--app-space-4);
 }
 .statCard{
-    background: var(--cgui-pane);
+    background: var(--app-pane);
     border-radius: 0;
     box-shadow: none;
-    padding: var(--cgui-space-4) var(--cgui-space-5);
+    padding: var(--app-space-4) var(--app-space-5);
     display: flex;
     flex-direction: column;
-    gap: var(--cgui-space-1);
+    gap: var(--app-space-1);
     min-height: 80px;
 }
 .statLabel{
     font-size: 0.75rem;
     font-weight: 500;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     letter-spacing: 0.4px;
     text-transform: uppercase;
 }
 .statValue{
     font-size: 1.75rem;
     font-weight: 500;
-    color: var(--cgui-accent);
+    color: var(--app-accent);
     line-height: 1.2;
 }
 .section{
-    background: var(--cgui-pane);
+    background: var(--app-pane);
     border-radius: 0;
     box-shadow: none;
-    padding: var(--cgui-space-5);
+    padding: var(--app-space-5);
 }
 .sectionTitle{
-    margin: 0 0 var(--cgui-space-4) 0;
+    margin: 0 0 var(--app-space-4) 0;
     font-size: 1.125rem;
     font-weight: 500;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 .list{
     list-style: none;
@@ -77,52 +77,52 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--cgui-space-2);
+    gap: var(--app-space-2);
 }
 .listItem{
     display: grid;
     grid-template-columns: minmax(120px, 200px) 1fr auto;
-    gap: var(--cgui-space-4);
+    gap: var(--app-space-4);
     align-items: center;
-    padding: var(--cgui-space-3) var(--cgui-space-4);
-    background: var(--cgui-pane);
-    border: 1px solid var(--cgui-border);
+    padding: var(--app-space-3) var(--app-space-4);
+    background: var(--app-pane);
+    border: 1px solid var(--app-border);
     border-radius: 0;
     font-size: 0.875rem;
-    transition: background-color var(--cgui-duration-fast) var(--cgui-easing), border-color var(--cgui-duration-fast) var(--cgui-easing);
+    transition: background-color var(--app-duration-fast) var(--app-easing), border-color var(--app-duration-fast) var(--app-easing);
 }
 .listItem:hover{
-    background: var(--cgui-pane);
-    border-color: var(--cgui-text-secondary);
+    background: var(--app-pane);
+    border-color: var(--app-text-secondary);
 }
 .listType{
     font-weight: 600;
-    color: var(--cgui-accent);
+    color: var(--app-accent);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 .listPreview{
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 .listDate{
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     font-size: 0.75rem;
     white-space: nowrap;
 }
 .empty{
     margin: 0;
-    padding: var(--cgui-space-4);
-    color: var(--cgui-text-secondary);
+    padding: var(--app-space-4);
+    color: var(--app-text-secondary);
     font-size: 0.875rem;
     text-align: center;
 }
 @media (max-width: 768px){
     .dashboard{
-        padding: var(--cgui-space-4);
+        padding: var(--app-space-4);
     }
     .listItem{
         grid-template-columns: 1fr;

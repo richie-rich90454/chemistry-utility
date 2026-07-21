@@ -1,7 +1,7 @@
 .navSheetBackdrop {
     position: fixed;
     inset: 0;
-    background: var(--cgui-scrim);
+    background: var(--app-scrim);
     z-index: 60;
     opacity: 1;
     visibility: visible;
@@ -14,8 +14,8 @@
     bottom: 0;
     width: 280px;
     max-width: 85vw;
-    background: var(--cgui-pane);
-    border-right: 1px solid var(--cgui-border);
+    background: var(--app-pane);
+    border-right: 1px solid var(--app-border);
     z-index: 61;
     overflow-y: auto;
     display: flex;
@@ -33,24 +33,24 @@
 }
 
 .navCategory {
-    font: var(--cgui-font-label);
-    letter-spacing: var(--cgui-label-tracking);
-    color: var(--cgui-text-secondary);
-    padding: var(--cgui-space-4) var(--cgui-space-4) var(--cgui-space-2);
+    font: var(--app-font-label);
+    letter-spacing: var(--app-label-tracking);
+    color: var(--app-text-secondary);
+    padding: var(--app-space-4) var(--app-space-4) var(--app-space-2);
     text-transform: uppercase;
 }
 
 .sheetItem {
     display: flex;
     align-items: center;
-    gap: var(--cgui-space-3);
-    padding: var(--cgui-space-3) var(--cgui-space-4);
+    gap: var(--app-space-3);
+    padding: var(--app-space-3) var(--app-space-4);
     cursor: pointer;
-    color: var(--cgui-text-secondary);
-    font: var(--cgui-font-body);
+    color: var(--app-text-secondary);
+    font: var(--app-font-body);
     font-weight: 500;
-    transition: background var(--cgui-duration-fast) var(--cgui-easing),
-                color var(--cgui-duration-fast) var(--cgui-easing);
+    transition: background var(--app-duration-fast) var(--app-easing),
+                color var(--app-duration-fast) var(--app-easing);
     border: none;
     background: none;
     width: 100%;
@@ -59,21 +59,21 @@
 }
 
 .sheetItem:hover {
-    background: var(--cgui-state-hover);
-    color: var(--cgui-text);
+    background: var(--app-state-hover);
+    color: var(--app-text);
 }
 
 .sheetItem.active {
-    background: var(--cgui-accent);
-    color: var(--cgui-on-accent);
+    background: var(--app-accent);
+    color: var(--app-on-accent);
 }
 
 .sheetItem:active {
-    background: var(--cgui-state-active);
+    background: var(--app-state-active);
 }
 
 .sheetItem:focus-visible {
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: -2px;
 }
 

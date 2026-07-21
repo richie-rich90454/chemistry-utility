@@ -1,17 +1,17 @@
 .input{
-    margin: 0 var(--cgui-space-5) var(--cgui-space-3) var(--cgui-space-5);
-    width: calc(100% - 2 * var(--cgui-space-5));
-    padding: 10px var(--cgui-space-4);
+    margin: 0 var(--app-space-5) var(--app-space-3) var(--app-space-5);
+    width: calc(100% - 2 * var(--app-space-5));
+    padding: 10px var(--app-space-4);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.9rem;
-    background: var(--cgui-pane);
-    color: var(--cgui-text);
-    border: 1.5px solid var(--cgui-border);
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
     border-radius: 0;
-    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
-                box-shadow var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-normal) var(--cgui-easing),
-                color var(--cgui-duration-normal) var(--cgui-easing);
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-normal) var(--app-easing),
+                color var(--app-duration-normal) var(--app-easing);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -19,38 +19,38 @@
 
 }
 .input::placeholder{
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     opacity: 1;
 }
 .input:hover{
-    border-color: var(--cgui-text);
+    border-color: var(--app-text);
 }
 .input:focus{
-    border-color: var(--cgui-accent);
-    box-shadow: 0 0 0 3px var(--cgui-state-active);
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
     outline: none;
     border-width: 2px;
     padding: 9px 15px;
 }
 .button{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--cgui-space-2);
-    padding: 0 var(--cgui-space-6);
+    gap: var(--app-space-2);
+    padding: 0 var(--app-space-6);
     font-family: "Noto Sans", sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--cgui-on-accent);
-    background-color: var(--cgui-accent);
+    color: var(--app-on-accent);
+    background-color: var(--app-accent);
     border: none;
     border-radius: 0;
     cursor: pointer;
-    transition: box-shadow var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-fast) var(--cgui-easing),
-                transform var(--cgui-duration-fast) var(--cgui-easing);
+    transition: box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-fast) var(--app-easing),
+                transform var(--app-duration-fast) var(--app-easing);
     min-height: 42px;
     width: auto;
     position: relative;
@@ -59,7 +59,7 @@
 }
 .button:hover{
     box-shadow: none;
-    background-color: var(--cgui-accent-hover);
+    background-color: var(--app-accent-hover);
 }
 .button:active{
     opacity: 0.85;
@@ -70,32 +70,32 @@
     pointer-events: none;
 }
 .button:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
 }
 .label {
     display: block;
-    font: var(--cgui-font-label);
-    letter-spacing: var(--cgui-label-tracking);
+    font: var(--app-font-label);
+    letter-spacing: var(--app-label-tracking);
     text-transform: uppercase;
-    color: var(--cgui-text-secondary);
-    margin-bottom: var(--cgui-space-2);
+    color: var(--app-text-secondary);
+    margin-bottom: var(--app-space-2);
 }
 .result{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
     position: relative;
-    padding: var(--cgui-space-4) var(--cgui-space-5);
-    background: var(--cgui-pane);
-    border: 1px solid var(--cgui-border);
-    border-left: 4px solid var(--cgui-accent);
+    padding: var(--app-space-4) var(--app-space-5);
+    background: var(--app-pane);
+    border: 1px solid var(--app-border);
+    border-left: 4px solid var(--app-accent);
     border-radius: 0;
     font-family: "Noto Sans", sans-serif;
     font-size: 0.95rem;
     overflow-wrap: break-word;
     line-height: 1.6;
-    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-normal) var(--cgui-easing),
-                box-shadow var(--cgui-duration-fast) var(--cgui-easing);
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-normal) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing);
 }
 .result:hover{
     box-shadow: none;
@@ -105,32 +105,32 @@
 }
 .result p{
     margin: 0.125rem 0;
-    color: var(--cgui-text);
+    color: var(--app-text);
     padding: 0;
 }
 .result.error{
     border-color: transparent;
-    border-left-color: var(--cgui-error);
+    border-left-color: var(--app-error);
     background: transparent;
 }
 .result.error p{
-    color: var(--cgui-error);
+    color: var(--app-error);
 }
 .elementResult{
-    margin: var(--cgui-space-3) var(--cgui-space-5) var(--cgui-space-5) var(--cgui-space-5);
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
     position: relative;
-    padding: var(--cgui-space-4) var(--cgui-space-5);
-    background: var(--cgui-pane);
-    border: 1px solid var(--cgui-border);
-    border-left: 4px solid var(--cgui-accent);
+    padding: var(--app-space-4) var(--app-space-5);
+    background: var(--app-pane);
+    border: 1px solid var(--app-border);
+    border-left: 4px solid var(--app-accent);
     border-radius: 0;
     font-family: "Noto Sans", sans-serif;
     font-size: 0.95rem;
     overflow-wrap: break-word;
     line-height: 1.6;
-    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
-                background-color var(--cgui-duration-normal) var(--cgui-easing),
-                box-shadow var(--cgui-duration-fast) var(--cgui-easing);
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-normal) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing);
 }
 .elementResult:hover{
     box-shadow: none;
@@ -140,14 +140,14 @@
 }
 .elementResult p{
     margin: 0.125rem 0;
-    color: var(--cgui-text);
+    color: var(--app-text);
     padding: 0;
     display: flex;
     justify-content: space-between;
-    gap: var(--cgui-space-4);
+    gap: var(--app-space-4);
 }
 .elementResult p strong{
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     font-weight: 600;
     flex-shrink: 0;
 }

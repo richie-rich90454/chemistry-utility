@@ -1,7 +1,7 @@
 .subGroup{
-    padding-bottom: var(--cgui-space-4);
-    border-bottom: 1px solid var(--cgui-border);
-    margin-bottom: var(--cgui-space-4);
+    padding-bottom: var(--app-space-4);
+    border-bottom: 1px solid var(--app-border);
+    margin-bottom: var(--app-space-4);
 }
 .subGroup:last-child{
     border-bottom: none;
@@ -9,25 +9,25 @@
     padding-bottom: 0;
 }
 .vdwDetails{
-    margin: var(--cgui-space-4) 0 0;
-    border: 1px solid var(--cgui-border);
+    margin: var(--app-space-4) 0 0;
+    border: 1px solid var(--app-border);
     border-radius: 0;
     overflow: hidden;
 }
 .vdwDetails summary{
-    padding: var(--cgui-space-3) var(--cgui-space-4);
+    padding: var(--app-space-3) var(--app-space-4);
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     cursor: pointer;
-    background: var(--cgui-pane);
-    border-bottom: 1px solid var(--cgui-border);
+    background: var(--app-pane);
+    border-bottom: 1px solid var(--app-border);
     list-style: none;
     display: flex;
     align-items: center;
-    gap: var(--cgui-space-2);
-    transition: background-color var(--cgui-duration-fast) var(--cgui-easing),
-                color var(--cgui-duration-fast) var(--cgui-easing);
+    gap: var(--app-space-2);
+    transition: background-color var(--app-duration-fast) var(--app-easing),
+                color var(--app-duration-fast) var(--app-easing);
 }
 .vdwDetails summary::-webkit-details-marker{
     display: none;
@@ -40,13 +40,13 @@
     border-left: 5px solid currentColor;
     border-top: 4px solid transparent;
     border-bottom: 4px solid transparent;
-    transition: transform var(--cgui-duration-fast) var(--cgui-easing);
+    transition: transform var(--app-duration-fast) var(--app-easing);
     flex-shrink: 0;
 }
 .vdwDetails[open] summary::before{
     transform: rotate(90deg);
 }
 .vdwDetails summary:hover{
-    background: var(--cgui-state-hover);
-    color: var(--cgui-text);
+    background: var(--app-state-hover);
+    color: var(--app-text);
 }

@@ -1,5 +1,5 @@
 /**
- * Chemical Equation Balancer — CGUI V3.0
+ * Chemical Equation Balancer — App Design System
  * Auto-balances on input with 500ms debounce.
  */
 import type {JSX} from "solid-js";

@@ -1,7 +1,7 @@
 .subGroup{
-    padding-bottom: var(--cgui-space-4);
-    border-bottom: 1px solid var(--cgui-border);
-    margin-bottom: var(--cgui-space-4);
+    padding-bottom: var(--app-space-4);
+    border-bottom: 1px solid var(--app-border);
+    margin-bottom: var(--app-space-4);
 }
 .subGroup:last-child{
     border-bottom: none;

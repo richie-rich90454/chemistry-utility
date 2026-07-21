@@ -1,4 +1,4 @@
-/* Core-Grid UI (CGUI) V3.0 — Global Design Tokens
+/* Core-Grid UI (App) V3.0 — Global Design Tokens
    Flat palette, zero rounded edges, asymmetric layout. */
 
 /* Font loading */
@@ -19,140 +19,140 @@
 }
 
 /* ============================================================
-   CGUI V3.0 LIGHT THEME TOKENS
+   App Design System LIGHT THEME TOKENS
    ============================================================ */
 :root {
     color-scheme: light;
 
     /* App canvas base — lowest visual layer */
-    --cgui-canvas: #F8F9FA;
+    --app-canvas: #F8F9FA;
     /* Workspace panes — solid surfaces for inputs/outputs */
-    --cgui-pane: #FFFFFF;
+    --app-pane: #FFFFFF;
     /* Borders & rules — structural lines only, never box individual fields */
-    --cgui-border: #E4E7EB;
+    --app-border: #E4E7EB;
     /* Text primary — maximum readability */
-    --cgui-text: #111827;
-    --cgui-text-secondary: #6B7280;
+    --app-text: #111827;
+    --app-text-secondary: #6B7280;
     /* Active accent — focused states, buttons, system actions */
-    --cgui-accent: #0052FF;
-    --cgui-accent-hover: #003DCC;
-    --cgui-on-accent: #FFFFFF;
+    --app-accent: #0052FF;
+    --app-accent-hover: #003DCC;
+    --app-on-accent: #FFFFFF;
 
     /* Success / Warning / Error */
-    --cgui-success: #059669;
-    --cgui-on-success: #FFFFFF;
-    --cgui-warning: #D97706;
-    --cgui-on-warning: #FFFFFF;
-    --cgui-error: #DC2626;
-    --cgui-on-error: #FFFFFF;
+    --app-success: #059669;
+    --app-on-success: #FFFFFF;
+    --app-warning: #D97706;
+    --app-on-warning: #FFFFFF;
+    --app-error: #DC2626;
+    --app-on-error: #FFFFFF;
 
     /* State layers */
-    --cgui-state-hover: rgba(0, 0, 0, 0.05);
-    --cgui-state-active: rgba(0, 82, 255, 0.12);
-    --cgui-state-selected: rgba(0, 82, 255, 0.08);
+    --app-state-hover: rgba(0, 0, 0, 0.05);
+    --app-state-active: rgba(0, 82, 255, 0.12);
+    --app-state-selected: rgba(0, 82, 255, 0.08);
 
     /* Scrim / overlay */
-    --cgui-scrim: rgba(15, 15, 17, 0.5);
+    --app-scrim: rgba(15, 15, 17, 0.5);
 
     /* Layout */
-    --cgui-nav-width: 15%;
-    --cgui-input-width: 35%;
-    --cgui-output-width: 50%;
-    --cgui-mobile-header-height: 48px;
+    --app-nav-width: 15%;
+    --app-input-width: 35%;
+    --app-output-width: 50%;
+    --app-mobile-header-height: 48px;
 
     /* Spacing grid (4px base) */
-    --cgui-space-1: 4px;
-    --cgui-space-2: 8px;
-    --cgui-space-3: 12px;
-    --cgui-space-4: 16px;
-    --cgui-space-5: 20px;
-    --cgui-space-6: 24px;
-    --cgui-space-8: 32px;
-    --cgui-space-10: 40px;
-    --cgui-space-12: 48px;
+    --app-space-1: 4px;
+    --app-space-2: 8px;
+    --app-space-3: 12px;
+    --app-space-4: 16px;
+    --app-space-5: 20px;
+    --app-space-6: 24px;
+    --app-space-8: 32px;
+    --app-space-10: 40px;
+    --app-space-12: 48px;
 
     /* Typography scale */
-    --cgui-font-display: 900 48px/1.1 "Noto Sans", sans-serif;
-    --cgui-font-heading: 700 20px/1.3 "Noto Sans", sans-serif;
-    --cgui-font-subheading: 700 14px/1.4 "Noto Sans", sans-serif;
-    --cgui-font-body: 400 14px/1.6 "Noto Sans", sans-serif;
-    --cgui-font-label: 700 10px/1.4 "Noto Sans", sans-serif;
-    --cgui-font-input: 300 14px/1.5 "Noto Sans", sans-serif;
-    --cgui-font-mono: 400 13px/1.5 "Consolas", "Monaco", monospace;
-    --cgui-font-prose: 400 15px/1.7 "Noto Serif", serif;
+    --app-font-display: 900 48px/1.1 "Noto Sans", sans-serif;
+    --app-font-heading: 700 20px/1.3 "Noto Sans", sans-serif;
+    --app-font-subheading: 700 14px/1.4 "Noto Sans", sans-serif;
+    --app-font-body: 400 14px/1.6 "Noto Sans", sans-serif;
+    --app-font-label: 700 10px/1.4 "Noto Sans", sans-serif;
+    --app-font-input: 300 14px/1.5 "Noto Sans", sans-serif;
+    --app-font-mono: 400 13px/1.5 "Consolas", "Monaco", monospace;
+    --app-font-prose: 400 15px/1.7 "Noto Serif", serif;
 
     /* Micro-label tracking */
-    --cgui-label-tracking: 0.06em;
+    --app-label-tracking: 0.06em;
 
     /* Zero radius — no rounded corners anywhere */
-    --cgui-radius: 0px;
+    --app-radius: 0px;
 
     /* Motion */
-    --cgui-easing: cubic-bezier(0.2, 0, 0, 1);
-    --cgui-duration-fast: 100ms;
-    --cgui-duration-normal: 200ms;
-    --cgui-duration-slow: 300ms;
+    --app-easing: cubic-bezier(0.2, 0, 0, 1);
+    --app-duration-fast: 100ms;
+    --app-duration-normal: 200ms;
+    --app-duration-slow: 300ms;
 
     /* Shadows — minimal, only for overlays */
-    --cgui-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 /* ============================================================
-   CGUI V3.0 DARK THEME TOKENS
+   App Design System DARK THEME TOKENS
    ============================================================ */
 .dark {
     color-scheme: dark;
 
-    --cgui-canvas: #0F0F11;
-    --cgui-pane: #16161A;
-    --cgui-border: #2A2A32;
-    --cgui-text: #F3F4F6;
-    --cgui-text-secondary: #9CA3AF;
-    --cgui-accent: #3B82F6;
-    --cgui-accent-hover: #2563EB;
-    --cgui-on-accent: #FFFFFF;
+    --app-canvas: #0F0F11;
+    --app-pane: #16161A;
+    --app-border: #2A2A32;
+    --app-text: #F3F4F6;
+    --app-text-secondary: #9CA3AF;
+    --app-accent: #3B82F6;
+    --app-accent-hover: #2563EB;
+    --app-on-accent: #FFFFFF;
 
-    --cgui-success: #10B981;
-    --cgui-on-success: #FFFFFF;
-    --cgui-warning: #F59E0B;
-    --cgui-on-warning: #111827;
-    --cgui-error: #EF4444;
-    --cgui-on-error: #FFFFFF;
+    --app-success: #10B981;
+    --app-on-success: #FFFFFF;
+    --app-warning: #F59E0B;
+    --app-on-warning: #111827;
+    --app-error: #EF4444;
+    --app-on-error: #FFFFFF;
 
-    --cgui-state-hover: rgba(255, 255, 255, 0.06);
-    --cgui-state-active: rgba(59, 130, 246, 0.2);
-    --cgui-state-selected: rgba(59, 130, 246, 0.12);
+    --app-state-hover: rgba(255, 255, 255, 0.06);
+    --app-state-active: rgba(59, 130, 246, 0.2);
+    --app-state-selected: rgba(59, 130, 246, 0.12);
 
-    --cgui-scrim: rgba(0, 0, 0, 0.7);
-    --cgui-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --app-scrim: rgba(0, 0, 0, 0.7);
+    --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* AMOLED variant */
 .amoled {
     color-scheme: dark;
 
-    --cgui-canvas: #000000;
-    --cgui-pane: #0A0A0A;
-    --cgui-border: #1F1F24;
-    --cgui-text: #F3F4F6;
-    --cgui-text-secondary: #9CA3AF;
-    --cgui-accent: #3B82F6;
-    --cgui-accent-hover: #2563EB;
-    --cgui-on-accent: #FFFFFF;
+    --app-canvas: #000000;
+    --app-pane: #0A0A0A;
+    --app-border: #1F1F24;
+    --app-text: #F3F4F6;
+    --app-text-secondary: #9CA3AF;
+    --app-accent: #3B82F6;
+    --app-accent-hover: #2563EB;
+    --app-on-accent: #FFFFFF;
 
-    --cgui-success: #10B981;
-    --cgui-on-success: #FFFFFF;
-    --cgui-warning: #F59E0B;
-    --cgui-on-warning: #111827;
-    --cgui-error: #EF4444;
-    --cgui-on-error: #FFFFFF;
+    --app-success: #10B981;
+    --app-on-success: #FFFFFF;
+    --app-warning: #F59E0B;
+    --app-on-warning: #111827;
+    --app-error: #EF4444;
+    --app-on-error: #FFFFFF;
 
-    --cgui-state-hover: rgba(255, 255, 255, 0.06);
-    --cgui-state-active: rgba(59, 130, 246, 0.2);
-    --cgui-state-selected: rgba(59, 130, 246, 0.12);
+    --app-state-hover: rgba(255, 255, 255, 0.06);
+    --app-state-active: rgba(59, 130, 246, 0.2);
+    --app-state-selected: rgba(59, 130, 246, 0.12);
 
-    --cgui-scrim: rgba(0, 0, 0, 0.85);
-    --cgui-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.6);
+    --app-scrim: rgba(0, 0, 0, 0.85);
+    --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.6);
 }
 
 /* Explicit light override */
@@ -165,28 +165,28 @@
     :root:not(.light):not(.dark):not(.amoled) {
         color-scheme: dark;
 
-        --cgui-canvas: #0F0F11;
-        --cgui-pane: #16161A;
-        --cgui-border: #2A2A32;
-        --cgui-text: #F3F4F6;
-        --cgui-text-secondary: #9CA3AF;
-        --cgui-accent: #3B82F6;
-        --cgui-accent-hover: #2563EB;
-        --cgui-on-accent: #FFFFFF;
+        --app-canvas: #0F0F11;
+        --app-pane: #16161A;
+        --app-border: #2A2A32;
+        --app-text: #F3F4F6;
+        --app-text-secondary: #9CA3AF;
+        --app-accent: #3B82F6;
+        --app-accent-hover: #2563EB;
+        --app-on-accent: #FFFFFF;
 
-        --cgui-success: #10B981;
-        --cgui-on-success: #FFFFFF;
-        --cgui-warning: #F59E0B;
-        --cgui-on-warning: #111827;
-        --cgui-error: #EF4444;
-        --cgui-on-error: #FFFFFF;
+        --app-success: #10B981;
+        --app-on-success: #FFFFFF;
+        --app-warning: #F59E0B;
+        --app-on-warning: #111827;
+        --app-error: #EF4444;
+        --app-on-error: #FFFFFF;
 
-        --cgui-state-hover: rgba(255, 255, 255, 0.06);
-        --cgui-state-active: rgba(59, 130, 246, 0.2);
-        --cgui-state-selected: rgba(59, 130, 246, 0.12);
+        --app-state-hover: rgba(255, 255, 255, 0.06);
+        --app-state-active: rgba(59, 130, 246, 0.2);
+        --app-state-selected: rgba(59, 130, 246, 0.12);
 
-        --cgui-scrim: rgba(0, 0, 0, 0.7);
-        --cgui-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
+        --app-scrim: rgba(0, 0, 0, 0.7);
+        --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
     }
 }
 
@@ -199,12 +199,12 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    border-radius: var(--cgui-radius);
+    border-radius: var(--app-radius);
 }
 
 html {
     font-size: clamp(13px, 0.8rem + 0.3vw, 16px);
-    background: var(--cgui-canvas);
+    background: var(--app-canvas);
     min-height: 100%;
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
@@ -212,20 +212,20 @@ html {
 }
 
 body {
-    font: var(--cgui-font-body);
-    background: var(--cgui-canvas);
-    color: var(--cgui-text);
+    font: var(--app-font-body);
+    background: var(--app-canvas);
+    color: var(--app-text);
     min-height: 100vh;
     overflow-x: hidden;
-    transition: background-color var(--cgui-duration-slow) var(--cgui-easing),
-                color var(--cgui-duration-slow) var(--cgui-easing);
+    transition: background-color var(--app-duration-slow) var(--app-easing),
+                color var(--app-duration-slow) var(--app-easing);
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 /* ============================================================
-   TYPOGRAPHY (CGUI — Noto Sans Only for UI)
+   TYPOGRAPHY (App — Noto Sans Only for UI)
    ============================================================ */
 h1, h2, h3, h4, h5, h6 {
     font-family: "Noto Sans", sans-serif;
@@ -240,56 +240,56 @@ h3 { font-size: 18px; }
 h4 { font-size: 14px; }
 
 /* Hero metric — Noto Sans Black, minimum 36pt/48px */
-.cgui-hero-metric {
+.hero-metric {
     font-family: "Noto Sans", sans-serif;
     font-weight: 900;
     font-size: 48px;
     line-height: 1.1;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 
 /* Editorial micro-label */
-.cgui-micro-label {
-    font: var(--cgui-font-label);
-    letter-spacing: var(--cgui-label-tracking);
+.micro-label {
+    font: var(--app-font-label);
+    letter-spacing: var(--app-label-tracking);
     text-transform: uppercase;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
 }
 
 /* Prose / documentation — Noto Serif only */
-.cgui-prose {
-    font: var(--cgui-font-prose);
-    color: var(--cgui-text);
+.app-prose {
+    font: var(--app-font-prose);
+    color: var(--app-text);
 }
 
 /* ============================================================
-   INTERACTIVE TOKENS (CGUI — no borders, no rounded corners)
+   INTERACTIVE TOKENS (App — no borders, no rounded corners)
    ============================================================ */
-.cgui-token {
+.token {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 6px 16px;
-    font: var(--cgui-font-input);
+    font: var(--app-font-input);
     font-weight: 400;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     background: transparent;
     border: none;
     cursor: pointer;
-    transition: background var(--cgui-duration-fast) var(--cgui-easing),
-                color var(--cgui-duration-fast) var(--cgui-easing);
+    transition: background var(--app-duration-fast) var(--app-easing),
+                color var(--app-duration-fast) var(--app-easing);
 }
 
-.cgui-token:hover {
-    color: var(--cgui-text);
-    background: var(--cgui-state-hover);
+.token:hover {
+    color: var(--app-text);
+    background: var(--app-state-hover);
 }
 
-.cgui-token.active,
-.cgui-token[aria-selected="true"],
-.cgui-token[aria-pressed="true"] {
-    background: var(--cgui-accent);
-    color: var(--cgui-on-accent);
+.token.active,
+.token[aria-selected="true"],
+.token[aria-pressed="true"] {
+    background: var(--app-accent);
+    color: var(--app-on-accent);
     font-weight: 700;
 }
 
@@ -304,32 +304,32 @@ input[type="password"],
 input[type="url"],
 textarea,
 select {
-    font: var(--cgui-font-input);
-    color: var(--cgui-text);
-    background: var(--cgui-pane);
+    font: var(--app-font-input);
+    color: var(--app-text);
+    background: var(--app-pane);
     padding: 10px 14px;
     width: 100%;
     border: none;
-    border-bottom: 2px solid var(--cgui-border);
+    border-bottom: 2px solid var(--app-border);
     outline: none;
-    transition: border-color var(--cgui-duration-fast) var(--cgui-easing);
+    transition: border-color var(--app-duration-fast) var(--app-easing);
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-    border-bottom-color: var(--cgui-accent);
+    border-bottom-color: var(--app-accent);
 }
 
 input::placeholder,
 textarea::placeholder {
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     font-weight: 300;
 }
 
 /* Buttons — flat, no rounded corners */
 button,
-.cgui-btn {
+.app-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -339,45 +339,45 @@ button,
     font-size: 13px;
     line-height: 1;
     font-family: "Noto Sans", sans-serif;
-    color: var(--cgui-on-accent);
-    background: var(--cgui-accent);
+    color: var(--app-on-accent);
+    background: var(--app-accent);
     border: none;
     cursor: pointer;
-    transition: background var(--cgui-duration-fast) var(--cgui-easing),
-                opacity var(--cgui-duration-fast) var(--cgui-easing);
+    transition: background var(--app-duration-fast) var(--app-easing),
+                opacity var(--app-duration-fast) var(--app-easing);
 }
 
 button:hover,
-.cgui-btn:hover {
-    background: var(--cgui-accent-hover);
+.app-btn:hover {
+    background: var(--app-accent-hover);
 }
 
 button:active,
-.cgui-btn:active {
+.app-btn:active {
     opacity: 0.85;
 }
 
 button:focus-visible,
-.cgui-btn:focus-visible {
-    outline: 2px solid var(--cgui-accent);
+.app-btn:focus-visible {
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
 }
 
 button:disabled,
-.cgui-btn:disabled {
+.app-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
 /* Secondary / ghost button */
-.cgui-btn-ghost {
+.app-btn-ghost {
     background: transparent;
-    color: var(--cgui-text);
+    color: var(--app-text);
     font-weight: 400;
 }
 
-.cgui-btn-ghost:hover {
-    background: var(--cgui-state-hover);
+.app-btn-ghost:hover {
+    background: var(--app-state-hover);
 }
 
 /* ============================================================
@@ -385,26 +385,26 @@ button:disabled,
    ============================================================ */
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--cgui-border) transparent;
+    scrollbar-color: var(--app-border) transparent;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-thumb { background: var(--cgui-border); }
+::-webkit-scrollbar-thumb { background: var(--app-border); }
 ::-webkit-scrollbar-track { background: transparent; }
 
 /* Selection */
 ::selection {
-    background: var(--cgui-accent);
-    color: var(--cgui-on-accent);
+    background: var(--app-accent);
+    color: var(--app-on-accent);
 }
 
 /* ============================================================
    LINKS
    ============================================================ */
 a {
-    color: var(--cgui-accent);
+    color: var(--app-accent);
     text-decoration: none;
-    transition: opacity var(--cgui-duration-fast) var(--cgui-easing);
+    transition: opacity var(--app-duration-fast) var(--app-easing);
 }
 
 a:hover {
@@ -412,97 +412,97 @@ a:hover {
 }
 
 /* ============================================================
-   CGUI LAYOUT: THREE-COLUMN DESKTOP
+   App LAYOUT: THREE-COLUMN DESKTOP
    ============================================================ */
-.cgui-app-shell {
+.app-shell {
     display: grid;
-    grid-template-columns: var(--cgui-nav-width) var(--cgui-input-width) var(--cgui-output-width);
+    grid-template-columns: var(--app-nav-width) var(--app-input-width) var(--app-output-width);
     min-height: 100vh;
-    background: var(--cgui-canvas);
-    transition: grid-template-columns var(--cgui-duration-normal) var(--cgui-easing);
+    background: var(--app-canvas);
+    transition: grid-template-columns var(--app-duration-normal) var(--app-easing);
 }
 
 /* Collapsed nav — content expands to fill space */
-.cgui-app-shell.nav-collapsed {
+.app-shell.nav-collapsed {
     grid-template-columns: 56px 1fr;
 }
 
-.cgui-nav-pane {
-    background: var(--cgui-pane);
-    border-right: 1px solid var(--cgui-border);
+.nav-pane {
+    background: var(--app-pane);
+    border-right: 1px solid var(--app-border);
     overflow-y: auto;
     height: 100vh;
     position: sticky;
     top: 0;
-    transition: background-color var(--cgui-duration-slow) var(--cgui-easing),
-                border-color var(--cgui-duration-slow) var(--cgui-easing);
+    transition: background-color var(--app-duration-slow) var(--app-easing),
+                border-color var(--app-duration-slow) var(--app-easing);
 }
 
-.cgui-input-pane {
-    background: var(--cgui-pane);
-    border-right: 1px solid var(--cgui-border);
+.input-pane {
+    background: var(--app-pane);
+    border-right: 1px solid var(--app-border);
     overflow-y: auto;
     height: 100vh;
     position: sticky;
     top: 0;
-    transition: background-color var(--cgui-duration-slow) var(--cgui-easing),
-                border-color var(--cgui-duration-slow) var(--cgui-easing);
+    transition: background-color var(--app-duration-slow) var(--app-easing),
+                border-color var(--app-duration-slow) var(--app-easing);
 }
 
-.cgui-output-pane {
-    background: var(--cgui-pane);
+.output-pane {
+    background: var(--app-pane);
     overflow-y: auto;
     height: 100vh;
     position: sticky;
     top: 0;
-    transition: background-color var(--cgui-duration-slow) var(--cgui-easing);
+    transition: background-color var(--app-duration-slow) var(--app-easing);
 }
 
 /* Content area — spans columns 2+ in the three-column grid */
-.cgui-content {
+.app-content {
     grid-column: 2 / -1;
     overflow-y: auto;
     height: 100vh;
     position: sticky;
     top: 0;
-    transition: background-color var(--cgui-duration-slow) var(--cgui-easing);
+    transition: background-color var(--app-duration-slow) var(--app-easing);
 }
 
 /* ============================================================
-   CGUI LAYOUT: SINGLE-COLUMN MOBILE (<768px)
+   App LAYOUT: SINGLE-COLUMN MOBILE (<768px)
    ============================================================ */
 @media (max-width: 767px) {
-    .cgui-app-shell {
+    .app-shell {
         grid-template-columns: 1fr;
     }
 
-    .cgui-nav-pane {
-        height: var(--cgui-mobile-header-height);
+    .nav-pane {
+        height: var(--app-mobile-header-height);
         position: sticky;
         top: 0;
         z-index: 100;
         border-right: none;
-        border-bottom: 1px solid var(--cgui-border);
+        border-bottom: 1px solid var(--app-border);
         display: flex;
         align-items: center;
         overflow: hidden;
     }
 
-    .cgui-input-pane {
+    .input-pane {
         height: auto;
         min-height: auto;
         position: relative;
         border-right: none;
-        border-bottom: 1px solid var(--cgui-border);
+        border-bottom: 1px solid var(--app-border);
     }
 
-    .cgui-output-pane {
+    .output-pane {
         height: auto;
         min-height: auto;
         position: relative;
     }
 
-    .cgui-content {
+    .app-content {
         grid-column: 1;
         height: auto;
         min-height: auto;
@@ -511,7 +511,7 @@ a:hover {
     }
 
     /* Hide desktop sidebar on mobile; show mobile nav banner */
-    .cgui-nav-pane > .sidebar {
+    .nav-pane > .sidebar {
         display: none;
     }
 
@@ -521,62 +521,62 @@ a:hover {
 }
 
 /* ============================================================
-   CGUI CARD (flat, no rounded corners, margin-based separation)
+   App CARD (flat, no rounded corners, margin-based separation)
    ============================================================ */
-.cgui-card {
-    background: var(--cgui-pane);
-    padding: var(--cgui-space-6);
+.app-card {
+    background: var(--app-pane);
+    padding: var(--app-space-6);
     margin-bottom: 1px;
     border: none;
 }
 
-.cgui-card + .cgui-card {
-    margin-top: var(--cgui-space-4);
+.app-card + .app-card {
+    margin-top: var(--app-space-4);
 }
 
 /* ============================================================
    ANIMATIONS (minimal, no GSAP-style heavy motion)
    ============================================================ */
 @media (prefers-reduced-motion: no-preference) {
-    .cgui-fade-in {
-        animation: cguiFadeIn var(--cgui-duration-normal) var(--cgui-easing) both;
+    .fade-in {
+        animation: appFadeIn var(--app-duration-normal) var(--app-easing) both;
     }
 
-    @keyframes cguiFadeIn {
+    @keyframes appFadeIn {
         from { opacity: 0; }
         to   { opacity: 1; }
     }
 
-    .cgui-slide-up {
-        animation: cguiSlideUp var(--cgui-duration-normal) var(--cgui-easing) both;
+    .slide-up {
+        animation: appSlideUp var(--app-duration-normal) var(--app-easing) both;
     }
 
-    @keyframes cguiSlideUp {
+    @keyframes appSlideUp {
         from { opacity: 0; transform: translateY(4px); }
         to   { opacity: 1; transform: translateY(0); }
     }
 }
 
 /* ============================================================
-   LEGACY ALIASES — map old --md-* tokens to --cgui-* for
+   LEGACY ALIASES — map old --md-* tokens to --app-* for
    backward compatibility during migration
    ============================================================ */
 :root {
-    --md-primary: var(--cgui-accent);
-    --md-on-primary: var(--cgui-on-accent);
-    --md-surface: var(--cgui-pane);
-    --md-on-surface: var(--cgui-text);
-    --md-surface-variant: var(--cgui-pane);
-    --md-on-surface-variant: var(--cgui-text-secondary);
-    --md-outline: var(--cgui-border);
-    --md-outline-variant: var(--cgui-border);
-    --md-background: var(--cgui-canvas);
-    --md-on-background: var(--cgui-text);
+    --md-primary: var(--app-accent);
+    --md-on-primary: var(--app-on-accent);
+    --md-surface: var(--app-pane);
+    --md-on-surface: var(--app-text);
+    --md-surface-variant: var(--app-pane);
+    --md-on-surface-variant: var(--app-text-secondary);
+    --md-outline: var(--app-border);
+    --md-outline-variant: var(--app-border);
+    --md-background: var(--app-canvas);
+    --md-on-background: var(--app-text);
     /* Custom input field tokens from legacy MD3 system */
-    --md-input-bg: var(--cgui-pane);
-    --md-input-text: var(--cgui-text);
-    --md-input-border: var(--cgui-border);
-    --md-input-placeholder: var(--cgui-text-secondary);
-    --md-input-focus-border: var(--cgui-accent);
-    --md-input-hover-border: var(--cgui-text);
+    --md-input-bg: var(--app-pane);
+    --md-input-text: var(--app-text);
+    --md-input-border: var(--app-border);
+    --md-input-placeholder: var(--app-text-secondary);
+    --md-input-focus-border: var(--app-accent);
+    --md-input-hover-border: var(--app-text);
 }

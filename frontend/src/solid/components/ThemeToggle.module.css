@@ -9,20 +9,20 @@
     border-radius: 0;
     border: none;
     background: transparent;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    transition: background-color var(--cgui-duration-fast) var(--cgui-easing);
+    transition: background-color var(--app-duration-fast) var(--app-easing);
 }
 .themeToggle:hover{
-    background: var(--cgui-state-hover);
+    background: var(--app-state-hover);
 }
 .themeToggle:active{
-    background: var(--cgui-state-hover);
+    background: var(--app-state-hover);
 }
 .themeToggle:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
 }
 .themeToggle:focus:not(:focus-visible){

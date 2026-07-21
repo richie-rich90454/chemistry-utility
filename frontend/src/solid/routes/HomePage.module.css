@@ -1,7 +1,7 @@
-/* CGUI V3.0 — Home page. Flat grid, zero radius, no shadows. */
+/* App Design System — Home page. Flat grid, zero radius, no shadows. */
 
 .home {
-    padding: var(--cgui-space-6);
+    padding: var(--app-space-6);
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -9,15 +9,15 @@
 .container {
     display: flex;
     flex-direction: column;
-    gap: var(--cgui-space-6);
+    gap: var(--app-space-6);
 }
 
 /* Hero section */
 .hero {
     display: flex;
     flex-direction: column;
-    gap: var(--cgui-space-3);
-    padding: var(--cgui-space-12) 0 var(--cgui-space-8);
+    gap: var(--app-space-3);
+    padding: var(--app-space-12) 0 var(--app-space-8);
 }
 
 .heroTitle {
@@ -26,7 +26,7 @@
     font-weight: 900;
     font-size: 48px;
     line-height: 1.1;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 
 .heroSubtitle {
@@ -35,46 +35,46 @@
     font-weight: 300;
     font-size: 16px;
     line-height: 1.5;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     max-width: 640px;
 }
 
-/* Getting Started — CGUI prose (Noto Serif) */
+/* Getting Started — App prose (Noto Serif) */
 .intro {
-    background: var(--cgui-pane);
-    padding: var(--cgui-space-6);
+    background: var(--app-pane);
+    padding: var(--app-space-6);
     border-radius: 0px;
 }
 
 .introTitle {
-    margin: 0 0 var(--cgui-space-3);
+    margin: 0 0 var(--app-space-3);
     font-family: "Noto Sans", sans-serif;
     font-weight: 700;
     font-size: 20px;
     line-height: 1.3;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 
 .introText {
     margin: 0;
-    font: var(--cgui-font-prose);
-    color: var(--cgui-text);
+    font: var(--app-font-prose);
+    color: var(--app-text);
 }
 
 /* Category group */
 .group {
     display: flex;
     flex-direction: column;
-    gap: var(--cgui-space-3);
+    gap: var(--app-space-3);
 }
 
-/* Category header — CGUI micro-label */
+/* Category header — App micro-label */
 .groupTitle {
     margin: 0;
-    font: var(--cgui-font-label);
-    letter-spacing: var(--cgui-label-tracking);
+    font: var(--app-font-label);
+    letter-spacing: var(--app-label-tracking);
     text-transform: uppercase;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
 }
 
 /* Calculator card grid — 1px gaps for structural rule */
@@ -88,22 +88,22 @@
 .card {
     display: flex;
     flex-direction: column;
-    gap: var(--cgui-space-2);
-    padding: var(--cgui-space-4);
-    background: var(--cgui-pane);
+    gap: var(--app-space-2);
+    padding: var(--app-space-4);
+    background: var(--app-pane);
     border: none;
     border-radius: 0px;
     text-decoration: none;
     color: inherit;
-    transition: background var(--cgui-duration-fast) var(--cgui-easing);
+    transition: background var(--app-duration-fast) var(--app-easing);
 }
 
 .card:hover {
-    background: var(--cgui-state-hover);
+    background: var(--app-state-hover);
 }
 
 .card:focus-visible {
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: -2px;
 }
 
@@ -112,7 +112,7 @@
     font-weight: 700;
     font-size: 14px;
     line-height: 1.4;
-    color: var(--cgui-text);
+    color: var(--app-text);
 }
 
 .cardDescription {
@@ -120,12 +120,12 @@
     font-weight: 300;
     font-size: 12px;
     line-height: 1.5;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
 }
 
 @media (max-width: 768px) {
     .home {
-        padding: var(--cgui-space-4);
+        padding: var(--app-space-4);
     }
 
     .heroTitle {

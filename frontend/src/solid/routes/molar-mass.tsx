@@ -1,5 +1,5 @@
 /**
- * Molar Mass Calculator — CGUI V3.0
+ * Molar Mass Calculator — App Design System
  * Auto-calculates on input with 300ms debounce. No button needed.
  */
 import type {JSX} from "solid-js";

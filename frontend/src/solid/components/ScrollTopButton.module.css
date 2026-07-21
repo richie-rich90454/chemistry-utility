@@ -5,18 +5,18 @@
     width: 48px;
     height: 48px;
     border-radius: 0;
-    background: var(--cgui-accent);
+    background: var(--app-accent);
     border: none;
-    color: var(--cgui-on-accent);
+    color: var(--app-on-accent);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 1;
     pointer-events: auto;
-    transition: opacity var(--cgui-duration-normal) var(--cgui-easing),
-                box-shadow var(--cgui-duration-fast) var(--cgui-easing),
-                transform var(--cgui-duration-fast) var(--cgui-easing);
+    transition: opacity var(--app-duration-normal) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing),
+                transform var(--app-duration-fast) var(--app-easing);
     z-index: 20;
     box-shadow: none;
 }
@@ -28,6 +28,6 @@
     box-shadow: none;
 }
 .scrollTop:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: 2px;
 }

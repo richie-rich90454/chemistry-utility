@@ -1,27 +1,27 @@
 .exampleDetails{
-    margin: var(--cgui-space-4) var(--cgui-space-5) 0 var(--cgui-space-5);
-    border: 1px solid var(--cgui-border);
+    margin: var(--app-space-4) var(--app-space-5) 0 var(--app-space-5);
+    border: 1px solid var(--app-border);
     border-radius: 0;
     overflow: hidden;
-    background: var(--cgui-pane);
-    transition: border-color var(--cgui-duration-fast) var(--cgui-easing),
-                box-shadow var(--cgui-duration-fast) var(--cgui-easing);
+    background: var(--app-pane);
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing);
 }
 .exampleDetails[open]{
-    border-color: var(--cgui-text-secondary);
+    border-color: var(--app-text-secondary);
     box-shadow: none;
 }
 .exampleDetails summary{
-    padding: var(--cgui-space-3) var(--cgui-space-4);
+    padding: var(--app-space-3) var(--app-space-4);
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
     cursor: pointer;
     background: transparent;
     list-style: none;
     display: flex;
     align-items: center;
-    gap: var(--cgui-space-3);
+    gap: var(--app-space-3);
 }
 .exampleDetails summary::-webkit-details-marker{
     display: none;
@@ -34,33 +34,33 @@
     border-left: 6px solid currentColor;
     border-top: 5px solid transparent;
     border-bottom: 5px solid transparent;
-    transition: transform var(--cgui-duration-normal) var(--cgui-easing);
+    transition: transform var(--app-duration-normal) var(--app-easing);
     flex-shrink: 0;
 }
 .exampleDetails[open] summary::before{
     transform: rotate(90deg);
 }
 .exampleDetails summary:hover{
-    background: var(--cgui-state-hover);
-    color: var(--cgui-text);
+    background: var(--app-state-hover);
+    color: var(--app-text);
 }
 .exampleDetails summary:focus-visible{
-    outline: 2px solid var(--cgui-accent);
+    outline: 2px solid var(--app-accent);
     outline-offset: -2px;
 }
 .exampleDetails[open] summary{
-    color: var(--cgui-text);
-    border-bottom: 1px solid var(--cgui-border);
+    color: var(--app-text);
+    border-bottom: 1px solid var(--app-border);
 }
 .exampleDetails p{
-    padding: var(--cgui-space-4);
+    padding: var(--app-space-4);
     margin: 0;
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--cgui-text-secondary);
+    color: var(--app-text-secondary);
 }
 .exampleDetails p strong{
-    color: var(--cgui-accent);
+    color: var(--app-accent);
     cursor: pointer;
     font-weight: 600;
 }
