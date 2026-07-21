@@ -1,5 +1,5 @@
 import type {JSX} from "solid-js";
-import {onMount, lazy, Suspense} from "solid-js";
+import {onMount, lazy} from "solid-js";
 import {Router, Route, Navigate} from "@solidjs/router";
 const HomePage = lazy(() => import("./routes/HomePage"));
 const MolarMass = lazy(() => import("./routes/molar-mass"));
@@ -51,9 +51,7 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
             </aside>
             <main class="app-content">
                 <SkipLink />
-                <Suspense fallback={<div style="padding:24px;color:var(--app-text-secondary)">Loading...</div>}>
-                    {props.children}
-                </Suspense>
+                {props.children}
                 <ScrollTopButton />
             </main>
             <MobileNavSheet />

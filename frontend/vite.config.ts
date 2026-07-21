@@ -19,7 +19,7 @@ export default defineConfig(({mode})=>({
 	build:{
 		minify: "oxc",
 		cssMinify: true,
-		target: "es2020",
+		target: "es2015",
 		sourcemap: false,
 		modulePreload: { polyfill: false },
 		cssCodeSplit: true,
