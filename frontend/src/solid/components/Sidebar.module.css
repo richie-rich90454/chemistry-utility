@@ -73,6 +73,8 @@
     justify-content: center;
     width: 44px;
     height: 44px;
+    padding: 0;
+    margin: 0;
     border: none;
     background: transparent;
     color: var(--cgui-text-secondary);
@@ -109,7 +111,7 @@
 
 .sidebarSearch input {
     width: 100%;
-    padding: var(--cgui-space-3) var(--cgui-space-4) var(--cgui-space-3) 40px;
+    padding: var(--cgui-space-3) var(--cgui-space-4) var(--cgui-space-3) 44px;
     min-height: 42px;
     font-size: 0.875rem;
     font-family: inherit;
@@ -137,7 +139,7 @@
 
 .searchIcon {
     position: absolute;
-    left: calc(var(--cgui-space-4) + 8px);
+    left: calc(var(--cgui-space-4) + 6px);
     top: 50%;
     transform: translateY(-50%);
     color: var(--cgui-text-secondary);
@@ -315,36 +317,52 @@
     flex-shrink: 0;
 }
 
-/* ---- Collapsed state — narrow sidebar via data attribute ---- */
+/* ---- Collapsed state — icon-only nav (Google-like) ---- */
 .sidebar[data-collapsed] {
     width: 56px;
     min-width: 56px;
 }
-
 .sidebar[data-collapsed] .sidebarHeader h1,
+.sidebar[data-collapsed] .logoIcon,
 .sidebar[data-collapsed] .sidebarSearch,
-.sidebar[data-collapsed] .sidebarNav,
 .sidebar[data-collapsed] .sidebarFooter,
 .sidebar[data-collapsed] .navRecent,
-.sidebar[data-collapsed] .logoIcon {
+.sidebar[data-collapsed] .navCategory,
+.sidebar[data-collapsed] .navLabel {
     display: none;
 }
-
-.sidebar[data-collapsed] .headerTop {
-    justify-content: center;
-    align-items: center;
-    gap: 4px;
-    padding: var(--cgui-space-2) 0;
-}
-
 .sidebar[data-collapsed] .sidebarHeader {
     padding: var(--cgui-space-1);
 }
-
+.sidebar[data-collapsed] .headerTop {
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    padding: var(--cgui-space-2) 0;
+}
 .sidebar[data-collapsed] .sidebarToggle,
 .sidebar[data-collapsed] .themeToggle {
     width: 40px;
     height: 40px;
+}
+.sidebar[data-collapsed] .sidebarNav {
+    display: block;
+    padding: 0;
+}
+.sidebar[data-collapsed] .navLink {
+    justify-content: center;
+    height: 44px;
+    padding: 0;
+    gap: 0;
+}
+.sidebar[data-collapsed] .navIcon {
+    width: 24px;
+    height: 24px;
+    opacity: 0.6;
+    margin: 0;
+}
+.sidebar[data-collapsed] .navLink.active .navIcon {
+    opacity: 1;
 }
 
 /* ---- Mobile: hide sidebar, show mobile nav banner ---- */
