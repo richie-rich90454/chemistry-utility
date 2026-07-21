@@ -19,8 +19,10 @@ export default defineConfig(({mode})=>({
 	build:{
 		minify: "oxc",
 		cssMinify: true,
-		target: "es2015",
+		target: "es2020",
 		sourcemap: false,
+		modulePreload: { polyfill: false },
+		cssCodeSplit: true,
 		rollupOptions:{
 			input: mode==="app"
 				?{index: path.resolve(__dirname, "index-app.html")}
@@ -28,31 +30,31 @@ export default defineConfig(({mode})=>({
 			output:{
 				manualChunks(id){
 					if (id.includes("node_modules")){
-						if (id.includes("katex")){
-							return "vendor-katex";
-						}
-						if (id.includes("gsap")){
-							return "vendor-gsap";
-						}
+						if (id.includes("katex")) return "vendor-katex";
+						if (id.includes("gsap")) return "vendor-gsap";
+						if (id.includes("chart.js") || id.includes("chartjs")) return "vendor-chart";
+						if (id.includes("fast-balance") || id.includes("chemparse")) return "vendor-chemistry";
+						if (id.includes("solid-js") || id.includes("@solidjs")) return "vendor-solid";
 						return "vendor";
 					}
 				},
 			},
 		},
 		reportCompressedSize: true,
-		chunkSizeWarningLimit: 1000,
+		chunkSizeWarningLimit: 500,
 		emptyOutDir: true,
 		commonjsOptions:{
 			include: [/node_modules/],
 		},
 	},
 	optimizeDeps:{
-		include: ["katex"],
+		include: ["katex","fast-balance"],
 	},
 	css:{
 		modules:{
 			localsConvention: "camelCaseOnly",
 		},
+		devSourcemap: false,
 	},
 	plugins: [
 		solid(),

@@ -1,34 +1,34 @@
 import type {JSX} from "solid-js";
-import {onMount} from "solid-js";
+import {onMount, lazy, Suspense} from "solid-js";
 import {Router, Route, Navigate} from "@solidjs/router";
-import {HomePage} from "./routes/HomePage";
-import {MolarMass} from "./routes/molar-mass";
-import {ElementLookup} from "./routes/element-lookup";
-import {PeriodicTable} from "./routes/periodic-table";
-import {EquationBalancerRoute} from "./routes/equation-balancer";
-import UnitConverter from "./routes/unit-converter";
-import {Dilution} from "./routes/dilution";
-import {MassPercent} from "./routes/mass-percent";
-import {SolutionMixing} from "./routes/solution-mixing";
-import {BufferSolution} from "./routes/buffer";
-import {PKaPKb} from "./routes/pka-pkb";
-import {Ksp} from "./routes/ksp";
-import {Colligative} from "./routes/colligative";
-import {Titration} from "./routes/titration";
-import {DebyeHuckel} from "./routes/debye-huckel";
-import {CommonIonEffect} from "./routes/common-ion";
-import {NuclearChemistry} from "./routes/nuclear";
-import {GasLaws} from "./routes/gas-laws";
-import {Electrochemistry} from "./routes/electrochemistry";
-import {Thermodynamics} from "./routes/thermodynamics";
-import {Kinetics} from "./routes/kinetics";
-import {QuantumAtomic} from "./routes/quantum-atomic";
-import {Stoichiometry} from "./routes/stoichiometry";
-import {BondType} from "./routes/bond-type";
-import {MolecularViewerRoute} from "./routes/molecular-viewer";
-import {CompoundSearch} from "./routes/compound-search";
-import {BatchCalc} from "./routes/batch-calc";
-import {Dashboard} from "./routes/dashboard";
+const HomePage = lazy(() => import("./routes/HomePage"));
+const MolarMass = lazy(() => import("./routes/molar-mass"));
+const ElementLookup = lazy(() => import("./routes/element-lookup"));
+const PeriodicTable = lazy(() => import("./routes/periodic-table"));
+const EquationBalancerRoute = lazy(() => import("./routes/equation-balancer"));
+const UnitConverter = lazy(() => import("./routes/unit-converter"));
+const Dilution = lazy(() => import("./routes/dilution"));
+const MassPercent = lazy(() => import("./routes/mass-percent"));
+const SolutionMixing = lazy(() => import("./routes/solution-mixing"));
+const BufferSolution = lazy(() => import("./routes/buffer"));
+const PKaPKb = lazy(() => import("./routes/pka-pkb"));
+const Ksp = lazy(() => import("./routes/ksp"));
+const Colligative = lazy(() => import("./routes/colligative"));
+const Titration = lazy(() => import("./routes/titration"));
+const DebyeHuckel = lazy(() => import("./routes/debye-huckel"));
+const CommonIonEffect = lazy(() => import("./routes/common-ion"));
+const NuclearChemistry = lazy(() => import("./routes/nuclear"));
+const GasLaws = lazy(() => import("./routes/gas-laws"));
+const Electrochemistry = lazy(() => import("./routes/electrochemistry"));
+const Thermodynamics = lazy(() => import("./routes/thermodynamics"));
+const Kinetics = lazy(() => import("./routes/kinetics"));
+const QuantumAtomic = lazy(() => import("./routes/quantum-atomic"));
+const Stoichiometry = lazy(() => import("./routes/stoichiometry"));
+const BondType = lazy(() => import("./routes/bond-type"));
+const MolecularViewerRoute = lazy(() => import("./routes/molecular-viewer"));
+const CompoundSearch = lazy(() => import("./routes/compound-search"));
+const BatchCalc = lazy(() => import("./routes/batch-calc"));
+const Dashboard = lazy(() => import("./routes/dashboard"));
 import {Sidebar} from "./components/Sidebar";
 import {MobileBottomTabs} from "./components/MobileBottomTabs";
 import {MobileNavSheet} from "./components/MobileNavSheet";
@@ -51,7 +51,9 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
             </aside>
             <main class="app-content">
                 <SkipLink />
-                {props.children}
+                <Suspense fallback={<div style="padding:24px;color:var(--app-text-secondary)">Loading...</div>}>
+                    {props.children}
+                </Suspense>
                 <ScrollTopButton />
             </main>
             <MobileNavSheet />

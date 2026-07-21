@@ -64,6 +64,18 @@ func securityHeadersMiddleware() gin.HandlerFunc {
 	}
 }
 
+func cacheHeadersMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if strings.HasPrefix(path, "/assets/") || strings.HasPrefix(path, "/src/") {
+			c.Header("Cache-Control", "public, max-age=31536000, immutable")
+		} else if path == "/ptable.json" {
+			c.Header("Cache-Control", "public, max-age=86400")
+		}
+		c.Next()
+	}
+}
+
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -107,6 +119,7 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(cacheHeadersMiddleware())
 	r.Use(securityHeadersMiddleware())
 	r.Use(gzipMiddleware())
 	apiRouter := apiInstance.Router()

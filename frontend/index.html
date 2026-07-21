@@ -147,20 +147,25 @@
         </script>
         <link rel="shortcut icon" href="/favicon.png" type="image/png">
         <link rel="dns-prefetch" href="//chemutil.richardsblogs.com">
+        <!-- Preconnect to Google Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
-            rel="stylesheet" fetchpriority="high">
-        <link
-            href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
-            rel="stylesheet">
+        <!-- Preload critical font -->
+        <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300;0,400;0,700;0,900&family=EB+Garamond:ital,wght@0,400;0,700&display=swap" fetchpriority="high">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,300;0,400;0,700;0,900&family=EB+Garamond:ital,wght@0,400;0,700&display=swap" fetchpriority="high">
+        <!-- Inline critical CSS to prevent FOUT/CLS -->
+        <style>
+            html{background:#F8F9FA;font-family:"Noto Sans",system-ui,sans-serif}
+            body{margin:0;min-height:100vh}
+            #root{min-height:100vh}
+            @media(prefers-color-scheme:dark){html{background:#0F0F11}}
+        </style>
         <link rel="manifest" href="/manifest.webmanifest">
     </head>
 
     <body>
         <div id="root"></div>
-        <script type="module" src="/src/solid/index.tsx" defer></script>
-        <noscript>This chemistry calculator requires JavaScript to run. It includes tools for element lookup, molar mass,
-            equation balancing, gas laws, and more.</noscript>
+        <script type="module" src="/src/solid/index.tsx"></script>
+        <noscript>This chemistry calculator requires JavaScript to run. It includes tools for element lookup, molar mass, equation balancing, gas laws, and more.</noscript>
     </body>
 </html>
