@@ -1,4 +1,4 @@
-/* Core-Grid UI (App) V3.0 — Global Design Tokens
+/* Chemistry Utility — App Design Tokens
    Flat palette, zero rounded edges, asymmetric layout. */
 
 /* Font loading */
@@ -127,6 +127,15 @@
     --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+.dark {
+    --md-input-bg: var(--app-pane);
+    --md-input-text: var(--app-text);
+    --md-input-border: var(--app-border);
+    --md-input-placeholder: var(--app-text-secondary);
+    --md-input-focus-border: var(--app-accent);
+    --md-input-hover-border: var(--app-text);
+}
+
 /* AMOLED variant */
 .amoled {
     color-scheme: dark;
@@ -153,6 +162,15 @@
 
     --app-scrim: rgba(0, 0, 0, 0.85);
     --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+.amoled {
+    --md-input-bg: var(--app-pane);
+    --md-input-text: var(--app-text);
+    --md-input-border: var(--app-border);
+    --md-input-placeholder: var(--app-text-secondary);
+    --md-input-focus-border: var(--app-accent);
+    --md-input-hover-border: var(--app-text);
 }
 
 /* Explicit light override */
@@ -383,7 +401,7 @@ button:disabled,
 /* ============================================================
    SCROLLBAR
    ============================================================ */
-* {
+html {
     scrollbar-width: thin;
     scrollbar-color: var(--app-border) transparent;
 }
@@ -510,14 +528,7 @@ a:hover {
         overflow: visible;
     }
 
-    /* Hide desktop sidebar on mobile; show mobile nav banner */
-    .nav-pane > .sidebar {
-        display: none;
-    }
 
-    .mobile-nav {
-        display: flex;
-    }
 }
 
 /* ============================================================

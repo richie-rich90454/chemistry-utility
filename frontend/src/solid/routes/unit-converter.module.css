@@ -74,8 +74,8 @@
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--app-on-accent) !important;
-    background-color: var(--app-accent) !important;
+    color: var(--app-on-accent);
+    background-color: var(--app-accent);
     border: none;
     border-radius: 0;
     cursor: pointer;

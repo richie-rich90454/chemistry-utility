@@ -69,8 +69,8 @@
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--app-on-accent) !important;
-    background-color: var(--app-accent) !important;
+    color: var(--app-on-accent);
+    background-color: var(--app-accent);
     border: none;
     border-radius: 0;
     cursor: pointer;
@@ -109,8 +109,8 @@
     font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.2px;
-    color: var(--app-text) !important;
-    background-color: var(--app-pane) !important;
+    color: var(--app-text);
+    background-color: var(--app-pane);
     border: 1.5px solid var(--app-border);
     border-radius: 0;
     cursor: pointer;
