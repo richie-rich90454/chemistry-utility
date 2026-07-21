@@ -139,7 +139,7 @@
 
 .searchIcon {
     position: absolute;
-    left: calc(var(--cgui-space-4) + 2px);
+    left: calc(var(--cgui-space-4));
     top: 50%;
     transform: translateY(-50%);
     color: var(--cgui-text-secondary);
