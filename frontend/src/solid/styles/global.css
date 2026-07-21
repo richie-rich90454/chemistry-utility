@@ -419,6 +419,12 @@ a:hover {
     grid-template-columns: var(--cgui-nav-width) var(--cgui-input-width) var(--cgui-output-width);
     min-height: 100vh;
     background: var(--cgui-canvas);
+    transition: grid-template-columns var(--cgui-duration-normal) var(--cgui-easing);
+}
+
+/* Collapsed nav — content expands to fill space */
+.cgui-app-shell.nav-collapsed {
+    grid-template-columns: 56px 1fr;
 }
 
 .cgui-nav-pane {

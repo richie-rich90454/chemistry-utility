@@ -36,7 +36,12 @@ function WorkspaceList(): JSX.Element {
     return (
         <section class={styles.section} aria-label="Workspaces">
             <div class={styles.header}>
-                <span class={styles.title}>Workspaces</span>
+                <span class={styles.title}>
+                    <svg class={styles.titleIcon} aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+                    </svg>
+                    Workspaces
+                </span>
                 <button class={styles.createBtn} type="button" aria-label="Create workspace" onClick={handleCreate}>+</button>
             </div>
             <ul class={styles.list}>

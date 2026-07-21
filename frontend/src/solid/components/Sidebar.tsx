@@ -43,10 +43,10 @@ function getIconContent(id: string): JSX.Element {
     }
 }
 
-function Sidebar(): JSX.Element {
+function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Element {
     let [calculators, setCalculators] = createSignal<CalculatorInfo[]>([]);
     let [searchQuery, setSearchQuery] = createSignal("");
-    let [collapsed, setCollapsed] = createSignal(false);
+    let collapsed = () => props.collapsed ?? false;
     onMount(function (): void {
         let nav = NavigationManager.getInstance();
         setCalculators(nav.getCalculators());
@@ -70,7 +70,7 @@ function Sidebar(): JSX.Element {
     }
 
     function handleToggleSidebar(): void {
-        setCollapsed(!collapsed());
+        if (props.onToggle) props.onToggle();
     }
     return (
         <aside class={styles.sidebar} role="navigation" aria-label="Calculator sidebar" data-collapsed={collapsed() || undefined}>

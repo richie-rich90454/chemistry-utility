@@ -34,6 +34,7 @@ import {MobileBottomTabs} from "./components/MobileBottomTabs";
 import {MobileNavSheet} from "./components/MobileNavSheet";
 import {SkipLink} from "./components/SkipLink";
 import {ScrollTopButton} from "./components/ScrollTopButton";
+import {createSignal} from "solid-js";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -41,10 +42,11 @@ function CatchAllRedirect(): JSX.Element {
     return <Navigate href="/" />;
 }
 function AppShell(props: {children?: JSX.Element}): JSX.Element {
+    let [collapsed, setCollapsed] = createSignal(false);
     return (
-        <div class="cgui-app-shell">
+        <div class={"cgui-app-shell" + (collapsed() ? " nav-collapsed" : "")}>
             <aside class="cgui-nav-pane">
-                <Sidebar />
+                <Sidebar collapsed={collapsed()} onToggle={() => setCollapsed(!collapsed())} />
                 <MobileBottomTabs />
             </aside>
             <main class="cgui-content">

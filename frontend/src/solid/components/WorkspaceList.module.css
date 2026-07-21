@@ -10,11 +10,18 @@
     margin-bottom: var(--cgui-space-2);
 }
 .title{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--cgui-text-secondary);
+}
+.titleIcon {
+    flex-shrink: 0;
+    opacity: 0.6;
 }
 .createBtn{
     width: 24px;
