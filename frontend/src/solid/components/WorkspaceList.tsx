@@ -34,7 +34,7 @@ function WorkspaceList(): JSX.Element {
         }
     }
     return (
-        <section class={styles.section} aria-label="Workspaces">
+        <section class={styles.section} aria-label="Workspaces" data-workspace-section>
             <div class={styles.header}>
                 <span class={styles.title}>
                     <svg class={styles.titleIcon} aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -111,7 +111,7 @@
 
 .sidebarSearch input {
     width: 100%;
-    padding: var(--cgui-space-3) var(--cgui-space-4) var(--cgui-space-3) 44px;
+    padding: var(--cgui-space-3) var(--cgui-space-4) var(--cgui-space-3) 48px;
     min-height: 42px;
     font-size: 0.875rem;
     font-family: inherit;
@@ -139,7 +139,7 @@
 
 .searchIcon {
     position: absolute;
-    left: calc(var(--cgui-space-4) + 6px);
+    left: calc(var(--cgui-space-4) + 2px);
     top: 50%;
     transform: translateY(-50%);
     color: var(--cgui-text-secondary);
@@ -328,7 +328,8 @@
 .sidebar[data-collapsed] .sidebarFooter,
 .sidebar[data-collapsed] .navRecent,
 .sidebar[data-collapsed] .navCategory,
-.sidebar[data-collapsed] .navLabel {
+.sidebar[data-collapsed] .navLabel,
+.sidebar[data-collapsed] [data-workspace-section] {
     display: none;
 }
 .sidebar[data-collapsed] .sidebarHeader {
