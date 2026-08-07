@@ -179,11 +179,14 @@ export class SignificantFiguresEngine {
         }
         let rounded = SignificantFiguresEngine.roundToSigFigs(value, sigFigs);
         let absValue = Math.abs(rounded);
-        if (absValue >= 1e6 || (absValue < 1e-3 && absValue !== 0)) {
+        // When rounding carries over a power of ten (e.g. 99 -> 1 sig fig),
+        // the rounded value has more digits than sigFigs; use scientific
+        // notation so the precision isn't overstated (100 would imply 3 sig figs).
+        let magnitude = Math.floor(Math.log10(absValue));
+        if (absValue >= 1e6 || (absValue < 1e-3 && absValue !== 0) || magnitude >= sigFigs) {
             return rounded.toExponential(sigFigs - 1);
         }
         // Format with the right number of decimal places
-        let magnitude = Math.floor(Math.log10(absValue));
         let decimalPlaces = Math.max(0, sigFigs - 1 - magnitude);
         let result = rounded.toFixed(decimalPlaces);
         return result;
