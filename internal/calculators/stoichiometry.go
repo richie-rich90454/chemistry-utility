@@ -183,7 +183,7 @@ func Stoichiometry(ctx context.Context, input CalculationInput) (CalculationResu
 		if !ok {
 			return CalculationResult{}, errors.New("missing required input: reactantMoles")
 		}
-		reactantMolesMap, ok := reactantMolesVal.(map[string]float64)
+		reactantMolesMap, ok := toFloat64Map(reactantMolesVal)
 		if !ok {
 			return CalculationResult{}, errors.New("reactantMoles must be a map[string]float64")
 		}
