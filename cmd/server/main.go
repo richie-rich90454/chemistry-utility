@@ -123,31 +123,36 @@ func main() {
 	r.Use(securityHeadersMiddleware())
 	r.Use(gzipMiddleware())
 	apiRouter := apiInstance.Router()
+	// Mount the nested API router through ServeHTTP (not HandleContext):
+	// HandleContext calls c.reset(), which replaces c.Writer with gin's
+	// default writer and silently bypasses the gzip wrapper, producing
+	// uncompressed bodies tagged Content-Encoding: gzip. ServeHTTP creates
+	// a fresh context around the wrapped writer so compression applies.
 	r.Any("/api/v1/:path", func(c *gin.Context) {
 		c.Request.URL.Path = "/api/v1/" + c.Param("path")
-		apiRouter.HandleContext(c)
+		apiRouter.ServeHTTP(c.Writer, c.Request)
 	})
 	r.Any("/api/v1/:path/:sub", func(c *gin.Context) {
 		c.Request.URL.Path = "/api/v1/" + c.Param("path") + "/" + c.Param("sub")
-		apiRouter.HandleContext(c)
+		apiRouter.ServeHTTP(c.Writer, c.Request)
 	})
 	r.Any("/api/v1/:path/:sub/:id", func(c *gin.Context) {
 		c.Request.URL.Path = "/api/v1/" + c.Param("path") + "/" + c.Param("sub") + "/" + c.Param("id")
-		apiRouter.HandleContext(c)
+		apiRouter.ServeHTTP(c.Writer, c.Request)
 	})
 	r.Any("/api/v1/:path/:sub/:id/:action", func(c *gin.Context) {
 		c.Request.URL.Path = "/api/v1/" + c.Param("path") + "/" + c.Param("sub") + "/" + c.Param("id") + "/" + c.Param("action")
-		apiRouter.HandleContext(c)
+		apiRouter.ServeHTTP(c.Writer, c.Request)
 	})
 	// Proxy the Swagger UI and OpenAPI spec to the API router so the docs
 	// routes registered in api.Router() are reachable through this server.
 	r.GET("/api/docs", func(c *gin.Context) {
 		c.Request.URL.Path = "/api/docs"
-		apiRouter.HandleContext(c)
+		apiRouter.ServeHTTP(c.Writer, c.Request)
 	})
 	r.GET("/api/docs/openapi.yaml", func(c *gin.Context) {
 		c.Request.URL.Path = "/api/docs/openapi.yaml"
-		apiRouter.HandleContext(c)
+		apiRouter.ServeHTTP(c.Writer, c.Request)
 	})
 	r.Static("/assets", filepath.Join(distDir, "assets"))
 	r.Static("/src", filepath.Join(distDir, "src"))
