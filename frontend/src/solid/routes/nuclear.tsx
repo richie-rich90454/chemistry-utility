@@ -62,7 +62,7 @@ function NuclearChemistry(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#gas-laws">For gas-phase reactions, see the Gas Laws calculators for pressure, volume, and temperature relationships.</SeeAlsoLink>
+                <SeeAlsoLink href="/gas-laws">For gas-phase reactions, see the Gas Laws calculators for pressure, volume, and temperature relationships.</SeeAlsoLink>
             }
         >
             <CalculatorForm
