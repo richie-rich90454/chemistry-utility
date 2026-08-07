@@ -1,5 +1,6 @@
 import {createSignal} from "solid-js";
 import {balance as fastBalance} from "fast-balance";
+import {balanceRedox, parseEquation} from "../../modules/equationBalancer.js";
 
 export interface BalancedSpecies {
     coefficient: number;
@@ -46,6 +47,17 @@ function useEquationBalancer(): {
         setLoading(false);
     }
 
+    function splitSpecies(s: string): BalancedSpecies {
+        let m = /^(\d*)(.*)$/.exec(s);
+        if (m && m[1]) {
+            return {coefficient: parseInt(m[1], 10), formula: m[2]};
+        }
+        return {coefficient: 1, formula: s};
+    }
+    function speciesFromTerms(terms: string[]): BalancedSpecies[] {
+        return terms.map(splitSpecies);
+    }
+
     function balance(): void {
         setError("");
         setResult(null);
@@ -57,29 +69,27 @@ function useEquationBalancer(): {
         setLoading(true);
         try {
             if (trimmed.indexOf("||") !== -1) {
-                // Remove || and try as single equation
-                let cleaned = trimmed.replace(/\|\|/g, " + ");
-                try {
-                    let res = fastBalance(cleaned, {showOne: false, format: "text"});
-                    setResult({
-                        equation: res.equation,
-                        reactants: res.reactants.map(function (s) { return {coefficient: s.coefficient, formula: s.formula}; }),
-                        products: res.products.map(function (s) { return {coefficient: s.coefficient, formula: s.formula}; }),
-                        explanation: {
-                            method: "Rational nullspace computation via Gaussian elimination",
-                            steps: [
-                                "Parsed " + res.reactants.length + " reactants and " + res.products.length + " products",
-                                "Built element conservation matrix with charge accounting",
-                                "Solved homogeneous linear system over rational numbers",
-                                "Scaled to smallest integer coefficients"
-                            ],
-                            coefficients: res.reactants.map(function (s: BalancedSpecies): number { return s.coefficient; })
-                                .concat(res.products.map(function (s: BalancedSpecies): number { return s.coefficient; }))
-                        }
-                    });
-                    setLoading(false);
-                    return;
-                } catch { /* fall through to standard balance */ }
+                // Redox equations combine two half-reactions; the medium
+                // (acidic/basic) selects how H+/OH-/H2O are added.
+                let balanced = balanceRedox(trimmed, medium());
+                let {reactants, products} = parseEquation(balanced);
+                setResult({
+                    equation: balanced,
+                    reactants: speciesFromTerms(reactants),
+                    products: speciesFromTerms(products),
+                    explanation: {
+                        method: "Redox half-reaction method (" + medium() + " medium)",
+                        steps: [
+                            "Separated equation into two half-reactions",
+                            "Balanced each half-reaction for atoms and charge",
+                            "Combined half-reactions and cancelled electrons"
+                        ],
+                        coefficients: speciesFromTerms(reactants).map(function (s) { return s.coefficient; })
+                            .concat(speciesFromTerms(products).map(function (s) { return s.coefficient; }))
+                    }
+                });
+                setLoading(false);
+                return;
             }
             let res = fastBalance(trimmed, {showOne: false, format: "text"});
             setResult({
