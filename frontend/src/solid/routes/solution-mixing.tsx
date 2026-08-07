@@ -49,7 +49,7 @@ function SolutionMixing(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#dilution-calc">For simple dilutions of a single stock solution, use the Dilution Calculator.</SeeAlsoLink>
+                <SeeAlsoLink href="/dilution">For simple dilutions of a single stock solution, use the Dilution Calculator.</SeeAlsoLink>
             }
         >
             <CalculatorForm
