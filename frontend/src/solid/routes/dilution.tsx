@@ -63,7 +63,7 @@ function Dilution(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#stoichiometry">If you're preparing solutions for reactions, check the Stoichiometry Calculator for molar relationships.</SeeAlsoLink>
+                <SeeAlsoLink href="/stoichiometry">If you're preparing solutions for reactions, check the Stoichiometry Calculator for molar relationships.</SeeAlsoLink>
             }
         >
             <CalculatorForm
