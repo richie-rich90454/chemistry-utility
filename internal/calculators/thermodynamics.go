@@ -58,7 +58,7 @@ func HessLaw(ctx context.Context, input CalculationInput) (CalculationResult, er
 		return CalculationResult{}, errors.New("missing required input: deltaHValues")
 	}
 
-	values, ok := v.([]float64)
+	values, ok := toFloat64Slice(v)
 	if !ok {
 		return CalculationResult{}, errors.New("deltaHValues must be a slice of float64")
 	}
@@ -94,11 +94,11 @@ func Entropy(ctx context.Context, input CalculationInput) (CalculationResult, er
 		return CalculationResult{}, errors.New("missing required input: SReactants")
 	}
 
-	sProducts, ok := sp.([]float64)
+	sProducts, ok := toFloat64Slice(sp)
 	if !ok {
 		return CalculationResult{}, errors.New("SProducts must be a slice of float64")
 	}
-	sReactants, ok := sr.([]float64)
+	sReactants, ok := toFloat64Slice(sr)
 	if !ok {
 		return CalculationResult{}, errors.New("SReactants must be a slice of float64")
 	}
