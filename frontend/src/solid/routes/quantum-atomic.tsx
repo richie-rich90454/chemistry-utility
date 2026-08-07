@@ -146,7 +146,7 @@ function QuantumAtomic(): JSX.Element {
             title="Quantum & Atomic"
             description="Validate quantum numbers, generate electron configurations, calculate wavelengths with the Rydberg formula, de Broglie wavelengths, photoelectric effect parameters, and Heisenberg uncertainty limits. These tools cover the fundamental quantum mechanics concepts essential for modern chemistry and atomic physics courses."
             seeAlso={
-                <SeeAlsoLink href="#kinetics">Exploring reaction dynamics? See the Kinetics calculators for Arrhenius, rate laws, and collision theory.</SeeAlsoLink>
+                <SeeAlsoLink href="/kinetics">Exploring reaction dynamics? See the Kinetics calculators for Arrhenius, rate laws, and collision theory.</SeeAlsoLink>
             }
         >
             <section class={styles.subGroup}>
