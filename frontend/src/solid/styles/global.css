@@ -95,6 +95,17 @@
 
     /* Shadows — minimal, only for overlays */
     --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+    /* Category container tints (periodic table) — cold, desaturated */
+    --md-tertiary-container: rgba(47, 93, 68, 0.12);
+    --md-on-tertiary-container: #2F5D44;
+    --md-secondary-container: rgba(42, 102, 118, 0.12);
+    --md-on-secondary-container: #2A6676;
+    --md-warning-container: rgba(178, 106, 23, 0.14);
+    --md-on-warning-container: #8A5412;
+    --md-success-container: rgba(60, 122, 84, 0.14);
+    --md-on-success-container: #2F6B45;
+    --md-on-tertiary: #FFFFFF;
 }
 
 /* ============================================================
@@ -125,6 +136,16 @@
 
     --app-scrim: rgba(0, 0, 0, 0.7);
     --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+    --md-tertiary-container: rgba(111, 169, 138, 0.16);
+    --md-on-tertiary-container: #A8CDB9;
+    --md-secondary-container: rgba(122, 184, 184, 0.14);
+    --md-on-secondary-container: #A3D0D0;
+    --md-warning-container: rgba(217, 160, 91, 0.16);
+    --md-on-warning-container: #E5BE84;
+    --md-success-container: rgba(95, 164, 124, 0.16);
+    --md-on-success-container: #93C5A8;
+    --md-on-tertiary: #0F0F11;
 }
 
 .dark {
@@ -162,6 +183,16 @@
 
     --app-scrim: rgba(0, 0, 0, 0.85);
     --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.6);
+
+    --md-tertiary-container: rgba(111, 169, 138, 0.16);
+    --md-on-tertiary-container: #A8CDB9;
+    --md-secondary-container: rgba(122, 184, 184, 0.14);
+    --md-on-secondary-container: #A3D0D0;
+    --md-warning-container: rgba(217, 160, 91, 0.16);
+    --md-on-warning-container: #E5BE84;
+    --md-success-container: rgba(95, 164, 124, 0.16);
+    --md-on-success-container: #93C5A8;
+    --md-on-tertiary: #0F0F11;
 }
 
 .amoled {
@@ -205,6 +236,16 @@
 
         --app-scrim: rgba(0, 0, 0, 0.7);
         --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+        --md-tertiary-container: rgba(111, 169, 138, 0.16);
+        --md-on-tertiary-container: #A8CDB9;
+        --md-secondary-container: rgba(122, 184, 184, 0.14);
+        --md-on-secondary-container: #A3D0D0;
+        --md-warning-container: rgba(217, 160, 91, 0.16);
+        --md-on-warning-container: #E5BE84;
+        --md-success-container: rgba(95, 164, 124, 0.16);
+        --md-on-success-container: #93C5A8;
+        --md-on-tertiary: #0F0F11;
     }
 }
 
