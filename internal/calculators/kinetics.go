@@ -124,11 +124,11 @@ func RateLaw(ctx context.Context, input CalculationInput) (CalculationResult, er
 		return CalculationResult{}, errors.New("missing required input: orders")
 	}
 
-	concentrations, ok := concVal.([]float64)
+	concentrations, ok := toFloat64Slice(concVal)
 	if !ok {
 		return CalculationResult{}, errors.New("concentrations must be a slice of float64")
 	}
-	orders, ok := orderVal.([]float64)
+	orders, ok := toFloat64Slice(orderVal)
 	if !ok {
 		return CalculationResult{}, errors.New("orders must be a slice of float64")
 	}
@@ -142,8 +142,18 @@ func RateLaw(ctx context.Context, input CalculationInput) (CalculationResult, er
 
 	for i, conc := range concentrations {
 		order := orders[i]
+		if conc < 0 {
+			return CalculationResult{}, errors.New("concentrations must be non-negative")
+		}
+		if conc == 0 && order < 0 {
+			return CalculationResult{}, errors.New("zero concentration with negative order is undefined")
+		}
 		rate *= math.Pow(conc, order)
 		steps = append(steps, fmt.Sprintf("[A%d] = %.4f, order = %.2f", i+1, conc, order))
+	}
+
+	if math.IsNaN(rate) || math.IsInf(rate, 0) {
+		return CalculationResult{}, errors.New("rate calculation produced an invalid value; check concentrations and orders")
 	}
 
 	return CalculationResult{
@@ -186,12 +196,27 @@ func IntegratedRateLaw(ctx context.Context, input CalculationInput) (Calculation
 	case 0: // [A] = [A]₀ - kt
 		switch solveFor {
 		case "concentration":
-			t, _ := getFloat(input, "time")
+			t, err := getFloat(input, "time")
+			if err != nil {
+				return CalculationResult{}, err
+			}
+			if t < 0 {
+				return CalculationResult{}, errors.New("time cannot be negative")
+			}
 			result = C0 - k*t
+			if result < 0 {
+				return CalculationResult{}, errors.New("reaction is complete before the given time (concentration would be negative)")
+			}
 			formula = "[A] = [A]₀ - kt"
 			unit = "M"
 		case "time":
-			C, _ := getFloat(input, "concentration")
+			C, err := getFloat(input, "concentration")
+			if err != nil {
+				return CalculationResult{}, err
+			}
+			if C < 0 || C > C0 {
+				return CalculationResult{}, errors.New("concentration must be between 0 and the initial concentration")
+			}
 			if k == 0 {
 				return CalculationResult{}, errors.New("rate constant cannot be zero for solving time")
 			}
@@ -202,14 +227,26 @@ func IntegratedRateLaw(ctx context.Context, input CalculationInput) (Calculation
 	case 1: // ln[A] = ln[A]₀ - kt  →  [A] = [A]₀·e^(-kt)
 		switch solveFor {
 		case "concentration":
-			t, _ := getFloat(input, "time")
+			t, err := getFloat(input, "time")
+			if err != nil {
+				return CalculationResult{}, err
+			}
+			if t < 0 {
+				return CalculationResult{}, errors.New("time cannot be negative")
+			}
 			result = C0 * math.Exp(-k*t)
 			formula = "[A] = [A]₀·e^(-kt)"
 			unit = "M"
 		case "time":
-			C, _ := getFloat(input, "concentration")
-			if C <= 0 || k == 0 {
-				return CalculationResult{}, errors.New("concentration must be positive and k non-zero")
+			C, err := getFloat(input, "concentration")
+			if err != nil {
+				return CalculationResult{}, err
+			}
+			if C <= 0 || C > C0 {
+				return CalculationResult{}, errors.New("concentration must be positive and not exceed the initial concentration")
+			}
+			if k == 0 {
+				return CalculationResult{}, errors.New("rate constant cannot be zero for solving time")
 			}
 			result = math.Log(C0/C) / k
 			formula = "t = ln([A]₀/[A]) / k"
@@ -218,13 +255,25 @@ func IntegratedRateLaw(ctx context.Context, input CalculationInput) (Calculation
 	case 2: // 1/[A] = 1/[A]₀ + kt  →  [A] = [A]₀/(1 + k·[A]₀·t)
 		switch solveFor {
 		case "concentration":
-			t, _ := getFloat(input, "time")
+			t, err := getFloat(input, "time")
+			if err != nil {
+				return CalculationResult{}, err
+			}
+			if t < 0 {
+				return CalculationResult{}, errors.New("time cannot be negative")
+			}
 			result = C0 / (1 + k*C0*t)
 			formula = "[A] = [A]₀ / (1 + k[A]₀t)"
 			unit = "M"
 		case "time":
-			C, _ := getFloat(input, "concentration")
-			if C <= 0 || k == 0 || C0 == 0 {
+			C, err := getFloat(input, "concentration")
+			if err != nil {
+				return CalculationResult{}, err
+			}
+			if C <= 0 || C > C0 {
+				return CalculationResult{}, errors.New("concentration must be positive and not exceed the initial concentration")
+			}
+			if k == 0 || C0 == 0 {
 				return CalculationResult{}, errors.New("concentrations must be positive and k non-zero")
 			}
 			result = (1/C - 1/C0) / k
