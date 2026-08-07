@@ -110,7 +110,7 @@ function UnitConverterRoute(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#mass-calc">Once you have your value, you can compute molar mass or stoichiometric yields with the Molar Mass Calculator.</SeeAlsoLink>
+                <SeeAlsoLink href="/molar-mass">Once you have your value, you can compute molar mass or stoichiometric yields with the Molar Mass Calculator.</SeeAlsoLink>
             }
         >
             <label class={styles.labelText} for="unit-converter-category">Category</label>
