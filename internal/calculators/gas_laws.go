@@ -147,11 +147,26 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 
 	switch solveFor {
 	case "P1":
-		V1, _ := getFloat(input, "V1")
-		T1, _ := getFloat(input, "T1")
-		P2, _ := getFloat(input, "P2")
-		V2, _ := getFloat(input, "V2")
-		T2, _ := getFloat(input, "T2")
+		V1, err := getFloat(input, "V1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T1, err := getFloat(input, "T1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		P2, err := getFloat(input, "P2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V2, err := getFloat(input, "V2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T2, err := getFloat(input, "T2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if V1 == 0 || T2 == 0 {
 			return CalculationResult{}, errors.New("division by zero: V1 and T2 must be non-zero")
 		}
@@ -159,11 +174,26 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		formula = "P1 = (P2 * V2 * T1) / (V1 * T2)"
 		unit = "pressure units"
 	case "V1":
-		P1, _ := getFloat(input, "P1")
-		T1, _ := getFloat(input, "T1")
-		P2, _ := getFloat(input, "P2")
-		V2, _ := getFloat(input, "V2")
-		T2, _ := getFloat(input, "T2")
+		P1, err := getFloat(input, "P1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T1, err := getFloat(input, "T1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		P2, err := getFloat(input, "P2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V2, err := getFloat(input, "V2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T2, err := getFloat(input, "T2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if P1 == 0 || T2 == 0 {
 			return CalculationResult{}, errors.New("division by zero: P1 and T2 must be non-zero")
 		}
@@ -171,11 +201,26 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		formula = "V1 = (P2 * V2 * T1) / (P1 * T2)"
 		unit = "volume units"
 	case "T1":
-		P1, _ := getFloat(input, "P1")
-		V1, _ := getFloat(input, "V1")
-		P2, _ := getFloat(input, "P2")
-		V2, _ := getFloat(input, "V2")
-		T2, _ := getFloat(input, "T2")
+		P1, err := getFloat(input, "P1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V1, err := getFloat(input, "V1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		P2, err := getFloat(input, "P2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V2, err := getFloat(input, "V2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T2, err := getFloat(input, "T2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if P2 == 0 || V2 == 0 {
 			return CalculationResult{}, errors.New("division by zero: P2 and V2 must be non-zero")
 		}
@@ -183,11 +228,26 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		formula = "T1 = (P1 * V1 * T2) / (P2 * V2)"
 		unit = "K"
 	case "P2":
-		P1, _ := getFloat(input, "P1")
-		V1, _ := getFloat(input, "V1")
-		T1, _ := getFloat(input, "T1")
-		V2, _ := getFloat(input, "V2")
-		T2, _ := getFloat(input, "T2")
+		P1, err := getFloat(input, "P1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V1, err := getFloat(input, "V1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T1, err := getFloat(input, "T1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V2, err := getFloat(input, "V2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T2, err := getFloat(input, "T2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if V2 == 0 || T1 == 0 {
 			return CalculationResult{}, errors.New("division by zero: V2 and T1 must be non-zero")
 		}
@@ -195,11 +255,26 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		formula = "P2 = (P1 * V1 * T2) / (V2 * T1)"
 		unit = "pressure units"
 	case "V2":
-		P1, _ := getFloat(input, "P1")
-		V1, _ := getFloat(input, "V1")
-		T1, _ := getFloat(input, "T1")
-		P2, _ := getFloat(input, "P2")
-		T2, _ := getFloat(input, "T2")
+		P1, err := getFloat(input, "P1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V1, err := getFloat(input, "V1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T1, err := getFloat(input, "T1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		P2, err := getFloat(input, "P2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T2, err := getFloat(input, "T2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if P2 == 0 || T1 == 0 {
 			return CalculationResult{}, errors.New("division by zero: P2 and T1 must be non-zero")
 		}
@@ -207,11 +282,26 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		formula = "V2 = (P1 * V1 * T2) / (P2 * T1)"
 		unit = "volume units"
 	case "T2":
-		P1, _ := getFloat(input, "P1")
-		V1, _ := getFloat(input, "V1")
-		T1, _ := getFloat(input, "T1")
-		P2, _ := getFloat(input, "P2")
-		V2, _ := getFloat(input, "V2")
+		P1, err := getFloat(input, "P1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V1, err := getFloat(input, "V1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		T1, err := getFloat(input, "T1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		P2, err := getFloat(input, "P2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V2, err := getFloat(input, "V2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if P1 == 0 || V1 == 0 {
 			return CalculationResult{}, errors.New("division by zero: P1 and V1 must be non-zero")
 		}
