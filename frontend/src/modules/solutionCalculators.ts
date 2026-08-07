@@ -739,6 +739,19 @@ export class TitrationCurveCalculator extends Calculator {
                 } else {
                     pH = -Math.log10(Math.sqrt(Ka * acidConc));
                 }
+            } else if (Math.abs(Vb - equivVol) <= stepSize / 2) {
+                // Nearest grid point to the equivalence point. Clamp to the
+                // exact equivalence volume so the equivalence pH always
+                // appears even when it falls between grid steps.
+                let totalVolumeEq = acidVol + equivVol;
+                if (acidType === "strong") {
+                    pH = 7;
+                } else {
+                    let concA = totalAcid / totalVolumeEq;
+                    let Kb = 1e-14 / Ka;
+                    let concOH = Math.sqrt(Kb * concA);
+                    pH = 14 + Math.log10(concOH);
+                }
             } else if (Vb < equivVol) {
                 let remainingAcid = totalAcid - addedBase;
                 let formedBase = addedBase;
@@ -749,20 +762,6 @@ export class TitrationCurveCalculator extends Calculator {
                     let concHA = remainingAcid / totalVolume;
                     let concA = formedBase / totalVolume;
                     pH = -Math.log10(Ka) + Math.log10(concA / concHA);
-                }
-            } else if (Math.abs(Vb - equivVol) < stepSize * 0.01) {
-                if (acidType === "strong") {
-                    let concOH = (addedBase - totalAcid) / totalVolume;
-                    if (concOH > 0) {
-                        pH = 14 + Math.log10(concOH);
-                    } else {
-                        pH = 7;
-                    }
-                } else {
-                    let concA = totalAcid / totalVolume;
-                    let Kb = 1e-14 / Ka;
-                    let concOH = Math.sqrt(Kb * concA);
-                    pH = 14 + Math.log10(concOH);
                 }
             } else {
                 let excessBase = addedBase - totalAcid;
@@ -828,6 +827,19 @@ export class TitrationCurveCalculator extends Calculator {
                 } else {
                     pH = -Math.log10(Math.sqrt(Ka * acidConc));
                 }
+            } else if (Math.abs(Vb - equivVol) <= stepSize / 2) {
+                // Nearest grid point to the equivalence point. Clamp to the
+                // exact equivalence volume so the equivalence pH always
+                // appears even when it falls between grid steps.
+                let totalVolumeEq = acidVol + equivVol;
+                if (acidType === "strong") {
+                    pH = 7;
+                } else {
+                    let concA = totalAcid / totalVolumeEq;
+                    let Kb = 1e-14 / Ka;
+                    let concOH = Math.sqrt(Kb * concA);
+                    pH = 14 + Math.log10(concOH);
+                }
             } else if (Vb < equivVol) {
                 let remainingAcid = totalAcid - addedBase;
                 let formedBase = addedBase;
@@ -838,20 +850,6 @@ export class TitrationCurveCalculator extends Calculator {
                     let concHA = remainingAcid / totalVolume;
                     let concA = formedBase / totalVolume;
                     pH = -Math.log10(Ka) + Math.log10(concA / concHA);
-                }
-            } else if (Math.abs(Vb - equivVol) < stepSize * 0.01) {
-                if (acidType === "strong") {
-                    let concOH = (addedBase - totalAcid) / totalVolume;
-                    if (concOH > 0) {
-                        pH = 14 + Math.log10(concOH);
-                    } else {
-                        pH = 7;
-                    }
-                } else {
-                    let concA = totalAcid / totalVolume;
-                    let Kb = 1e-14 / Ka;
-                    let concOH = Math.sqrt(Kb * concA);
-                    pH = 14 + Math.log10(concOH);
                 }
             } else {
                 let excessBase = addedBase - totalAcid;
