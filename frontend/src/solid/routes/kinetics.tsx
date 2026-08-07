@@ -200,7 +200,7 @@ function Kinetics(): JSX.Element {
             title="Kinetics"
             description="Calculate reaction rates, rate laws, and activation energies using the Arrhenius equation, integrated rate laws, and collision theory. Determine reaction orders from initial rates or concentration-time data. These tools are essential for understanding chemical kinetics and reaction mechanisms."
             seeAlso={
-                <SeeAlsoLink href="#thermodynamics">Exploring reaction energetics? See the Thermodynamics calculators for Gibbs free energy, Hess's Law, and more.</SeeAlsoLink>
+                <SeeAlsoLink href="/thermodynamics">Exploring reaction energetics? See the Thermodynamics calculators for Gibbs free energy, Hess's Law, and more.</SeeAlsoLink>
             }
         >
             <section class={styles.subGroup}>
