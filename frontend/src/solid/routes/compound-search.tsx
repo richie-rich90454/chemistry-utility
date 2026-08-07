@@ -178,7 +178,7 @@ function CompoundSearch(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#molar-mass">Need a quick molar mass? Use the Molar Mass Calculator for any formula.</SeeAlsoLink>
+                <SeeAlsoLink href="/molar-mass">Need a quick molar mass? Use the Molar Mass Calculator for any formula.</SeeAlsoLink>
             }
         >
             <label class={styles.labelText} for="compound-search-type">Search by</label>
