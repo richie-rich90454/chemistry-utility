@@ -2,6 +2,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"path/filepath"
+	"strings"
 	"time"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -37,24 +39,43 @@ func New(cfg Config) (*sql.DB, error) {
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
-	if err := runMigrations(db, cfg.Driver); err != nil {
+	if err := runMigrations(db, cfg); err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 	return db, nil
 }
-func runMigrations(db *sql.DB, driver string) error {
+func runMigrations(db *sql.DB, cfg Config) error {
 	var migrateDriver string
-	switch driver {
+	switch cfg.Driver {
 	case "sqlite3":
 		migrateDriver = "sqlite3"
 	case "postgres":
 		migrateDriver = "postgres"
 	default:
-		return fmt.Errorf("unsupported driver for migrations: %s", driver)
+		return fmt.Errorf("unsupported driver for migrations: %s", cfg.Driver)
+	}
+	// Pass the configured DSN through so migrations apply to the same
+	// database the app uses, not a fresh empty connection. The migrate
+	// sqlite3 driver strips "sqlite3://" from the URL, so the DSN must be
+	// encoded in a form that round-trips through net/url: "./relative.db"
+	// for relative paths and "/C:/abs/path.db" for absolute Windows paths.
+	migrateURL := cfg.DSN
+	if !strings.Contains(migrateURL, "://") {
+		if migrateDriver == "sqlite3" {
+			dsn := filepath.ToSlash(cfg.DSN)
+			if filepath.IsAbs(cfg.DSN) {
+				dsn = "/" + dsn
+			} else {
+				dsn = "./" + dsn
+			}
+			migrateURL = "sqlite3://" + dsn
+		} else {
+			migrateURL = fmt.Sprintf("%s://%s", migrateDriver, cfg.DSN)
+		}
 	}
 	m, err := migrate.New(
 		"file://migrations",
-		fmt.Sprintf("%s://", migrateDriver),
+		migrateURL,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create migrate instance: %w", err)
