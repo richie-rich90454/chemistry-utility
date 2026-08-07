@@ -34,22 +34,22 @@
     --app-text: #111827;
     --app-text-secondary: #6B7280;
     /* Active accent — focused states, buttons, system actions */
-    --app-accent: #0052FF;
-    --app-accent-hover: #003DCC;
+    --app-accent: #2F5D44;
+    --app-accent-hover: #254A35;
     --app-on-accent: #FFFFFF;
 
-    /* Success / Warning / Error */
-    --app-success: #059669;
+    /* Success / Warning / Error - muted for a professional lab feel */
+    --app-success: #3C7A54;
     --app-on-success: #FFFFFF;
-    --app-warning: #D97706;
+    --app-warning: #B26A17;
     --app-on-warning: #FFFFFF;
-    --app-error: #DC2626;
+    --app-error: #B3352E;
     --app-on-error: #FFFFFF;
 
     /* State layers */
     --app-state-hover: rgba(0, 0, 0, 0.05);
-    --app-state-active: rgba(0, 82, 255, 0.12);
-    --app-state-selected: rgba(0, 82, 255, 0.08);
+    --app-state-active: rgba(47, 93, 68, 0.12);
+    --app-state-selected: rgba(47, 93, 68, 0.08);
 
     /* Scrim / overlay */
     --app-scrim: rgba(15, 15, 17, 0.5);
@@ -108,20 +108,20 @@
     --app-border: #2A2A32;
     --app-text: #F3F4F6;
     --app-text-secondary: #9CA3AF;
-    --app-accent: #3B82F6;
-    --app-accent-hover: #2563EB;
-    --app-on-accent: #FFFFFF;
+    --app-accent: #6FA98A;
+    --app-accent-hover: #84B79E;
+    --app-on-accent: #0F0F11;
 
-    --app-success: #10B981;
-    --app-on-success: #FFFFFF;
-    --app-warning: #F59E0B;
-    --app-on-warning: #111827;
-    --app-error: #EF4444;
-    --app-on-error: #FFFFFF;
+    --app-success: #5FA47C;
+    --app-on-success: #0F0F11;
+    --app-warning: #D9A05B;
+    --app-on-warning: #0F0F11;
+    --app-error: #D9685C;
+    --app-on-error: #0F0F11;
 
     --app-state-hover: rgba(255, 255, 255, 0.06);
-    --app-state-active: rgba(59, 130, 246, 0.2);
-    --app-state-selected: rgba(59, 130, 246, 0.12);
+    --app-state-active: rgba(111, 169, 138, 0.2);
+    --app-state-selected: rgba(111, 169, 138, 0.12);
 
     --app-scrim: rgba(0, 0, 0, 0.7);
     --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
@@ -145,20 +145,20 @@
     --app-border: #1F1F24;
     --app-text: #F3F4F6;
     --app-text-secondary: #9CA3AF;
-    --app-accent: #3B82F6;
-    --app-accent-hover: #2563EB;
-    --app-on-accent: #FFFFFF;
+    --app-accent: #6FA98A;
+    --app-accent-hover: #84B79E;
+    --app-on-accent: #0F0F11;
 
-    --app-success: #10B981;
-    --app-on-success: #FFFFFF;
-    --app-warning: #F59E0B;
-    --app-on-warning: #111827;
-    --app-error: #EF4444;
-    --app-on-error: #FFFFFF;
+    --app-success: #5FA47C;
+    --app-on-success: #0F0F11;
+    --app-warning: #D9A05B;
+    --app-on-warning: #0F0F11;
+    --app-error: #D9685C;
+    --app-on-error: #0F0F11;
 
     --app-state-hover: rgba(255, 255, 255, 0.06);
-    --app-state-active: rgba(59, 130, 246, 0.2);
-    --app-state-selected: rgba(59, 130, 246, 0.12);
+    --app-state-active: rgba(111, 169, 138, 0.2);
+    --app-state-selected: rgba(111, 169, 138, 0.12);
 
     --app-scrim: rgba(0, 0, 0, 0.85);
     --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.6);
@@ -188,20 +188,20 @@
         --app-border: #2A2A32;
         --app-text: #F3F4F6;
         --app-text-secondary: #9CA3AF;
-        --app-accent: #3B82F6;
-        --app-accent-hover: #2563EB;
-        --app-on-accent: #FFFFFF;
+    --app-accent: #6FA98A;
+    --app-accent-hover: #84B79E;
+    --app-on-accent: #0F0F11;
 
-        --app-success: #10B981;
-        --app-on-success: #FFFFFF;
-        --app-warning: #F59E0B;
-        --app-on-warning: #111827;
-        --app-error: #EF4444;
-        --app-on-error: #FFFFFF;
+    --app-success: #5FA47C;
+    --app-on-success: #0F0F11;
+    --app-warning: #D9A05B;
+    --app-on-warning: #0F0F11;
+    --app-error: #D9685C;
+    --app-on-error: #0F0F11;
 
-        --app-state-hover: rgba(255, 255, 255, 0.06);
-        --app-state-active: rgba(59, 130, 246, 0.2);
-        --app-state-selected: rgba(59, 130, 246, 0.12);
+    --app-state-hover: rgba(255, 255, 255, 0.06);
+    --app-state-active: rgba(111, 169, 138, 0.2);
+    --app-state-selected: rgba(111, 169, 138, 0.12);
 
         --app-scrim: rgba(0, 0, 0, 0.7);
         --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
