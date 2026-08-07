@@ -88,19 +88,27 @@ describe("ElementLookup", function (): void {
         let errorText = await result.findByText(/Element not found/);
         expect(errorText).toBeTruthy();
     });
-    it("shows prompt when searching with an empty query", async function (): Promise<void> {
+    it("clears the result and error when the input is emptied", async function (): Promise<void> {
         let result = render(function () { return <ElementLookup />; });
         await waitFor(function (): void {
             expect(result.queryByText(/Loading elements/)).toBeNull();
         });
         let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
+        input.value = "H";
+        vi.useFakeTimers();
+        fireEvent.input(input);
+        await vi.advanceTimersByTimeAsync(350);
+        vi.useRealTimers();
+        await waitFor(function (): void {
+            expect(result.container.textContent).toMatch(/Name: Hydrogen/);
+        });
         input.value = "";
         vi.useFakeTimers();
         fireEvent.input(input);
         await vi.advanceTimersByTimeAsync(350);
         vi.useRealTimers();
-        let promptText = await result.findByText(/Please enter/);
-        expect(promptText).toBeTruthy();
+        expect(result.queryByText(/Please enter/)).toBeNull();
+        expect(result.queryByText(/Name: Hydrogen/)).toBeNull();
     });
     it("triggers search on Enter key", async function (): Promise<void> {
         let result = render(function () { return <ElementLookup />; });

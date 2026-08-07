@@ -20,6 +20,7 @@ function ElementLookup(): JSX.Element {
     let loading = state.loading;
     let loadError = state.loadError;
     let search = state.search;
+    let clearFn = state.clear;
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
     onCleanup(function (): void {
@@ -34,6 +35,10 @@ function ElementLookup(): JSX.Element {
         setQuery(value);
         if (debounceTimer !== null) {
             clearTimeout(debounceTimer);
+        }
+        if (value.trim() === "") {
+            clearFn();
+            return;
         }
         debounceTimer = setTimeout(function (): void {
             search();
