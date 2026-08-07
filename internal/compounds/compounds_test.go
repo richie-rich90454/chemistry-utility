@@ -334,30 +334,6 @@ func TestSearchByNameEmptyResponse(t *testing.T) {
 
 // --- Cache tests ---
 
-// setupFTS5 creates the FTS5 virtual table and insert trigger needed
-// by CompoundStore.Search for the SQLite driver.
-func setupFTS5(t *testing.T, sqlDB *sql.DB) {
-	t.Helper()
-	_, err := sqlDB.Exec(`
-		CREATE VIRTUAL TABLE IF NOT EXISTS compounds_fts USING fts5(
-			name, formula, cas_number, smiles, inchi,
-			content=compounds, content_rowid=rowid
-		)
-	`)
-	if err != nil {
-		t.Fatalf("failed to create FTS table: %v", err)
-	}
-	_, err = sqlDB.Exec(`
-		CREATE TRIGGER IF NOT EXISTS compounds_ai AFTER INSERT ON compounds BEGIN
-			INSERT INTO compounds_fts(rowid, name, formula, cas_number, smiles, inchi)
-			VALUES (new.rowid, new.name, new.formula, new.cas_number, new.smiles, new.inchi);
-		END
-	`)
-	if err != nil {
-		t.Fatalf("failed to create insert trigger: %v", err)
-	}
-}
-
 func TestCacheSearchWithEmptyLocalDB(t *testing.T) {
 	// Set up a mock HTTP server that simulates PubChem
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -510,9 +486,7 @@ func TestCacheSearchWithEmptyLocalDB(t *testing.T) {
 		t.Fatalf("failed to create table: %v", err)
 	}
 
-	// Create FTS5 table so CompoundStore.Search works without error on empty DB
-	setupFTS5(t, sqlDB)
-
+	// CompoundStore.Search uses a LIKE-based query, so the plain table is enough
 	store := &db.CompoundStore{DB: sqlDB, Driver: "sqlite3"}
 	cache := NewCompoundCache(store, pubchemClient)
 
@@ -571,15 +545,8 @@ func TestCacheSearchReturnsLocalFirst(t *testing.T) {
 		t.Fatalf("failed to create table: %v", err)
 	}
 
-	// Note: The existing CompoundStore.Search for SQLite queries compounds_fts
-	// directly and tries to scan time.Time fields, which fails with FTS5.
-	// This is a known issue in the existing codebase. We test the cache's
-	// local-first logic by verifying that when local data exists and FTS
-	// search succeeds, PubChem is not called.
-	//
-	// For now, we verify the cache behavior using GetByID and GetByCAS
-	// which work correctly, and document that Search-based cache lookup
-	// depends on the FTS5 implementation in queries.go.
+	// Note: CompoundStore.Search for SQLite uses a LIKE-based query against
+	// the compounds table directly (FTS5 requires a non-default build tag).
 
 	store := &db.CompoundStore{DB: sqlDB, Driver: "sqlite3"}
 	localCompound := &db.Compound{
