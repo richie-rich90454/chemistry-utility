@@ -178,6 +178,11 @@ func (c *PubChemClient) doSearchRequest(ctx context.Context, rawURL string) ([]i
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode == http.StatusNotFound {
+		// PubChem returns HTTP 404 with a Status body when a name/formula
+		// is not found. That is an empty result set, not an error.
+		return nil, nil
+	}
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status code %d from %s", resp.StatusCode, rawURL)
 	}
