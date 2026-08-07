@@ -213,7 +213,7 @@ function PeriodicTable(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#element-lookup">For looking up a single element by symbol or name, try the Element Lookup tool.</SeeAlsoLink>
+                <SeeAlsoLink href="/element-lookup">For looking up a single element by symbol or name, try the Element Lookup tool.</SeeAlsoLink>
             }
         >
             <div class={styles.wrapper}>
