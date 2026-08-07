@@ -93,18 +93,3 @@ CREATE INDEX IF NOT EXISTS idx_api_keys_key_hash ON api_keys(key_hash);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_user_id ON analytics_events(user_id);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_event_type ON analytics_events(event_type);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON analytics_events(created_at);
-
-CREATE VIRTUAL TABLE IF NOT EXISTS compounds_fts USING fts5(name, formula, cas_number, smiles, inchi, content=compounds, content_rowid=rowid);
-
-CREATE TRIGGER IF NOT EXISTS compounds_ai AFTER INSERT ON compounds BEGIN
-    INSERT INTO compounds_fts(rowid, name, formula, cas_number, smiles, inchi) VALUES (new.rowid, new.name, new.formula, new.cas_number, new.smiles, new.inchi);
-END;
-
-CREATE TRIGGER IF NOT EXISTS compounds_ad AFTER DELETE ON compounds BEGIN
-    INSERT INTO compounds_fts(compounds_fts, rowid, name, formula, cas_number, smiles, inchi) VALUES ('delete', old.rowid, old.name, old.formula, old.cas_number, old.smiles, old.inchi);
-END;
-
-CREATE TRIGGER IF NOT EXISTS compounds_au AFTER UPDATE ON compounds BEGIN
-    INSERT INTO compounds_fts(compounds_fts, rowid, name, formula, cas_number, smiles, inchi) VALUES ('delete', old.rowid, old.name, old.formula, old.cas_number, old.smiles, old.inchi);
-    INSERT INTO compounds_fts(rowid, name, formula, cas_number, smiles, inchi) VALUES (new.rowid, new.name, new.formula, new.cas_number, new.smiles, new.inchi);
-END;
