@@ -122,7 +122,14 @@ func parseFormulaToCounts(formula string) map[string]int {
 			}
 			cnt := 1
 			if start < i {
-				cnt = atoi(formula[start:i])
+				// Digits directly followed by +/-, e.g. Fe2+, are the charge
+				// magnitude, not an element subscript. Rewind so the charge
+				// branch below consumes them.
+				if i < len(formula) && (formula[i] == '+' || formula[i] == '-') {
+					i = start
+				} else {
+					cnt = atoi(formula[start:i])
+				}
 			}
 			stack[len(stack)-1][el] += cnt
 		} else if ch == '+' || ch == '-' || unicode.IsDigit(ch) {
@@ -188,15 +195,36 @@ func ParseEquation(equation string) (reactants []string, products []string, err 
 		return nil, nil, errors.New("invalid equation format: expected exactly one '->' or '='")
 	}
 	splitSide := func(s string) []string {
-		parts := regexp.MustCompile(`\s+\+\s+`).Split(strings.TrimSpace(s), -1)
-		var result []string
-		for _, p := range parts {
-			p = strings.TrimSpace(p)
-			if p != "" {
-				result = append(result, p)
+		s = strings.TrimSpace(s)
+		var terms []string
+		start := 0
+		for i := 0; i < len(s); i++ {
+			if s[i] != '+' {
+				continue
+			}
+			// A '+' is a term separator only when it starts a new term
+			// (followed by a term-start character). A '+' attached to an
+			// ion, e.g. Fe2+ or H+, is a charge. This lets both
+			// "H2 + O2" and "H2+O2" parse, while "Fe2+ + Fe3+" stays intact.
+			j := i + 1
+			for j < len(s) && s[j] == ' ' {
+				j++
+			}
+			isTermStart := j < len(s) && ((s[j] >= 'A' && s[j] <= 'Z') || (s[j] >= '0' && s[j] <= '9') || s[j] == '(' || s[j] == '[')
+			if isTermStart {
+				term := strings.TrimSpace(s[start:i])
+				if term != "" {
+					terms = append(terms, term)
+				}
+				start = j
+				i = j - 1
 			}
 		}
-		return result
+		tail := strings.TrimSpace(s[start:])
+		if tail != "" {
+			terms = append(terms, tail)
+		}
+		return terms
 	}
 	return splitSide(sides[0]), splitSide(sides[1]), nil
 }
