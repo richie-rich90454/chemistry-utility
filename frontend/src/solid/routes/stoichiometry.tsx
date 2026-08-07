@@ -228,7 +228,7 @@ function Stoichiometry(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#mass-calc">Need compound masses? Use the Molar Mass Calculator to get accurate molar masses for any formula.</SeeAlsoLink>
+                <SeeAlsoLink href="/molar-mass">Need compound masses? Use the Molar Mass Calculator to get accurate molar masses for any formula.</SeeAlsoLink>
             }
         >
             <label class={styles.labelText} for="stoich-equation-input">Balanced chemical equation</label>
