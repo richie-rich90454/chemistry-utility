@@ -174,7 +174,7 @@ function BatchCalc(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#molar-mass">Need a single calculation? Use the Molar Mass Calculator for one-off formulas.</SeeAlsoLink>
+                <SeeAlsoLink href="/molar-mass">Need a single calculation? Use the Molar Mass Calculator for one-off formulas.</SeeAlsoLink>
             }
         >
             <label class={styles.labelText} for="batch-calc-calculator-type">Calculator type</label>
