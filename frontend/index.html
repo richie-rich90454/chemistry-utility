@@ -150,8 +150,8 @@
         <!-- Preload self-hosted fonts -->
         <link rel="preload" as="font" href="/NotoSans-VariableFont_wdth,wght.woff2" type="font/woff2" crossorigin fetchpriority="high">
         <link rel="preload" as="font" href="/EBGaramond-VariableFont_wght.woff2" type="font/woff2" crossorigin>
-        <!-- Preload critical data -->
-        <link rel="preload" as="fetch" href="/ptable.json" crossorigin="anonymous">
+        <!-- Preload critical data (plain fetch mode matches DataCache's request) -->
+        <link rel="preload" as="fetch" href="/ptable.json">
         <!-- Inline critical CSS to prevent FOUT/CLS -->
         <style>
             html{background:#F8F9FA;font-family:"Noto Sans",system-ui,sans-serif}
