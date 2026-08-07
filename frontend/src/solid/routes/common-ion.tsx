@@ -61,7 +61,7 @@ function CommonIonEffect(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#ksp-calc">For solubility in pure water, use the Ksp Calculator.</SeeAlsoLink>
+                <SeeAlsoLink href="/ksp">For solubility in pure water, use the Ksp Calculator.</SeeAlsoLink>
             }
         >
             <CalculatorForm
