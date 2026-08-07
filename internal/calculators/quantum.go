@@ -115,7 +115,16 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 	subshellNames := map[int]string{0: "s", 1: "p", 2: "d", 3: "f"}
 	maxElectrons := map[int]int{0: 2, 1: 6, 2: 10, 3: 14}
 
-	var config string
+	// Aufbau exceptions: half- or fully-filled d subshells are lower in
+	// energy, so one (or both for Pd) ns electron is promoted into (n-1)d.
+	// 24 Cr, 29 Cu, 41 Nb, 42 Mo, 44 Ru, 45 Rh, 46 Pd, 47 Ag, 78 Pt, 79 Au.
+	aufbauExceptions := map[int]bool{
+		24: true, 29: true, 41: true, 42: true, 44: true,
+		45: true, 46: true, 47: true, 78: true, 79: true,
+	}
+
+	type shell struct{ n, l, count int }
+	var configShells []shell
 	remaining := z
 
 	for _, sub := range aufbauOrder {
@@ -128,9 +137,39 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 			electrons = max
 		}
 		if electrons > 0 {
-			config += fmt.Sprintf("%d%s%d ", sub.n, subshellNames[sub.l], electrons)
+			configShells = append(configShells, shell{sub.n, sub.l, electrons})
 			remaining -= electrons
 		}
+	}
+
+	if aufbauExceptions[z] && len(configShells) >= 2 {
+		// Move one electron from the outermost s shell into the d shell
+		// just beneath it.
+		sIdx := -1
+		dIdx := -1
+		for i := len(configShells) - 1; i >= 0; i-- {
+			if sIdx == -1 && configShells[i].l == 0 {
+				sIdx = i
+			}
+			if dIdx == -1 && configShells[i].l == 2 {
+				dIdx = i
+			}
+			if sIdx != -1 && dIdx != -1 {
+				break
+			}
+		}
+		if sIdx != -1 && dIdx != -1 {
+			configShells[sIdx].count--
+			configShells[dIdx].count++
+			if configShells[sIdx].count == 0 {
+				configShells = append(configShells[:sIdx], configShells[sIdx+1:]...)
+			}
+		}
+	}
+
+	var config string
+	for _, s := range configShells {
+		config += fmt.Sprintf("%d%s%d ", s.n, subshellNames[s.l], s.count)
 	}
 
 	return CalculationResult{
@@ -141,7 +180,7 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 			fmt.Sprintf("Configuration: %s", config),
 		},
 		Metadata: map[string]interface{}{
-			"atomicNumber": z,
+			"atomicNumber":  z,
 			"configuration": config,
 		},
 	}, nil
