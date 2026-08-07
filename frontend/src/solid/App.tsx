@@ -34,6 +34,9 @@ import {MobileBottomTabs} from "./components/MobileBottomTabs";
 import {MobileNavSheet} from "./components/MobileNavSheet";
 import {SkipLink} from "./components/SkipLink";
 import {ScrollTopButton} from "./components/ScrollTopButton";
+import {CommandPalette} from "./components/CommandPalette";
+import {OnboardingTour} from "./components/OnboardingTour";
+import {ComparisonModal} from "./components/ComparisonModal";
 import {createSignal} from "solid-js";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
@@ -49,12 +52,15 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
                 <Sidebar collapsed={collapsed()} onToggle={() => setCollapsed(!collapsed())} />
                 <MobileBottomTabs />
             </aside>
-            <main class="app-content">
+            <main class="app-content" id="main-content" aria-label="Main content">
                 <SkipLink />
                 {props.children}
                 <ScrollTopButton />
             </main>
             <MobileNavSheet />
+            <CommandPalette />
+            <OnboardingTour />
+            <ComparisonModal />
         </div>
     );
 }
