@@ -130,7 +130,7 @@ function Thermodynamics(): JSX.Element {
             title="Thermodynamics"
             description="Calculate Gibbs free energy, Hess's Law enthalpy sums, entropy changes, heat capacity, bond enthalpy estimates, and Born-Haber cycle lattice energies. These tools cover the core thermodynamic relationships needed for general and physical chemistry courses."
             seeAlso={
-                <SeeAlsoLink href="#gas-laws">Working with thermochemistry? See the Gas Laws calculators for pressure, volume, and temperature relationships.</SeeAlsoLink>
+                <SeeAlsoLink href="/gas-laws">Working with thermochemistry? See the Gas Laws calculators for pressure, volume, and temperature relationships.</SeeAlsoLink>
             }
         >
             <section class={styles.subGroup}>
