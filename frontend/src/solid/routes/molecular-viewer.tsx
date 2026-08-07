@@ -71,7 +71,7 @@ function MolecularViewerRoute(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#stoichiometry">Working with reaction equations? Try the Stoichiometry Calculator for mole ratios and limiting reactants.</SeeAlsoLink>
+                <SeeAlsoLink href="/stoichiometry">Working with reaction equations? Try the Stoichiometry Calculator for mole ratios and limiting reactants.</SeeAlsoLink>
             }
         >
             <label class={styles.labelText} for="molecular-viewer-smiles">SMILES string</label>
