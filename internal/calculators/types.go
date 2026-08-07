@@ -75,3 +75,59 @@ func getFloatWithDefault(input CalculationInput, key string, defaultVal float64)
 		return defaultVal
 	}
 }
+
+// toFloat64 coerces JSON-decoded number values to float64.
+func toFloat64(v interface{}) (float64, bool) {
+	switch n := v.(type) {
+	case float64:
+		return n, true
+	case int:
+		return float64(n), true
+	case int64:
+		return float64(n), true
+	default:
+		return 0, false
+	}
+}
+
+// toFloat64Slice converts a JSON-decoded value into a []float64, handling both
+// []float64 (from direct Go calls) and []interface{} (from JSON decoding).
+func toFloat64Slice(v interface{}) ([]float64, bool) {
+	switch s := v.(type) {
+	case []float64:
+		return s, true
+	case []interface{}:
+		out := make([]float64, len(s))
+		for i, e := range s {
+			f, ok := toFloat64(e)
+			if !ok {
+				return nil, false
+			}
+			out[i] = f
+		}
+		return out, true
+	default:
+		return nil, false
+	}
+}
+
+// toFloat64Map converts a JSON-decoded value into a map[string]float64,
+// handling both map[string]float64 and map[string]interface{}.
+func toFloat64Map(v interface{}) (map[string]float64, bool) {
+	switch m := v.(type) {
+	case map[string]float64:
+		return m, true
+	case map[string]interface{}:
+		out := make(map[string]float64, len(m))
+		for k, e := range m {
+			f, ok := toFloat64(e)
+			if !ok {
+				return nil, false
+			}
+			out[k] = f
+		}
+		return out, true
+	default:
+		return nil, false
+	}
+}
