@@ -103,7 +103,7 @@ function BondType(): JSX.Element {
                 </ExampleDetails>
             }
             seeAlso={
-                <SeeAlsoLink href="#stoichiometry">Once you know the bond type, use the Stoichiometry Calculator to work out mole ratios for the reaction.</SeeAlsoLink>
+                <SeeAlsoLink href="/stoichiometry">Once you know the bond type, use the Stoichiometry Calculator to work out mole ratios for the reaction.</SeeAlsoLink>
             }
         >
             <label class={styles.labelText}>Element symbols</label>
