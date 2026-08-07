@@ -93,12 +93,23 @@ type rateLimitEntry struct {
 func (a *API) RateLimitMiddleware(rpm int) gin.HandlerFunc {
 	var mu sync.Mutex
 	clients := make(map[string]*rateLimitEntry)
+	lastSweep := time.Now()
 
 	return func(c *gin.Context) {
 		ip := c.ClientIP()
-		mu.Lock()
-		entry, exists := clients[ip]
 		now := time.Now()
+		mu.Lock()
+		// Prune expired entries at most once a minute so the per-IP map
+		// stays bounded instead of growing forever with unique IPs.
+		if now.Sub(lastSweep) >= time.Minute {
+			for k, e := range clients {
+				if now.Sub(e.windowStart) >= time.Minute {
+					delete(clients, k)
+				}
+			}
+			lastSweep = now
+		}
+		entry, exists := clients[ip]
 		if !exists || now.Sub(entry.windowStart) >= time.Minute {
 			clients[ip] = &rateLimitEntry{count: 1, windowStart: now}
 			mu.Unlock()
