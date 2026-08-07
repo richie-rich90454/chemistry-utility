@@ -1,4 +1,5 @@
 import type {JSX} from "solid-js";
+import {Link} from "@solidjs/router";
 import styles from "./SeeAlsoLink.module.css";
 interface SeeAlsoLinkProps {
     href: string;
@@ -7,7 +8,7 @@ interface SeeAlsoLinkProps {
 function SeeAlsoLink(props: SeeAlsoLinkProps): JSX.Element {
     return (
         <p class={styles.seeAlso}>
-            <a href={props.href}>{props.children}</a>
+            <Link href={props.href}>{props.children}</Link>
         </p>
     );
 }
