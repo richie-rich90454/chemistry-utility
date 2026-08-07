@@ -21,9 +21,18 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 
 	switch solveFor {
 	case "C1":
-		V1, _ := getFloat(input, "V1")
-		C2, _ := getFloat(input, "C2")
-		V2, _ := getFloat(input, "V2")
+		V1, err := getFloat(input, "V1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		C2, err := getFloat(input, "C2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V2, err := getFloat(input, "V2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if V1 == 0 {
 			return CalculationResult{}, errors.New("V1 cannot be zero")
 		}
@@ -31,9 +40,18 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 		formula = "C1 = (C2 * V2) / V1"
 		unit = "M"
 	case "V1":
-		C1, _ := getFloat(input, "C1")
-		C2, _ := getFloat(input, "C2")
-		V2, _ := getFloat(input, "V2")
+		C1, err := getFloat(input, "C1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		C2, err := getFloat(input, "C2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V2, err := getFloat(input, "V2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if C1 == 0 {
 			return CalculationResult{}, errors.New("C1 cannot be zero")
 		}
@@ -41,9 +59,18 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 		formula = "V1 = (C2 * V2) / C1"
 		unit = "L"
 	case "C2":
-		C1, _ := getFloat(input, "C1")
-		V1, _ := getFloat(input, "V1")
-		V2, _ := getFloat(input, "V2")
+		C1, err := getFloat(input, "C1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V1, err := getFloat(input, "V1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V2, err := getFloat(input, "V2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if V2 == 0 {
 			return CalculationResult{}, errors.New("V2 cannot be zero")
 		}
@@ -51,9 +78,18 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 		formula = "C2 = (C1 * V1) / V2"
 		unit = "M"
 	case "V2":
-		C1, _ := getFloat(input, "C1")
-		V1, _ := getFloat(input, "V1")
-		C2, _ := getFloat(input, "C2")
+		C1, err := getFloat(input, "C1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		V1, err := getFloat(input, "V1")
+		if err != nil {
+			return CalculationResult{}, err
+		}
+		C2, err := getFloat(input, "C2")
+		if err != nil {
+			return CalculationResult{}, err
+		}
 		if C2 == 0 {
 			return CalculationResult{}, errors.New("C2 cannot be zero")
 		}
@@ -230,10 +266,18 @@ func PKaPKb(ctx context.Context, input CalculationInput) (CalculationResult, err
 }
 
 // Ksp calculates solubility product.
-// Input keys: "Ksp" (to find molar solubility) or "molarSolubility" and "stoichiometry",
-// "mode" ("ksp-to-solubility" or "solubility-to-ksp").
+// Input keys: "Ksp" (to find molar solubility) or "molarSolubility",
+// "mode" ("ksp-to-solubility" or "solubility-to-ksp"),
+// "cationCount" and "anionCount" (stoichiometry, default 1 and 1).
+// For salt A_aB_b: Ksp = (a·s)^a · (b·s)^b, so s = (Ksp / (a^a·b^b))^(1/(a+b)).
 func Ksp(ctx context.Context, input CalculationInput) (CalculationResult, error) {
 	mode := getStringWithDefault(input, "mode", "ksp-to-solubility")
+	a := getFloatWithDefault(input, "cationCount", 1.0)
+	b := getFloatWithDefault(input, "anionCount", 1.0)
+	if a <= 0 || b <= 0 {
+		return CalculationResult{}, errors.New("stoichiometric coefficients must be positive")
+	}
+	ionCount := a + b
 
 	switch mode {
 	case "ksp-to-solubility":
@@ -241,33 +285,29 @@ func Ksp(ctx context.Context, input CalculationInput) (CalculationResult, error)
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		ionCount, _ := getFloat(input, "ionCount")
-		if ionCount <= 0 {
-			ionCount = 2
-		}
 		if ksp <= 0 {
 			return CalculationResult{}, errors.New("Ksp must be positive")
 		}
-		s := math.Pow(ksp, 1.0/ionCount) / math.Pow(float64(int(ionCount)), 1.0/ionCount)
+		coeff := math.Pow(a, a) * math.Pow(b, b)
+		s := math.Pow(ksp/coeff, 1.0/ionCount)
 		return CalculationResult{
 			Value: s,
 			Unit:  "M",
-			Steps: []string{fmt.Sprintf("s = (Ksp / n^n)^(1/n) for %d ions", int(ionCount))},
+			Steps: []string{fmt.Sprintf("s = (Ksp / (a^a × b^b))^(1/(a+b)) = (%.4g / (%.0f^%.0f × %.0f^%.0f))^(1/%.0f)", ksp, a, a, b, b, ionCount)},
 		}, nil
 	case "solubility-to-ksp":
 		s, err := getFloat(input, "molarSolubility")
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		ionCount, _ := getFloat(input, "ionCount")
-		if ionCount <= 0 {
-			ionCount = 2
+		if s <= 0 {
+			return CalculationResult{}, errors.New("molar solubility must be positive")
 		}
-		ksp := math.Pow(float64(int(ionCount))*s, ionCount)
+		ksp := math.Pow(a*s, a) * math.Pow(b*s, b)
 		return CalculationResult{
 			Value: ksp,
 			Unit:  "",
-			Steps: []string{fmt.Sprintf("Ksp = (n × s)^n for %d ions", int(ionCount))},
+			Steps: []string{fmt.Sprintf("Ksp = (a × s)^a × (b × s)^b = (%.4g × %.4g)^%.0f × (%.4g × %.4g)^%.0f", a, s, a, b, s, b)},
 		}, nil
 	default:
 		return CalculationResult{}, fmt.Errorf("invalid mode: %s", mode)
@@ -326,7 +366,7 @@ func ColligativeProperties(ctx context.Context, input CalculationInput) (Calcula
 		pi := i * M * RSI * T
 		return CalculationResult{
 			Value: pi,
-			Unit:  "Pa",
+			Unit:  "kPa",
 			Steps: []string{fmt.Sprintf("π = iMRT = %.4f × %.4f × %.4f × %.4f = %.4f", i, M, RSI, T, pi)},
 		}, nil
 	default:
@@ -407,9 +447,11 @@ func TitrationCurve(ctx context.Context, input CalculationInput) (CalculationRes
 			fraction := ct * vb / (ca * va)
 			if fraction <= 0.001 {
 				pH = 0.5 * (pKa - math.Log10(ca))
-			} else if fraction >= 0.999 && fraction <= 1.001 {
-				pH = 0.5 * (14 + pKa - math.Log10(ca*va/totalVol))
-			} else if fraction > 1.001 {
+		} else if fraction >= 0.999 && fraction <= 1.001 {
+			// At equivalence all HA has become A⁻; pH of the weak base is
+			// 7 + ½pKa + ½log10([A⁻]).
+			pH = 0.5 * (14 + pKa + math.Log10(ca*va/totalVol))
+		} else if fraction > 1.001 {
 				excessOH := (ct*vb - ca*va) / totalVol
 				pOH := -math.Log10(excessOH)
 				pH = 14 - pOH
