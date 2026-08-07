@@ -26,6 +26,8 @@ export default defineConfig(({mode})=>({
 		rollupOptions:{
 			input: mode==="app"
 				?{index: path.resolve(__dirname, "index-app.html")}
+				: mode==="web"
+				?{main: path.resolve(__dirname, "index.html")}
 				:{main: path.resolve(__dirname, "index.html"), app: path.resolve(__dirname, "index-app.html")},
 			output:{
 				manualChunks(id){
