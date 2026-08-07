@@ -220,8 +220,13 @@ func (s *CompoundStore) Search(ctx context.Context, term string, limit, offset i
 	var query string
 	var args []interface{}
 	if s.Driver == "sqlite3" {
-		query = `SELECT id, name, formula, cas_number, smiles, inchi, molar_mass, properties, source, created_at, updated_at FROM compounds_fts WHERE compounds_fts MATCH ? ORDER BY rank LIMIT ? OFFSET ?`
-		args = []interface{}{term, limit, offset}
+		// FTS5 requires the mattn/go-sqlite3 driver to be compiled with the
+		// sqlite_fts5 tag, which CI and Makefile builds don't set. Use a
+		// portable LIKE search instead so fresh databases work everywhere.
+		escaped := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(term)
+		pattern := "%" + escaped + "%"
+		query = `SELECT id, name, formula, cas_number, smiles, inchi, molar_mass, properties, source, created_at, updated_at FROM compounds WHERE name LIKE ? ESCAPE '\' OR formula LIKE ? ESCAPE '\' OR cas_number LIKE ? ESCAPE '\' OR smiles LIKE ? ESCAPE '\' ORDER BY name LIMIT ? OFFSET ?`
+		args = []interface{}{pattern, pattern, pattern, pattern, limit, offset}
 	} else {
 		query = `SELECT id, name, formula, cas_number, smiles, inchi, molar_mass, properties, source, created_at, updated_at FROM compounds WHERE to_tsvector('english', name || ' ' || formula || ' ' || cas_number) @@ to_tsquery($1) ORDER BY created_at DESC LIMIT $2 OFFSET $3`
 		args = []interface{}{term, limit, offset}
