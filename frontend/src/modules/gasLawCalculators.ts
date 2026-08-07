@@ -44,18 +44,22 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 		let result: number, formula: string;
 		if (solveFor === "P") {
 			InputValidator.validateValues([V, n, T], ["ideal-V", "ideal-n", "ideal-T"]);
+			if (V === 0) throw new Error("Volume cannot be zero");
 			result = (n * R * T) / V;
 			formula = "P=(nRT)/V";
 		} else if (solveFor === "V") {
 			InputValidator.validateValues([P, n, T], ["ideal-P", "ideal-n", "ideal-T"]);
+			if (P === 0) throw new Error("Pressure cannot be zero");
 			result = (n * R * T) / P;
 			formula = "V=(nRT)/P";
 		} else if (solveFor === "n") {
 			InputValidator.validateValues([P, V, T], ["ideal-P", "ideal-V", "ideal-T"]);
+			if (T === 0) throw new Error("Temperature cannot be zero");
 			result = (P * V) / (R * T);
 			formula = "n=(PV)/(RT)";
 		} else if (solveFor === "T") {
 			InputValidator.validateValues([P, V, n], ["ideal-P", "ideal-V", "ideal-n"]);
+			if (n === 0) throw new Error("Moles cannot be zero");
 			result = (P * V) / (n * R);
 			formula = "T=(PV)/(nR)";
 		} else {
@@ -87,24 +91,28 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 			if (isNaN(V) || isNaN(n) || isNaN(T)) {
 				throw new Error("Missing or invalid inputs for ideal-V, ideal-n, ideal-T");
 			}
+			if (V === 0) throw new Error("Volume cannot be zero");
 			result = (n * R * T) / V;
 			formula = "P=(nRT)/V";
 		} else if (solveFor === "V") {
 			if (isNaN(P) || isNaN(n) || isNaN(T)) {
 				throw new Error("Missing or invalid inputs for ideal-P, ideal-n, ideal-T");
 			}
+			if (P === 0) throw new Error("Pressure cannot be zero");
 			result = (n * R * T) / P;
 			formula = "V=(nRT)/P";
 		} else if (solveFor === "n") {
 			if (isNaN(P) || isNaN(V) || isNaN(T)) {
 				throw new Error("Missing or invalid inputs for ideal-P, ideal-V, ideal-T");
 			}
+			if (T === 0) throw new Error("Temperature cannot be zero");
 			result = (P * V) / (R * T);
 			formula = "n=(PV)/(RT)";
 		} else if (solveFor === "T") {
 			if (isNaN(P) || isNaN(V) || isNaN(n)) {
 				throw new Error("Missing or invalid inputs for ideal-P, ideal-V, ideal-n");
 			}
+			if (n === 0) throw new Error("Moles cannot be zero");
 			result = (P * V) / (n * R);
 			formula = "T=(PV)/(nR)";
 		} else {
@@ -145,26 +153,32 @@ export class CombinedGasLawCalculator extends SolveForCalculator {
 		let result: number, formula: string;
 		if (solveFor === "P1") {
 			InputValidator.validateValues([V1, T1, P2, V2, T2], ["combined-V1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"]);
+			if (V1 === 0 || T2 === 0) throw new Error("V1 and T2 cannot be zero");
 			result = (P2 * V2 * T1) / (V1 * T2);
 			formula = "P<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(V<sub>1</sub> T<sub>2</sub>)";
 		} else if (solveFor === "V1") {
 			InputValidator.validateValues([P1, T1, P2, V2, T2], ["combined-P1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"]);
+			if (P1 === 0 || T2 === 0) throw new Error("P1 and T2 cannot be zero");
 			result = (P2 * V2 * T1) / (P1 * T2);
 			formula = "V<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> T<sub>2</sub>)";
 		} else if (solveFor === "T1") {
 			InputValidator.validateValues([P1, V1, P2, V2, T2], ["combined-P1", "combined-V1", "combined-P2", "combined-V2", "combined-T2"]);
+			if (P2 === 0 || V2 === 0) throw new Error("P2 and V2 cannot be zero");
 			result = (P1 * V1 * T2) / (P2 * V2);
 			formula = "T<sub>1</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> V<sub>2</sub>)";
 		} else if (solveFor === "P2") {
 			InputValidator.validateValues([P1, V1, T1, V2, T2], ["combined-P1", "combined-V1", "combined-T1", "combined-V2", "combined-T2"]);
+			if (V2 === 0 || T1 === 0) throw new Error("V2 and T1 cannot be zero");
 			result = (P1 * V1 * T2) / (V2 * T1);
 			formula = "P<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(V<sub>2</sub> T<sub>1</sub>)";
 		} else if (solveFor === "V2") {
 			InputValidator.validateValues([P1, V1, T1, P2, T2], ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-T2"]);
+			if (P2 === 0 || T1 === 0) throw new Error("P2 and T1 cannot be zero");
 			result = (P1 * V1 * T2) / (P2 * T1);
 			formula = "V<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> T<sub>1</sub>)";
 		} else if (solveFor === "T2") {
 			InputValidator.validateValues([P1, V1, T1, P2, V2], ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-V2"]);
+			if (P1 === 0 || V1 === 0) throw new Error("P1 and V1 cannot be zero");
 			result = (P2 * V2 * T1) / (P1 * V1);
 			formula = "T<sub>2</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> V<sub>1</sub>)";
 		} else {
@@ -196,36 +210,42 @@ export class CombinedGasLawCalculator extends SolveForCalculator {
 			if (isNaN(V1) || isNaN(T1) || isNaN(P2) || isNaN(V2) || isNaN(T2)) {
 				throw new Error("Missing or invalid inputs for combined-V1, combined-T1, combined-P2, combined-V2, combined-T2");
 			}
+			if (V1 === 0 || T2 === 0) throw new Error("V1 and T2 cannot be zero");
 			result = (P2 * V2 * T1) / (V1 * T2);
 			formula = "P<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(V<sub>1</sub> T<sub>2</sub>)";
 		} else if (solveFor === "V1") {
 			if (isNaN(P1) || isNaN(T1) || isNaN(P2) || isNaN(V2) || isNaN(T2)) {
 				throw new Error("Missing or invalid inputs for combined-P1, combined-T1, combined-P2, combined-V2, combined-T2");
 			}
+			if (P1 === 0 || T2 === 0) throw new Error("P1 and T2 cannot be zero");
 			result = (P2 * V2 * T1) / (P1 * T2);
 			formula = "V<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> T<sub>2</sub>)";
 		} else if (solveFor === "T1") {
 			if (isNaN(P1) || isNaN(V1) || isNaN(P2) || isNaN(V2) || isNaN(T2)) {
 				throw new Error("Missing or invalid inputs for combined-P1, combined-V1, combined-P2, combined-V2, combined-T2");
 			}
+			if (P2 === 0 || V2 === 0) throw new Error("P2 and V2 cannot be zero");
 			result = (P1 * V1 * T2) / (P2 * V2);
 			formula = "T<sub>1</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> V<sub>2</sub>)";
 		} else if (solveFor === "P2") {
 			if (isNaN(P1) || isNaN(V1) || isNaN(T1) || isNaN(V2) || isNaN(T2)) {
 				throw new Error("Missing or invalid inputs for combined-P1, combined-V1, combined-T1, combined-V2, combined-T2");
 			}
+			if (V2 === 0 || T1 === 0) throw new Error("V2 and T1 cannot be zero");
 			result = (P1 * V1 * T2) / (V2 * T1);
 			formula = "P<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(V<sub>2</sub> T<sub>1</sub>)";
 		} else if (solveFor === "V2") {
 			if (isNaN(P1) || isNaN(V1) || isNaN(T1) || isNaN(P2) || isNaN(T2)) {
 				throw new Error("Missing or invalid inputs for combined-P1, combined-V1, combined-T1, combined-P2, combined-T2");
 			}
+			if (P2 === 0 || T1 === 0) throw new Error("P2 and T1 cannot be zero");
 			result = (P1 * V1 * T2) / (P2 * T1);
 			formula = "V<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> T<sub>1</sub>)";
 		} else if (solveFor === "T2") {
 			if (isNaN(P1) || isNaN(V1) || isNaN(T1) || isNaN(P2) || isNaN(V2)) {
 				throw new Error("Missing or invalid inputs for combined-P1, combined-V1, combined-T1, combined-P2, combined-V2");
 			}
+			if (P1 === 0 || V1 === 0) throw new Error("P1 and V1 cannot be zero");
 			result = (P2 * V2 * T1) / (P1 * V1);
 			formula = "T<sub>2</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> V<sub>1</sub>)";
 		} else {
