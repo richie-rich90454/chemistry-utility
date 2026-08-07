@@ -415,6 +415,29 @@ export class ElectronConfigurationGenerator extends Calculator {
         if (fullConfig.startsWith(coreConfig)) {
             remaining = fullConfig.substring(coreConfig.length).trim();
         }
+        // Exception elements (Cr, Cu, Nb, Mo, Ru, Rh, Pd, Ag, Pt, Au) render
+        // their config in sorted (n, l) order, so the Aufbau-ordered core
+        // string is not a literal prefix. The shells after the core are
+        // exactly the exception entries (e.g. Pt: [Xe] 5d9 6s1).
+        let exception: number[][] | undefined = ElectronConfigurationGenerator.EXCEPTIONS[z];
+        if (exception) {
+            let parts: string[] = [];
+            for (let i = 0; i < exception.length; i++) {
+                if (exception[i][2] > 0) {
+                    parts.push(String(exception[i][0]) + ElectronConfigurationGenerator.SUBSHELL_NAMES[exception[i][1]] + exception[i][2]);
+                }
+            }
+            parts.sort(function (a: string, b: string): number {
+                let na: number = parseInt(a.charAt(0), 10);
+                let nb: number = parseInt(b.charAt(0), 10);
+                if (na !== nb) {
+                    return na - nb;
+                }
+                let order: Record<string, number> = { "s": 0, "p": 1, "d": 2, "f": 3 };
+                return order[a.charAt(1)] - order[b.charAt(1)];
+            });
+            remaining = parts.join(" ");
+        }
         if (remaining === "") {
             return "[" + nobleGasSymbol + "]";
         }
@@ -471,6 +494,23 @@ export class ElectronConfigurationGenerator extends Calculator {
                 maxN = n;
             }
         }
+        // A filled p AND d subshell at maxN (Pd: [Kr] ...4p6 4d10, no 5s)
+        // means the element's true outermost shell is maxN+1 and empty, so
+        // the s/p of the maxN shell belong to the core and only its d
+        // subshell counts.
+        let hasPAtMaxN: boolean = false;
+        let hasDAtMaxN: boolean = false;
+        for (let i = 0; i < parts.length; i++) {
+            let n: number = parseInt(parts[i].charAt(0), 10);
+            let l: string = parts[i].charAt(1);
+            if (n === maxN && l === "p") {
+                hasPAtMaxN = true;
+            }
+            if (n === maxN && l === "d") {
+                hasDAtMaxN = true;
+            }
+        }
+        let dIsOutermostShell: boolean = hasPAtMaxN && hasDAtMaxN;
         // For transition metals, also count (maxN-1)d electrons partially
         // Count electrons in the outermost shell and any partially filled d/f
         for (let i = 0; i < parts.length; i++) {
@@ -482,7 +522,13 @@ export class ElectronConfigurationGenerator extends Calculator {
                 continue;
             }
             if (n === maxN) {
-                valence += electronCount;
+                if (dIsOutermostShell) {
+                    if (l === "d") {
+                        valence += electronCount;
+                    }
+                } else {
+                    valence += electronCount;
+                }
             } else if (l === "d" && n === maxN - 1 && electronCount < 10) {
                 // Partially filled (n-1)d counts for transition metals
                 valence += electronCount;
@@ -1006,8 +1052,9 @@ export class HeisenbergUncertaintyCalculator extends SolveForCalculator {
             if (!isNaN(massVal) && massVal > 0) {
                 let deltaV: number = deltaPVal / massVal;
                 html += "<p>\u0394v corresponding to \u0394p: <strong>" + this.numberFormatter.format(deltaV, 4) + " m/s</strong></p>";
-                let minDeltaV: number = minDeltaX * massVal;
-                html += "<p>Minimum \u0394v from \u0394x: <strong>" + this.numberFormatter.format(minDeltaV / massVal, 4) + " m/s</strong></p>";
+                // Δv ≥ ħ/(2·Δx·m); with Δx at its minimum this equals Δp/m.
+                let minDeltaV: number = minProduct / (minDeltaX * massVal);
+                html += "<p>Minimum \u0394v from \u0394x: <strong>" + this.numberFormatter.format(minDeltaV, 4) + " m/s</strong></p>";
             }
         } else if (solveFor === "min-delta-p") {
             if (isNaN(deltaXVal)) {
@@ -1054,11 +1101,12 @@ export class HeisenbergUncertaintyCalculator extends SolveForCalculator {
             };
             if (!isNaN(massVal) && massVal > 0) {
                 let deltaV: number = deltaPVal / massVal;
-                let minDeltaV: number = minDeltaX * massVal;
+                // Δv ≥ ħ/(2·Δx·m); with Δx at its minimum this equals Δp/m.
+                let minDeltaV: number = minProduct / (minDeltaX * massVal);
                 explanation += "; \u0394v corresponding to \u0394p: " + this.numberFormatter.format(deltaV, 4) + " m/s";
-                explanation += "; Minimum \u0394v from \u0394x: " + this.numberFormatter.format(minDeltaV / massVal, 4) + " m/s";
+                explanation += "; Minimum \u0394v from \u0394x: " + this.numberFormatter.format(minDeltaV, 4) + " m/s";
                 metadata.deltaV = deltaV;
-                metadata.minDeltaV = minDeltaV / massVal;
+                metadata.minDeltaV = minDeltaV;
                 metadata.mass = massVal;
             }
             return {
