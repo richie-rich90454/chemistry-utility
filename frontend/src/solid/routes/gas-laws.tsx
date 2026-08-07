@@ -117,7 +117,7 @@ function GasLaws(): JSX.Element {
             title="Gas Laws"
             description="Use this suite of gas calculators to solve for pressure, volume, temperature, or moles using the Ideal or Combined Gas Laws. For real gases, the Van der Waals correction adjusts for molecular interactions, giving more accurate predictions. It is perfect for review and more."
             seeAlso={
-                <SeeAlsoLink href="#molar-mass">Working with gases? You may also need molar masses from the Molar Mass Calculator.</SeeAlsoLink>
+                <SeeAlsoLink href="/molar-mass">Working with gases? You may also need molar masses from the Molar Mass Calculator.</SeeAlsoLink>
             }
         >
             <section class={styles.subGroup}>
