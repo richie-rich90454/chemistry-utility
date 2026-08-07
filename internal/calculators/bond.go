@@ -2,6 +2,7 @@ package calculators
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -85,6 +86,10 @@ func BondType(ctx context.Context, input CalculationInput) (CalculationResult, e
 	elem2Str, err := getString(input, "element2")
 	if err != nil {
 		return CalculationResult{}, err
+	}
+
+	if elem1Str == "" || elem2Str == "" {
+		return CalculationResult{}, errors.New("element symbols cannot be empty")
 	}
 
 	// Normalize: first letter uppercase, rest lowercase
