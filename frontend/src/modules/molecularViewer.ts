@@ -175,7 +175,7 @@ class MolecularViewer {
             throw new Error("SMILES string is required");
         }
         let self: MolecularViewer = this;
-        let drawer: any = new SmilesDrawer.Drawer(self.getDrawerOptions());
+        let drawer = new SmilesDrawer.Drawer(self.getDrawerOptions());
         let success: (g: GraphShape) => void = function (data: GraphShape): void {
             try {
                 drawer.draw(data, canvas as HTMLCanvasElement, "light", false, []);
