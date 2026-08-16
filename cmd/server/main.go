@@ -13,8 +13,6 @@ import (
 	"time"
 
 	"chemistry-utility/internal/api"
-	"chemistry-utility/internal/compounds"
-	"chemistry-utility/internal/db"
 
 	"github.com/gin-gonic/gin"
 )
@@ -81,41 +79,18 @@ func main() {
 	if port == "" {
 		port = "6005"
 	}
-	dbDriver := os.Getenv("DB_DRIVER")
-	if dbDriver == "" {
-		dbDriver = "sqlite3"
-	}
-	dbDSN := os.Getenv("DB_DSN")
-	if dbDSN == "" {
-		dbDSN = "chemistry.db"
-	}
 	distDir := os.Getenv("DIST_DIR")
 	if distDir == "" {
 		distDir = "frontend/dist"
 	}
-	cfg := db.Config{
-		Driver:          dbDriver,
-		DSN:             dbDSN,
-		MaxOpenConns:    25,
-		MaxIdleConns:    5,
-		ConnMaxLifetime: 5 * time.Minute,
-	}
-	database, err := db.New(cfg)
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
-	}
-	defer database.Close()
-	compoundStore := &db.CompoundStore{DB: database, Driver: dbDriver}
-	pluginStore := &db.PluginStore{DB: database, Driver: dbDriver}
-	pubchemClient := compounds.NewPubChemClient()
-	compoundCache := compounds.NewCompoundCache(compoundStore, pubchemClient)
+	// The anonymous web build stores nothing on the server: no database is
+	// opened and DB-backed API features (compound search, plugins) are
+	// disabled. The desktop app runs its own in-process database instead.
 	apiCfg := api.Config{
 		RateLimitPerMinute: 100,
 		CORSAllowedOrigins: []string{"*"},
 	}
-	apiInstance := api.New(database, dbDriver, apiCfg)
-	_ = compoundCache
-	_ = pluginStore
+	apiInstance := api.New(nil, "", apiCfg)
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -155,8 +130,6 @@ func main() {
 		apiRouter.ServeHTTP(c.Writer, c.Request)
 	})
 	r.Static("/assets", filepath.Join(distDir, "assets"))
-	r.Static("/src", filepath.Join(distDir, "src"))
-	r.Static("/wailsjs", filepath.Join(distDir, "wailsjs"))
 	r.StaticFile("/favicon.ico", filepath.Join(distDir, "favicon.ico"))
 	r.StaticFile("/favicon.png", filepath.Join(distDir, "favicon.png"))
 	r.StaticFile("/manifest.webmanifest", filepath.Join(distDir, "manifest.webmanifest"))
@@ -184,7 +157,7 @@ func main() {
 		Handler: r,
 	}
 	go func() {
-		log.Printf("Starting server on :%s (db: %s)", port, dbDriver)
+		log.Printf("Starting server on :%s (no database)", port)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal("Server failed:", err)
 		}
