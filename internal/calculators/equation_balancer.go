@@ -453,9 +453,9 @@ func EquationBalance(ctx context.Context, input CalculationInput) (CalculationRe
 			fmt.Sprintf("Balanced: %s", balanced),
 		},
 		Metadata: map[string]interface{}{
-			"balanced":    balanced,
-			"reactants":   reactants,
-			"products":    products,
+			"balanced":  balanced,
+			"reactants": reactants,
+			"products":  products,
 		},
 	}, nil
 }
