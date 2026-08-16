@@ -397,6 +397,12 @@ func TitrationCurve(ctx context.Context, input CalculationInput) (CalculationRes
 
 	mode := getStringWithDefault(input, "mode", "strong-acid-strong-base")
 	numPoints := int(getFloatWithDefault(input, "numPoints", 50))
+	if numPoints < 2 {
+		numPoints = 50
+	}
+	if numPoints > 5000 {
+		numPoints = 5000
+	}
 
 	equivalenceVolume := ca * va / ct
 
