@@ -1,6 +1,7 @@
 import { ScrollNavigationStrategy } from "./scrollNavigationStrategy.js";
 import { AppNavigationStrategy } from "./appNavigationStrategy.js";
 import { PluginManager } from "./pluginManager.js";
+import { RuntimeDetector } from "./runtimeDetector.js";
 
 export interface NavigationStrategy {
 	navigate(targetId: string): void;
@@ -138,6 +139,11 @@ class NavigationManager {
 	}
 
 	public getCalculators(): CalculatorInfo[] {
+		if (RuntimeDetector.getInstance().isWebMode) {
+			return CALCULATORS.filter(function (c: CalculatorInfo): boolean {
+				return c.id !== "batch-calc" && c.id !== "dashboard";
+			});
+		}
 		return CALCULATORS.slice();
 	}
 
