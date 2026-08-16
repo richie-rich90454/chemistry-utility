@@ -1,4 +1,5 @@
 package db
+
 import (
 	"database/sql"
 	"fmt"
@@ -6,16 +7,18 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
 	"github.com/golang-migrate/migrate/v4/source"
-	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 )
+
 type Config struct {
 	Driver          string
 	DSN             string
@@ -27,6 +30,7 @@ type Config struct {
 	// CWD-relative "file://migrations" source is used.
 	Migrations fs.FS
 }
+
 func DefaultConfig() Config {
 	return Config{
 		Driver:          "sqlite3",
@@ -36,6 +40,7 @@ func DefaultConfig() Config {
 		ConnMaxLifetime: 5 * time.Minute,
 	}
 }
+
 // withBusyTimeout adds SQLite's busy_timeout so concurrent writes on the
 // app pool wait instead of failing with SQLITE_BUSY.
 func withBusyTimeout(driver, dsn string) string {
