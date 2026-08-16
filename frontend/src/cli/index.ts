@@ -21,6 +21,7 @@
 import { balanceEquation } from "../modules/equationBalancer.js";
 import { calculateMolarMass } from "../modules/formulaParser.js";
 import { computeDilution, computeIdealGasLaw, computeBoylesLaw, computeCharlesLaw, computePH, computeFirstOrderHalfLife } from "../modules/compute.js";
+import { ChemicalElement } from "../types.js";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -28,7 +29,7 @@ import { dirname, join } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export function loadPeriodicTable(): any[] {
+export function loadPeriodicTable(): ChemicalElement[] {
     let ptablePath = join(__dirname, "..", "..", "public", "ptable.json");
     let raw = readFileSync(ptablePath, "utf-8");
     let data = JSON.parse(raw);
