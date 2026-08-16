@@ -38,6 +38,7 @@ import {CommandPalette} from "./components/CommandPalette";
 import {OnboardingTour} from "./components/OnboardingTour";
 import {ComparisonModal} from "./components/ComparisonModal";
 import {createSignal} from "solid-js";
+import {RuntimeDetector} from "../modules/runtimeDetector.js";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -65,6 +66,7 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
     );
 }
 function App(): JSX.Element {
+    let desktopOnly: boolean = !RuntimeDetector.getInstance().isWebMode;
     onMount(function (): void {
         if (window.location.hash === "#mass-calc") {
             window.location.replace("/molar-mass");
@@ -262,8 +264,8 @@ function App(): JSX.Element {
                 <Route path="/bond-type" component={BondType} />
                 <Route path="/molecular-viewer" component={MolecularViewerRoute} />
                 <Route path="/compound-search" component={CompoundSearch} />
-                <Route path="/batch-calc" component={BatchCalc} />
-                <Route path="/dashboard" component={Dashboard} />
+                {desktopOnly ? <Route path="/batch-calc" component={BatchCalc} /> : null}
+                {desktopOnly ? <Route path="/dashboard" component={Dashboard} /> : null}
                 <Route path="*" component={CatchAllRedirect} />
             </Route>
         </Router>
