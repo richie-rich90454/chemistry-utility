@@ -81,6 +81,9 @@ func HalfLife(ctx context.Context, input CalculationInput) (CalculationResult, e
 		if Nt <= 0 {
 			return CalculationResult{}, errors.New("remaining quantity must be positive")
 		}
+		if Nt >= N0 {
+			return CalculationResult{}, errors.New("remaining quantity must be less than initial quantity")
+		}
 		result = t / (math.Log(Nt/N0) / math.Log(0.5))
 		unit = ""
 	default:
