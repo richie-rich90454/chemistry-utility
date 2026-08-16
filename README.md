@@ -207,8 +207,7 @@ chemistry-utility/
 │   │   └── style.css           # Shared base styles (MD3 design system)
 │   ├── public/                 # Static assets (fonts, icons, ptable.json, sw.js)
 │   ├── e2e/                    # Playwright end-to-end tests
-│   ├── index.html              # Web version (SEO optimized)
-│   └── index-app.html          # Desktop version (minimal)
+│   ├── index.html              # Single app shell (web + desktop)
 ├── .github/
 │   ├── workflows/              # CI/CD pipelines
 │   ├── ISSUE_TEMPLATE/
