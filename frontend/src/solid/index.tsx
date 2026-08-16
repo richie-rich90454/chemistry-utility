@@ -1,6 +1,7 @@
 import {render} from "solid-js/web";
 import type {JSX} from "solid-js";
 import {App} from "./App";
+import {ApiClient} from "../modules/apiClient.js";
 import {RuntimeDetector} from "../modules/runtimeDetector.js";
 import "./styles/global.css";
 
@@ -36,5 +37,26 @@ function initializeSolidApp(): void {
     render(function (): JSX.Element { return <App />; }, root);
 }
 
+// In the Wails desktop app the API runs in-process on a loopback port exposed
+// by the App.GetAPIURL binding; the web build uses same-origin API calls.
+// Resolved before any user action can trigger an API request.
+async function configureApiClientForWails(): Promise<void> {
+    if (!RuntimeDetector.getInstance().isWails) {
+        return;
+    }
+    try {
+        let w = window as unknown as {
+            go?: { main?: { App?: { GetAPIURL?: () => Promise<string> } } };
+        };
+        let url: string | undefined = await w.go?.main?.App?.GetAPIURL?.();
+        if (url && url !== "") {
+            ApiClient.configure({ "baseURL": url, "timeout": 30000 });
+        }
+    } catch {
+        // Binding unavailable: fall back to same-origin (harmless in web).
+    }
+}
+
 clearStaleServiceWorker();
+void configureApiClientForWails();
 initializeSolidApp();
