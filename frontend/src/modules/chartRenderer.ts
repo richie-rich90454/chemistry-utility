@@ -48,6 +48,23 @@ export interface ActivityPoint {
     count: number;
 }
 
+interface ChartThemeScale {
+    title?: { color?: string };
+    ticks?: { color?: string };
+    grid?: { color?: string };
+}
+interface ChartThemeOptions {
+    plugins?: {
+        title?: { color?: string };
+        legend?: { labels?: { color?: string } };
+        tooltip?: { backgroundColor?: string; titleColor?: string; bodyColor?: string };
+    };
+    scales?: {
+        x?: ChartThemeScale;
+        y?: ChartThemeScale;
+    };
+}
+
 type ChartType = "line" | "bar" | "scatter";
 type ThemeChangeCallback = (theme: Theme) => void;
 
@@ -381,7 +398,7 @@ class ChartRenderer {
     }
 
     private applyThemeToChart(chart: Chart, colors: ThemeColors): void {
-        let opts: any = chart.options;
+        let opts = chart.options as unknown as ChartThemeOptions;
         if (opts.plugins && opts.plugins.title) {
             opts.plugins.title.color = colors.textColor;
         }
@@ -399,7 +416,7 @@ class ChartRenderer {
         }
     }
 
-    private applyThemeToScale(scale: any, colors: ThemeColors): void {
+    private applyThemeToScale(scale: ChartThemeScale | undefined, colors: ThemeColors): void {
         if (!scale) {
             return;
         }
