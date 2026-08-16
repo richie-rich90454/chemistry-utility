@@ -101,9 +101,9 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 	}
 
 	return CalculationResult{
-		Value: result,
-		Unit:  unit,
-		Steps: []string{formula},
+		Value:    result,
+		Unit:     unit,
+		Steps:    []string{formula},
 		Metadata: map[string]interface{}{"solveFor": solveFor},
 	}, nil
 }
@@ -222,7 +222,7 @@ func BufferSolution(ctx context.Context, input CalculationInput) (CalculationRes
 		Value: pH,
 		Unit:  "",
 		Steps: []string{
-			fmt.Sprintf("pH = pKa + log([A⁻]/[HA])"),
+			"pH = pKa + log([A⁻]/[HA])",
 			fmt.Sprintf("pH = %.4f + log(%.4f/%.4f) = %.4f", pKa, A, HA, pH),
 		},
 		Metadata: map[string]interface{}{"pKa": pKa, "HA": HA, "A": A},
@@ -453,11 +453,11 @@ func TitrationCurve(ctx context.Context, input CalculationInput) (CalculationRes
 			fraction := ct * vb / (ca * va)
 			if fraction <= 0.001 {
 				pH = 0.5 * (pKa - math.Log10(ca))
-		} else if fraction >= 0.999 && fraction <= 1.001 {
-			// At equivalence all HA has become A⁻; pH of the weak base is
-			// 7 + ½pKa + ½log10([A⁻]).
-			pH = 0.5 * (14 + pKa + math.Log10(ca*va/totalVol))
-		} else if fraction > 1.001 {
+			} else if fraction >= 0.999 && fraction <= 1.001 {
+				// At equivalence all HA has become A⁻; pH of the weak base is
+				// 7 + ½pKa + ½log10([A⁻]).
+				pH = 0.5 * (14 + pKa + math.Log10(ca*va/totalVol))
+			} else if fraction > 1.001 {
 				excessOH := (ct*vb - ca*va) / totalVol
 				pOH := -math.Log10(excessOH)
 				pH = 14 - pOH
