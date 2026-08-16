@@ -1,0 +1,4 @@
+# Normalize Go module files to LF so `go mod tidy` (auto-run by wails dev)
+# never marks them dirty or invalidates the Go build cache.
+go.mod text eol=lf
+go.sum text eol=lf
