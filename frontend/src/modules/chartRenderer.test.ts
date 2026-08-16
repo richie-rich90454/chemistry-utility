@@ -88,7 +88,7 @@ function createSampleOptions(): ChartOptions {
 describe("ChartRenderer", function () {
     let originalGetContext: typeof HTMLCanvasElement.prototype.getContext;
     let originalToDataURL: typeof HTMLCanvasElement.prototype.toDataURL;
-    let originalResizeObserver: any;
+    let originalResizeObserver: typeof globalThis.ResizeObserver | undefined;
     let toDataURLMock: ReturnType<typeof vi.fn>;
     let getContextMock: ReturnType<typeof vi.fn>;
 
@@ -97,7 +97,7 @@ describe("ChartRenderer", function () {
         ChartRenderer.resetInstance();
         originalGetContext = HTMLCanvasElement.prototype.getContext;
         originalToDataURL = HTMLCanvasElement.prototype.toDataURL;
-        originalResizeObserver = (globalThis as any).ResizeObserver;
+        originalResizeObserver = globalThis.ResizeObserver;
         getContextMock = vi.fn(function (this: HTMLCanvasElement): CanvasRenderingContext2D | null {
             return createNoopContext(this);
         });
@@ -106,8 +106,8 @@ describe("ChartRenderer", function () {
         });
         HTMLCanvasElement.prototype.getContext = getContextMock as typeof HTMLCanvasElement.prototype.getContext;
         HTMLCanvasElement.prototype.toDataURL = toDataURLMock as typeof HTMLCanvasElement.prototype.toDataURL;
-        (globalThis as any).ResizeObserver = MockResizeObserver;
-        (window as any).ResizeObserver = MockResizeObserver;
+        (globalThis as unknown as Record<string, unknown>).ResizeObserver = MockResizeObserver;
+        (window as unknown as Record<string, unknown>).ResizeObserver = MockResizeObserver;
     });
 
     afterEach(function () {
@@ -115,8 +115,8 @@ describe("ChartRenderer", function () {
         document.body.innerHTML = "";
         HTMLCanvasElement.prototype.getContext = originalGetContext;
         HTMLCanvasElement.prototype.toDataURL = originalToDataURL;
-        (globalThis as any).ResizeObserver = originalResizeObserver;
-        (window as any).ResizeObserver = originalResizeObserver;
+        (globalThis as unknown as Record<string, unknown>).ResizeObserver = originalResizeObserver;
+        (window as unknown as Record<string, unknown>).ResizeObserver = originalResizeObserver;
         vi.restoreAllMocks();
     });
 
@@ -157,7 +157,7 @@ describe("ChartRenderer", function () {
         });
 
         it("throws when labels are missing", function () {
-            let data: any = {
+            let data = {
                 "datasets": [{
                     "label": "A",
                     "data": [1],
@@ -165,12 +165,12 @@ describe("ChartRenderer", function () {
                     "borderColor": "",
                     "backgroundColor": ""
                 }]
-            };
+            } as unknown as ChartData;
             expect(function () { instance.validateChartData(data); }).toThrow();
         });
 
         it("throws when datasets are missing", function () {
-            let data: any = { "labels": ["a"] };
+            let data = { "labels": ["a"] } as unknown as ChartData;
             expect(function () { instance.validateChartData(data); }).toThrow();
         });
 
@@ -194,7 +194,7 @@ describe("ChartRenderer", function () {
         });
 
         it("throws when dataset data array is missing", function () {
-            let data: any = {
+            let data = {
                 "labels": ["a"],
                 "datasets": [{
                     "label": "A",
@@ -202,7 +202,7 @@ describe("ChartRenderer", function () {
                     "borderColor": "",
                     "backgroundColor": ""
                 }]
-            };
+            } as unknown as ChartData;
             expect(function () { instance.validateChartData(data); }).toThrow();
         });
 
