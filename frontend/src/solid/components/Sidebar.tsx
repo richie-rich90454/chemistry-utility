@@ -1,9 +1,10 @@
 import type {JSX} from "solid-js";
-import {For, createSignal, onMount} from "solid-js";
+import {For, Show, createSignal, onMount} from "solid-js";
 import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {GroupedCalculators, groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
+import {RuntimeDetector} from "../../modules/runtimeDetector.js";
 import {ThemeToggle} from "./ThemeToggle";
 import {WorkspaceList} from "./WorkspaceList";
 import {ExportImportButtons} from "./ExportImportButtons";
@@ -128,8 +129,10 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                 </ul>
             </nav>
             <div class={styles.sidebarFooter}>
-                <ExportImportButtons />
-                <PluginManagerPanel />
+                <Show when={!RuntimeDetector.getInstance().isWebMode}>
+                    <ExportImportButtons />
+                    <PluginManagerPanel />
+                </Show>
                 <p>&copy; 2026 Richard's Blogs</p>
                 <p>Main site: <a href="https://www.richardsblogs.com" target="_blank" rel="noopener noreferrer">www.richardsblogs.com</a></p>
             </div>
