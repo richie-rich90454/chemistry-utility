@@ -51,3 +51,9 @@ func WriteForbidden(c *gin.Context, detail string) {
 func WriteNotFound(c *gin.Context, detail string) {
 	WriteProblem(c, 404, "Not Found", detail)
 }
+
+// WriteNotImplemented writes a 501 Not Implemented response. Used for
+// features disabled on the anonymous web build, which has no database.
+func WriteNotImplemented(c *gin.Context, detail string) {
+	WriteProblem(c, 501, "Not Implemented", detail)
+}
