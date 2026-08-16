@@ -18,6 +18,9 @@ type createPluginRequest struct {
 
 // listPlugins returns all plugins.
 func (a *API) listPlugins(c *gin.Context) {
+	if !a.requireDB(c) {
+		return
+	}
 	plugins, err := a.pluginStore.List(c.Request.Context())
 	if err != nil {
 		WriteError(c, err)
@@ -31,6 +34,9 @@ func (a *API) listPlugins(c *gin.Context) {
 
 // createPlugin creates a new plugin.
 func (a *API) createPlugin(c *gin.Context) {
+	if !a.requireDB(c) {
+		return
+	}
 	var req createPluginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		WriteValidation(c, err.Error())
@@ -54,6 +60,9 @@ func (a *API) createPlugin(c *gin.Context) {
 
 // enablePlugin enables a plugin by ID.
 func (a *API) enablePlugin(c *gin.Context) {
+	if !a.requireDB(c) {
+		return
+	}
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		WriteValidation(c, "invalid plugin id")
@@ -70,6 +79,9 @@ func (a *API) enablePlugin(c *gin.Context) {
 
 // disablePlugin disables a plugin by ID.
 func (a *API) disablePlugin(c *gin.Context) {
+	if !a.requireDB(c) {
+		return
+	}
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		WriteValidation(c, "invalid plugin id")
@@ -86,6 +98,9 @@ func (a *API) disablePlugin(c *gin.Context) {
 
 // deletePlugin deletes a plugin by ID.
 func (a *API) deletePlugin(c *gin.Context) {
+	if !a.requireDB(c) {
+		return
+	}
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		WriteValidation(c, "invalid plugin id")
