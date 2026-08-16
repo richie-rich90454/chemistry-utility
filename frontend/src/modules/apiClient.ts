@@ -37,6 +37,15 @@ export class ApiClient {
         }
         return ApiClient.instance;
     }
+    /** Points an already-created client at a different base URL (used by the
+     *  Wails bootstrap to target the in-process API server). */
+    public static configure(config: ApiClientConfig): void {
+        if (ApiClient.instance) {
+            ApiClient.instance.config = config;
+        } else {
+            ApiClient.instance = new ApiClient(config);
+        }
+    }
     private loadToken(): void {
         try {
             let stored: string | null = localStorage.getItem("chemutil_auth");
@@ -248,7 +257,7 @@ export class ApiClient {
         return this.request<T>("DELETE", path);
     }
     public isOffline(): boolean {
-        return !navigator.onLine;
+        return typeof navigator === "undefined" ? false : !navigator.onLine;
     }
     public static resetInstance(): void {
         ApiClient.instance = null;
