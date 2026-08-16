@@ -434,9 +434,9 @@ export function buildFormulaSegments(formula: string): FormulaSegment[] {
     }
     return segments;
 }
-export async function searchCompounds(query: string, type: string): Promise<CompoundResult[]> {
+export async function searchCompounds(query: string, _type: string): Promise<CompoundResult[]> {
     let client: ApiClient = ApiClient.getInstance();
-    let path: string = "/api/v1/compounds/search?q=" + encodeURIComponent(query) + "&type=" + type;
+    let path: string = "/api/v1/compounds?q=" + encodeURIComponent(query);
     let response: CompoundSearchResponse = await client.get<CompoundSearchResponse>(path);
     return (response && response.compounds) ? response.compounds : [];
 }
