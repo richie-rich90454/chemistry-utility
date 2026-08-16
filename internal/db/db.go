@@ -2,14 +2,18 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"strings"
 	"time"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
+	"github.com/golang-migrate/migrate/v4/source"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 type Config struct {
@@ -18,6 +22,10 @@ type Config struct {
 	MaxOpenConns    int
 	MaxIdleConns    int
 	ConnMaxLifetime time.Duration
+	// Migrations embeds the SQL migration files (a filesystem rooted at the
+	// directory that contains the "migrations" subfolder). When nil, the
+	// CWD-relative "file://migrations" source is used.
+	Migrations fs.FS
 }
 func DefaultConfig() Config {
 	return Config{
@@ -28,8 +36,20 @@ func DefaultConfig() Config {
 		ConnMaxLifetime: 5 * time.Minute,
 	}
 }
+// withBusyTimeout adds SQLite's busy_timeout so concurrent writes on the
+// app pool wait instead of failing with SQLITE_BUSY.
+func withBusyTimeout(driver, dsn string) string {
+	if driver != "sqlite3" || strings.HasPrefix(dsn, ":memory:") || strings.Contains(dsn, "busy_timeout") {
+		return dsn
+	}
+	sep := "?"
+	if strings.Contains(dsn, "?") {
+		sep = "&"
+	}
+	return dsn + sep + "_busy_timeout=5000"
+}
 func New(cfg Config) (*sql.DB, error) {
-	db, err := sql.Open(cfg.Driver, cfg.DSN)
+	db, err := sql.Open(cfg.Driver, withBusyTimeout(cfg.Driver, cfg.DSN))
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
@@ -73,10 +93,23 @@ func runMigrations(db *sql.DB, cfg Config) error {
 			migrateURL = fmt.Sprintf("%s://%s", migrateDriver, cfg.DSN)
 		}
 	}
-	m, err := migrate.New(
-		"file://migrations",
-		migrateURL,
-	)
+	var m *migrate.Migrate
+	var err error
+	if cfg.Migrations != nil {
+		var src source.Driver
+		src, err = iofs.New(cfg.Migrations, "migrations")
+		if err != nil {
+			return fmt.Errorf("failed to create embedded migration source: %w", err)
+		}
+		var dbDriver database.Driver
+		dbDriver, err = database.Open(migrateURL)
+		if err != nil {
+			return fmt.Errorf("failed to open migration database: %w", err)
+		}
+		m, err = migrate.NewWithInstance("iofs", src, migrateDriver, dbDriver)
+	} else {
+		m, err = migrate.New("file://migrations", migrateURL)
+	}
 	if err != nil {
 		return fmt.Errorf("failed to create migrate instance: %w", err)
 	}
