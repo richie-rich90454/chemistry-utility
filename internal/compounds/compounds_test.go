@@ -55,7 +55,7 @@ func TestSearchByNameURLConstruction(t *testing.T) {
 			}{CID: []int{2244}},
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -90,7 +90,7 @@ func TestSearchByFormulaURLConstruction(t *testing.T) {
 			}{CID: []int{962}},
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -125,7 +125,7 @@ func TestSearchBySMILESURLConstruction(t *testing.T) {
 			}{CID: []int{241}},
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -159,7 +159,7 @@ func TestSearchByCASURLConstruction(t *testing.T) {
 			}{CID: []int{2244}},
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -229,7 +229,7 @@ func TestGetCompoundDetail(t *testing.T) {
 				},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			_ = json.NewEncoder(w).Encode(result)
 			return
 		}
 
@@ -249,7 +249,7 @@ func TestGetCompoundDetail(t *testing.T) {
 				},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			_ = json.NewEncoder(w).Encode(result)
 			return
 		}
 
@@ -277,7 +277,7 @@ func TestGetCompoundDetail(t *testing.T) {
 				},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			_ = json.NewEncoder(w).Encode(result)
 			return
 		}
 
@@ -314,7 +314,7 @@ func TestSearchByNameEmptyResponse(t *testing.T) {
 			IdentifierList: nil,
 		}
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(resp)
+		_ = json.NewEncoder(w).Encode(resp)
 	}))
 	defer server.Close()
 
@@ -347,7 +347,7 @@ func TestCacheSearchWithEmptyLocalDB(t *testing.T) {
 				}{CID: []int{2244}},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(resp)
+			_ = json.NewEncoder(w).Encode(resp)
 			return
 		}
 
@@ -395,7 +395,7 @@ func TestCacheSearchWithEmptyLocalDB(t *testing.T) {
 				},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			_ = json.NewEncoder(w).Encode(result)
 			return
 		}
 
@@ -416,7 +416,7 @@ func TestCacheSearchWithEmptyLocalDB(t *testing.T) {
 				},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			_ = json.NewEncoder(w).Encode(result)
 			return
 		}
 
@@ -445,7 +445,7 @@ func TestCacheSearchWithEmptyLocalDB(t *testing.T) {
 				},
 			}
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(result)
+			_ = json.NewEncoder(w).Encode(result)
 			return
 		}
 
