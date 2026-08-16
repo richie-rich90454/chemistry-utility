@@ -360,8 +360,8 @@ func VanDerWaals(ctx context.Context, input CalculationInput) (CalculationResult
 		Value: P,
 		Unit:  "atm",
 		Steps: []string{
-			fmt.Sprintf("P = (nRT)/(V - nb) - a(n/V)²"),
-			fmt.Sprintf("P = (%.4f × %.5f × %.4f)/(%.4f - %.4f × %.4f) - %.4f × (%.4f/%.4f)²", n, RAtmL, T, V, n, b, a, n, V),
+			"P = (nRT)/(V - nb) - a(n/V)2",
+			fmt.Sprintf("P = (%.4f × %.5f × %.4f)/(%.4f - %.4f × %.4f) - %.4f × (%.4f/%.4f)2", n, RAtmL, T, V, n, b, a, n, V),
 		},
 		Metadata: map[string]interface{}{
 			"V": V, "n": n, "T": T, "a": a, "b": b,
