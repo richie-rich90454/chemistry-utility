@@ -51,6 +51,23 @@ export class RuntimeDetector {
     public get hasNavigator(): boolean {
         return this._hasNavigator;
     }
+    /** True on the anonymous web build (deployed web mode or a plain browser
+     *  during local dev), where desktop-only features such as the dashboard,
+     *  batch calculator, export/import, and plugins are hidden. False in the
+     *  Wails desktop app and in unit tests. */
+    public get isWebMode(): boolean {
+        let env = (import.meta as unknown as { env?: { MODE?: string } }).env;
+        let mode: string = env ? (env.MODE || "") : "";
+        if (mode === "web") {
+            return true;
+        }
+        if (mode === "app" || mode === "test") {
+            return false;
+        }
+        // "development": a plain browser is the web build, the Wails runtime
+        // is the desktop app.
+        return !this._isWails;
+    }
     public describe(): string {
         if (this._isWails) {
             return "browser+wails";
