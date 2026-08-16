@@ -16,7 +16,7 @@ export class ChemicalElement {
 	public ionizationEnergy?: number | null;
 	public valenceElectrons: number;
 	public totalElectrons: number;
-	public group: number;
+	public group: number | null;
 	public period: number;
 	public type: string;
 
@@ -31,7 +31,7 @@ export class ChemicalElement {
 		ionizationEnergy?: number | null;
 		valenceElectrons: number;
 		totalElectrons: number;
-		group: number;
+		group: number | null;
 		period: number;
 		type: string;
 	}) {
