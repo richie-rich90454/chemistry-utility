@@ -53,34 +53,6 @@ type pubChemSearchResponse struct {
 	} `json:"IdentifierList"`
 }
 
-type pubChemCompoundResponse struct {
-	PC_Compounds []pubChemPCCompound `json:"PC_Compounds"`
-}
-
-type pubChemPCCompound struct {
-	Props []pubChemProp `json:"props"`
-	ID    struct {
-		ID struct {
-			CID int `json:"cid"`
-		} `json:"id"`
-	} `json:"id"`
-}
-
-type pubChemProp struct {
-	Urn  pubChemUrn  `json:"urn"`
-	Value pubChemValue `json:"value"`
-}
-
-type pubChemUrn struct {
-	Label string `json:"label"`
-	Name  string `json:"name"`
-}
-
-type pubChemValue struct {
-	StringVal *string  `json:"sval"`
-	NumberVal *float64 `json:"fval"`
-}
-
 type pubChemDescriptionResponse struct {
 	InformationList *struct {
 		Information []pubChemInformation `json:"Information"`
@@ -226,18 +198,16 @@ func (c *PubChemClient) fetchCompounds(ctx context.Context, cids []int) ([]db.Co
 	}
 
 	descMap := make(map[int]pubChemInformation)
-	if descriptions != nil {
-		for _, info := range descriptions {
-			descMap[info.CID] = info
-		}
+	for _, info := range descriptions {
+		descMap[info.CID] = info
 	}
 
 	// Merge: if property data is empty, use description data
 	var results []db.Compound
 	for _, cid := range cids {
 		compound := db.Compound{
-			ID:       uuid.New(),
-			Source:   "pubchem",
+			ID:     uuid.New(),
+			Source: "pubchem",
 		}
 
 		if pc, ok := compounds[cid]; ok {
@@ -270,12 +240,12 @@ func (c *PubChemClient) fetchCompounds(ctx context.Context, cids []int) ([]db.Co
 }
 
 type compoundProps struct {
-	Name       string
-	Formula    string
-	MolarMass  float64
-	SMILES     string
-	InChI      string
-	CASNumber  string
+	Name      string
+	Formula   string
+	MolarMass float64
+	SMILES    string
+	InChI     string
+	CASNumber string
 }
 
 // fetchProperties retrieves IUPAC name, molecular formula, molar mass, SMILES, InChI, and CAS.
@@ -305,12 +275,12 @@ func (c *PubChemClient) fetchProperties(ctx context.Context, cidList string) (ma
 	var result struct {
 		PropertyTable *struct {
 			Properties []struct {
-				CID             int     `json:"CID"`
-				IUPACName       string  `json:"IUPACName"`
-				MolecularFormula string `json:"MolecularFormula"`
-				MolecularWeight float64 `json:"MolecularWeight"`
-				IsomericSMILES  string  `json:"IsomericSMILES"`
-				InChI           string  `json:"InChI"`
+				CID              int     `json:"CID"`
+				IUPACName        string  `json:"IUPACName"`
+				MolecularFormula string  `json:"MolecularFormula"`
+				MolecularWeight  float64 `json:"MolecularWeight"`
+				IsomericSMILES   string  `json:"IsomericSMILES"`
+				InChI            string  `json:"InChI"`
 			} `json:"Properties"`
 		} `json:"PropertyTable"`
 	}
@@ -323,11 +293,11 @@ func (c *PubChemClient) fetchProperties(ctx context.Context, cidList string) (ma
 	if result.PropertyTable != nil {
 		for _, p := range result.PropertyTable.Properties {
 			propsMap[p.CID] = compoundProps{
-				Name:       p.IUPACName,
-				Formula:    p.MolecularFormula,
-				MolarMass:  p.MolecularWeight,
-				SMILES:     p.IsomericSMILES,
-				InChI:      p.InChI,
+				Name:      p.IUPACName,
+				Formula:   p.MolecularFormula,
+				MolarMass: p.MolecularWeight,
+				SMILES:    p.IsomericSMILES,
+				InChI:     p.InChI,
 			}
 		}
 	}
@@ -403,8 +373,8 @@ func (c *PubChemClient) fetchCASNumbers(ctx context.Context, cidList string) (ma
 	var result struct {
 		InformationList *struct {
 			Information []struct {
-				CID  int      `json:"CID"`
-				CAS  []string `json:"CAS"`
+				CID int      `json:"CID"`
+				CAS []string `json:"CAS"`
 			} `json:"Information"`
 		} `json:"InformationList"`
 	}
