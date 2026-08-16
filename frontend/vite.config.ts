@@ -24,11 +24,7 @@ export default defineConfig(({mode})=>({
 		modulePreload: { polyfill: false },
 		cssCodeSplit: true,
 		rollupOptions:{
-			input: mode==="app"
-				?{index: path.resolve(__dirname, "index-app.html")}
-				: mode==="web"
-				?{main: path.resolve(__dirname, "index.html")}
-				:{main: path.resolve(__dirname, "index.html"), app: path.resolve(__dirname, "index-app.html")},
+			input: path.resolve(__dirname, "index.html"),
 			output:{
 				manualChunks(id){
 					if (id.includes("node_modules")){
