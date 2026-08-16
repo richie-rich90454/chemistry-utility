@@ -17,11 +17,11 @@ type BreakdownItem struct {
 
 // CalculationResult holds the output of a calculator function.
 type CalculationResult struct {
-	Value    float64
-	Unit     string
+	Value     float64
+	Unit      string
 	Breakdown []BreakdownItem
-	Steps    []string
-	Metadata map[string]interface{}
+	Steps     []string
+	Metadata  map[string]interface{}
 }
 
 // CalculatorFunc is the signature for all calculator functions.
