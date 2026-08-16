@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"chemistry-utility/api"
+	apispec "chemistry-utility/api"
 
 	"github.com/gin-gonic/gin"
 )
