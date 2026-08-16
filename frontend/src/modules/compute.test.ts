@@ -32,7 +32,7 @@ describe("computeDilution", () => {
         expect(() => computeDilution({ M1: 2, V1: 1, M2: 0, V2: -4 }, "M2")).toThrow();
     });
     it("throws for invalid solveFor", () => {
-        expect(() => computeDilution({ M1: 2, V1: 1, M2: 0, V2: 4 }, "X" as any)).toThrow();
+        expect(() => computeDilution({ M1: 2, V1: 1, M2: 0, V2: 4 }, "X" as never)).toThrow();
     });
 });
 
@@ -127,7 +127,7 @@ describe("computeMassPercent", () => {
         expect(() => computeMassPercent({ soluteMass: -5, solutionMass: 100, unit: "percent" })).toThrow();
     });
     it("throws for invalid unit", () => {
-        expect(() => computeMassPercent({ soluteMass: 10, solutionMass: 100, unit: "x" as any })).toThrow();
+        expect(() => computeMassPercent({ soluteMass: 10, solutionMass: 100, unit: "x" as never })).toThrow();
     });
 });
 
