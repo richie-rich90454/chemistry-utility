@@ -36,10 +36,10 @@ export class OnboardingManager {
 	 */
 	public startTour(): void {
 		this.steps = [
-			{ selector: ".sidebar", text: "This sidebar lists all available calculators. Click any item to navigate." },
-			{ selector: ".sidebar-search input", text: "Use the search bar to quickly find a calculator by name." },
+			{ selector: "[data-tour=\"sidebar\"]", text: "This sidebar lists all available calculators. Click any item to navigate." },
+			{ selector: "[data-tour=\"sidebar-search\"] input", text: "Use the search bar to quickly find a calculator by name." },
 			{ selector: "#theme-toggle", text: "Toggle between light and dark themes here." },
-			{ selector: ".sidebar-nav a", text: "Click a calculator to get started, or use keyboard shortcuts (Alt+1 through Alt+9)." }
+			{ selector: "[data-tour=\"sidebar-nav\"] a", text: "Click a calculator to get started, or use keyboard shortcuts (Alt+1 through Alt+9)." }
 		];
 		this.currentStep = 0;
 		this.showStep();
