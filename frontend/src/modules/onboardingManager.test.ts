@@ -64,6 +64,7 @@ describe("OnboardingManager", () => {
             // Manually create an overlay by starting a tour first
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             document.body.appendChild(sidebar);
             manager.startTour();
             expect(document.querySelector(".onboarding-overlay")).not.toBeNull();
@@ -160,6 +161,7 @@ describe("OnboardingManager", () => {
         it("creates an overlay when the first step target exists", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             document.body.appendChild(sidebar);
             OnboardingManager.getInstance().startTour();
             expect(document.querySelector(".onboarding-overlay")).not.toBeNull();
@@ -169,6 +171,7 @@ describe("OnboardingManager", () => {
         it("shows the step indicator with 1 / total", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             document.body.appendChild(sidebar);
             OnboardingManager.getInstance().startTour();
             const indicator = document.querySelector(".onboarding-step-indicator");
@@ -180,6 +183,7 @@ describe("OnboardingManager", () => {
         it("shows a Next button on the first step", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             document.body.appendChild(sidebar);
             OnboardingManager.getInstance().startTour();
             const nextBtn = document.querySelector(".onboarding-next") as HTMLElement;
@@ -190,6 +194,7 @@ describe("OnboardingManager", () => {
         it("does not show a Back button on the first step", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             document.body.appendChild(sidebar);
             OnboardingManager.getInstance().startTour();
             const prevBtn = document.querySelector(".onboarding-prev");
@@ -199,6 +204,7 @@ describe("OnboardingManager", () => {
         it("shows a Skip tour button", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             document.body.appendChild(sidebar);
             OnboardingManager.getInstance().startTour();
             const skipBtn = document.querySelector(".onboarding-skip") as HTMLElement;
@@ -209,6 +215,7 @@ describe("OnboardingManager", () => {
         it("highlights the target element with onboarding-highlight class", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             document.body.appendChild(sidebar);
             OnboardingManager.getInstance().startTour();
             expect(sidebar.classList.contains("onboarding-highlight")).toBe(true);
@@ -217,8 +224,10 @@ describe("OnboardingManager", () => {
         it("advances to the next step when Next is clicked", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             const search = document.createElement("div");
             search.className = "sidebar-search";
+            search.dataset.tour = "sidebar-search";
             const searchInput = document.createElement("input");
             search.appendChild(searchInput);
             document.body.appendChild(sidebar);
@@ -237,8 +246,10 @@ describe("OnboardingManager", () => {
         it("shows a Done button on the last step", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             const search = document.createElement("div");
             search.className = "sidebar-search";
+            search.dataset.tour = "sidebar-search";
             const searchInput = document.createElement("input");
             search.appendChild(searchInput);
             const themeToggle = document.createElement("button");
@@ -246,6 +257,7 @@ describe("OnboardingManager", () => {
             // Step 4 selector is ".sidebar-nav a" — needs an <a> inside .sidebar-nav
             const navContainer = document.createElement("div");
             navContainer.className = "sidebar-nav";
+            navContainer.dataset.tour = "sidebar-nav";
             const navLink = document.createElement("a");
             navLink.href = "#";
             navContainer.appendChild(navLink);
@@ -267,14 +279,17 @@ describe("OnboardingManager", () => {
         it("completes the tour when Done is clicked", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             const search = document.createElement("div");
             search.className = "sidebar-search";
+            search.dataset.tour = "sidebar-search";
             const searchInput = document.createElement("input");
             search.appendChild(searchInput);
             const themeToggle = document.createElement("button");
             themeToggle.id = "theme-toggle";
             const navContainer = document.createElement("div");
             navContainer.className = "sidebar-nav";
+            navContainer.dataset.tour = "sidebar-nav";
             const navLink = document.createElement("a");
             navLink.href = "#";
             navContainer.appendChild(navLink);
@@ -297,6 +312,7 @@ describe("OnboardingManager", () => {
         it("completes the tour when Skip tour is clicked", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             document.body.appendChild(sidebar);
             OnboardingManager.getInstance().startTour();
             const skipBtn = document.querySelector(".onboarding-skip") as HTMLElement;
@@ -308,8 +324,10 @@ describe("OnboardingManager", () => {
         it("shows a Back button on step 2 onwards", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             const search = document.createElement("div");
             search.className = "sidebar-search";
+            search.dataset.tour = "sidebar-search";
             const searchInput = document.createElement("input");
             search.appendChild(searchInput);
             document.body.appendChild(sidebar);
@@ -324,8 +342,10 @@ describe("OnboardingManager", () => {
         it("goes back to the previous step when Back is clicked", () => {
             const sidebar = document.createElement("div");
             sidebar.className = "sidebar";
+            sidebar.dataset.tour = "sidebar";
             const search = document.createElement("div");
             search.className = "sidebar-search";
+            search.dataset.tour = "sidebar-search";
             const searchInput = document.createElement("input");
             search.appendChild(searchInput);
             document.body.appendChild(sidebar);
