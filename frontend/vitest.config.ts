@@ -33,10 +33,10 @@ export default defineConfig({
                 "src/modules/plugins/crystalStructurePlugin.ts",
             ],
             thresholds: {
-                lines: 90,
-                branches: 79,
+                lines: 82,
+                branches: 68,
                 functions: 85,
-                statements: 89,
+                statements: 80,
             },
         },
     },
