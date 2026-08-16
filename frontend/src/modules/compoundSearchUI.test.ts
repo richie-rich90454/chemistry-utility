@@ -143,28 +143,28 @@ describe("CompoundSearchUI", function () {
             ui.init();
         });
 
-        it("should construct search URL with encoded query and type", async function () {
+        it("should construct search URL with encoded query", async function () {
             mockGet.mockResolvedValue({ "compounds": [] as CompoundResult[], "query": "water & co" });
             await ui.search("water & co", "name");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/search?q=water%20%26%20co&type=name");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=water%20%26%20co");
         });
 
-        it("should pass type parameter as provided", async function () {
+        it("should ignore type parameter", async function () {
             mockGet.mockResolvedValue({ "compounds": [] as CompoundResult[], "query": "H2O" });
             await ui.search("H2O", "formula");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/search?q=H2O&type=formula");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=H2O");
         });
 
         it("should support CAS type", async function () {
             mockGet.mockResolvedValue({ "compounds": [] as CompoundResult[], "query": "7732-18-5" });
             await ui.search("7732-18-5", "cas");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/search?q=7732-18-5&type=cas");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=7732-18-5");
         });
 
         it("should support SMILES type", async function () {
             mockGet.mockResolvedValue({ "compounds": [] as CompoundResult[], "query": "O" });
             await ui.search("O", "smiles");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/search?q=O&type=smiles");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=O");
         });
 
         it("should call renderResults with compounds from response", async function () {
@@ -188,7 +188,7 @@ describe("CompoundSearchUI", function () {
             await p1;
             await p2;
             let searchCalls: number = mockGet.mock.calls.filter(function (call: unknown[]): boolean {
-                return typeof call[0] === "string" && (call[0] as string).indexOf("/api/v1/compounds/search") === 0;
+                return typeof call[0] === "string" && (call[0] as string).indexOf("/api/v1/compounds?") === 0;
             }).length;
             expect(searchCalls).toBe(1);
         });
@@ -553,10 +553,10 @@ describe("CompoundSearchUI", function () {
         });
     });
     describe("searchCompounds (pure)", function () {
-        it("should call ApiClient.get with encoded query and type", async function () {
+        it("should call ApiClient.get with encoded query", async function () {
             mockGet.mockResolvedValue({"compounds": [makeCompound()], "query": "water"});
             let results = await searchCompounds("water & co", "name");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/search?q=water%20%26%20co&type=name");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=water%20%26%20co");
             expect(results.length).toBe(1);
             expect(results[0].name).toBe("Water");
         });
