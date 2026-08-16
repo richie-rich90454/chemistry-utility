@@ -49,6 +49,17 @@ func New(db *sql.DB, driver string, cfg Config) *API {
 	}
 }
 
+// requireDB aborts the request with 501 when the API has no database. The
+// anonymous web build runs without any database or user storage, so
+// DB-backed features (compound search, plugins) are disabled there.
+func (a *API) requireDB(c *gin.Context) bool {
+	if a.db != nil {
+		return true
+	}
+	WriteNotImplemented(c, "this feature requires a server database and is not available on this build")
+	return false
+}
+
 // Router creates and configures the Gin engine with all routes.
 func (a *API) Router() *gin.Engine {
 	r := gin.New()
