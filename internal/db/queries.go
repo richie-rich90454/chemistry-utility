@@ -1,12 +1,15 @@
 package db
+
 import (
 	"context"
 	"database/sql"
 	"fmt"
 	"strings"
 	"time"
+
 	"github.com/google/uuid"
 )
+
 func placeholder(driver string, query string) string {
 	if driver == "postgres" {
 		return query
@@ -22,10 +25,12 @@ func placeholder(driver string, query string) string {
 	}
 	return query
 }
+
 type CalculationStore struct {
 	DB     *sql.DB
 	Driver string
 }
+
 func (s *CalculationStore) Create(ctx context.Context, c *Calculation) error {
 	c.ID = uuid.New()
 	c.CreatedAt = time.Now()
@@ -151,10 +156,12 @@ func (s *CalculationStore) List(ctx context.Context, limit, offset int) ([]*Calc
 	}
 	return calcs, rows.Err()
 }
+
 type CompoundStore struct {
 	DB     *sql.DB
 	Driver string
 }
+
 func (s *CompoundStore) Create(ctx context.Context, c *Compound) error {
 	c.ID = uuid.New()
 	c.CreatedAt = time.Now()
@@ -277,10 +284,12 @@ func (s *CompoundStore) List(ctx context.Context, limit, offset int) ([]*Compoun
 	}
 	return compounds, rows.Err()
 }
+
 type PluginStore struct {
 	DB     *sql.DB
 	Driver string
 }
+
 func (s *PluginStore) Create(ctx context.Context, p *Plugin) error {
 	p.ID = uuid.New()
 	p.CreatedAt = time.Now()
