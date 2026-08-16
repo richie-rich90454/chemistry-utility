@@ -198,3 +198,9 @@ test-results/
 .idea/
 .vscode/
 .omo
+
+# SQLite databases created by local runs
+*.db
+
+# OpenCode session/plan metadata
+.opencode/
