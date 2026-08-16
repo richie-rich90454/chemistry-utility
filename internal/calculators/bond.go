@@ -10,9 +10,9 @@ import (
 
 // ElementData holds element information for bond type prediction.
 type ElementData struct {
-	Symbol          string
+	Symbol            string
 	Electronegativity float64
-	Type            string
+	Type              string
 }
 
 // elementDB contains element data for bond type prediction.
@@ -126,12 +126,12 @@ func BondType(ctx context.Context, input CalculationInput) (CalculationResult, e
 			fmt.Sprintf("Bond type: %s", bondType),
 		},
 		Metadata: map[string]interface{}{
-			"element1":      elem1.Symbol,
-			"element2":      elem2.Symbol,
-			"en1":           elem1.Electronegativity,
-			"en2":           elem2.Electronegativity,
-			"deltaEN":       deltaEN,
-			"bondType":      bondType,
+			"element1": elem1.Symbol,
+			"element2": elem2.Symbol,
+			"en1":      elem1.Electronegativity,
+			"en2":      elem2.Electronegativity,
+			"deltaEN":  deltaEN,
+			"bondType": bondType,
 		},
 	}, nil
 }
