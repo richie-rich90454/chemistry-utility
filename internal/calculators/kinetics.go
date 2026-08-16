@@ -137,7 +137,7 @@ func RateLaw(ctx context.Context, input CalculationInput) (CalculationResult, er
 	}
 
 	rate := k
-	steps := []string{fmt.Sprintf("rate = k[A]^m[B]^n...")}
+	steps := []string{"rate = k[A]^m[B]^n..."}
 	steps = append(steps, fmt.Sprintf("k = %.6f", k))
 
 	for i, conc := range concentrations {
@@ -289,7 +289,7 @@ func IntegratedRateLaw(ctx context.Context, input CalculationInput) (Calculation
 		Unit:  unit,
 		Steps: []string{fmt.Sprintf("Integrated rate law (order %d): %s", int(order), formula)},
 		Metadata: map[string]interface{}{
-			"order":   int(order),
+			"order":    int(order),
 			"solveFor": solveFor,
 		},
 	}, nil
