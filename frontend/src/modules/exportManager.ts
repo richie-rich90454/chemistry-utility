@@ -3,7 +3,7 @@ import { UrlStateManager } from "./urlStateManager.js";
 const HISTORY_KEY = "calc-history";
 const MAX_HISTORY = 50;
 
-interface HistoryEntry {
+export interface HistoryEntry {
 	calculatorId: string;
 	inputs: Record<string, string>;
 	result: string;
@@ -146,6 +146,6 @@ export class ExportManager {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		ExportManager.instance = null as any;
+		ExportManager.instance = null as unknown as ExportManager;
 	}
 }

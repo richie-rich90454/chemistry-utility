@@ -115,4 +115,9 @@ export class TranslationManager {
 			}
 		}
 	}
+
+	/** Resets the singleton instance. For testing only. */
+	public static resetInstance(): void {
+		TranslationManager.instance = null as unknown as TranslationManager;
+	}
 }

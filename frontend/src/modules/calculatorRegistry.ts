@@ -31,6 +31,11 @@ export class CalculatorRegistry {
 		return this.calculators.get(id);
 	}
 
+	/** Removes the calculator registered under the given id, if any. */
+	public unregister(id: string): void {
+		this.calculators.delete(id);
+	}
+
 	/** Returns the full map of registered calculators. */
 	public getAll(): Map<string, Calculator> {
 		return this.calculators;

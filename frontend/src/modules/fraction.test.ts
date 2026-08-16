@@ -36,16 +36,12 @@ describe("parseEquation", () => {
 		expect(() => parseEquation("H2 + O2 H2O")).toThrow("Invalid format");
 	});
 
-	it("should return empty reactants for empty reactant side", () => {
-		const result = parseEquation(" -> H2O");
-		expect(result.reactants).toEqual([]);
-		expect(result.products).toEqual(["H2O"]);
+	it("should throw for empty reactant side", () => {
+		expect(() => parseEquation(" -> H2O")).toThrow();
 	});
 
-	it("should return empty products for empty product side", () => {
-		const result = parseEquation("H2 + O2 -> ");
-		expect(result.reactants).toEqual(["H2", "O2"]);
-		expect(result.products).toEqual([]);
+	it("should throw for empty product side", () => {
+		expect(() => parseEquation("H2 + O2 -> ")).toThrow();
 	});
 });
 

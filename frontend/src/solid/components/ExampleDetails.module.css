@@ -1,0 +1,69 @@
+.exampleDetails{
+    margin: var(--app-space-4) var(--app-space-5) 0 var(--app-space-5);
+    border: 1px solid var(--app-border);
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--app-pane);
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing);
+}
+.exampleDetails[open]{
+    border-color: var(--app-text-secondary);
+    box-shadow: none;
+}
+.exampleDetails summary{
+    padding: var(--app-space-3) var(--app-space-4);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--app-text-secondary);
+    cursor: pointer;
+    background: transparent;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+}
+.exampleDetails summary::-webkit-details-marker{
+    display: none;
+}
+.exampleDetails summary::before{
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid currentColor;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transition: transform var(--app-duration-normal) var(--app-easing);
+    flex-shrink: 0;
+}
+.exampleDetails[open] summary::before{
+    transform: rotate(90deg);
+}
+.exampleDetails summary:hover{
+    background: var(--app-state-hover);
+    color: var(--app-text);
+}
+.exampleDetails summary:focus-visible{
+    outline: 2px solid var(--app-accent);
+    outline-offset: -2px;
+}
+.exampleDetails[open] summary{
+    color: var(--app-text);
+    border-bottom: 1px solid var(--app-border);
+}
+.exampleDetails p{
+    padding: var(--app-space-4);
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--app-text-secondary);
+}
+.exampleDetails p strong{
+    color: var(--app-accent);
+    cursor: pointer;
+    font-weight: 600;
+}
+.exampleDetails p strong:hover{
+    text-decoration: underline;
+}

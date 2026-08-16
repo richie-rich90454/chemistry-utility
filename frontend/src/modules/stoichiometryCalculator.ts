@@ -1,4 +1,5 @@
 import { Calculator } from "./calculator.js";
+import type { CalculatorResult } from "./calculator.js";
 import { NumberFormatter } from "./i18n/numberFormatter.js";
 
 /**
@@ -260,6 +261,143 @@ export class StoichiometryCalculator extends Calculator {
             let molesProduct = minRatio * product.getCoefficient();
             this.resultDisplay.showResult("<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
         }
+        else {
+            throw new Error("Invalid calculation type");
+        }
+    }
+
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        const equation = inputs["equation"] ?? "";
+        const type = inputs["calculation-type"] ?? "";
+        const parsed = BalancedEquation.parse(equation);
+        const reactants = parsed.getReactants();
+        const products = parsed.getProducts();
+        if (type == "product-from-reactant") {
+            const reactantFormula = inputs["reactant-select"] ?? "";
+            const molesReactant = parseFloat(inputs["reactant-moles"] ?? "");
+            const productFormula = inputs["product-select"] ?? "";
+            const isMolesValid = !isNaN(molesReactant) && molesReactant > 0;
+            if (!isMolesValid) {
+                throw new Error("Invalid moles input");
+            }
+            let reactant: Term | null = null;
+            for (let i = 0; i < reactants.length; i++) {
+                if (reactants[i].getFormula() == reactantFormula) {
+                    reactant = reactants[i];
+                    break;
+                }
+            }
+            let product: Term | null = null;
+            for (let i = 0; i < products.length; i++) {
+                if (products[i].getFormula() == productFormula) {
+                    product = products[i];
+                    break;
+                }
+            }
+            if (reactant == null || product == null) {
+                throw new Error("Selected compound not found");
+            }
+            const molesProduct = (molesReactant / reactant.getCoefficient()) * product.getCoefficient();
+            return {
+                value: "Moles of " + productFormula + ": " + this.numberFormatter.format(molesProduct, 2),
+                explanation: "molesProduct = (molesReactant / reactant_coefficient) * product_coefficient = (" + molesReactant + " / " + reactant.getCoefficient() + ") * " + product.getCoefficient() + " = " + this.numberFormatter.format(molesProduct, 2),
+                metadata: {
+                    calculationType: type,
+                    reactant: reactantFormula,
+                    product: productFormula,
+                    molesReactant: molesReactant,
+                    molesProduct: molesProduct
+                }
+            };
+        }
+        else if (type == "reactant-from-product") {
+            const productFormula = inputs["product-select"] ?? "";
+            const molesProduct = parseFloat(inputs["product-moles"] ?? "");
+            const reactantFormula = inputs["reactant-select"] ?? "";
+            const isMolesValid = !isNaN(molesProduct) && molesProduct > 0;
+            if (!isMolesValid) {
+                throw new Error("Invalid moles input");
+            }
+            let product: Term | null = null;
+            for (let i = 0; i < products.length; i++) {
+                if (products[i].getFormula() == productFormula) {
+                    product = products[i];
+                    break;
+                }
+            }
+            let reactant: Term | null = null;
+            for (let i = 0; i < reactants.length; i++) {
+                if (reactants[i].getFormula() == reactantFormula) {
+                    reactant = reactants[i];
+                    break;
+                }
+            }
+            if (product == null || reactant == null) {
+                throw new Error("Selected compound not found");
+            }
+            const molesReactant = (molesProduct / product.getCoefficient()) * reactant.getCoefficient();
+            return {
+                value: "Moles of " + reactantFormula + ": " + this.numberFormatter.format(molesReactant, 2),
+                explanation: "molesReactant = (molesProduct / product_coefficient) * reactant_coefficient = (" + molesProduct + " / " + product.getCoefficient() + ") * " + reactant.getCoefficient() + " = " + this.numberFormatter.format(molesReactant, 2),
+                metadata: {
+                    calculationType: type,
+                    reactant: reactantFormula,
+                    product: productFormula,
+                    molesReactant: molesReactant,
+                    molesProduct: molesProduct
+                }
+            };
+        }
+        else if (type == "limiting-reactant") {
+            const reactantMoles: Record<string, number> = {};
+            for (let i = 0; i < reactants.length; i++) {
+                const reactant = reactants[i];
+                const sanitizedId = StoichiometryCalculator.sanitizeId(reactant.getFormula());
+                const moles = parseFloat(inputs["moles-" + sanitizedId] ?? "");
+                const isMolesValid = !isNaN(moles) && moles > 0;
+                if (!isMolesValid) {
+                    throw new Error("Invalid moles for " + reactant.getFormula());
+                }
+                reactantMoles[reactant.getFormula()] = moles;
+            }
+            const productFormula = inputs["product-select"] ?? "";
+            let product: Term | null = null;
+            for (let i = 0; i < products.length; i++) {
+                if (products[i].getFormula() == productFormula) {
+                    product = products[i];
+                    break;
+                }
+            }
+            if (product == null) {
+                throw new Error("Selected product not found");
+            }
+            let minRatio = Infinity;
+            let limitingReactant: string | null = null;
+            for (let i = 0; i < reactants.length; i++) {
+                const reactant = reactants[i];
+                const ratio = reactantMoles[reactant.getFormula()] / reactant.getCoefficient();
+                if (ratio < minRatio) {
+                    minRatio = ratio;
+                    limitingReactant = reactant.getFormula();
+                }
+            }
+            const molesProduct = minRatio * product.getCoefficient();
+            return {
+                value: "Limiting reactant: " + limitingReactant + "; Moles of " + productFormula + ": " + this.numberFormatter.format(molesProduct, 2),
+                explanation: "minRatio = min(moles_i / coeff_i) = " + this.numberFormatter.format(minRatio, 4) + " (limiting: " + limitingReactant + "); molesProduct = minRatio * product_coefficient = " + this.numberFormatter.format(minRatio, 4) + " * " + product.getCoefficient() + " = " + this.numberFormatter.format(molesProduct, 2),
+                metadata: {
+                    calculationType: type,
+                    limitingReactant: limitingReactant,
+                    product: productFormula,
+                    reactantMoles: reactantMoles,
+                    minRatio: minRatio,
+                    molesProduct: molesProduct
+                }
+            };
+        }
+        else {
+            throw new Error("Invalid calculation type");
+        }
     }
 }
 
@@ -407,5 +545,8 @@ export function calculateStoichiometry(equation: string): void {
         let molesProduct = minRatio * product.coefficient;
         resultDiv.innerHTML = "<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + NumberFormatter.createFromCurrentLocale().format(molesProduct, 2) + "</p>";
         resultDiv.classList.add("show");
+    }
+    else {
+        throw new Error("Invalid calculation type");
     }
 }

@@ -1,0 +1,6 @@
+.container {
+    display: inline-block;
+}
+.canvas {
+    display: block;
+}

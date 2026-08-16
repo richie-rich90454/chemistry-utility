@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { predictBondType } from "./bondPredictor.js";
+import { predictBondType, BondTypePredictor } from "./bondPredictor.js";
 import { mockElements } from "../test/elementsData";
 import { setOrCreateInput, getResultHTML } from "../test/helpers.js";
 import type { ChemicalElement } from "../types";
@@ -112,5 +112,166 @@ describe("bondPredictor", () => {
         const html = getResultHTML("bond-type-result");
         expect(html).toContain("Error");
         expect(html).toContain("enter both element symbols");
+    });
+
+    it("should not round deltaEN up to 1.7 threshold (uses raw value for comparison)", () => {
+        // Two non-metals with deltaEN = 1.696, which rounds to "1.70" for display
+        // but the raw value (1.696) is below the 1.7 ionic threshold.
+        // The buggy code parses the rounded string and misclassifies as Ionic.
+        const boundaryElements: ChemicalElement[] = [
+            {
+                atomicNumber: 900,
+                symbol: "Xa",
+                name: "TestA",
+                atomicMass: 1,
+                type: "non-metal",
+                period: 2,
+                group: 14,
+                electronegativity: 1.000,
+                electronAffinity: null,
+                atomicRadius: null,
+                ionizationEnergy: null,
+                valenceElectrons: 4,
+                totalElectrons: 4,
+            },
+            {
+                atomicNumber: 901,
+                symbol: "Xb",
+                name: "TestB",
+                atomicMass: 1,
+                type: "non-metal",
+                period: 2,
+                group: 15,
+                electronegativity: 2.696,
+                electronAffinity: null,
+                atomicRadius: null,
+                ionizationEnergy: null,
+                valenceElectrons: 5,
+                totalElectrons: 5,
+            },
+        ];
+        setOrCreateInput("element1-input", "Xa", "bond-predictor", "text");
+        setOrCreateInput("element2-input", "Xb", "bond-predictor", "text");
+        predictBondType(boundaryElements);
+        const html = getResultHTML("bond-type-result");
+        expect(html).toContain("Polar Covalent");
+        expect(html).not.toContain("Ionic");
+    });
+});
+
+describe("BondTypePredictor.calculatePure", () => {
+    beforeEach(() => {
+        // Legacy DOM hooks are still constructed by the calculator; supply
+        // a result element so the constructor does not throw.
+        const result = document.createElement("div");
+        result.id = "bond-type-result";
+        document.body.appendChild(result);
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("predicts Ionic bond for Na + Cl", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({
+            "element1-input": "Na",
+            "element2-input": "Cl"
+        });
+        expect(result.value).toContain("Ionic");
+        expect(result.value).toContain("Na");
+        expect(result.value).toContain("Cl");
+        expect(result.metadata).toHaveProperty("bondType", "Ionic");
+        expect(result.metadata).toHaveProperty("deltaEN");
+    });
+
+    it("predicts Metallic bond for Na + Ca", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({
+            "element1-input": "Na",
+            "element2-input": "Ca"
+        });
+        expect(result.value).toContain("Metallic");
+        expect(result.metadata).toHaveProperty("bondType", "Metallic");
+    });
+
+    it("predicts Polar Covalent bond for H + O", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({
+            "element1-input": "H",
+            "element2-input": "O"
+        });
+        expect(result.value).toContain("Polar Covalent");
+        expect(result.metadata).toHaveProperty("bondType", "Polar Covalent");
+    });
+
+    it("predicts Nonpolar Covalent bond for H + H", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({
+            "element1-input": "H",
+            "element2-input": "H"
+        });
+        expect(result.value).toContain("Nonpolar Covalent");
+        expect(result.metadata).toHaveProperty("bondType", "Nonpolar Covalent");
+    });
+
+    it("returns 'not possible' result when an element has null electronegativity", () => {
+        const elementsWithNullEN: ChemicalElement[] = [
+            ...mockElements,
+            {
+                atomicNumber: 999,
+                symbol: "Zz",
+                name: "TestElement",
+                atomicMass: 1,
+                type: "non-metal",
+                period: 1,
+                group: 1,
+                electronegativity: null,
+                electronAffinity: null,
+                atomicRadius: null,
+                ionizationEnergy: null,
+                valenceElectrons: 1,
+                totalElectrons: 1,
+            },
+        ];
+        const calc = new BondTypePredictor(elementsWithNullEN);
+        const result = calc.calculatePure({
+            "element1-input": "Zz",
+            "element2-input": "H"
+        });
+        expect(result.value).toContain("not possible");
+        expect(result.value).toContain("unavailable electronegativity data");
+        expect(result.metadata).toHaveProperty("element1", "Zz");
+        expect(result.metadata).toHaveProperty("element2", "H");
+    });
+
+    it("returns an error result when an element symbol is missing", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({
+            "element1-input": "Xx",
+            "element2-input": "Na"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("not found");
+    });
+
+    it("returns an error result when an element input is empty", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({
+            "element1-input": "",
+            "element2-input": "Na"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("enter both element symbols");
+    });
+
+    it("exercises ?? fallback when both element input keys are missing", () => {
+        const calc = new BondTypePredictor(mockElements);
+        const result = calc.calculatePure({});
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("enter both element symbols");
     });
 });

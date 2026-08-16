@@ -55,6 +55,6 @@ export class DataCache {
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
-		DataCache.instance = null as any;
+		DataCache.instance = null as unknown as DataCache;
 	}
 }

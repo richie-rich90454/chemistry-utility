@@ -4,8 +4,6 @@ import (
 	"embed"
 	"log"
 
-	"chemistry-utility/internal/ptable"
-
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -14,6 +12,9 @@ import (
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+//go:embed migrations
+var migrationsFS embed.FS
 
 func main() {
 	app := NewApp()
@@ -40,9 +41,4 @@ func main() {
 	if err != nil {
 		log.Fatal("Error starting application:", err)
 	}
-}
-
-func init() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	_ = ptable.New
 }

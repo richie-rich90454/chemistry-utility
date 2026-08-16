@@ -1,0 +1,76 @@
+import {render, fireEvent, cleanup} from "@solidjs/testing-library";
+import {describe, it, expect, afterEach} from "vitest";
+import {Dilution} from "./dilution";
+afterEach(function (): void {
+    cleanup();
+});
+describe("Dilution route", function (): void {
+    it("renders the card with M1, V1, M2, V2 inputs, solve-for select, and buttons", function (): void {
+        let result = render(function () { return <Dilution />; });
+        let m1 = result.getByLabelText("Initial molarity") as HTMLInputElement;
+        let v1 = result.getByLabelText("Initial volume") as HTMLInputElement;
+        let m2 = result.getByLabelText("Final molarity") as HTMLInputElement;
+        let v2 = result.getByLabelText("Final volume") as HTMLInputElement;
+        expect(m1).toBeTruthy();
+        expect(v1).toBeTruthy();
+        expect(m2).toBeTruthy();
+        expect(v2).toBeTruthy();
+        let solveFor = result.getByLabelText("Select dilution parameter to solve for") as HTMLSelectElement;
+        expect(solveFor).toBeTruthy();
+        expect(solveFor.value).toBe("V2");
+        expect(result.getByText("Calculate")).toBeTruthy();
+        expect(result.getByText("Clear")).toBeTruthy();
+    });
+    it("solves for V2 given M1=6, V1=100, M2=2 and displays 300.0000 L", async function (): Promise<void> {
+        let result = render(function () { return <Dilution />; });
+        let m1 = result.getByLabelText("Initial molarity") as HTMLInputElement;
+        m1.value = "6";
+        fireEvent.input(m1);
+        let v1 = result.getByLabelText("Initial volume") as HTMLInputElement;
+        v1.value = "100";
+        fireEvent.input(v1);
+        let m2 = result.getByLabelText("Final molarity") as HTMLInputElement;
+        m2.value = "2";
+        fireEvent.input(m2);
+        fireEvent.click(result.getByText("Calculate"));
+        let text = await result.findByText(/300\.0000/);
+        expect(text).toBeTruthy();
+        expect(result.container.textContent).toMatch(/L/);
+    });
+    it("shows an error when V1 is zero while solving for M2", async function (): Promise<void> {
+        let result = render(function () { return <Dilution />; });
+        let solveFor = result.getByLabelText("Select dilution parameter to solve for") as HTMLSelectElement;
+        solveFor.value = "M2";
+        fireEvent.change(solveFor);
+        let m1 = result.getByLabelText("Initial molarity") as HTMLInputElement;
+        m1.value = "2";
+        fireEvent.input(m1);
+        let v1 = result.getByLabelText("Initial volume") as HTMLInputElement;
+        v1.value = "0";
+        fireEvent.input(v1);
+        let v2 = result.getByLabelText("Final volume") as HTMLInputElement;
+        v2.value = "4";
+        fireEvent.input(v2);
+        fireEvent.click(result.getByText("Calculate"));
+        let errorText = await result.findByText(/Error/);
+        expect(errorText).toBeTruthy();
+    });
+    it("clears the result when the Clear button is clicked", async function (): Promise<void> {
+        let result = render(function () { return <Dilution />; });
+        let m1 = result.getByLabelText("Initial molarity") as HTMLInputElement;
+        m1.value = "6";
+        fireEvent.input(m1);
+        let v1 = result.getByLabelText("Initial volume") as HTMLInputElement;
+        v1.value = "100";
+        fireEvent.input(v1);
+        let m2 = result.getByLabelText("Final molarity") as HTMLInputElement;
+        m2.value = "2";
+        fireEvent.input(m2);
+        fireEvent.click(result.getByText("Calculate"));
+        let text = await result.findByText(/300\.0000/);
+        expect(text).toBeTruthy();
+        fireEvent.click(result.getByText("Clear"));
+        expect(m1.value).toBe("");
+        expect(result.container.textContent).not.toMatch(/300\.0000/);
+    });
+});

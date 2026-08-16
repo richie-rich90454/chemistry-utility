@@ -1,0 +1,78 @@
+import {render, fireEvent, cleanup} from "@solidjs/testing-library";
+import {describe, it, expect, afterEach} from "vitest";
+import {DebyeHuckel} from "./debye-huckel";
+afterEach(function (): void {
+    cleanup();
+});
+describe("DebyeHuckel route", function (): void {
+    it("renders the card with z+, z-, concentration, ion-size inputs and buttons", function (): void {
+        let result = render(function () { return <DebyeHuckel />; });
+        let zplus = result.getByLabelText("Cation charge") as HTMLInputElement;
+        let zminus = result.getByLabelText("Anion charge") as HTMLInputElement;
+        let conc = result.getByLabelText("Concentration") as HTMLInputElement;
+        let ionSize = result.getByLabelText("Ion size parameter") as HTMLInputElement;
+        expect(zplus).toBeTruthy();
+        expect(zminus).toBeTruthy();
+        expect(conc).toBeTruthy();
+        expect(ionSize).toBeTruthy();
+        expect(result.getByText("Calculate")).toBeTruthy();
+        expect(result.getByText("Clear")).toBeTruthy();
+    });
+    it("calculates ionic strength I for z+=1, z-=1, conc=0.01, ion-size=9", async function (): Promise<void> {
+        let result = render(function () { return <DebyeHuckel />; });
+        let zplus = result.getByLabelText("Cation charge") as HTMLInputElement;
+        zplus.value = "1";
+        fireEvent.input(zplus);
+        let zminus = result.getByLabelText("Anion charge") as HTMLInputElement;
+        zminus.value = "-1";
+        fireEvent.input(zminus);
+        let conc = result.getByLabelText("Concentration") as HTMLInputElement;
+        conc.value = "0.01";
+        fireEvent.input(conc);
+        let ionSize = result.getByLabelText("Ion size parameter") as HTMLInputElement;
+        ionSize.value = "9";
+        fireEvent.input(ionSize);
+        fireEvent.click(result.getByText("Calculate"));
+        let text = await result.findByText(/Ionic Strength/);
+        expect(text).toBeTruthy();
+    });
+    it("shows an error when concentration is zero", async function (): Promise<void> {
+        let result = render(function () { return <DebyeHuckel />; });
+        let zplus = result.getByLabelText("Cation charge") as HTMLInputElement;
+        zplus.value = "1";
+        fireEvent.input(zplus);
+        let zminus = result.getByLabelText("Anion charge") as HTMLInputElement;
+        zminus.value = "-1";
+        fireEvent.input(zminus);
+        let conc = result.getByLabelText("Concentration") as HTMLInputElement;
+        conc.value = "0";
+        fireEvent.input(conc);
+        let ionSize = result.getByLabelText("Ion size parameter") as HTMLInputElement;
+        ionSize.value = "9";
+        fireEvent.input(ionSize);
+        fireEvent.click(result.getByText("Calculate"));
+        let errorText = await result.findByText(/Error/);
+        expect(errorText).toBeTruthy();
+    });
+    it("clears the result when the Clear button is clicked", async function (): Promise<void> {
+        let result = render(function () { return <DebyeHuckel />; });
+        let zplus = result.getByLabelText("Cation charge") as HTMLInputElement;
+        zplus.value = "1";
+        fireEvent.input(zplus);
+        let zminus = result.getByLabelText("Anion charge") as HTMLInputElement;
+        zminus.value = "-1";
+        fireEvent.input(zminus);
+        let conc = result.getByLabelText("Concentration") as HTMLInputElement;
+        conc.value = "0.01";
+        fireEvent.input(conc);
+        let ionSize = result.getByLabelText("Ion size parameter") as HTMLInputElement;
+        ionSize.value = "9";
+        fireEvent.input(ionSize);
+        fireEvent.click(result.getByText("Calculate"));
+        let text = await result.findByText(/Ionic Strength/);
+        expect(text).toBeTruthy();
+        fireEvent.click(result.getByText("Clear"));
+        expect(zplus.value).toBe("");
+        expect(result.container.textContent).not.toMatch(/Ionic Strength/);
+    });
+});

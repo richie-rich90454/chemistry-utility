@@ -149,11 +149,13 @@ describe("Edge Cases: Extreme Values", () => {
             createResultDiv("ideal-result", "ideal-gas-law");
         });
 
-        it("produces Infinity when V=0", () => {
+        it("reports a validation error when V=0", () => {
             calculateIdealGasLaw();
             const result = getResultText("ideal-result");
-            // V=0 causes P = nRT/0 = Infinity, which toFixed renders as "Infinity"
-            expect(result).toContain("Infinity");
+            // V=0 makes P = nRT/0 undefined; the calculator must reject it
+            // rather than surface "Infinity" as a result.
+            expect(result).not.toContain("Infinity");
+            expect(result).toContain("Volume cannot be zero");
         });
     });
 

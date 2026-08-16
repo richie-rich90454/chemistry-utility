@@ -1,0 +1,89 @@
+/* App Design System — Flat card container. Zero rounded corners, structural separation only. */
+
+.card {
+    background: var(--app-pane);
+    padding: var(--app-space-6);
+    margin-bottom: 1px;
+    border: none;
+    border-radius: 0px;
+}
+
+/* Title — App heading weight */
+.card h2 {
+    font-family: "Noto Sans", sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 1.3;
+    color: var(--app-text);
+    margin: 0 0 var(--app-space-4);
+    padding: 0;
+}
+
+/* Description — Noto Sans Light for form/description text */
+.cardDescription {
+    font-family: "Noto Sans", sans-serif;
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--app-text-secondary);
+    margin: 0 0 var(--app-space-4);
+    padding: 0;
+}
+
+/* Form labels — App micro-label */
+.card label,
+.cardLabel {
+    font: var(--app-font-label);
+    letter-spacing: var(--app-label-tracking);
+    text-transform: uppercase;
+    color: var(--app-text-secondary);
+    display: block;
+    margin: 0 0 var(--app-space-2);
+}
+
+/* Form inputs — bottom-border only, no box, no radius */
+.card input[type="text"],
+.card input[type="number"] {
+    font: var(--app-font-input);
+    color: var(--app-text);
+    background: var(--app-pane);
+    padding: 10px 14px;
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--app-border);
+    border-radius: 0px;
+    outline: none;
+    transition: border-color var(--app-duration-fast) var(--app-easing);
+}
+
+.card input:focus {
+    border-bottom-color: var(--app-accent);
+}
+
+/* Results area — App hero metric pattern (bold, large) */
+.cardResults {
+    font-family: "Noto Sans", sans-serif;
+    font-weight: 900;
+    font-size: 36px;
+    line-height: 1.1;
+    color: var(--app-text);
+    margin: var(--app-space-4) 0;
+}
+
+/* Example / details — Noto Serif for prose/documentation */
+.cardProse {
+    font: var(--app-font-prose);
+    color: var(--app-text);
+    margin: var(--app-space-4) 0 0;
+    padding: 0;
+}
+
+/* See Also — compact list at card bottom */
+.cardSeeAlso {
+    margin: var(--app-space-4) 0 0;
+    padding: 0;
+    border-top: 1px solid var(--app-border);
+    padding-top: var(--app-space-4);
+}
+
+/* No box-shadows, no gradients, no rounded corners anywhere */

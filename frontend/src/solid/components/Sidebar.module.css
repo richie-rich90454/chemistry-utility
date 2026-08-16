@@ -1,0 +1,374 @@
+/* ============================================================
+   Sidebar — App Design System
+   Flat design, zero rounded corners, interactive token active states.
+   No gradients, no box-shadows on nav items, no --md-* references.
+   ============================================================ */
+
+.sidebar {
+    width: var(--app-nav-width, 15%);
+    min-width: 200px;
+    background: var(--app-pane);
+    border-right: 1px solid var(--app-border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 10;
+    flex-shrink: 0;
+    transition: width var(--app-duration-normal) var(--app-easing),
+                background-color var(--app-duration-slow) var(--app-easing),
+                color var(--app-duration-slow) var(--app-easing);
+}
+
+/* ---- Header ---- */
+.sidebarHeader {
+    padding: var(--app-space-4) var(--app-space-4) var(--app-space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--app-space-2);
+}
+
+.headerTop {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+}
+
+.sidebarHeader h1 {
+    font-size: clamp(1.05rem, 1rem + 0.2vw, 1.25rem);
+    font-weight: 700;
+    color: var(--app-text);
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---- Logo icon — flat square, accent background, no gradient ---- */
+.logoIcon {
+    width: 40px;
+    height: 40px;
+    background: var(--app-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.logoIcon svg {
+    color: var(--app-on-accent);
+    width: 24px;
+    height: 24px;
+}
+
+/* ---- Sidebar toggle — icon-style flat button ---- */
+.sidebarToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    color: var(--app-text-secondary);
+    cursor: pointer;
+    transition: background var(--app-duration-fast) var(--app-easing),
+                color var(--app-duration-fast) var(--app-easing);
+}
+
+.sidebarToggle:hover {
+    background: var(--app-state-hover);
+    color: var(--app-text);
+}
+
+.sidebarToggle:active {
+    background: var(--app-state-active);
+}
+
+.sidebarToggle:focus-visible {
+    outline: 2px solid var(--app-accent);
+    outline-offset: 2px;
+}
+
+.sidebarToggle svg {
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+}
+
+/* ---- Search — border-bottom only, flat input ---- */
+.sidebarSearch {
+    padding: var(--app-space-3) var(--app-space-4) var(--app-space-2);
+    position: relative;
+}
+
+.sidebarSearch input {
+    width: 100%;
+    padding: var(--app-space-3) var(--app-space-4) var(--app-space-3) 48px;
+    min-height: 42px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    font-weight: 300;
+    color: var(--app-text);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--app-border);
+    transition: border-color var(--app-duration-fast) var(--app-easing);
+}
+
+.sidebarSearch input::placeholder {
+    color: var(--app-text-secondary);
+    font-weight: 300;
+}
+
+.sidebarSearch input:focus {
+    border-bottom-color: var(--app-accent);
+    outline: none;
+}
+
+.sidebarSearch input:focus-visible {
+    outline: none;
+}
+
+.searchIcon {
+    position: absolute;
+    left: calc(var(--app-space-4));
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--app-text-secondary);
+    pointer-events: none;
+    width: 16px;
+    height: 16px;
+    transition: color var(--app-duration-fast) var(--app-easing);
+}
+
+.sidebarSearch:focus-within .searchIcon {
+    color: var(--app-accent);
+}
+
+/* ---- Recent section ---- */
+.navRecent {
+    padding: var(--app-space-2) var(--app-space-4);
+}
+
+/* ---- Nav list ---- */
+.sidebarNav {
+    flex: 1;
+    padding: var(--app-space-1) var(--app-space-2);
+}
+
+.sidebarNav ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- Category headers — uppercase micro-labels ---- */
+.navCategory {
+    font: var(--app-font-label);
+    letter-spacing: var(--app-label-tracking);
+    text-transform: uppercase;
+    color: var(--app-text-secondary);
+    padding: var(--app-space-6) var(--app-space-5) var(--app-space-2);
+    list-style: none;
+}
+
+/* ---- Nav link — flat rectangle, interactive token active state ---- */
+.navLink {
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+    padding: 0 var(--app-space-4);
+    height: 52px;
+    color: var(--app-text-secondary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 400;
+    white-space: nowrap;
+    transition: background var(--app-duration-fast) var(--app-easing),
+                color var(--app-duration-fast) var(--app-easing);
+}
+
+.navLink:hover {
+    background: var(--app-state-hover);
+    color: var(--app-text);
+}
+
+.navLink:active {
+    background: var(--app-state-active);
+}
+
+/* Active nav item — solid accent background (App interactive token) */
+.navLink.active {
+    background: var(--app-accent);
+    color: var(--app-on-accent);
+    font-weight: 700;
+}
+
+.navLink.active:hover {
+    background: var(--app-accent-hover);
+    color: var(--app-on-accent);
+}
+
+.navIcon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: opacity var(--app-duration-fast) var(--app-easing);
+    margin-right: 0;
+}
+
+.navIcon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.navLink:hover .navIcon {
+    opacity: 1;
+}
+
+.navLink.active .navIcon {
+    opacity: 1;
+}
+
+.navLabel {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---- Footer — flat, border-top only ---- */
+.sidebarFooter {
+    padding: var(--app-space-3) var(--app-space-4);
+    border-top: 1px solid var(--app-border);
+    font-size: 0.6875rem;
+    color: var(--app-text-secondary);
+    text-align: center;
+}
+
+.sidebarFooter a {
+    color: var(--app-accent);
+    text-decoration: none;
+    transition: opacity var(--app-duration-fast) var(--app-easing);
+}
+
+.sidebarFooter a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+/* ---- Footer actions row ---- */
+.sidebarFooterActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--app-space-2);
+    justify-content: center;
+    margin-bottom: var(--app-space-2);
+}
+
+/* ---- Footer action button — flat, no border-radius ---- */
+.sidebarFooterButton {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    padding: var(--app-space-2) var(--app-space-3);
+    border: 1px solid var(--app-border);
+    background: transparent;
+    color: var(--app-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background var(--app-duration-fast) var(--app-easing),
+                border-color var(--app-duration-fast) var(--app-easing),
+                color var(--app-duration-fast) var(--app-easing);
+}
+
+.sidebarFooterButton:hover {
+    background: var(--app-state-hover);
+    border-color: var(--app-accent);
+    color: var(--app-accent);
+}
+
+.sidebarFooterButton:focus-visible {
+    outline: 2px solid var(--app-accent);
+    outline-offset: 2px;
+}
+
+.sidebarFooterButton:active {
+    background: var(--app-state-active);
+}
+
+.sidebarFooterButton svg {
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+/* ---- Collapsed state — icon-only nav (Google-like) ---- */
+.sidebar[data-collapsed] {
+    width: 56px;
+    min-width: 56px;
+}
+.sidebar[data-collapsed] .sidebarHeader h1,
+.sidebar[data-collapsed] .logoIcon,
+.sidebar[data-collapsed] .sidebarSearch,
+.sidebar[data-collapsed] .sidebarFooter,
+.sidebar[data-collapsed] .navRecent,
+.sidebar[data-collapsed] .navCategory,
+.sidebar[data-collapsed] .navLabel,
+.sidebar[data-collapsed] [data-workspace-section] {
+    display: none;
+}
+.sidebar[data-collapsed] .sidebarHeader {
+    padding: var(--app-space-1);
+}
+.sidebar[data-collapsed] .headerTop {
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    padding: var(--app-space-2) 0;
+}
+.sidebar[data-collapsed] .sidebarToggle,
+.sidebar[data-collapsed] .themeToggle {
+    width: 40px;
+    height: 40px;
+}
+.sidebar[data-collapsed] .sidebarNav {
+    display: block;
+    padding: 0;
+}
+.sidebar[data-collapsed] .navLink {
+    justify-content: center;
+    height: 44px;
+    padding: 0;
+    gap: 0;
+}
+.sidebar[data-collapsed] .navIcon {
+    width: 24px;
+    height: 24px;
+    opacity: 0.6;
+    margin: 0;
+}
+.sidebar[data-collapsed] .navLink.active .navIcon {
+    opacity: 1;
+}
+
+/* ---- Mobile: hide sidebar, show mobile nav banner ---- */
+@media (max-width: 767px) {
+    .sidebar {
+        display: none;
+    }
+}

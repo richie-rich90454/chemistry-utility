@@ -1,5 +1,7 @@
 import { ScrollNavigationStrategy } from "./scrollNavigationStrategy.js";
 import { AppNavigationStrategy } from "./appNavigationStrategy.js";
+import { PluginManager } from "./pluginManager.js";
+import { RuntimeDetector } from "./runtimeDetector.js";
 
 export interface NavigationStrategy {
 	navigate(targetId: string): void;
@@ -15,30 +17,62 @@ interface CalculatorInfo {
 
 const CALCULATORS: CalculatorInfo[] = [
 	{ id: "element-lookup", name: "Element Lookup", category: "General", icon: "element", description: "Look up element properties" },
-	{ id: "mass-calc", name: "Molar Mass", category: "General", icon: "mass", description: "Calculate molar mass of compounds" },
-	{ id: "balancing", name: "Equation Balancer", category: "General", icon: "balance", description: "Balance chemical equations" },
-	{ id: "dilution-calc", name: "Dilution", category: "Solutions", icon: "dilution", description: "Molarity and dilution calculations" },
-	{ id: "mass-percent-calc", name: "Mass Percent", category: "Solutions", icon: "percent", description: "Concentration and mass percent" },
-	{ id: "solution-mixing-calc", name: "Solution Mixing", category: "Solutions", icon: "mixing", description: "Mix solutions of different concentrations" },
-	{ id: "nuclear-chemistry", name: "Nuclear", category: "Physical Chemistry", icon: "nuclear", description: "Half-life and nuclear decay" },
+	{ id: "periodic-table", name: "Periodic Table", category: "General", icon: "element", description: "Interactive periodic table with heatmap mode" },
+	{ id: "molar-mass", name: "Molar Mass", category: "General", icon: "mass", description: "Calculate molar mass of compounds" },
+	{ id: "equation-balancer", name: "Equation Balancer", category: "General", icon: "balance", description: "Balance chemical equations" },
+	{ id: "unit-converter", name: "Unit Converter", category: "General", icon: "convert", description: "Convert between chemistry units" },
+	{ id: "compound-search", name: "Compound Search", category: "General", icon: "search", description: "Search PubChem database" },
+	{ id: "dilution", name: "Dilution", category: "Solutions", icon: "dilution", description: "Molarity and dilution calculations" },
+	{ id: "mass-percent", name: "Mass Percent", category: "Solutions", icon: "percent", description: "Concentration and mass percent" },
+	{ id: "solution-mixing", name: "Solution Mixing", category: "Solutions", icon: "mixing", description: "Mix solutions of different concentrations" },
+	{ id: "buffer", name: "Buffer Solution", category: "Solutions", icon: "buffer", description: "pH buffer calculations" },
+	{ id: "pka-pkb", name: "pKa / pKb", category: "Solutions", icon: "acid", description: "Acid-base dissociation" },
+	{ id: "ksp", name: "Ksp Solubility", category: "Solutions", icon: "solubility", description: "Solubility product constant" },
+	{ id: "colligative", name: "Colligative Properties", category: "Solutions", icon: "colligative", description: "Boiling point, freezing point" },
+	{ id: "titration", name: "Titration", category: "Solutions", icon: "titration", description: "Acid-base titration curves" },
+	{ id: "debye-huckel", name: "Debye-Huckel", category: "Solutions", icon: "ionic", description: "Ionic activity coefficients" },
+	{ id: "common-ion", name: "Common Ion Effect", category: "Solutions", icon: "ion", description: "Solubility with common ion" },
+	{ id: "nuclear", name: "Nuclear Chemistry", category: "Physical Chemistry", icon: "nuclear", description: "Half-life and nuclear decay" },
 	{ id: "gas-laws", name: "Gas Laws", category: "Physical Chemistry", icon: "gas", description: "Ideal, combined, Van der Waals" },
 	{ id: "electrochemistry", name: "Electrochemistry", category: "Physical Chemistry", icon: "electro", description: "Cell potential, Nernst, electrolysis" },
+	{ id: "thermodynamics", name: "Thermodynamics", category: "Physical Chemistry", icon: "thermo", description: "Gibbs, Hess, entropy, enthalpy" },
+	{ id: "kinetics", name: "Kinetics", category: "Physical Chemistry", icon: "kinetics", description: "Rate laws, Arrhenius" },
+	{ id: "quantum-atomic", name: "Quantum & Atomic", category: "Physical Chemistry", icon: "quantum", description: "Quantum numbers, Rydberg, de Broglie" },
 	{ id: "stoichiometry", name: "Stoichiometry", category: "Reactions & Bonds", icon: "stoich", description: "Reaction stoichiometry calculations" },
-	{ id: "bond-type-predictor", name: "Bond Type", category: "Reactions & Bonds", icon: "bond", description: "Predict ionic, covalent, or metallic" }
+	{ id: "bond-type", name: "Bond Type Predictor", category: "Reactions & Bonds", icon: "bond", description: "Predict ionic, covalent, or metallic" },
+	{ id: "molecular-viewer", name: "Molecular Viewer", category: "Tools", icon: "molecule", description: "3D molecular structure viewer" },
+	{ id: "batch-calc", name: "Batch Calculator", category: "Tools", icon: "batch", description: "Process CSV input files" },
+	{ id: "dashboard", name: "Dashboard", category: "Tools", icon: "dashboard", description: "User analytics and history" }
 ];
 
 const BREADCRUMB_CATEGORIES: Record<string, string> = {
 	"element-lookup": "Reference",
-	"mass-calc": "Reference",
-	"balancing": "Reactions",
-	"dilution-calc": "Solutions",
-	"mass-percent-calc": "Solutions",
-	"solution-mixing-calc": "Solutions",
-	"nuclear-chemistry": "Nuclear",
+	"periodic-table": "Reference",
+	"molar-mass": "Reference",
+	"equation-balancer": "Reactions",
+	"unit-converter": "Tools",
+	"compound-search": "Reference",
+	"dilution": "Solutions",
+	"mass-percent": "Solutions",
+	"solution-mixing": "Solutions",
+	"buffer": "Solutions",
+	"pka-pkb": "Solutions",
+	"ksp": "Solutions",
+	"colligative": "Solutions",
+	"titration": "Solutions",
+	"debye-huckel": "Solutions",
+	"common-ion": "Solutions",
+	"nuclear": "Nuclear",
 	"gas-laws": "Physical Chemistry",
 	"electrochemistry": "Electrochemistry",
+	"thermodynamics": "Physical Chemistry",
+	"kinetics": "Physical Chemistry",
+	"quantum-atomic": "Physical Chemistry",
 	"stoichiometry": "Reactions",
-	"bond-type-predictor": "Reactions"
+	"bond-type": "Reactions",
+	"molecular-viewer": "Tools",
+	"batch-calc": "Tools",
+	"dashboard": "Tools"
 };
 
 const FAVORITES_KEY = "favorites";
@@ -49,6 +83,7 @@ class NavigationManager {
 	private navHistory: string[] = [];
 	private forwardHistory: string[] = [];
 	private activeViewId: string | null = null;
+	private listeners: Array<(id: string | null) => void> = [];
 
 	private constructor() {}
 
@@ -77,6 +112,9 @@ class NavigationManager {
 		if (this.activeViewId) {
 			this.pushHistory(targetId);
 		}
+		let pm: PluginManager = PluginManager.getInstance();
+		let payload: { view: string } = { view: targetId };
+		pm.executeHook("onNavigate", payload);
 		if (this.strategy) {
 			this.strategy.navigate(targetId);
 		}
@@ -101,6 +139,11 @@ class NavigationManager {
 	}
 
 	public getCalculators(): CalculatorInfo[] {
+		if (RuntimeDetector.getInstance().isWebMode) {
+			return CALCULATORS.filter(function (c: CalculatorInfo): boolean {
+				return c.id !== "batch-calc" && c.id !== "dashboard";
+			});
+		}
 		return CALCULATORS.slice();
 	}
 
@@ -118,6 +161,35 @@ class NavigationManager {
 
 	public setActiveViewId(id: string | null): void {
 		this.activeViewId = id;
+		this.notifyListeners();
+	}
+
+	public subscribe(listener: (id: string | null) => void): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			if (this.listeners[i] === listener) {
+				return;
+			}
+		}
+		this.listeners.push(listener);
+		listener(this.activeViewId);
+	}
+
+	public unsubscribe(listener: (id: string | null) => void): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			if (this.listeners[i] === listener) {
+				this.listeners.splice(i, 1);
+				return;
+			}
+		}
+	}
+
+	private notifyListeners(): void {
+		let i: number;
+		for (i = 0; i < this.listeners.length; i++) {
+			this.listeners[i](this.activeViewId);
+		}
 	}
 
 	public pushHistory(_id: string): void {
@@ -319,6 +391,11 @@ class NavigationManager {
 				forwardBtn.setAttribute("aria-disabled", "true");
 			}
 		}
+	}
+
+	/** Resets the singleton instance. For testing only. */
+	public static resetInstance(): void {
+		NavigationManager.instance = null as unknown as NavigationManager;
 	}
 }
 

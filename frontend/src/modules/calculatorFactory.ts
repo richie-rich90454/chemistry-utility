@@ -1,5 +1,4 @@
 import type { Calculator } from "./calculator.js";
-import type { InputProvider } from "./inputProvider.js";
 import type { ChemicalElement } from "../types.js";
 import { DilutionCalculator, MassPercentCalculator, MixingCalculator } from "./solutionCalculators.js";
 import { IdealGasLawCalculator, CombinedGasLawCalculator, VanDerWaalsCalculator, HalfLifeCalculator } from "./gasLawCalculators.js";
@@ -23,32 +22,32 @@ export class CalculatorFactory {
 	 * Creates a calculator instance for the given id, optionally injecting
 	 * a custom {@link InputProvider}. Returns undefined for unknown ids.
 	 */
-	public create(calculatorId: string, inputProvider?: InputProvider): Calculator | undefined {
+	public create(calculatorId: string): Calculator | undefined {
 		switch (calculatorId) {
 			case "dilution":
-				return new DilutionCalculator(inputProvider);
+				return new DilutionCalculator();
 			case "mass-percent":
-				return new MassPercentCalculator(inputProvider);
+				return new MassPercentCalculator();
 			case "mixing":
-				return new MixingCalculator(inputProvider);
+				return new MixingCalculator();
 			case "ideal-gas":
-				return new IdealGasLawCalculator(inputProvider);
+				return new IdealGasLawCalculator();
 			case "combined-gas":
-				return new CombinedGasLawCalculator(inputProvider);
+				return new CombinedGasLawCalculator();
 			case "vdw":
-				return new VanDerWaalsCalculator(inputProvider);
+				return new VanDerWaalsCalculator();
 			case "half-life":
-				return new HalfLifeCalculator(inputProvider);
+				return new HalfLifeCalculator();
 			case "cell-potential":
-				return new CellPotentialCalculator(inputProvider);
+				return new CellPotentialCalculator();
 			case "nernst":
-				return new NernstCalculator(inputProvider);
+				return new NernstCalculator();
 			case "electrolysis":
-				return new ElectrolysisCalculator(inputProvider);
+				return new ElectrolysisCalculator();
 			case "bond-type":
-				return new BondTypePredictor(this.elementsData, inputProvider);
+				return new BondTypePredictor(this.elementsData);
 			case "stoichiometry":
-				return new StoichiometryCalculator(inputProvider);
+				return new StoichiometryCalculator();
 			default:
 				return undefined;
 		}

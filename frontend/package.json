@@ -1,34 +1,59 @@
 {
   "name": "chemistry-utility-frontend",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:app": "vite --mode app",
+    "dev:host": "vite --host",
     "build": "vite build",
+    "build:web": "vite build --mode web",
     "build:app": "vite build --mode app",
+    "build:watch": "vite build --watch",
+    "build:web:watch": "vite build --mode web --watch",
+    "build:app:watch": "vite build --mode app --watch",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
+    "typecheck:watch": "tsc --noEmit --watch",
     "lint": "eslint src",
-    "check-bundle-size": "node scripts/check-bundle-size.mjs"
+    "lint:fix": "eslint src --fix",
+    "check": "npm run typecheck && npm run lint && npm run test",
+    "check:unit": "npm run typecheck && npm run lint && npm run test:unit",
+    "check-bundle-size": "node scripts/check-bundle-size.mjs",
+    "cli": "tsx src/cli/index.ts"
   },
   "dependencies": {
+    "@solidjs/router": "^0.15.3",
+    "chart.js": "^4.5.1",
+    "chartjs-plugin-zoom": "^2.2.0",
+    "fast-balance": "^1.0.7",
     "gsap": "^3.15.0",
-    "katex": "^0.17.0"
+    "katex": "^0.17.0",
+    "smiles-drawer": "^2.4.1",
+    "solid-js": "^1.9.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "@solidjs/testing-library": "^0.8.10",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@types/chart.js": "^2.9.41",
     "@types/node": "^26.1.1",
     "@typescript-eslint/eslint-plugin": "^8.64.0",
     "@typescript-eslint/parser": "^8.64.0",
-    "eslint": "^10.7.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^9.0.0",
+    "eslint-plugin-solid": "^0.14.5",
     "jsdom": "^29.1.1",
     "typescript": "^6.0.3",
     "vite": "^8.1.4",
     "vite-plugin-html": "^3.2.2",
+    "vite-plugin-solid": "^2.11.0",
     "vitest": "^4.1.10"
   }
 }

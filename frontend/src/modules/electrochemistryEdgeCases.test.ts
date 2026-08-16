@@ -192,6 +192,18 @@ describe("Electrochemistry Edge Cases", () => {
             const html = getResultHTML("electrolysis-result");
             expect(html).toContain("mass deposited");
         });
+
+        it("shows error for invalid solveFor value instead of silent failure", () => {
+            const select = document.getElementById("electrolysis-solve-for") as HTMLSelectElement;
+            const badOpt = document.createElement("option");
+            badOpt.value = "invalid";
+            badOpt.textContent = "invalid";
+            select.appendChild(badOpt);
+            select.value = "invalid";
+            calculateElectrolysis();
+            const html = getResultHTML("electrolysis-result");
+            expect(html).toContain("Error");
+        });
     });
 });
 

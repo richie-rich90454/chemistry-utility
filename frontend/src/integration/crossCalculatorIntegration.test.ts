@@ -10,6 +10,7 @@ import {
     calculateVanDerWaals,
     calculateHalfLife,
 } from "../modules/gasLawCalculators.js";
+import { ChemicalElement } from "../types.js";
 import {
     calculateCellPotential,
     calculateNernst,
@@ -37,7 +38,7 @@ describe("Cross-Calculator Integration", () => {
         const balanced = balanceEquation("H2 + O2 -> H2O");
         expect(balanced).toBe("2H2 + O2 -> 2H2O");
 
-        const molarMassH2O = calculateMolarMass("H2O", testElements as any);
+        const molarMassH2O = calculateMolarMass("H2O", testElements as unknown as ChemicalElement[]);
         expect(molarMassH2O).toBeCloseTo(18.015, 1);
     });
 
@@ -45,15 +46,15 @@ describe("Cross-Calculator Integration", () => {
         const balanced = balanceEquation("CH4 + O2 -> CO2 + H2O");
         expect(balanced).toBe("CH4 + 2O2 -> CO2 + 2H2O");
 
-        const molarMassCO2 = calculateMolarMass("CO2", testElements as any);
+        const molarMassCO2 = calculateMolarMass("CO2", testElements as unknown as ChemicalElement[]);
         expect(molarMassCO2).toBeCloseTo(44.009, 1);
 
-        const molarMassH2O = calculateMolarMass("H2O", testElements as any);
+        const molarMassH2O = calculateMolarMass("H2O", testElements as unknown as ChemicalElement[]);
         expect(molarMassH2O).toBeCloseTo(18.015, 1);
     });
 
     it("calculates molar mass of NaCl, then predicts bond type Na-Cl", () => {
-        const molarMassNaCl = calculateMolarMass("NaCl", testElements as any);
+        const molarMassNaCl = calculateMolarMass("NaCl", testElements as unknown as ChemicalElement[]);
         expect(molarMassNaCl).toBeCloseTo(58.443, 1);
 
         createContainer("bond-type-predictor");
@@ -61,18 +62,18 @@ describe("Cross-Calculator Integration", () => {
         createInput("element2-input", "Cl", "bond-type-predictor", "text");
         createResultDiv("bond-type-result", "bond-type-predictor");
 
-        predictBondType(testElements as any);
+        predictBondType(testElements as unknown as ChemicalElement[]);
         const result = getResultText("bond-type-result");
         expect(result).toContain("Ionic");
     });
 
     it("calculates molar mass of H2O and verifies it is approximately 18.015", () => {
-        const molarMass = calculateMolarMass("H2O", testElements as any);
+        const molarMass = calculateMolarMass("H2O", testElements as unknown as ChemicalElement[]);
         expect(molarMass).toBeCloseTo(18.015, 1);
     });
 
     it("calculates molar mass of C6H12O6 and verifies it is approximately 180.156", () => {
-        const molarMass = calculateMolarMass("C6H12O6", testElements as any);
+        const molarMass = calculateMolarMass("C6H12O6", testElements as unknown as ChemicalElement[]);
         expect(molarMass).toBeCloseTo(180.156, 0);
     });
 
@@ -240,19 +241,19 @@ describe("Cross-Calculator Integration", () => {
         const balanced = balanceEquation("Na + Cl2 -> NaCl");
         expect(balanced).toBe("2Na + Cl2 -> 2NaCl");
 
-        const molarMassNaCl = calculateMolarMass("NaCl", testElements as any);
+        const molarMassNaCl = calculateMolarMass("NaCl", testElements as unknown as ChemicalElement[]);
         expect(molarMassNaCl).toBeCloseTo(58.443, 1);
     });
 
     it("calculates molar mass of Fe2O3, then predicts bond type Fe-O", () => {
-        const molarMass = calculateMolarMass("Fe2O3", testElements as any);
+        const molarMass = calculateMolarMass("Fe2O3", testElements as unknown as ChemicalElement[]);
         expect(molarMass).toBeCloseTo(159.687, 0);
 
         createContainer("bond-type-predictor");
         createInput("element1-input", "Fe", "bond-type-predictor", "text");
         createInput("element2-input", "O", "bond-type-predictor", "text");
         createResultDiv("bond-type-result", "bond-type-predictor");
-        predictBondType(testElements as any);
+        predictBondType(testElements as unknown as ChemicalElement[]);
         const result = getResultText("bond-type-result");
         expect(result).toContain("Ionic");
     });

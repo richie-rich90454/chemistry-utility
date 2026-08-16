@@ -1,0 +1,52 @@
+.subGroup{
+    padding-bottom: var(--app-space-4);
+    border-bottom: 1px solid var(--app-border);
+    margin-bottom: var(--app-space-4);
+}
+.subGroup:last-child{
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.vdwDetails{
+    margin: var(--app-space-4) 0 0;
+    border: 1px solid var(--app-border);
+    border-radius: 0;
+    overflow: hidden;
+}
+.vdwDetails summary{
+    padding: var(--app-space-3) var(--app-space-4);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--app-text-secondary);
+    cursor: pointer;
+    background: var(--app-pane);
+    border-bottom: 1px solid var(--app-border);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-2);
+    transition: background-color var(--app-duration-fast) var(--app-easing),
+                color var(--app-duration-fast) var(--app-easing);
+}
+.vdwDetails summary::-webkit-details-marker{
+    display: none;
+}
+.vdwDetails summary::before{
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid currentColor;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    transition: transform var(--app-duration-fast) var(--app-easing);
+    flex-shrink: 0;
+}
+.vdwDetails[open] summary::before{
+    transform: rotate(90deg);
+}
+.vdwDetails summary:hover{
+    background: var(--app-state-hover);
+    color: var(--app-text);
+}

@@ -101,8 +101,8 @@ describe("Theme color meta tag", () => {
             meta.name = "theme-color";
             document.head.appendChild(meta);
         }
-        meta.content = "#1a73e8";
-        expect(meta.content).toBe("#1a73e8");
+        meta.content = "#2d5a3d";
+        expect(meta.content).toBe("#2d5a3d");
     });
 
     it("amoled theme-color meta is #000000", () => {
@@ -162,7 +162,7 @@ describe("CSS custom properties for form elements", () => {
         const input = document.createElement("input");
         input.type = "text";
         document.body.appendChild(input);
-        const cs = window.getComputedStyle(input);
+        window.getComputedStyle(input);
         // In jsdom, computed style may not reflect CSS file values
         // but we can verify the element was created
         expect(input.tagName).toBe("INPUT");
@@ -202,7 +202,7 @@ describe("CSS color-scheme for form elements", () => {
 describe("Theme CSS variable values", () => {
     it("dark theme input background should be dark", () => {
         // Verify the expected dark mode input background
-        const darkInputBg = "#1c1b1f";
+        const darkInputBg = "#1a1a1a";
         expect(darkInputBg).toBeTruthy();
         // Dark background should not be a light color
         const r = parseInt(darkInputBg.slice(1, 3), 16);
@@ -223,7 +223,7 @@ describe("Theme CSS variable values", () => {
     });
 
     it("dark theme input text should be light", () => {
-        const darkInputText = "#e6e1e5";
+        const darkInputText = "#f5f1e8";
         const r = parseInt(darkInputText.slice(1, 3), 16);
         const g = parseInt(darkInputText.slice(3, 5), 16);
         const b = parseInt(darkInputText.slice(5, 7), 16);
@@ -232,7 +232,7 @@ describe("Theme CSS variable values", () => {
     });
 
     it("light theme input text should be dark", () => {
-        const lightInputText = "#1c1b1f";
+        const lightInputText = "#1a1a1a";
         const r = parseInt(lightInputText.slice(1, 3), 16);
         const g = parseInt(lightInputText.slice(3, 5), 16);
         const b = parseInt(lightInputText.slice(5, 7), 16);
@@ -262,7 +262,7 @@ describe("Theme CSS variable values", () => {
     });
 
     it("AMOLED theme input text should be light", () => {
-        const amoledInputText = "#e6e1e5";
+        const amoledInputText = "#f5f1e8";
         const r = parseInt(amoledInputText.slice(1, 3), 16);
         const g = parseInt(amoledInputText.slice(3, 5), 16);
         const b = parseInt(amoledInputText.slice(5, 7), 16);

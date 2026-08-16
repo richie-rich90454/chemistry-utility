@@ -37,7 +37,54 @@ export class FormulaParser {
 		let finalNumber=number>0?number:1;
 		return [finalNumber, index];
 	}
+	private static stripChargeNotation(formula: string): string{
+		let caretIdx=formula.indexOf("^");
+		if (caretIdx!==-1){
+			return formula.substring(0, caretIdx);
+		}
+		return formula;
+	}
+	private static stripWhitespace(formula: string): string{
+		let result="";
+		for (let i=0; i<formula.length; i++){
+			let ch=formula[i];
+			if (ch!==" "&&ch!=="\t"&&ch!=="\n"&&ch!=="\r"){
+				result=result+ch;
+			}
+		}
+		return result;
+	}
+	private static preprocessFormula(formula: string): string{
+		let stripped=FormulaParser.stripWhitespace(formula);
+		stripped=FormulaParser.stripChargeNotation(stripped);
+		return stripped;
+	}
 	public static calculateMolarMass(formula: string, elements: ChemicalElement[]): number{
+		let processedFormula=FormulaParser.preprocessFormula(formula);
+		if (processedFormula.length===0){
+			throw new Error("Empty formula");
+		}
+		let hydrateParts=processedFormula.split(/[·*]/);
+		if (hydrateParts.length>1){
+			let totalMass=0;
+			for (let part of hydrateParts){
+				if (part.length===0) continue;
+				let mult=1;
+				let body=part;
+				let numMatch=part.match(/^\d+/);
+				if (numMatch!==null){
+					mult=parseInt(numMatch[0], 10);
+					body=part.substring(numMatch[0].length);
+				}
+				if (body.length===0) continue;
+				let partMass=FormulaParser.calculateMolarMassSingle(body, elements);
+				totalMass=totalMass+(partMass*mult);
+			}
+			return totalMass;
+		}
+		return FormulaParser.calculateMolarMassSingle(processedFormula, elements);
+	}
+	private static calculateMolarMassSingle(formula: string, elements: ChemicalElement[]): number{
 		let massStack: number[]=[0];
 		let index=0;
 		let formulaLength=formula.length;
@@ -66,14 +113,14 @@ export class FormulaParser {
 					throw new Error("Element not found: "+symbol);
 				}
 			}
-			else if (currentChar=="("){
+			else if (currentChar=="("||currentChar=="["||currentChar=="{"){
 				massStack.push(0);
 				index=index+1;
 			}
-			else if (currentChar==")"){
+			else if (currentChar==")"||currentChar=="]"||currentChar=="}"){
 				let stackLength=massStack.length;
 				if (stackLength<2){
-					throw new Error("Unmatched \")\"");
+					throw new Error("Unmatched \""+currentChar+"\"");
 				}
 				let subgroupMass=massStack.pop() as number;
 				let numberResult=FormulaParser.parseNumber(formula, index+1);
@@ -95,15 +142,39 @@ export class FormulaParser {
 	public static formatFormula(formula: string): string{
 		let result="";
 		let i=0;
+		let hydrateParts=formula.split(/[·*]/);
+		if (hydrateParts.length>1){
+			for (let p=0; p<hydrateParts.length; p++){
+				let part=hydrateParts[p];
+				if (part.length===0) continue;
+				let mult=1;
+				let body=part;
+				let numMatch=part.match(/^\d+/);
+				if (numMatch!==null){
+					mult=parseInt(numMatch[0], 10);
+					body=part.substring(numMatch[0].length);
+				}
+				if (body.length===0) continue;
+				let formatted=FormulaParser.formatFormula(body);
+				for (let k=0; k<mult; k++){
+					result=result+formatted;
+				}
+			}
+			if (result==="") throw new Error("Bad formula");
+			return result;
+		}
 		while (i<formula.length){
-			if (formula[i]==="("||formula[i]==="["){
+			if (formula[i]==="("||formula[i]==="["||formula[i]==="{"){
 				let depth=1;
 				let start=i;
 				i++;
 				while (i<formula.length&&depth>0){
-					if (formula[i]==="("||formula[i]==="[") depth++;
-					else if (formula[i]===")"||formula[i]==="]") depth--;
+					if (formula[i]==="("||formula[i]==="["||formula[i]==="{") depth++;
+					else if (formula[i]===")"||formula[i]==="]"||formula[i]==="}") depth--;
 					i++;
+				}
+				if (depth>0){
+					throw new Error("Unmatched \""+formula[start]+"\"");
 				}
 				let inner=formula.substring(start+1, i-1);
 				let numStr="";
@@ -124,6 +195,9 @@ export class FormulaParser {
 				let count=numStr===""?1:parseInt(numStr, 10);
 				result+=element;
 				if (count>1) result+=count;
+			}
+			else if (formula[i]===")"||formula[i]==="]"||formula[i]==="}"){
+				throw new Error("Unmatched \""+formula[i]+"\"");
 			}
 			else{
 				i++;

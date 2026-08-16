@@ -19,6 +19,13 @@ func New(dataPath string) *Service {
 	return s
 }
 
+// NewFromBytes creates a Service from in-memory data (e.g. embedded assets).
+func NewFromBytes(data []byte) *Service {
+	s := &Service{}
+	s.data, s.err = data, nil
+	return s
+}
+
 // GetData returns the periodic table JSON data as a string
 func (s *Service) GetData() (string, error) {
 	s.mu.RLock()

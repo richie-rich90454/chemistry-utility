@@ -1,4 +1,5 @@
 import { NumberFormatter } from "./i18n/numberFormatter.js";
+import { HtmlSanitizer } from "./htmlSanitizer.js";
 
 /**
  * Wraps a result display DOM element by ID, providing helpers to render
@@ -21,14 +22,14 @@ export class ResultDisplay {
 
 	/** Renders an error message and makes the result visible. */
 	public showError(message: string): void {
-		this.element.innerHTML = "<p>Error: " + message + "</p>";
+		this.element.innerHTML = "<p>Error: " + HtmlSanitizer.escape(message) + "</p>";
 		this.element.classList.add("show");
 	}
 
 	/** Renders a formula and its numeric result with a unit, then makes it visible. */
 	public showFormula(formula: string, result: number, unit: string): void {
 		this.element.innerHTML =
-			"<p>" + formula + "</p><p>Result: " + this.numberFormatter.format(result, 4) + " " + unit + "</p>";
+			"<p>" + formula + "</p><p>Result: " + this.numberFormatter.format(result, 4) + " " + HtmlSanitizer.escape(unit) + "</p>";
 		this.element.classList.add("show");
 	}
 

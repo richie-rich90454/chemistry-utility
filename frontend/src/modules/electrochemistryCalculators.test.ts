@@ -3,6 +3,9 @@ import {
     calculateCellPotential,
     calculateNernst,
     calculateElectrolysis,
+    CellPotentialCalculator,
+    NernstCalculator,
+    ElectrolysisCalculator,
 } from "./electrochemistryCalculators.js";
 import { setOrCreateInput, setOrCreateSelect, getResultHTML } from "../test/helpers.js";
 
@@ -209,5 +212,185 @@ describe("electrochemistryCalculators", () => {
             const html = getResultHTML("electrolysis-result");
             expect(html).toContain("Please enter valid positive numbers");
         });
+    });
+});
+
+describe("CellPotentialCalculator.calculatePure", () => {
+    it("should calculate E_cell = 1.10 V for Cu (0.34) and Zn (-0.76)", () => {
+        const calc = new CellPotentialCalculator();
+        const result = calc.calculatePure({
+            "E1": "0.34",
+            "E2": "-0.76"
+        });
+        expect(result.value).toContain("1.100");
+        expect(result.metadata).toHaveProperty("E_cell");
+        expect(result.metadata).toHaveProperty("E_cathode");
+    });
+
+    it("should return error result when E1 is not a number", () => {
+        const calc = new CellPotentialCalculator();
+        const result = calc.calculatePure({
+            "E1": "abc",
+            "E2": "0.5"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+
+    it("exercises ?? fallback when E1 and E2 keys are missing", () => {
+        const calc = new CellPotentialCalculator();
+        const result = calc.calculatePure({});
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("valid numbers for both potentials");
+    });
+});
+
+describe("NernstCalculator.calculatePure", () => {
+    it("should return E = E_standard when Q = 1 (standard conditions)", () => {
+        const calc = new NernstCalculator();
+        const result = calc.calculatePure({
+            "E-standard": "1.10",
+            "temperature": "298",
+            "n-electrons": "2",
+            "Q-reaction": "1"
+        });
+        expect(result.value).toContain("1.100");
+        expect(result.metadata).toHaveProperty("E");
+        expect(result.metadata).toHaveProperty("E_standard");
+    });
+
+    it("should return error result when Q is zero", () => {
+        const calc = new NernstCalculator();
+        const result = calc.calculatePure({
+            "E-standard": "1.10",
+            "temperature": "298",
+            "n-electrons": "2",
+            "Q-reaction": "0"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+
+    it("exercises ?? fallback when all Nernst input keys are missing", () => {
+        const calc = new NernstCalculator();
+        const result = calc.calculatePure({});
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("valid positive numbers");
+    });
+});
+
+describe("ElectrolysisCalculator.calculatePure", () => {
+    it("should solve for mass: I=1A, t=96500s, z=1, M=63.5 -> m~63.5g", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "mass",
+            "electrolysis-m": "",
+            "electrolysis-I": "1",
+            "electrolysis-t": "96500",
+            "electrolysis-z": "1",
+            "electrolysis-M": "63.5"
+        });
+        const expectedMass = (1 * 96500) / (FARADAY * 1) * 63.5;
+        expect(result.value).toContain(expectedMass.toFixed(3));
+        expect(result.metadata).toHaveProperty("mass");
+    });
+
+    it("should return error result when I is zero solving for mass", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "mass",
+            "electrolysis-m": "",
+            "electrolysis-I": "0",
+            "electrolysis-t": "96500",
+            "electrolysis-z": "1",
+            "electrolysis-M": "63.5"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+
+    it("should solve for current: m=63.5, t=96500, z=1, M=63.5 -> I~1A", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "current",
+            "electrolysis-m": "63.5",
+            "electrolysis-I": "",
+            "electrolysis-t": "96500",
+            "electrolysis-z": "1",
+            "electrolysis-M": "63.5"
+        });
+        const expectedCurrent = (63.5 / 63.5) * FARADAY * 1 / 96500;
+        expect(result.value).toContain(expectedCurrent.toFixed(3));
+        expect(result.metadata).toHaveProperty("current");
+    });
+
+    it("should return error result when m is zero solving for current", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "current",
+            "electrolysis-m": "0",
+            "electrolysis-I": "",
+            "electrolysis-t": "96500",
+            "electrolysis-z": "1",
+            "electrolysis-M": "63.5"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+
+    it("should solve for time: m=63.5, I=1, z=1, M=63.5 -> t~96500s", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "time",
+            "electrolysis-m": "63.5",
+            "electrolysis-I": "1",
+            "electrolysis-t": "",
+            "electrolysis-z": "1",
+            "electrolysis-M": "63.5"
+        });
+        const expectedTime = (63.5 / 63.5) * FARADAY * 1 / 1;
+        expect(result.value).toContain(expectedTime.toFixed(3));
+        expect(result.metadata).toHaveProperty("time");
+    });
+
+    it("should return error result when m is zero solving for time", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "time",
+            "electrolysis-m": "0",
+            "electrolysis-I": "1",
+            "electrolysis-t": "",
+            "electrolysis-z": "1",
+            "electrolysis-M": "63.5"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+    });
+
+    it("should return error result for invalid solve-for selection", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "invalid",
+            "electrolysis-m": "63.5",
+            "electrolysis-I": "1",
+            "electrolysis-t": "96500",
+            "electrolysis-z": "1",
+            "electrolysis-M": "63.5"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("Invalid solve-for selection");
+    });
+
+    it("exercises ?? fallback for m/I/t/z/M keys when solve-for is mass", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "mass"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error:");
+        expect(result.explanation).toContain("valid positive numbers for I, t, z, and M");
     });
 });

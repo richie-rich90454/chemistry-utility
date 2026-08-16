@@ -1,0 +1,79 @@
+.row{
+    display: flex;
+    gap: var(--app-space-2);
+    align-items: center;
+    margin: var(--app-space-2) var(--app-space-5);
+}
+.rowSelect{
+    flex: 2;
+    margin: 0;
+    padding: 10px var(--app-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.9rem;
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
+    border-radius: 0;
+    min-height: 48px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.rowSelect:focus{
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
+    outline: none;
+    border-width: 2px;
+    padding: 9px 15px;
+}
+.rowInput{
+    flex: 1;
+    margin: 0;
+    padding: 10px var(--app-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.9rem;
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
+    border-radius: 0;
+    min-height: 48px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.rowInput:focus{
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
+    outline: none;
+    border-width: 2px;
+    padding: 9px 15px;
+}
+.removeButton{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--app-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--app-accent);
+    background-color: transparent;
+    border: 1.5px solid var(--app-border);
+    border-radius: 0;
+    cursor: pointer;
+    min-height: 42px;
+    flex-shrink: 0;
+}
+.removeButton:hover{
+    box-shadow: none;
+    border-color: var(--app-text-secondary);
+}
+.addButtonRow{
+    margin: 0 var(--app-space-5) var(--app-space-3);
+}
+.emptyHint{
+    margin: var(--app-space-2) var(--app-space-5);
+    font-size: 0.85rem;
+    color: var(--app-text-secondary);
+    font-style: italic;
+}

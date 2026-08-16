@@ -1,5 +1,6 @@
 import {ChemicalElement} from "../types.js";
 import {Calculator} from "./calculator.js";
+import type {CalculatorResult} from "./calculator.js";
 
 /**
  * Predicts the type of chemical bond formed between two elements based on
@@ -51,7 +52,8 @@ export class BondTypePredictor extends Calculator {
 			this.resultDisplay.showResult("<p>Bond prediction not possible due to unavailable electronegativity data</p>");
 			return;
 		}
-		let deltaEN = this.numberFormatter.format(Math.abs(en1 - en2), 2);
+		let deltaENValue = Math.abs(en1 - en2);
+		let deltaEN = this.numberFormatter.format(deltaENValue, 2);
 		let type1 = element1.type.toLowerCase();
 		let type2 = element2.type.toLowerCase();
 		let isMetal1 = (type1 == "lanthanide" || type1 == "actinide" || (type1.indexOf("metal") != -1 && type1 != "metalloid" && type1 != "non-metal"));
@@ -60,10 +62,10 @@ export class BondTypePredictor extends Calculator {
 		if (isMetal1 && isMetal2) {
 			bondType = "Metallic";
 		}
-		else if (isMetal1 != isMetal2 || parseFloat(deltaEN) >= 1.7) {
+		else if (isMetal1 != isMetal2 || deltaENValue >= 1.7) {
 			bondType = "Ionic";
 		}
-		else if (parseFloat(deltaEN) >= .4) {
+		else if (deltaENValue >= .4) {
 			bondType = "Polar Covalent";
 		}
 		else {
@@ -71,6 +73,80 @@ export class BondTypePredictor extends Calculator {
 		}
 		let result = "<p>" + element1.symbol + " (" + en1 + ") and " + element2.symbol + " (" + en2 + ") -> ΔEN=" + deltaEN + " -> " + bondType + " bond</p>";
 		this.resultDisplay.showResult(result);
+	}
+
+	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+		let element1Value = (inputs["element1-input"] ?? "").trim();
+		let element2Value = (inputs["element2-input"] ?? "").trim();
+		if (!element1Value || !element2Value) {
+			throw new Error("Please enter both element symbols");
+		}
+		element1Value = element1Value.charAt(0).toUpperCase() + element1Value.slice(1).toLowerCase();
+		element2Value = element2Value.charAt(0).toUpperCase() + element2Value.slice(1).toLowerCase();
+		let element1: ChemicalElement | null = null;
+		let element2: ChemicalElement | null = null;
+		for (let i = 0; i < this.elementsData.length; i++) {
+			let currentElement = this.elementsData[i];
+			if (currentElement.symbol == element1Value) {
+				element1 = currentElement;
+			}
+			if (currentElement.symbol == element2Value) {
+				element2 = currentElement;
+			}
+			if (element1 != null && element2 != null) {
+				break;
+			}
+		}
+		if (!element1 || !element2) {
+			throw new Error("One or both elements not found in periodic table");
+		}
+		let en1 = element1.electronegativity;
+		let en2 = element2.electronegativity;
+		if (en1 == null || en2 == null) {
+			return {
+				value: "Bond prediction not possible due to unavailable electronegativity data",
+				explanation: "Element " + element1.symbol + " or " + element2.symbol + " has null electronegativity; cannot compute ΔEN.",
+				metadata: {
+					element1: element1.symbol,
+					element2: element2.symbol,
+					en1: en1,
+					en2: en2
+				}
+			};
+		}
+		let deltaENValue = Math.abs(en1 - en2);
+		let deltaEN = this.numberFormatter.format(deltaENValue, 2);
+		let type1 = element1.type.toLowerCase();
+		let type2 = element2.type.toLowerCase();
+		let isMetal1 = (type1 == "lanthanide" || type1 == "actinide" || (type1.indexOf("metal") != -1 && type1 != "metalloid" && type1 != "non-metal"));
+		let isMetal2 = (type2 == "lanthanide" || type2 == "actinide" || (type2.indexOf("metal") != -1 && type2 != "metalloid" && type2 != "non-metal"));
+		let bondType: string;
+		if (isMetal1 && isMetal2) {
+			bondType = "Metallic";
+		}
+		else if (isMetal1 != isMetal2 || deltaENValue >= 1.7) {
+			bondType = "Ionic";
+		}
+		else if (deltaENValue >= .4) {
+			bondType = "Polar Covalent";
+		}
+		else {
+			bondType = "Nonpolar Covalent";
+		}
+		return {
+			value: element1.symbol + " (" + en1 + ") and " + element2.symbol + " (" + en2 + ") -> ΔEN=" + deltaEN + " -> " + bondType + " bond",
+			explanation: "ΔEN = |EN(" + element1.symbol + ") - EN(" + element2.symbol + ")| = |" + en1 + " - " + en2 + "| = " + deltaEN + "; isMetal1=" + isMetal1 + ", isMetal2=" + isMetal2 + " -> " + bondType,
+			metadata: {
+				element1: element1.symbol,
+				element2: element2.symbol,
+				en1: en1,
+				en2: en2,
+				deltaEN: deltaENValue,
+				bondType: bondType,
+				isMetal1: isMetal1,
+				isMetal2: isMetal2
+			}
+		};
 	}
 }
 

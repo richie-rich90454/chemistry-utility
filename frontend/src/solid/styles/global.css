@@ -1,0 +1,717 @@
+/* Chemistry Utility — App Design Tokens
+   Flat palette, zero rounded edges, asymmetric layout. */
+
+/* Font loading */
+@font-face {
+    font-family: "Noto Sans";
+    src: url("/NotoSans-VariableFont_wdth,wght.woff2") format("woff2-variations");
+    font-weight: 100 900;
+    font-stretch: 75% 125%;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Noto Serif";
+    src: url("/EBGaramond-VariableFont_wght.woff2") format("woff2-variations");
+    font-weight: 400 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ============================================================
+   App Design System LIGHT THEME TOKENS
+   ============================================================ */
+:root {
+    color-scheme: light;
+
+    /* App canvas base — lowest visual layer */
+    --app-canvas: #F8F9FA;
+    /* Workspace panes — solid surfaces for inputs/outputs */
+    --app-pane: #FFFFFF;
+    /* Borders & rules — structural lines only, never box individual fields */
+    --app-border: #E4E7EB;
+    /* Text primary — maximum readability */
+    --app-text: #111827;
+    --app-text-secondary: #6B7280;
+    /* Active accent — focused states, buttons, system actions */
+    --app-accent: #2F5D44;
+    --app-accent-hover: #254A35;
+    --app-on-accent: #FFFFFF;
+
+    /* Success / Warning / Error - muted for a professional lab feel */
+    --app-success: #3C7A54;
+    --app-on-success: #FFFFFF;
+    --app-warning: #B26A17;
+    --app-on-warning: #FFFFFF;
+    --app-error: #B3352E;
+    --app-on-error: #FFFFFF;
+
+    /* State layers */
+    --app-state-hover: rgba(0, 0, 0, 0.05);
+    --app-state-active: rgba(47, 93, 68, 0.12);
+    --app-state-selected: rgba(47, 93, 68, 0.08);
+
+    /* Scrim / overlay */
+    --app-scrim: rgba(15, 15, 17, 0.5);
+
+    /* Layout */
+    --app-nav-width: 15%;
+    --app-input-width: 35%;
+    --app-output-width: 50%;
+    --app-mobile-header-height: 48px;
+
+    /* Spacing grid (4px base) */
+    --app-space-1: 4px;
+    --app-space-2: 8px;
+    --app-space-3: 12px;
+    --app-space-4: 16px;
+    --app-space-5: 20px;
+    --app-space-6: 24px;
+    --app-space-8: 32px;
+    --app-space-10: 40px;
+    --app-space-12: 48px;
+
+    /* Typography scale */
+    --app-font-display: 900 48px/1.1 "Noto Sans", sans-serif;
+    --app-font-heading: 700 20px/1.3 "Noto Sans", sans-serif;
+    --app-font-subheading: 700 14px/1.4 "Noto Sans", sans-serif;
+    --app-font-body: 400 14px/1.6 "Noto Sans", sans-serif;
+    --app-font-label: 700 10px/1.4 "Noto Sans", sans-serif;
+    --app-font-input: 300 14px/1.5 "Noto Sans", sans-serif;
+    --app-font-mono: 400 13px/1.5 "Consolas", "Monaco", monospace;
+    --app-font-prose: 400 15px/1.7 "Noto Serif", serif;
+
+    /* Micro-label tracking */
+    --app-label-tracking: 0.06em;
+
+    /* Zero radius — no rounded corners anywhere */
+    --app-radius: 0px;
+
+    /* Motion */
+    --app-easing: cubic-bezier(0.2, 0, 0, 1);
+    --app-duration-fast: 100ms;
+    --app-duration-normal: 200ms;
+    --app-duration-slow: 300ms;
+
+    /* Shadows — minimal, only for overlays */
+    --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+    /* Category container tints (periodic table) — cold, desaturated */
+    --md-tertiary-container: rgba(47, 93, 68, 0.12);
+    --md-on-tertiary-container: #2F5D44;
+    --md-secondary-container: rgba(42, 102, 118, 0.12);
+    --md-on-secondary-container: #2A6676;
+    --md-warning-container: rgba(178, 106, 23, 0.14);
+    --md-on-warning-container: #8A5412;
+    --md-success-container: rgba(60, 122, 84, 0.14);
+    --md-on-success-container: #2F6B45;
+    --md-on-tertiary: #FFFFFF;
+}
+
+/* ============================================================
+   App Design System DARK THEME TOKENS
+   ============================================================ */
+.dark {
+    color-scheme: dark;
+
+    --app-canvas: #0F0F11;
+    --app-pane: #16161A;
+    --app-border: #2A2A32;
+    --app-text: #F3F4F6;
+    --app-text-secondary: #9CA3AF;
+    --app-accent: #6FA98A;
+    --app-accent-hover: #84B79E;
+    --app-on-accent: #0F0F11;
+
+    --app-success: #5FA47C;
+    --app-on-success: #0F0F11;
+    --app-warning: #D9A05B;
+    --app-on-warning: #0F0F11;
+    --app-error: #D9685C;
+    --app-on-error: #0F0F11;
+
+    --app-state-hover: rgba(255, 255, 255, 0.06);
+    --app-state-active: rgba(111, 169, 138, 0.2);
+    --app-state-selected: rgba(111, 169, 138, 0.12);
+
+    --app-scrim: rgba(0, 0, 0, 0.7);
+    --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+    --md-tertiary-container: rgba(111, 169, 138, 0.16);
+    --md-on-tertiary-container: #A8CDB9;
+    --md-secondary-container: rgba(122, 184, 184, 0.14);
+    --md-on-secondary-container: #A3D0D0;
+    --md-warning-container: rgba(217, 160, 91, 0.16);
+    --md-on-warning-container: #E5BE84;
+    --md-success-container: rgba(95, 164, 124, 0.16);
+    --md-on-success-container: #93C5A8;
+    --md-on-tertiary: #0F0F11;
+}
+
+.dark {
+    --md-input-bg: var(--app-pane);
+    --md-input-text: var(--app-text);
+    --md-input-border: var(--app-border);
+    --md-input-placeholder: var(--app-text-secondary);
+    --md-input-focus-border: var(--app-accent);
+    --md-input-hover-border: var(--app-text);
+}
+
+/* AMOLED variant */
+.amoled {
+    color-scheme: dark;
+
+    --app-canvas: #000000;
+    --app-pane: #0A0A0A;
+    --app-border: #1F1F24;
+    --app-text: #F3F4F6;
+    --app-text-secondary: #9CA3AF;
+    --app-accent: #6FA98A;
+    --app-accent-hover: #84B79E;
+    --app-on-accent: #0F0F11;
+
+    --app-success: #5FA47C;
+    --app-on-success: #0F0F11;
+    --app-warning: #D9A05B;
+    --app-on-warning: #0F0F11;
+    --app-error: #D9685C;
+    --app-on-error: #0F0F11;
+
+    --app-state-hover: rgba(255, 255, 255, 0.06);
+    --app-state-active: rgba(111, 169, 138, 0.2);
+    --app-state-selected: rgba(111, 169, 138, 0.12);
+
+    --app-scrim: rgba(0, 0, 0, 0.85);
+    --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.6);
+
+    --md-tertiary-container: rgba(111, 169, 138, 0.16);
+    --md-on-tertiary-container: #A8CDB9;
+    --md-secondary-container: rgba(122, 184, 184, 0.14);
+    --md-on-secondary-container: #A3D0D0;
+    --md-warning-container: rgba(217, 160, 91, 0.16);
+    --md-on-warning-container: #E5BE84;
+    --md-success-container: rgba(95, 164, 124, 0.16);
+    --md-on-success-container: #93C5A8;
+    --md-on-tertiary: #0F0F11;
+}
+
+.amoled {
+    --md-input-bg: var(--app-pane);
+    --md-input-text: var(--app-text);
+    --md-input-border: var(--app-border);
+    --md-input-placeholder: var(--app-text-secondary);
+    --md-input-focus-border: var(--app-accent);
+    --md-input-hover-border: var(--app-text);
+}
+
+/* Explicit light override */
+.light {
+    color-scheme: light;
+}
+
+/* System dark preference (no explicit class) */
+@media (prefers-color-scheme: dark) {
+    :root:not(.light):not(.dark):not(.amoled) {
+        color-scheme: dark;
+
+        --app-canvas: #0F0F11;
+        --app-pane: #16161A;
+        --app-border: #2A2A32;
+        --app-text: #F3F4F6;
+        --app-text-secondary: #9CA3AF;
+    --app-accent: #6FA98A;
+    --app-accent-hover: #84B79E;
+    --app-on-accent: #0F0F11;
+
+    --app-success: #5FA47C;
+    --app-on-success: #0F0F11;
+    --app-warning: #D9A05B;
+    --app-on-warning: #0F0F11;
+    --app-error: #D9685C;
+    --app-on-error: #0F0F11;
+
+    --app-state-hover: rgba(255, 255, 255, 0.06);
+    --app-state-active: rgba(111, 169, 138, 0.2);
+    --app-state-selected: rgba(111, 169, 138, 0.12);
+
+        --app-scrim: rgba(0, 0, 0, 0.7);
+        --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.4);
+
+        --md-tertiary-container: rgba(111, 169, 138, 0.16);
+        --md-on-tertiary-container: #A8CDB9;
+        --md-secondary-container: rgba(122, 184, 184, 0.14);
+        --md-on-secondary-container: #A3D0D0;
+        --md-warning-container: rgba(217, 160, 91, 0.16);
+        --md-on-warning-container: #E5BE84;
+        --md-success-container: rgba(95, 164, 124, 0.16);
+        --md-on-success-container: #93C5A8;
+        --md-on-tertiary: #0F0F11;
+    }
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-radius: var(--app-radius);
+}
+
+html {
+    font-size: clamp(13px, 0.8rem + 0.3vw, 16px);
+    background: var(--app-canvas);
+    min-height: 100%;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    font: var(--app-font-body);
+    background: var(--app-canvas);
+    color: var(--app-text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background-color var(--app-duration-slow) var(--app-easing),
+                color var(--app-duration-slow) var(--app-easing);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================================
+   TYPOGRAPHY (App — Noto Sans Only for UI)
+   ============================================================ */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Noto Sans", sans-serif;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+}
+
+h1 { font-size: 32px; font-weight: 900; }
+h2 { font-size: 24px; }
+h3 { font-size: 18px; }
+h4 { font-size: 14px; }
+
+/* Hero metric — Noto Sans Black, minimum 36pt/48px */
+.hero-metric {
+    font-family: "Noto Sans", sans-serif;
+    font-weight: 900;
+    font-size: 48px;
+    line-height: 1.1;
+    color: var(--app-text);
+}
+
+/* Editorial micro-label */
+.micro-label {
+    font: var(--app-font-label);
+    letter-spacing: var(--app-label-tracking);
+    text-transform: uppercase;
+    color: var(--app-text-secondary);
+}
+
+/* Prose / documentation — Noto Serif only */
+.app-prose {
+    font: var(--app-font-prose);
+    color: var(--app-text);
+}
+
+/* ============================================================
+   INTERACTIVE TOKENS (App — no borders, no rounded corners)
+   ============================================================ */
+.token {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    font: var(--app-font-input);
+    font-weight: 400;
+    color: var(--app-text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background var(--app-duration-fast) var(--app-easing),
+                color var(--app-duration-fast) var(--app-easing);
+}
+
+.token:hover {
+    color: var(--app-text);
+    background: var(--app-state-hover);
+}
+
+.token.active,
+.token[aria-selected="true"],
+.token[aria-pressed="true"] {
+    background: var(--app-accent);
+    color: var(--app-on-accent);
+    font-weight: 700;
+}
+
+/* ============================================================
+   FORM ELEMENTS (no individual borders, margin separation only)
+   ============================================================ */
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+textarea,
+select {
+    font: var(--app-font-input);
+    color: var(--app-text);
+    background: var(--app-pane);
+    padding: 10px 14px;
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--app-border);
+    outline: none;
+    transition: border-color var(--app-duration-fast) var(--app-easing);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-bottom-color: var(--app-accent);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--app-text-secondary);
+    font-weight: 300;
+}
+
+/* Buttons — flat, no rounded corners */
+button,
+.app-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1;
+    font-family: "Noto Sans", sans-serif;
+    color: var(--app-on-accent);
+    background: var(--app-accent);
+    border: none;
+    cursor: pointer;
+    transition: background var(--app-duration-fast) var(--app-easing),
+                opacity var(--app-duration-fast) var(--app-easing);
+}
+
+button:hover,
+.app-btn:hover {
+    background: var(--app-accent-hover);
+}
+
+button:active,
+.app-btn:active {
+    opacity: 0.85;
+}
+
+button:focus-visible,
+.app-btn:focus-visible {
+    outline: 2px solid var(--app-accent);
+    outline-offset: 2px;
+}
+
+button:disabled,
+.app-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Secondary / ghost button */
+.app-btn-ghost {
+    background: transparent;
+    color: var(--app-text);
+    font-weight: 400;
+}
+
+.app-btn-ghost:hover {
+    background: var(--app-state-hover);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--app-border) transparent;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-thumb { background: var(--app-border); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Selection */
+::selection {
+    background: var(--app-accent);
+    color: var(--app-on-accent);
+}
+
+/* ============================================================
+   LINKS
+   ============================================================ */
+a {
+    color: var(--app-accent);
+    text-decoration: none;
+    transition: opacity var(--app-duration-fast) var(--app-easing);
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* ============================================================
+   App LAYOUT: THREE-COLUMN DESKTOP
+   ============================================================ */
+.app-shell {
+    display: grid;
+    grid-template-columns: var(--app-nav-width) var(--app-input-width) var(--app-output-width);
+    min-height: 100vh;
+    background: var(--app-canvas);
+    transition: grid-template-columns var(--app-duration-normal) var(--app-easing);
+}
+
+/* Collapsed nav — content expands to fill space */
+.app-shell.nav-collapsed {
+    grid-template-columns: 56px 1fr;
+}
+
+.nav-pane {
+    background: var(--app-pane);
+    border-right: 1px solid var(--app-border);
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    transition: background-color var(--app-duration-slow) var(--app-easing),
+                border-color var(--app-duration-slow) var(--app-easing);
+}
+
+.input-pane {
+    background: var(--app-pane);
+    border-right: 1px solid var(--app-border);
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    transition: background-color var(--app-duration-slow) var(--app-easing),
+                border-color var(--app-duration-slow) var(--app-easing);
+}
+
+.output-pane {
+    background: var(--app-pane);
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    transition: background-color var(--app-duration-slow) var(--app-easing);
+}
+
+/* Content area — spans columns 2+ in the three-column grid */
+.app-content {
+    grid-column: 2 / -1;
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    transition: background-color var(--app-duration-slow) var(--app-easing);
+}
+
+/* ============================================================
+   App LAYOUT: SINGLE-COLUMN MOBILE (<768px)
+   ============================================================ */
+@media (max-width: 767px) {
+    .app-shell {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-pane {
+        height: var(--app-mobile-header-height);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        border-right: none;
+        border-bottom: 1px solid var(--app-border);
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .input-pane {
+        height: auto;
+        min-height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--app-border);
+    }
+
+    .output-pane {
+        height: auto;
+        min-height: auto;
+        position: relative;
+    }
+
+    .app-content {
+        grid-column: 1;
+        height: auto;
+        min-height: auto;
+        position: relative;
+        overflow: visible;
+    }
+
+
+}
+
+/* ============================================================
+   App CARD (flat, no rounded corners, margin-based separation)
+   ============================================================ */
+.app-card {
+    background: var(--app-pane);
+    padding: var(--app-space-6);
+    margin-bottom: 1px;
+    border: none;
+}
+
+.app-card + .app-card {
+    margin-top: var(--app-space-4);
+}
+
+/* ============================================================
+   ANIMATIONS (minimal, no GSAP-style heavy motion)
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+    .fade-in {
+        animation: appFadeIn var(--app-duration-normal) var(--app-easing) both;
+    }
+
+    @keyframes appFadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .slide-up {
+        animation: appSlideUp var(--app-duration-normal) var(--app-easing) both;
+    }
+
+    @keyframes appSlideUp {
+        from { opacity: 0; transform: translateY(4px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+}
+
+/* ============================================================
+   LEGACY ALIASES — map old --md-* tokens to --app-* for
+   backward compatibility during migration
+   ============================================================ */
+:root {
+    --md-primary: var(--app-accent);
+    --md-on-primary: var(--app-on-accent);
+    --md-surface: var(--app-pane);
+    --md-on-surface: var(--app-text);
+    --md-surface-variant: var(--app-pane);
+    --md-on-surface-variant: var(--app-text-secondary);
+    --md-outline: var(--app-border);
+    --md-outline-variant: var(--app-border);
+    --md-background: var(--app-canvas);
+    --md-on-background: var(--app-text);
+    /* Custom input field tokens from legacy MD3 system */
+    --md-input-bg: var(--app-pane);
+    --md-input-text: var(--app-text);
+    --md-input-border: var(--app-border);
+    --md-input-placeholder: var(--app-text-secondary);
+    --md-input-focus-border: var(--app-accent);
+    --md-input-hover-border: var(--app-text);
+}
+
+/* ============================================================
+   ONBOARDING TOUR
+   ============================================================ */
+.onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.onboarding-step-tooltip {
+    position: fixed;
+    max-width: 320px;
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1px solid var(--app-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    padding: 16px 18px;
+    z-index: 1001;
+}
+
+.onboarding-step-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.onboarding-step-indicator {
+    color: var(--app-text-secondary);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.onboarding-step-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 14px;
+}
+
+.onboarding-skip,
+.onboarding-tooltip-dismiss {
+    background: transparent;
+    color: var(--app-text);
+    font-weight: 400;
+}
+
+.onboarding-skip:hover,
+.onboarding-tooltip-dismiss:hover {
+    background: var(--app-state-hover);
+}
+
+.onboarding-highlight {
+    outline: 2px solid var(--app-accent);
+    outline-offset: 2px;
+}
+
+.onboarding-tooltip {
+    position: fixed;
+    max-width: 260px;
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1px solid var(--app-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    padding: 12px 14px;
+    z-index: 1001;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.onboarding-tooltip-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}

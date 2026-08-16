@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { calculateDilution, calculateMassPercent, calculateMixing } from "./solutionCalculators.js";
+import { calculateDilution, calculateMassPercent, calculateMixing, calculateKsp, calculateCommonIonEffect } from "./solutionCalculators.js";
 import { predictBondType } from "./bondPredictor.js";
 import { parseBalancedEquation, parseTerm, calculateStoichiometry } from "./stoichiometryCalculator.js";
 import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM, getResultHTML } from "../test/helpers.js";
@@ -425,5 +425,117 @@ describe("Solution Calculators - more edge cases", () => {
 		expect(result.products).toEqual([
 			{ formula: "H2O", coefficient: 2 },
 		]);
+	});
+});
+
+describe("Ksp Calculator - charge display", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("displays correct charges for AB2 salt (e.g. CaCl2: Ca^2+, Cl^1-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "AB2", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For AB2 (e.g. CaCl2): A is cation with charge +2 (= stoichB), B is anion with charge -1 (= stoichA)
+		expect(html).toContain("[A<sup>2+</sup>]");
+		expect(html).toContain("[B<sup>1-</sup>]");
+	});
+
+	it("displays correct charges for A2B salt (e.g. Na2S: Na^1+, S^2-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "A2B", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For A2B (e.g. Na2S): A is cation with charge +1 (= stoichB), B is anion with charge -2 (= stoichA)
+		expect(html).toContain("[A<sup>1+</sup>]");
+		expect(html).toContain("[B<sup>2-</sup>]");
+	});
+
+	it("displays correct charges for AB3 salt (e.g. FeCl3: Fe^3+, Cl^1-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "AB3", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For AB3 (e.g. FeCl3): A is cation with charge +3 (= stoichB), B is anion with charge -1 (= stoichA)
+		expect(html).toContain("[A<sup>3+</sup>]");
+		expect(html).toContain("[B<sup>1-</sup>]");
+	});
+});
+
+describe("Common Ion Effect - solubility formula", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("A2B salt: solubility includes the /stoichA factor (Na2S with common S^2-)", () => {
+		// Ksp = [A]^2 * [B] = (2s)^2 * (commonIonConc) = 4 s^2 * commonIonConc
+		// s = sqrt(Ksp / commonIonConc) / stoichA = sqrt(1.48e-8 / 0.1) / 2
+		//   = sqrt(1.48e-7) / 2 = 3.847e-4 / 2 = 1.9235e-4 -> 0.000192
+		createContainer("common-ion-calc");
+		createSelect("common-ion-salt-type", "A2B", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+		createInput("common-ion-Ksp", "0.0000000148", "common-ion-calc");
+		createInput("common-ion-concentration", "0.1", "common-ion-calc");
+		createResultDiv("common-ion-result", "common-ion-calc");
+
+		calculateCommonIonEffect();
+
+		const html = getResultHTML("common-ion-result");
+		// Correct solubility is 0.000192 M; buggy formula (missing /stoichA) gives 0.000385 M
+		expect(html).toContain("Molar Solubility (with common ion) = 0.000192 M");
+		expect(html).not.toContain("Molar Solubility (with common ion) = 0.000385 M");
+	});
+
+	it("A3B salt: solubility includes the /stoichA factor", () => {
+		// Ksp = [A]^3 * [B] = (3s)^3 * (commonIonConc) = 27 s^3 * commonIonConc
+		// s = (Ksp / commonIonConc)^(1/3) / stoichA = (1.48e-12 / 0.05)^(1/3) / 3
+		//   = (2.96e-11)^(1/3) / 3 = 3.093e-4 / 3 = 1.031e-4 -> 0.000103
+		createContainer("common-ion-calc");
+		createSelect("common-ion-salt-type", "A3B", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+		createInput("common-ion-Ksp", "0.00000000000148", "common-ion-calc");
+		createInput("common-ion-concentration", "0.05", "common-ion-calc");
+		createResultDiv("common-ion-result", "common-ion-calc");
+
+		calculateCommonIonEffect();
+
+		const html = getResultHTML("common-ion-result");
+		// Correct solubility is 0.000103 M; buggy formula gives 0.000309 M
+		expect(html).toContain("Molar Solubility (with common ion) = 0.000103 M");
+		expect(html).not.toContain("Molar Solubility (with common ion) = 0.000309 M");
+	});
+
+	it("rejects zero common ion concentration instead of returning Infinity", () => {
+		// With commonIonConc = 0 the formula Ksp / commonIonConc^stoichB divides by
+		// zero and yields Infinity, which is meaningless for this calculator.
+		createContainer("common-ion-calc");
+		createSelect("common-ion-salt-type", "AB", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+		createInput("common-ion-Ksp", "0.00000000018", "common-ion-calc");
+		createInput("common-ion-concentration", "0", "common-ion-calc");
+		createResultDiv("common-ion-result", "common-ion-calc");
+
+		calculateCommonIonEffect();
+
+		const html = getResultHTML("common-ion-result");
+		expect(html).not.toContain("Infinity");
+		expect(html).toContain("Error");
 	});
 });

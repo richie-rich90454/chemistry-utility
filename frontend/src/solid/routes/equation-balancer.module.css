@@ -1,0 +1,298 @@
+.input{
+    margin: 0 var(--app-space-5) var(--app-space-3) var(--app-space-5);
+    width: calc(100% - 2 * var(--app-space-5));
+    padding: 10px var(--app-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.9rem;
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
+    border-radius: 0;
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-normal) var(--app-easing),
+                color var(--app-duration-normal) var(--app-easing);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    min-height: 48px;
+}
+.input::placeholder{
+    color: var(--app-text-secondary);
+    opacity: 1;
+}
+.input:hover{
+    border-color: var(--app-text);
+}
+.input:focus{
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
+    outline: none;
+    border-width: 2px;
+    padding: 9px 15px;
+}
+.select{
+    margin: 0 var(--app-space-5) var(--app-space-3) var(--app-space-5);
+    width: calc(100% - 2 * var(--app-space-5));
+    padding: 10px var(--app-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.9rem;
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
+    border-radius: 0;
+    min-height: 48px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.select:focus{
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
+    outline: none;
+    border-width: 2px;
+    padding: 9px 15px;
+}
+.buttonRow{
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-3) var(--app-space-5);
+    display: flex;
+    gap: var(--app-space-3);
+    flex-wrap: wrap;
+}
+.button{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--app-space-2);
+    padding: 0 var(--app-space-6);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--app-on-accent);
+    background-color: var(--app-accent);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-fast) var(--app-easing),
+                transform var(--app-duration-fast) var(--app-easing);
+    min-height: 42px;
+    width: auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: none;
+}
+.button:hover{
+    box-shadow: none;
+    background-color: var(--app-accent-hover);
+}
+.button:active{
+    opacity: 0.85;
+}
+.button:disabled{
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.button:focus-visible{
+    outline: 2px solid var(--app-accent);
+    outline-offset: 2px;
+}
+.secondaryButton{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--app-space-2);
+    padding: 0 var(--app-space-6);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--app-text);
+    background-color: var(--app-pane);
+    border: 1.5px solid var(--app-border);
+    border-radius: 0;
+    cursor: pointer;
+    transition: box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-fast) var(--app-easing),
+                border-color var(--app-duration-fast) var(--app-easing);
+    min-height: 42px;
+    width: auto;
+}
+.secondaryButton:hover{
+    box-shadow: none;
+    border-color: var(--app-text-secondary);
+    background: var(--app-state-hover);
+}
+.secondaryButton:disabled{
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.secondaryButton:focus-visible{
+    outline: 2px solid var(--app-accent);
+    outline-offset: 2px;
+}
+.result{
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
+    position: relative;
+    padding: var(--app-space-4) var(--app-space-5);
+    background: var(--app-pane);
+    border: 1px solid var(--app-border);
+    border-left: 4px solid var(--app-accent);
+    border-radius: 0;
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.95rem;
+    overflow-wrap: break-word;
+    line-height: 1.6;
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-normal) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing);
+}
+.result:hover{
+    box-shadow: none;
+}
+.result:empty{
+    display: none;
+}
+.result p{
+    margin: 0.125rem 0;
+    color: var(--app-text);
+    padding: 0;
+}
+.result.error{
+    border-color: transparent;
+    border-left-color: var(--app-error);
+    background: transparent;
+}
+.result.error p{
+    color: var(--app-error);
+}
+.equation{
+    font-family: "Noto Sans", sans-serif;
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--app-text);
+    padding: var(--app-space-2) 0;
+    overflow-wrap: break-word;
+}
+.term{
+    display: inline;
+    white-space: nowrap;
+}
+.coefficient{
+    display: inline-block;
+    min-width: 1ch;
+    padding: 0 var(--app-space-1);
+    margin-right: 2px;
+    border-radius: 0;
+    background: var(--app-state-active);
+    color: var(--app-accent);
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1.4;
+    box-shadow: 0 0 0 1px var(--app-border);
+}
+.operator{
+    display: inline;
+    color: var(--app-text-secondary);
+    font-weight: 600;
+    margin: 0 var(--app-space-1);
+}
+.explanationDetails{
+    margin-top: var(--app-space-3);
+    border: 1px solid var(--app-border);
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--app-pane);
+}
+.explanationDetails[open]{
+    border-color: var(--app-text-secondary);
+    box-shadow: none;
+}
+.explanationDetails summary{
+    padding: var(--app-space-3) var(--app-space-4);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--app-text-secondary);
+    cursor: pointer;
+    background: transparent;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+}
+.explanationDetails summary::-webkit-details-marker{
+    display: none;
+}
+.explanationDetails summary::before{
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid currentColor;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transition: transform var(--app-duration-normal) var(--app-easing);
+    flex-shrink: 0;
+}
+.explanationDetails[open] summary::before{
+    transform: rotate(90deg);
+}
+.explanationDetails summary:hover{
+    background: var(--app-state-hover);
+    color: var(--app-text);
+}
+.explanationDetails summary:focus-visible{
+    outline: 2px solid var(--app-accent);
+    outline-offset: -2px;
+}
+.explanationDetails[open] summary{
+    color: var(--app-text);
+    border-bottom: 1px solid var(--app-border);
+}
+.explanationBody{
+    padding: var(--app-space-4);
+    margin: 0;
+}
+.explanationBody p{
+    margin: 0.25rem 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--app-text-secondary);
+}
+.explanationBody p strong{
+    color: var(--app-text);
+    font-weight: 600;
+}
+.explanationBody ol{
+    margin: 0.5rem 0 0;
+    padding-left: 1.5rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--app-text-secondary);
+}
+.explanationBody ol li{
+    margin: 0.125rem 0;
+}
+.labelText{
+    display: block;
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-1) var(--app-space-5);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--app-text-secondary);
+}
+@media (max-width: 720px){
+    .buttonRow{
+        flex-direction: column;
+    }
+    .button,
+    .secondaryButton{
+        width: 100%;
+    }
+    .equation{
+        font-size: 1rem;
+    }
+}

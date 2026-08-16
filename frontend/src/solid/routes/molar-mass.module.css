@@ -1,0 +1,229 @@
+.card{
+    background: var(--app-pane);
+    border-radius: 0;
+    border: 1px solid var(--app-border);
+    margin-bottom: var(--app-space-6);
+    overflow: hidden;
+    box-shadow: none;
+    transition: box-shadow var(--app-duration-normal) var(--app-easing),
+                border-color var(--app-duration-normal) var(--app-easing),
+                transform var(--app-duration-normal) var(--app-easing);
+}
+.card:hover{
+    box-shadow: none;
+    border-color: var(--app-text-secondary);
+}
+.card h2{
+    font-size: clamp(1.05rem, 1rem + 0.3vw, 1.3rem);
+    font-weight: 600;
+    padding: var(--app-space-5) var(--app-space-5) var(--app-space-3);
+    margin-bottom: 0;
+    color: var(--app-text);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+}
+.card h2::before{
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 24px;
+    border-radius: 0;
+    background: var(--app-accent);
+    flex-shrink: 0;
+}
+.toolDescription{
+    padding: 0 var(--app-space-5);
+    margin-bottom: var(--app-space-3);
+    color: var(--app-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.input{
+    margin: 0 var(--app-space-5) var(--app-space-3) var(--app-space-5);
+    width: calc(100% - 2 * var(--app-space-5));
+    padding: 10px var(--app-space-4);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.9rem;
+    background: var(--app-pane);
+    color: var(--app-text);
+    border: 1.5px solid var(--app-border);
+    border-radius: 0;
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-normal) var(--app-easing),
+                color var(--app-duration-normal) var(--app-easing);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    min-height: 48px;
+
+}
+.input::placeholder{
+    color: var(--app-text-secondary);
+    opacity: 1;
+}
+.input:hover{
+    border-color: var(--app-text);
+}
+.input:focus{
+    border-color: var(--app-accent);
+    box-shadow: 0 0 0 3px var(--app-state-active);
+    outline: none;
+    border-width: 2px;
+    padding: 9px 15px;
+}
+.button{
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--app-space-2);
+    padding: 0 var(--app-space-6);
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: var(--app-on-accent);
+    background-color: var(--app-accent);
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    transition: box-shadow var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-fast) var(--app-easing),
+                transform var(--app-duration-fast) var(--app-easing);
+    min-height: 42px;
+    width: auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: none;
+}
+.button:hover{
+    box-shadow: none;
+    background-color: var(--app-accent-hover);
+}
+.button:active{
+    opacity: 0.85;
+}
+.button:disabled{
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.button:focus-visible{
+    outline: 2px solid var(--app-accent);
+    outline-offset: 2px;
+}
+.label {
+    display: block;
+    font: var(--app-font-label);
+    letter-spacing: var(--app-label-tracking);
+    text-transform: uppercase;
+    color: var(--app-text-secondary);
+    margin-bottom: var(--app-space-2);
+}
+.result{
+    margin: var(--app-space-3) var(--app-space-5) var(--app-space-5) var(--app-space-5);
+    position: relative;
+    padding: var(--app-space-4) var(--app-space-5);
+    background: var(--app-pane);
+    border: 1px solid var(--app-border);
+    border-left: 4px solid var(--app-accent);
+    border-radius: 0;
+    font-family: "Noto Sans", sans-serif;
+    font-size: 0.95rem;
+    overflow-wrap: break-word;
+    line-height: 1.6;
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                background-color var(--app-duration-normal) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing);
+}
+.result:hover{
+    box-shadow: none;
+}
+.result:empty{
+    display: none;
+}
+.result p{
+    margin: 0.125rem 0;
+    color: var(--app-text);
+    padding: 0;
+}
+.result.error{
+    border-color: transparent;
+    border-left-color: var(--app-error);
+    background: transparent;
+}
+.result.error p{
+    color: var(--app-error);
+}
+.exampleDetails{
+    margin: var(--app-space-4) var(--app-space-5) 0 var(--app-space-5);
+    border: 1px solid var(--app-border);
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--app-pane);
+    transition: border-color var(--app-duration-fast) var(--app-easing),
+                box-shadow var(--app-duration-fast) var(--app-easing);
+}
+.exampleDetails[open]{
+    border-color: var(--app-text-secondary);
+    box-shadow: none;
+}
+.exampleDetails summary{
+    padding: var(--app-space-3) var(--app-space-4);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--app-text-secondary);
+    cursor: pointer;
+    background: transparent;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: var(--app-space-3);
+}
+.exampleDetails summary::-webkit-details-marker{
+    display: none;
+}
+.exampleDetails summary::before{
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 6px solid currentColor;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    transition: transform var(--app-duration-normal) var(--app-easing);
+    flex-shrink: 0;
+}
+.exampleDetails[open] summary::before{
+    transform: rotate(90deg);
+}
+.exampleDetails summary:hover{
+    background: var(--app-state-hover);
+    color: var(--app-text);
+}
+.exampleDetails summary:focus-visible{
+    outline: 2px solid var(--app-accent);
+    outline-offset: -2px;
+}
+.exampleDetails[open] summary{
+    color: var(--app-text);
+    border-bottom: 1px solid var(--app-border);
+}
+.exampleDetails p{
+    padding: var(--app-space-4);
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--app-text-secondary);
+}
+.exampleDetails p strong{
+    color: var(--app-accent);
+    cursor: pointer;
+    font-weight: 600;
+}
+.exampleDetails p strong:hover{
+    text-decoration: underline;
+}
