@@ -1,8 +1,11 @@
 package db
+
 import (
 	"time"
+
 	"github.com/google/uuid"
 )
+
 type Calculation struct {
 	ID             uuid.UUID
 	UserID         uuid.UUID
