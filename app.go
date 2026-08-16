@@ -17,11 +17,11 @@ import (
 
 // App is the main Wails application struct
 type App struct {
-	ctx         context.Context
-	ptableSvc   *PTableService
-	apiServer   *http.Server
-	apiURL      string
-	db          *sql.DB
+	ctx       context.Context
+	ptableSvc *PTableService
+	apiServer *http.Server
+	apiURL    string
+	db        *sql.DB
 }
 
 // NewApp creates a new App instance
