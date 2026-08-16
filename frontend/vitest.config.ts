@@ -12,7 +12,7 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             reporter: ["text", "html", "lcov"],
-            include: ["src/modules/**/*.ts", "src/script.ts"],
+            include: ["src/modules/**/*.ts"],
             exclude: [
                 "**/*.test.ts",
                 "**/*.d.ts",
@@ -24,11 +24,6 @@ export default defineConfig({
                 // testing rather than unit tests.
                 // Coverage is enforced via integration/E2E tests instead.
                 "src/modules/pluginManagerUI.ts",
-                // Entry-point bootstrap: wires every subsystem together inside a
-                // DOMContentLoaded handler with async data loading (Wails bindings
-                // or fetch+cache), dynamic imports, and singleton initialization
-                // with side effects. Exercised end-to-end via Playwright E2E.
-                "src/script.ts",
                 // 3D molecule rendering via SmilesDrawer on <canvas>. Requires a
                 // real WebGL/canvas implementation (not available in jsdom) and
                 // user-driven pan/zoom interactions. Covered by visual/E2E tests.
