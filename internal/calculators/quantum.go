@@ -12,10 +12,6 @@ const (
 	planck = 6.626e-34
 	// Reduced Planck constant (ℏ) in J·s
 	hbar = 1.055e-34
-	// Speed of light in m/s
-	speedOfLight = 2.998e8
-	// Electron mass in kg
-	electronMass = 9.109e-31
 	// Elementary charge in C
 	elementaryCharge = 1.602e-19
 )
@@ -82,12 +78,12 @@ func QuantumNumbers(ctx context.Context, input CalculationInput) (CalculationRes
 		Unit:  "",
 		Steps: steps,
 		Metadata: map[string]interface{}{
-			"valid":   valid,
-			"n":       n,
-			"l":       l,
-			"ml":      ml,
-			"ms":      ms,
-			"shell":   shell,
+			"valid":    valid,
+			"n":        n,
+			"l":        l,
+			"ml":       ml,
+			"ms":       ms,
+			"shell":    shell,
 			"subshell": subshell,
 		},
 	}, nil
