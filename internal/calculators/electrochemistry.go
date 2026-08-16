@@ -170,9 +170,9 @@ func Electrolysis(ctx context.Context, input CalculationInput) (CalculationResul
 	}
 
 	return CalculationResult{
-		Value: result,
-		Unit:  unit,
-		Steps: []string{fmt.Sprintf("Faraday's law: m = (I × t × M) / (z × F)")},
+		Value:    result,
+		Unit:     unit,
+		Steps:    []string{"Faraday's law: m = (I × t × M) / (z × F)"},
 		Metadata: map[string]interface{}{"solveFor": solveFor},
 	}, nil
 }
