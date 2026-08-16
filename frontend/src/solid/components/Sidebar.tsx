@@ -73,7 +73,7 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
         if (props.onToggle) props.onToggle();
     }
     return (
-        <aside class={styles.sidebar} role="navigation" aria-label="Calculator sidebar" data-collapsed={collapsed() || undefined}>
+        <aside class={styles.sidebar} role="navigation" aria-label="Calculator sidebar" data-collapsed={collapsed() || undefined} data-tour="sidebar">
             <div class={styles.sidebarHeader}>
                 <h1>Chemistry Utility</h1>
                 <div class={styles.headerTop}>
@@ -93,7 +93,7 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                     <ThemeToggle />
                 </div>
             </div>
-            <div class={styles.sidebarSearch} role="search">
+            <div class={styles.sidebarSearch} role="search" data-tour="sidebar-search">
                 <span class={styles.searchIcon}>
                     <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16">
                         <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
@@ -104,7 +104,7 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
             </div>
             <WorkspaceList />
             <div class={styles.navRecent} />
-            <nav class={styles.sidebarNav}>
+            <nav class={styles.sidebarNav} data-tour="sidebar-nav">
                 <ul>
                     <For each={groupByCategory(filteredCalculators())}>
                         {(group) => (
