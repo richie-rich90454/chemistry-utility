@@ -62,7 +62,7 @@ function ElementLookup(): JSX.Element {
                 <p><strong>Ionization Energy:</strong> {formatOptional(el.ionizationEnergy, " kJ/mol")}</p>
                 <p><strong>Valence Electrons:</strong> {String(el.valenceElectrons)}</p>
                 <p><strong>Total Electrons:</strong> {String(el.totalElectrons)}</p>
-                <p><strong>Group:</strong> {String(el.group)}</p>
+                <p><strong>Group:</strong> {el.group === null ? "n/a" : String(el.group)}</p>
                 <p><strong>Period:</strong> {String(el.period)}</p>
                 <p><strong>Type:</strong> {el.type}</p>
             </div>
