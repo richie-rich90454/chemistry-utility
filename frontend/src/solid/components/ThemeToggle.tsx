@@ -40,7 +40,7 @@ function ThemeToggle(): JSX.Element {
         return SUN_PATH;
     }
     return (
-        <button class={styles.themeToggle} type="button" aria-label={getAriaLabel()} aria-pressed={getAriaPressed()} onClick={handleClick}>
+        <button id="theme-toggle" class={styles.themeToggle} type="button" aria-label={getAriaLabel()} aria-pressed={getAriaPressed()} onClick={handleClick}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d={getIconPath()} />
             </svg>
