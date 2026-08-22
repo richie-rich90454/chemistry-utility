@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"regexp"
-	"strings"
 )
 
 // StoichTerm represents a term in a balanced equation with a coefficient and formula.
@@ -46,22 +45,18 @@ func parseFloat(s string) (float64, error) {
 }
 
 // parseStoichEquation parses a balanced equation into reactant and product terms.
+// Uses the charge-aware term splitter from ParseEquation so ion equations
+// like "Na+ + Cl- -> NaCl" parse correctly.
 func parseStoichEquation(equation string) (reactants []StoichTerm, products []StoichTerm, err error) {
-	cleaned := strings.ReplaceAll(equation, " ", "")
-	parts := regexp.MustCompile(`->|=`).Split(cleaned, -1)
-	if len(parts) != 2 {
-		return nil, nil, errors.New("invalid equation format: missing '->' or '='")
+	reactantTerms, productTerms, err := ParseEquation(equation)
+	if err != nil {
+		return nil, nil, err
 	}
-
-	for _, term := range strings.Split(parts[0], "+") {
-		if term != "" {
-			reactants = append(reactants, parseStoichTerm(term))
-		}
+	for _, term := range reactantTerms {
+		reactants = append(reactants, parseStoichTerm(term))
 	}
-	for _, term := range strings.Split(parts[1], "+") {
-		if term != "" {
-			products = append(products, parseStoichTerm(term))
-		}
+	for _, term := range productTerms {
+		products = append(products, parseStoichTerm(term))
 	}
 	return reactants, products, nil
 }
