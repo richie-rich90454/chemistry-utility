@@ -92,14 +92,17 @@ describe("PerformanceMonitor", () => {
 
     describe("measure with PerformanceObserver", () => {
         let observeSpy: ReturnType<typeof vi.fn>;
+        let disconnectSpy: ReturnType<typeof vi.fn>;
         let observerCallbacks: Array<(entryList: PerformanceObserverEntryList) => void>;
 
         beforeEach(() => {
             observeSpy = vi.fn();
+            disconnectSpy = vi.fn();
             observerCallbacks = [];
 
-            function MockPerformanceObserver(this: { observe: typeof observeSpy }, callback: (entryList: PerformanceObserverEntryList) => void): void {
+            function MockPerformanceObserver(this: { observe: typeof observeSpy; disconnect: typeof disconnectSpy }, callback: (entryList: PerformanceObserverEntryList) => void): void {
                 this.observe = observeSpy;
+                this.disconnect = disconnectSpy;
                 observerCallbacks.push(callback);
             }
 
@@ -263,14 +266,20 @@ describe("PerformanceMonitor", () => {
         });
 
         it("does not call console.info in production mode", () => {
-            const originalNodeEnv = process.env.NODE_ENV;
-            process.env.NODE_ENV = "production";
-            PerformanceMonitor.resetInstance();
-            const infoSpy = vi.spyOn(console, "info").mockImplementation(function (): void {});
-            const monitor = PerformanceMonitor.getInstance();
-            monitor.reportToConsole();
-            expect(infoSpy).not.toHaveBeenCalled();
-            process.env.NODE_ENV = originalNodeEnv;
+            // detectProduction reads import.meta.env.PROD (the Vite build flag).
+            const env = import.meta.env as { PROD: boolean };
+            const originalProd = env.PROD;
+            env.PROD = true;
+            try {
+                PerformanceMonitor.resetInstance();
+                const infoSpy = vi.spyOn(console, "info").mockImplementation(function (): void {});
+                const monitor = PerformanceMonitor.getInstance();
+                monitor.reportToConsole();
+                expect(infoSpy).not.toHaveBeenCalled();
+            } finally {
+                env.PROD = originalProd;
+                PerformanceMonitor.resetInstance();
+            }
         });
     });
 
