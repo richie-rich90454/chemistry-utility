@@ -107,9 +107,9 @@ describe("ComparisonModal", function (): void {
         let itemB: ComparisonItem = {"calculationId": "c2", "data": {"result": {"value": 150}}};
         mocks.mockItems.mockReturnValue([itemA, itemB]);
         let result = renderModal();
-        let rows: HTMLElement[] = result.container.querySelectorAll("tbody tr");
+        let rows = Array.from(result.container.querySelectorAll<HTMLElement>("tbody tr"));
         expect(rows.length).toBe(1);
-        let cells: HTMLElement[] = rows[0].querySelectorAll("td");
+        let cells = Array.from(rows[0].querySelectorAll<HTMLElement>("td"));
         expect(cells[3].textContent).toBe("40.00%");
     });
     it("calls closeModal when close button is clicked", function (): void {
