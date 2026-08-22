@@ -1,20 +1,31 @@
 # Chemistry Utility API — Developer Guide
 
-This guide explains how to integrate with the Chemistry Utility REST API: authentication,
-rate limiting, errors, pagination, role-based access, calculators, and workspace
-collaboration. For the full machine-readable contract, see the
+This guide documents the Chemistry Utility REST API: endpoints, rate limiting,
+errors, pagination, calculator inputs, compound search, and plugin storage.
+For the full machine-readable contract, see the
 [OpenAPI 3.1 specification](../api/openapi.yaml) or browse it interactively at
 `/api/docs` (Swagger UI) once the server is running.
+
+The API is **public and anonymous**: there is no authentication, no user
+accounts, and no server-side history. Two deployment targets exist:
+
+- **Web server** (`cmd/server`): runs without any database. Calculator
+  endpoints work; database-backed features (compound search, plugins) respond
+  `501 Not Implemented`.
+- **Desktop app** (Wails): starts the same API in-process on a random loopback
+  port (exposed to the frontend via the `App.GetAPIURL` binding) backed by a
+  local SQLite (or PostgreSQL) database. Compound search and plugin storage
+  work there.
 
 ## Table of Contents
 - [Base URL](#base-url)
 - [Authentication](#authentication)
-- [Role-Based Access Control](#role-based-access-control)
 - [Rate Limiting](#rate-limiting)
 - [Errors (RFC 7807)](#errors-rfc-7807)
 - [Pagination](#pagination)
 - [Calculators](#calculators)
-- [Workspaces & Collaboration](#workspaces--collaboration)
+- [Compounds](#compounds)
+- [Plugins](#plugins)
 - [Example API Calls](#example-api-calls)
 - [Interactive Documentation](#interactive-documentation)
 
@@ -28,7 +39,8 @@ under `/api/docs` (no version prefix).
 | Environment | Base URL |
 | --- | --- |
 | Local development | `http://localhost:6005/api/v1` |
-| Production | `https://api.chemistry-utility.dev/api/v1` |
+| Desktop app | `http://127.0.0.1:<random port>/api/v1` (per-run port via Wails binding) |
+| Production | Your deployment of `cmd/server`; default port is `6005` |
 
 The default local server port is `6005` (overridable via the `PORT` env var).
 
@@ -36,162 +48,40 @@ The default local server port is `6005` (overridable via the `PORT` env var).
 
 ## Authentication
 
-The API uses JWT bearer tokens. There are three ways to obtain tokens:
-email/password registration, email/password login, or OAuth (GitHub/Google).
-
-### 1. Register a new account
-
-`POST /auth/register` creates a user with the default `student` role and returns
-the user profile plus a token pair.
-
-```bash
-curl -X POST http://localhost:6005/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"alice@example.com","password":"super-secret-123","name":"Alice Doe"}'
-```
-
-Response (201):
-```json
-{
-  "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "email": "alice@example.com",
-    "name": "Alice Doe",
-    "role": "student",
-    "email_verified": false,
-    "created_at": "2026-07-17T10:00:00Z",
-    "updated_at": "2026-07-17T10:00:00Z"
-  },
-  "tokens": {
-    "AccessToken": "eyJhbGciOi...",
-    "RefreshToken": "eyJhbGciOi...",
-    "AccessExpiry": "2026-07-17T10:15:00Z",
-    "RefreshExpiry": "2026-07-24T10:00:00Z"
-  }
-}
-```
-
-### 2. Log in with email and password
-
-`POST /auth/login` validates credentials and returns a fresh token pair.
-
-```bash
-curl -X POST http://localhost:6005/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"alice@example.com","password":"super-secret-123"}'
-```
-
-### 3. Refresh access tokens
-
-Access tokens are short-lived (15 minutes by default). When an access token
-expires, exchange the refresh token for a new pair using `POST /auth/refresh`.
-Refresh tokens live for 7 days by default.
-
-```bash
-curl -X POST http://localhost:6005/api/v1/auth/refresh \
-  -H "Content-Type: application/json" \
-  -d '{"refresh_token":"<refresh-token-from-login>"}'
-```
-
-### 4. OAuth login (GitHub / Google)
-
-OAuth is a two-step redirect flow. The server exposes dedicated endpoints per
-provider rather than a generic `{provider}` path:
-
-1. `GET /auth/github` (or `/auth/google`) — redirects the user agent to the
-   provider's authorization page. Returns `404` if the provider is not
-   configured (no client ID set).
-2. The provider redirects back to `GET /auth/github/callback` (or
-   `/auth/google/callback`) with a `code` query parameter. The server exchanges
-   the code, finds or creates the user, and returns an `AuthResponse` JSON
-   body containing `user` and `tokens`.
-
-Typical browser flow:
-```
-GET /api/v1/auth/github
-  -> 302 https://github.com/login/oauth/authorize?client_id=...
-  -> user authorizes
-  -> 302 /api/v1/auth/github/callback?code=...
-  -> 200 { "user": {...}, "tokens": {...} }
-```
-
-### Using the access token
-
-Send the access token in the `Authorization` header as a bearer token:
-
-```
-Authorization: Bearer <access-token>
-```
-
-Endpoints marked as "authenticated" in the OpenAPI spec require this header.
-Public endpoints (calculators, compound search) do not.
-
-### Password reset
-
-- `POST /auth/forgot-password` — submits an email and **always returns 200**
-  to prevent email enumeration. A reset token is issued server-side (the
-  delivery mechanism is environment-dependent).
-- `POST /auth/reset-password` — submits the reset `token` and a new `password`
-  (minimum 8 characters). Returns 200 on success or 400 for an invalid/expired
-  token.
-
----
-
-## Role-Based Access Control
-
-Every authenticated user has a role that determines which endpoints they can
-access. Roles are hierarchical in intent but enforced via an explicit
-allow-list in `auth.RBACMiddleware`.
-
-| Role | Capabilities |
-| --- | --- |
-| `student` (default) | Use calculators, manage own calculations and workspaces. |
-| `researcher` | Student permissions **plus** API key management (`/api-keys`). |
-| `educator` | Same as `researcher` (granted by admins). |
-| `admin` | Full access: analytics, plugins, all user data, all workspaces. |
-
-Route groups and their required roles:
-
-| Route prefix | Required role |
-| --- | --- |
-| `/auth/*`, `/calculators/*`, `/compounds/*` | Public (no auth) |
-| `/users/me`, `/calculations/*`, `/workspaces/*` | Any authenticated user |
-| `/api-keys/*` | `researcher`, `educator`, or `admin` |
-| `/analytics/*`, `/plugins/*` | `admin` only |
-
-For per-resource access (e.g. viewing or deleting a single calculation),
-ownership is checked in addition to authentication: only the owner of a
-resource or an `admin` may read, modify, or delete it.
+None. The API is anonymous by design — calculations never touch a database and
+no user data is stored server-side.
 
 ---
 
 ## Rate Limiting
 
-Rate limiting is applied **per client IP** with a sliding one-minute window.
+Rate limiting is applied per client IP with a fixed one-minute window on all
+`/api/v1` routes.
 
 | Scope | Default limit |
 | --- | --- |
-| Public routes (`/calculators`, `/compounds`) | 100 requests/minute |
-| Authenticated routes | Not rate-limited at the middleware level (effectively higher) |
-| Auth routes (`/auth/*`) | Not rate-limited |
+| All `/api/v1` routes | 100 requests/minute |
 
-The public limit is configurable via `Config.RateLimitPerMinute` (defaults to
-`100`). When the limit is exceeded, the server responds with `429 Too Many
-Requests` and a JSON body:
+The limit is configurable:
+
+- Web server: `RATE_LIMIT_PER_MINUTE` env var (defaults to `100`).
+- Programmatic: `Config.RateLimitPerMinute`.
+
+When the limit is exceeded, the server responds with `429 Too Many Requests`
+and a plain JSON body (not Problem Details):
 
 ```json
 { "error": "rate limit exceeded" }
 ```
 
-Note: the 429 response from the rate-limit middleware is a plain `{"error":...}`
-shape rather than the RFC 7807 Problem Details format used elsewhere — see
-[Errors](#errors-rfc-7807).
+Client IP resolution ignores spoofable `X-Forwarded-For` headers unless the
+proxy's CIDR is listed in the `TRUSTED_PROXIES` env var (web server only).
 
 ---
 
 ## Errors (RFC 7807)
 
-All error responses from API handlers use **RFC 7807 Problem Details** with the
+Error responses from API handlers use **RFC 7807 Problem Details** with the
 `application/problem+json` media type. The shape is:
 
 ```json
@@ -199,8 +89,8 @@ All error responses from API handlers use **RFC 7807 Problem Details** with the
   "type": "https://chemistry-utility.dev/errors/400",
   "title": "Bad Request",
   "status": 400,
-  "detail": "missing required field: email",
-  "instance": "/api/v1/auth/register"
+  "detail": "missing search query parameter 'q'",
+  "instance": "/api/v1/compounds"
 }
 ```
 
@@ -216,41 +106,18 @@ Common status codes returned by the API:
 
 | Status | Title | When |
 | --- | --- | --- |
-| 400 | Bad Request | Validation failure, malformed JSON, invalid UUID. |
-| 401 | Unauthorized | Missing/invalid/expired JWT, invalid credentials. |
-| 403 | Forbidden | Authenticated but lacks role or ownership. |
-| 404 | Not Found | Resource does not exist, or OAuth provider not configured. |
-| 409 | Conflict | Email already registered. |
+| 400 | Bad Request | Validation failure, malformed JSON, calculation error, invalid UUID. |
+| 404 | Not Found | Unknown calculator type or resource id. |
 | 429 | Too Many Requests | Rate limit exceeded (plain JSON shape, see above). |
-| 500 | Internal Server Error | Unexpected server failure. |
+| 500 | Internal Server Error | Unexpected server failure (generic detail; full error logged server-side only). |
+| 501 | Not Implemented | Database-backed feature requested from the anonymous web build. |
 
 ---
 
 ## Pagination
 
-Two pagination styles are used in the API, depending on the endpoint. Both are
-documented per-endpoint in the OpenAPI spec.
-
-### Page-based (`page` + `limit`)
-
-Used by `GET /calculations`:
-
-| Parameter | Default | Range |
-| --- | --- | --- |
-| `page` | 1 | ≥ 1 |
-| `limit` | 20 | 1–100 (clamped to 20 if out of range) |
-
-The offset is computed server-side as `(page - 1) * limit`. The response
-echoes `page` and `limit` alongside `calculations`.
-
-Example:
-```
-GET /api/v1/calculations?page=2&limit=50
-```
-
-### Offset-based (`limit` + `offset`)
-
-Used by `GET /compounds` (compound search):
+Only compound search paginates, using offset-based (`limit` + `offset`)
+parameters:
 
 | Parameter | Default | Range |
 | --- | --- | --- |
@@ -261,9 +128,6 @@ Example:
 ```
 GET /api/v1/compounds?q=water&limit=10&offset=20
 ```
-
-`GET /workspaces` and `GET /workspaces/{id}/calculations` return up to 100
-items and do not currently expose pagination parameters.
 
 ---
 
@@ -347,33 +211,33 @@ defaults. Numeric inputs accept JSON numbers (integers or floats).
 | Type | Input keys | Notes |
 | --- | --- | --- |
 | `molar-mass` | `formula` (string, **required**) | e.g. `"H2O"`, `"Ca(OH)2"`. |
-| `equation-balance` | `equation` (string, **required**) | e.g. `"H2 + O2 -> H2O"`. |
-| `stoichiometry` | `equation` (**required**), `mode` (`"product-from-reactant"`, `"reactant-from-product"`, `"limiting-reactant"`), plus mode-specific keys. | |
+| `equation-balance` | `equation` (string, **required**) | e.g. `"H2 + O2 -> H2O"`. Accepts ion charges like `"Fe2+ + Fe3+"`. |
+| `stoichiometry` | `equation` (**required**), `mode` (`"product-from-reactant"` default, `"reactant-from-product"`, `"limiting-reactant"`), plus mode-specific keys. | |
 | `dilution` | `C1`, `V1`, `C2`, `V2`, `solveFor` (one of `C1`/`V1`/`C2`/`V2`, **required**). | |
-| `mass-percent` | `solute`, `solution`, `unit` (`"percent"`, `"ppm"`, `"ppb"`). | |
+| `mass-percent` | `solute`, `solution`, `unit` (`"percent"` default, `"ppm"`, `"ppb"`). | |
 | `solution-mixing` | `C1`, `V1`, `C2`, `V2`. | Mixes two solutions. |
 | `ideal-gas` | `P`, `V`, `n`, `T`, `solveFor` (one of `P`/`V`/`n`/`T`, **required**), `units` (`"atm-L"` default or `"SI"`). | PV = nRT. |
 | `combined-gas` | `P1`, `V1`, `T1`, `P2`, `V2`, `T2`, `solveFor` (**required**). | |
 | `van-der-waals` | `V`, `n`, `T`, `a`, `b`. | |
-| `half-life` | `N0` (initial quantity), `t` (time), `halfLife` (t½), `solveFor` (`"remaining"` default, or `"halfLife"`/`"elapsed"`/`"initial"`). | |
+| `half-life` | `N0` (initial quantity), `t` (time), `halfLife` (t½), `Nt` (remaining quantity), `solveFor` (`"remaining"` default, `"time"`, or `"halfLife"`). | Decay decreases quantity: `Nt < N0`. |
 | `cell-potential` | `E1`, `E2`. | Higher potential is the cathode. |
 | `nernst` | `E_standard`, `T`, `n`, `Q`. | |
-| `electrolysis` | `m` (mass), `I` (current), `t` (time), `z` (charge number), `solveFor`. | |
+| `electrolysis` | `m` (mass), `I` (current), `t` (time), `z` (charge number), `M` (molar mass), `solveFor` (default `"mass"`). | |
 | `bond-type` | `element1` (symbol), `element2` (symbol). | |
 | `gibbs-free-energy` | `deltaH` (kJ/mol), `deltaS` (J/(mol·K)), `T` (K). | ΔG = ΔH − TΔS. |
 | `hess-law` | `deltaHValues` (array of float64). | |
 | `entropy` | `SProducts` (array of float64), `SReactants` (array of float64). | ΔS = ΣS(products) − ΣS(reactants). |
-| `heat-capacity` | `m` (mass), `c` (specific heat), `deltaT` (temperature change), `solveFor` (default `"q"`). | q = mcΔT. |
-| `arrhenius` | `A` (pre-exponential factor), `Ea` (activation energy in J/mol), `T`, `solveFor` (default `"k"`). | |
+| `heat-capacity` | `m` (mass), `c` (specific heat), `deltaT` (temperature change), `q`, `solveFor` (default `"q"`). | q = mcΔT. |
+| `arrhenius` | `A` (pre-exponential factor), `Ea` (activation energy in J/mol), `T`, `k`, `solveFor` (default `"k"`; also `"Ea"`, `"T"`, `"A"`). | |
 | `rate-law` | `k`, `concentrations` (array of float64), `orders` (array of float64). | |
-| `integrated-rate-law` | `order` (0, 1, or 2), `k`, `initialConcentration`, `time`. | |
+| `integrated-rate-law` | `order` (integer 0, 1, or 2), `k`, `initialConcentration`, `time` or `concentration`, `solveFor` (`"concentration"` default, or `"time"`). | |
 | `buffer-solution` | `pKa`, `HA` (acid concentration), `A` (conjugate base concentration). | Henderson–Hasselbalch. |
 | `pka-pkb` | `pKa` or `pKb`, `pKw` (optional, defaults to 14), `solveFor` (default `"pKb"`). | |
-| `ksp` | `Ksp` (to find molar solubility) or `molarSolubility` + `stoichiometry`. | |
-| `colligative-properties` | `mode` (`"boiling"`, `"freezing"`, `"osmotic"`), plus mode-specific keys. | |
-| `titration-curve` | `analyteConcentration`, `analyteVolume`, `titrantConcentration`, ... | |
+| `ksp` | `mode` (`"ksp-to-solubility"` default, `"solubility-to-ksp"`), `Ksp` or `molarSolubility`, `cationCount` (default 1), `anionCount` (default 1). | |
+| `colligative-properties` | `mode` (`"boiling"` default, `"freezing"`, `"osmotic"`), plus mode-specific keys: `Kb`/`m`, `Kf`/`m`, or `M`/`T`/`i`. | |
+| `titration-curve` | `analyteConcentration`, `analyteVolume`, `titrantConcentration`, `mode`, `numPoints` (default 50), `pKa` (weak-acid modes). | |
 | `quantum-numbers` | `n`, `l`, `ml`, `ms`. | |
-| `electron-configuration` | `atomicNumber`. | |
+| `electron-configuration` | `atomicNumber`. | Full Aufbau configuration with known exceptions (Cr, Cu, Nb, Mo, Ru, Rh, Pd, Ag, Pt, Au). |
 | `debroglie-wavelength` | `m` (mass in kg), `v` (velocity in m/s). | |
 | `photoelectric-effect` | `frequency` (Hz), `workFunction` (in J or eV), `solveFor` (default `"KE"`), `unit` (default `"eV"`). | |
 | `heisenberg-uncertainty` | `deltaX` (or `deltaP`), `solveFor` (`"deltaX"`, `"deltaP"`, `"minDeltaX"`, `"minDeltaP"`). | |
@@ -383,62 +247,72 @@ Problem Details response with a message like `"missing required input: formula"`
 
 ---
 
-## Workspaces & Collaboration
+## Compounds
 
-Workspaces let users group calculations together and share them with other
-users. Every workspace has exactly one owner (the creator) and zero or more
-members.
+Compound search queries the local compound table (populated by the desktop
+app's PubChem-backed cache). On the anonymous web build these endpoints
+respond `501 Not Implemented`.
 
-### Lifecycle
+### Search compounds
 
-- `POST /workspaces` — create a workspace. The creator is automatically added
-  as a member with the `owner` role.
-- `GET /workspaces` — list workspaces the current user belongs to.
-- `GET /workspaces/{id}` — fetch a workspace by ID.
-- `PATCH /workspaces/{id}` — update name/description. **Owner or admin only.**
-- `DELETE /workspaces/{id}` — delete a workspace. **Owner or admin only.**
+`GET /compounds?q=<term>` searches by name, formula, CAS number, and SMILES.
 
-### Members
+| Parameter | Meaning |
+| --- | --- |
+| `q` (**required**) | Free-text search term. |
+| `type` | Optional filter: `name`, `formula`, `cas`, or `smiles`. Any other value searches all fields. |
+| `limit` / `offset` | See [Pagination](#pagination). |
 
-- `POST /workspaces/{id}/members` — add a user as a member with a given role.
-  Body: `{"user_id":"<uuid>","role":"member"}`. **Owner or admin only.**
-- `DELETE /workspaces/{id}/members/{userId}` — remove a member.
-  **Owner or admin only.**
+Response:
 
-### Workspace calculations
+```json
+{
+  "compounds": [
+    {
+      "ID": "...",
+      "Name": "Water",
+      "Formula": "H2O",
+      "CASNumber": "7732-18-5",
+      "SMILES": "O",
+      "InChI": "...",
+      "MolarMass": 18.015,
+      "Properties": "{}",
+      "Source": "pubchem",
+      "CreatedAt": "...",
+      "UpdatedAt": "..."
+    }
+  ],
+  "query": "water"
+}
+```
 
-- `GET /workspaces/{id}/calculations` — list all calculations associated with
-  the workspace (up to 100). Calculations are associated with a workspace via
-  their `WorkspaceID` field when saved.
+### Get a compound by ID
 
-### Ownership model
+`GET /compounds/{id}` returns the full compound object (404 if unknown;
+400 for an invalid UUID).
 
-Workspace mutations (update, delete, member add/remove) require the requesting
-user to be the workspace owner or an `admin`. The check is performed in
-`isOwnerOrAdmin` using the workspace's `OwnerID` field.
+---
 
-The same ownership model applies to calculations: only the calculation's owner
-or an `admin` may view, annotate, star, or delete a calculation.
+## Plugins
+
+Plugin registration is persisted in the desktop app's local database. On the
+anonymous web build these endpoints respond `501 Not Implemented`.
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/plugins` | List all plugins. |
+| `POST` | `/plugins` | Create a plugin. Body: `{"name","version","author","manifest"}` (first three required); created disabled. Returns 201. |
+| `PATCH` | `/plugins/{id}/enable` | Enable the plugin. |
+| `PATCH` | `/plugins/{id}/disable` | Disable the plugin. |
+| `DELETE` | `/plugins/{id}` | Delete the plugin. Returns 204. |
+
+Note: these HTTP endpoints manage plugin *records* in the database. The
+frontend plugin runtime (`frontend/src/modules/pluginManager.ts`) manages
+locally installed plugins in browser storage and does not use this API.
 
 ---
 
 ## Example API Calls
-
-### Register and save a token
-
-```bash
-RESP=$(curl -s -X POST http://localhost:6005/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"alice@example.com","password":"super-secret-123","name":"Alice"}')
-TOKEN=$(echo "$RESP" | jq -r '.tokens.AccessToken')
-```
-
-### Call an authenticated endpoint
-
-```bash
-curl http://localhost:6005/api/v1/users/me \
-  -H "Authorization: Bearer $TOKEN"
-```
 
 ### Run the molar-mass calculator (public)
 
@@ -456,61 +330,27 @@ curl -X POST http://localhost:6005/api/v1/calculators/ideal-gas \
   -d '{"solveFor":"P","V":22.4,"n":1,"T":273.15,"units":"atm-L"}'
 ```
 
-### Search compounds (public)
+### Balance an equation with ionic species (public)
 
 ```bash
-curl "http://localhost:6005/api/v1/compounds?q=water&limit=10&offset=0"
-```
-
-### List saved calculations (authenticated, paginated)
-
-```bash
-curl "http://localhost:6005/api/v1/calculations?page=1&limit=20" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-### Annotate a calculation
-
-```bash
-curl -X POST http://localhost:6005/api/v1/calculations/<calc-id>/annotate \
-  -H "Authorization: Bearer $TOKEN" \
+curl -X POST http://localhost:6005/api/v1/calculators/equation-balance \
   -H "Content-Type: application/json" \
-  -d '{"annotation":"Lab result from 2026-07-17"}'
+  -d '{"equation":"Fe2+ + MnO4- + H+ -> Fe3+ + Mn2+ + H2O"}'
 ```
 
-### Toggle star on a calculation
+### Search compounds (desktop build)
 
 ```bash
-curl -X POST http://localhost:6005/api/v1/calculations/<calc-id>/star \
-  -H "Authorization: Bearer $TOKEN"
+curl "http://localhost:6005/api/v1/compounds?q=water&type=name&limit=10&offset=0"
 ```
 
-### Create a workspace and add a member
+### Register a plugin record (desktop build)
 
 ```bash
-WS=$(curl -s -X POST http://localhost:6005/api/v1/workspaces \
-  -H "Authorization: Bearer $TOKEN" \
+curl -X POST http://localhost:6005/api/v1/plugins \
   -H "Content-Type: application/json" \
-  -d '{"name":"Organic Lab","description":"Shared organic synthesis calcs"}')
-WS_ID=$(echo "$WS" | jq -r '.ID')
-
-curl -X POST "http://localhost:6005/api/v1/workspaces/$WS_ID/members" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"user_id":"<other-user-uuid>","role":"member"}'
+  -d '{"name":"my-plugin","version":"1.0.0","author":"Alice","manifest":"{}"}'
 ```
-
-### Create an API key (researcher+)
-
-```bash
-curl -X POST http://localhost:6005/api/v1/api-keys \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"name":"CI pipeline key"}'
-```
-
-The raw key is returned only once in the response (field `key`); store it
-securely. Subsequent `GET /api-keys` responses omit the raw key value.
 
 ---
 
