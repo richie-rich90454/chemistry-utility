@@ -1,4 +1,5 @@
 import { Plugin, PluginManager } from "./pluginManager.js";
+import { HtmlSanitizer } from "./htmlSanitizer.js";
 
 const MODAL_ID: string = "plugin-manager-modal";
 const MODAL_LIST_CLASS: string = "plugin-manager-list";
@@ -154,12 +155,12 @@ export class PluginManagerUI {
             card.className = "plugin-card";
             card.innerHTML =
                 '<div class="plugin-card-header">' +
-                '<div><strong>' + plugin.manifest.name + '</strong> <span class="plugin-version">v' + plugin.manifest.version + '</span></div>' +
-                '<div class="plugin-card-author">by ' + plugin.manifest.author + '</div>' +
+                '<div><strong>' + HtmlSanitizer.escape(plugin.manifest.name) + '</strong> <span class="plugin-version">v' + HtmlSanitizer.escape(plugin.manifest.version) + '</span></div>' +
+                '<div class="plugin-card-author">by ' + HtmlSanitizer.escape(plugin.manifest.author) + '</div>' +
                 "</div>" +
-                '<p class="plugin-card-desc">' + plugin.manifest.description + '</p>' +
-                '<div class="plugin-card-permissions">Permissions: ' + plugin.manifest.permissions.join(", ") + '</div>' +
-                '<div class="plugin-card-hooks">Hooks: ' + plugin.manifest.lifecycleHooks.join(", ") + '</div>' +
+                '<p class="plugin-card-desc">' + HtmlSanitizer.escape(plugin.manifest.description) + '</p>' +
+                '<div class="plugin-card-permissions">Permissions: ' + HtmlSanitizer.escape(plugin.manifest.permissions.join(", ")) + '</div>' +
+                '<div class="plugin-card-hooks">Hooks: ' + HtmlSanitizer.escape(plugin.manifest.lifecycleHooks.join(", ")) + '</div>' +
                 '<div class="plugin-card-actions">' +
                 '<label class="plugin-toggle-label"><input type="checkbox" class="plugin-toggle"' + (enabled ? " checked" : "") + '> Enabled</label>' +
                 '<button class="plugin-uninstall" type="button">Uninstall</button>' +
