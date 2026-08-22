@@ -250,7 +250,7 @@ function Kinetics(): JSX.Element {
                     error={integratedRateLawError}
                 >
                     <Show when={integratedRateLawChartData() !== null}>
-                        {() => <ChartCanvas type="line" data={integratedRateLawChartData() as ChartData} options={irlChartOptions} canvasId="integrated-rate-law-chart" />}
+                        <ChartCanvas type="line" data={integratedRateLawChartData() as ChartData} options={irlChartOptions} canvasId="integrated-rate-law-chart" />
                     </Show>
                 </CalculatorForm>
                 <ExampleDetails>
