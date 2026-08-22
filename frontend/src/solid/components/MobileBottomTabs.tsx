@@ -55,7 +55,7 @@ function MobileBottomTabs(): JSX.Element {
     return (
         <header class={styles.topBanner} aria-label="Navigation">
             <button type="button" class={styles.menuBtn} aria-label="Open navigation menu" onClick={handleMenu}>
-                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
                     <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" />
                 </svg>
             </button>
