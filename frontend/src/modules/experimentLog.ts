@@ -418,7 +418,11 @@ export class ExperimentLogManager {
     }
 
     private writeLogs(logs: ExperimentLog[]): void {
-        localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+        try {
+            localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
+        } catch (_e) {
+            // localStorage may be unavailable (quota exceeded / private browsing)
+        }
     }
 
     private readSteps(logId: string): ExperimentStep[] {
@@ -438,7 +442,11 @@ export class ExperimentLogManager {
     }
 
     private writeSteps(logId: string, steps: ExperimentStep[]): void {
-        localStorage.setItem(STEPS_STORAGE_KEY_PREFIX + logId, JSON.stringify(steps));
+        try {
+            localStorage.setItem(STEPS_STORAGE_KEY_PREFIX + logId, JSON.stringify(steps));
+        } catch (_e) {
+            // localStorage may be unavailable (quota exceeded / private browsing)
+        }
     }
 
     private generateId(prefix: string): string {
