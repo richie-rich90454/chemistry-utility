@@ -164,14 +164,18 @@ export class ResultAnnotationManager {
             if (parsed && typeof parsed === "object") {
                 return parsed as Record<string, string>;
             }
-        } catch (e) {
+        } catch (_e) {
             // fall through to empty object
         }
         return {};
     }
 
     private writeAnnotations(annotations: Record<string, string>): void {
-        localStorage.setItem(ANNOTATIONS_STORAGE_KEY, JSON.stringify(annotations));
+        try {
+            localStorage.setItem(ANNOTATIONS_STORAGE_KEY, JSON.stringify(annotations));
+        } catch (_e) {
+            // localStorage may be unavailable (quota exceeded / private browsing)
+        }
     }
 
     private readStarred(): Record<string, boolean> {
@@ -184,14 +188,18 @@ export class ResultAnnotationManager {
             if (parsed && typeof parsed === "object") {
                 return parsed as Record<string, boolean>;
             }
-        } catch (e) {
+        } catch (_e) {
             // fall through to empty object
         }
         return {};
     }
 
     private writeStarred(starred: Record<string, boolean>): void {
-        localStorage.setItem(STARRED_STORAGE_KEY, JSON.stringify(starred));
+        try {
+            localStorage.setItem(STARRED_STORAGE_KEY, JSON.stringify(starred));
+        } catch (_e) {
+            // localStorage may be unavailable (quota exceeded / private browsing)
+        }
     }
 
     public getTrackedCount(): number {
