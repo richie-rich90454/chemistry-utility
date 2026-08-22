@@ -327,6 +327,14 @@ class MolecularViewer {
         if (canvas === null) {
             return;
         }
+        // Handlers resolve live state from this.states on every event, so one
+        // listener set per canvas element stays correct across re-renders.
+        // Without this guard each render() would stack another 4 listeners
+        // and apply the drag transform N times per mousemove.
+        if (canvas.dataset.viewerInteractive === "true") {
+            return;
+        }
+        canvas.dataset.viewerInteractive = "true";
         let self: MolecularViewer = this;
         canvas.addEventListener("mousedown", function (e: MouseEvent): void {
             let state: CanvasViewState | undefined = self.states.get(canvasId);
