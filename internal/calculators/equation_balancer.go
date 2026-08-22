@@ -180,7 +180,13 @@ func parseFormulaToCounts(formula string) map[string]int {
 	return stack[0]
 }
 
+// atoi parses a non-negative decimal integer. Inputs longer than 9 digits
+// are clamped to a huge sentinel so any coefficient derived from them
+// overflows the balance attempt instead of wrapping int arithmetic.
 func atoi(s string) int {
+	if len(s) > 9 {
+		return 1 << 30
+	}
 	n := 0
 	for _, ch := range s {
 		n = n*10 + int(ch-'0')
