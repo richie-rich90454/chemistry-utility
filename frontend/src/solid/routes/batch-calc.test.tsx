@@ -81,7 +81,7 @@ describe("BatchCalc", function (): void {
             "successCount": 1,
             "errorCount": 0
         };
-        mocks.mockProcessCsvText.mockImplementation(function (text: string, type: string, onProgress: (info: {"current": number; "total": number}) => void): Promise<{"csvString": string; "totalRows": number; "successCount": number; "errorCount": number}> {
+        mocks.mockProcessCsvText.mockImplementation(function (_text: string, _type: string, onProgress: (info: {"current": number; "total": number}) => void): Promise<{"csvString": string; "totalRows": number; "successCount": number; "errorCount": number}> {
             onProgress({"current": 1, "total": 1});
             return Promise.resolve(csvResult);
         });
@@ -175,7 +175,7 @@ describe("BatchCalc", function (): void {
     });
     it("shows progress bar during processing", async function (): Promise<void> {
         let resolveProcess: (val: {"csvString": string; "totalRows": number; "successCount": number; "errorCount": number}) => void = function (): void { return; };
-        mocks.mockProcessCsvText.mockImplementation(function (text: string, type: string, onProgress: (info: {"current": number; "total": number}) => void): Promise<{"csvString": string; "totalRows": number; "successCount": number; "errorCount": number}> {
+        mocks.mockProcessCsvText.mockImplementation(function (_text: string, _type: string, onProgress: (info: {"current": number; "total": number}) => void): Promise<{"csvString": string; "totalRows": number; "successCount": number; "errorCount": number}> {
             onProgress({"current": 1, "total": 3});
             return new Promise(function (resolve: (val: {"csvString": string; "totalRows": number; "successCount": number; "errorCount": number}) => void): void {
                 resolveProcess = resolve;
@@ -199,7 +199,7 @@ describe("BatchCalc", function (): void {
             expect(result.container.querySelector("progress")).toBeNull();
         });
     });
-    it("clears inputs and results when Clear is clicked", async function (): void {
+    it("clears inputs and results when Clear is clicked", async function (): Promise<void> {
         let csvResult: {"csvString": string; "totalRows": number; "successCount": number; "errorCount": number} = {
             "csvString": "formula,molar_mass,unit,status\nH2O,18.015,g/mol,ok",
             "totalRows": 1,
@@ -225,7 +225,7 @@ describe("BatchCalc", function (): void {
     it("renders all calculator type options", function (): void {
         let result = render(function () { return <BatchCalc />; });
         let typeSelect = result.getByLabelText("Select calculator type for batch processing") as HTMLSelectElement;
-        let options: HTMLOptionCollection = typeSelect.options;
+        let options = typeSelect.options;
         expect(options.length).toBe(29);
         expect(options[0].value).toBe("molar-mass");
         expect(options[1].value).toBe("dilution");
