@@ -16,6 +16,11 @@ import (
 type Config struct {
 	RateLimitPerMinute int
 	CORSAllowedOrigins []string
+	// TrustedProxies lists CIDRs allowed to set client-ip forwarding
+	// headers (X-Forwarded-For). Empty/nil distrusts every proxy so
+	// spoofed headers cannot rotate rate-limit buckets. Deployments
+	// behind a reverse proxy must list the proxy's CIDR here.
+	TrustedProxies []string
 }
 
 // API is the main API instance holding all stores, services, and configuration.
@@ -63,6 +68,10 @@ func (a *API) requireDB(c *gin.Context) bool {
 // Router creates and configures the Gin engine with all routes.
 func (a *API) Router() *gin.Engine {
 	r := gin.New()
+	// Rate limiting keys on ClientIP, which honors forwarding headers from
+	// any trusted proxy. Distrust all proxies unless configured otherwise,
+	// otherwise spoofed X-Forwarded-For headers bypass the limiter.
+	_ = r.SetTrustedProxies(a.cfg.TrustedProxies)
 	r.Use(gin.Recovery())
 	r.Use(a.CORSMiddleware(a.cfg.CORSAllowedOrigins))
 
