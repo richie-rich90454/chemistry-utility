@@ -28,7 +28,7 @@ describe("MoleculeRenderer onMount", function (): void {
         mocks.mockParse.mockReset();
         mocks.capturedDrawerOptions.length = 0;
         mocks.mockDraw.mockImplementation(function (): void { return; });
-        mocks.mockParse.mockImplementation(function (smiles: string, success: (g: unknown) => void): void {
+        mocks.mockParse.mockImplementation(function (_smiles: string, success: (g: unknown) => void): void {
             success({"vertices": []});
         });
     });
@@ -70,7 +70,7 @@ describe("MoleculeRenderer cleanup", function (): void {
         mocks.mockParse.mockReset();
         mocks.capturedDrawerOptions.length = 0;
         mocks.mockDraw.mockImplementation(function (): void { return; });
-        mocks.mockParse.mockImplementation(function (smiles: string, success: (g: unknown) => void): void {
+        mocks.mockParse.mockImplementation(function (_smiles: string, success: (g: unknown) => void): void {
             success({"vertices": []});
         });
     });
@@ -81,7 +81,8 @@ describe("MoleculeRenderer cleanup", function (): void {
     it("clears the canvas context on unmount", function (): void {
         let clearRectSpy: ReturnType<typeof vi.fn> = vi.fn();
         let mockCtx: {clearRect: ReturnType<typeof vi.fn>} = {"clearRect": clearRectSpy};
-        HTMLCanvasElement.prototype.getContext.mockImplementationOnce(function (): CanvasRenderingContext2D | null {
+        let getContextMock = HTMLCanvasElement.prototype.getContext as unknown as {mockImplementationOnce: (fn: () => CanvasRenderingContext2D | null) => void};
+        getContextMock.mockImplementationOnce(function (): CanvasRenderingContext2D | null {
             return mockCtx as unknown as CanvasRenderingContext2D;
         });
         render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" />; });
@@ -102,7 +103,7 @@ describe("MoleculeRenderer reactivity", function (): void {
         mocks.mockParse.mockReset();
         mocks.capturedDrawerOptions.length = 0;
         mocks.mockDraw.mockImplementation(function (): void { return; });
-        mocks.mockParse.mockImplementation(function (smiles: string, success: (g: unknown) => void): void {
+        mocks.mockParse.mockImplementation(function (_smiles: string, success: (g: unknown) => void): void {
             success({"vertices": []});
         });
     });
@@ -136,7 +137,7 @@ describe("MoleculeRenderer zoom", function (): void {
         mocks.mockParse.mockReset();
         mocks.capturedDrawerOptions.length = 0;
         mocks.mockDraw.mockImplementation(function (): void { return; });
-        mocks.mockParse.mockImplementation(function (smiles: string, success: (g: unknown) => void): void {
+        mocks.mockParse.mockImplementation(function (_smiles: string, success: (g: unknown) => void): void {
             success({"vertices": []});
         });
     });
@@ -181,7 +182,7 @@ describe("MoleculeRenderer defaults", function (): void {
         mocks.mockParse.mockReset();
         mocks.capturedDrawerOptions.length = 0;
         mocks.mockDraw.mockImplementation(function (): void { return; });
-        mocks.mockParse.mockImplementation(function (smiles: string, success: (g: unknown) => void): void {
+        mocks.mockParse.mockImplementation(function (_smiles: string, success: (g: unknown) => void): void {
             success({"vertices": []});
         });
     });
@@ -219,7 +220,7 @@ describe("MoleculeRenderer error handling", function (): void {
         mocks.mockParse.mockReset();
         mocks.capturedDrawerOptions.length = 0;
         mocks.mockDraw.mockImplementation(function (): void { return; });
-        mocks.mockParse.mockImplementation(function (smiles: string, success: (g: unknown) => void): void {
+        mocks.mockParse.mockImplementation(function (_smiles: string, success: (g: unknown) => void): void {
             success({"vertices": []});
         });
     });
@@ -228,8 +229,8 @@ describe("MoleculeRenderer error handling", function (): void {
         vi.restoreAllMocks();
     });
     it("does not call drawer.draw when parse reports an error", function (): void {
-        mocks.mockParse.mockImplementation(function (smiles: string, success: (g: unknown) => void, error?: (e: Error) => void): void {
-            if (error) { error(new Error("Invalid SMILES: " + smiles)); }
+        mocks.mockParse.mockImplementation(function (_smiles: string, _success: (g: unknown) => void, error?: (e: Error) => void): void {
+            if (error) { error(new Error("Invalid SMILES")); }
         });
         render(function (): JSX.Element { return <MoleculeRenderer smiles="BAD" />; });
         expect(mocks.mockDraw).not.toHaveBeenCalled();
