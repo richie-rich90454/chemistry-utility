@@ -112,7 +112,7 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
-      # Build from source with the 1.25 toolchain: prebuilt golangci-lint
+      # Build from source with the current toolchain: prebuilt golangci-lint
       # binaries are built with Go 1.24 and refuse to load go.mod "go 1.25.0".
       - name: Install golangci-lint
         run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
