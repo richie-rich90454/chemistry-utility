@@ -142,75 +142,82 @@ describe("DebugLogger", () => {
     });
 
     describe("production mode", () => {
-        it("defaults to warn level when NODE_ENV is production", () => {
-            const originalEnv = process.env.NODE_ENV;
-            process.env.NODE_ENV = "production";
-            DebugLogger.resetInstance();
-            const logger = DebugLogger.getInstance();
-            logger.debug("d");
-            logger.info("i");
-            expect(debugSpy).not.toHaveBeenCalled();
-            expect(infoSpy).not.toHaveBeenCalled();
-            logger.warn("w");
-            expect(warnSpy).toHaveBeenCalled();
-            process.env.NODE_ENV = originalEnv;
+        // detectProduction reads import.meta.env.PROD (the Vite build flag).
+        function withProdMode(fn: () => void): void {
+            const env = import.meta.env as { PROD: boolean };
+            const originalProd = env.PROD;
+            env.PROD = true;
+            try {
+                fn();
+            } finally {
+                env.PROD = originalProd;
+                DebugLogger.resetInstance();
+            }
+        }
+
+        it("defaults to warn level when built in production mode", () => {
+            withProdMode(function (): void {
+                DebugLogger.resetInstance();
+                const logger = DebugLogger.getInstance();
+                logger.debug("d");
+                logger.info("i");
+                expect(debugSpy).not.toHaveBeenCalled();
+                expect(infoSpy).not.toHaveBeenCalled();
+                logger.warn("w");
+                expect(warnSpy).toHaveBeenCalled();
+            });
         });
 
         it("does not allow setting level below warn in production", () => {
-            const originalEnv = process.env.NODE_ENV;
-            process.env.NODE_ENV = "production";
-            DebugLogger.resetInstance();
-            const logger = DebugLogger.getInstance();
-            logger.setLevel("debug");
-            logger.debug("d");
-            expect(debugSpy).not.toHaveBeenCalled();
-            process.env.NODE_ENV = originalEnv;
+            withProdMode(function (): void {
+                DebugLogger.resetInstance();
+                const logger = DebugLogger.getInstance();
+                logger.setLevel("debug");
+                logger.debug("d");
+                expect(debugSpy).not.toHaveBeenCalled();
+            });
         });
 
         it("allows setting warn level in production", () => {
-            const originalEnv = process.env.NODE_ENV;
-            process.env.NODE_ENV = "production";
-            DebugLogger.resetInstance();
-            const logger = DebugLogger.getInstance();
-            logger.setLevel("warn");
-            logger.warn("w");
-            expect(warnSpy).toHaveBeenCalled();
-            process.env.NODE_ENV = originalEnv;
+            withProdMode(function (): void {
+                DebugLogger.resetInstance();
+                const logger = DebugLogger.getInstance();
+                logger.setLevel("warn");
+                logger.warn("w");
+                expect(warnSpy).toHaveBeenCalled();
+            });
         });
 
         it("allows setting error level in production", () => {
-            const originalEnv = process.env.NODE_ENV;
-            process.env.NODE_ENV = "production";
-            DebugLogger.resetInstance();
-            const logger = DebugLogger.getInstance();
-            logger.setLevel("error");
-            logger.error("e");
-            expect(errorSpy).toHaveBeenCalled();
-            process.env.NODE_ENV = originalEnv;
+            withProdMode(function (): void {
+                DebugLogger.resetInstance();
+                const logger = DebugLogger.getInstance();
+                logger.setLevel("error");
+                logger.error("e");
+                expect(errorSpy).toHaveBeenCalled();
+            });
         });
     });
 
     describe("detectProduction fallback", () => {
-        it("defaults to non-production when NODE_ENV is not set", () => {
-            const originalEnv = process.env.NODE_ENV;
-            delete process.env.NODE_ENV;
+        it("defaults to non-production when NODE_ENV is development", () => {
+            vi.stubEnv("NODE_ENV", "development");
             DebugLogger.resetInstance();
             const logger = DebugLogger.getInstance();
             logger.setLevel("debug");
             logger.debug("d");
             expect(debugSpy).toHaveBeenCalled();
-            process.env.NODE_ENV = originalEnv;
+            vi.unstubAllEnvs();
         });
 
-        it("defaults to non-production when NODE_ENV is development", () => {
-            const originalEnv = process.env.NODE_ENV;
-            process.env.NODE_ENV = "development";
+        it("defaults to non-production when NODE_ENV is test", () => {
+            vi.stubEnv("NODE_ENV", "test");
             DebugLogger.resetInstance();
             const logger = DebugLogger.getInstance();
             logger.setLevel("debug");
             logger.debug("d");
             expect(debugSpy).toHaveBeenCalled();
-            process.env.NODE_ENV = originalEnv;
+            vi.unstubAllEnvs();
         });
     });
 });
