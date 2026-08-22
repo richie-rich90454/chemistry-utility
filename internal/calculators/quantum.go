@@ -139,22 +139,30 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 	}
 
 	if aufbauExceptions[z] && len(configShells) >= 2 {
-		// Move one electron from the outermost s shell into the d shell
-		// just beneath it.
-		sIdx := -1
-		dIdx := -1
-		for i := len(configShells) - 1; i >= 0; i-- {
-			if sIdx == -1 && configShells[i].l == 0 {
-				sIdx = i
+		// Move electron(s) from the outermost s shell into the d shell just
+		// beneath it. Pd's ground state is [Kr] 4d10, so both of its 5s
+		// electrons are promoted.
+		promoted := 1
+		if z == 46 {
+			promoted = 2
+		}
+		for p := 0; p < promoted; p++ {
+			sIdx := -1
+			dIdx := -1
+			for i := len(configShells) - 1; i >= 0; i-- {
+				if sIdx == -1 && configShells[i].l == 0 {
+					sIdx = i
+				}
+				if dIdx == -1 && configShells[i].l == 2 {
+					dIdx = i
+				}
+				if sIdx != -1 && dIdx != -1 {
+					break
+				}
 			}
-			if dIdx == -1 && configShells[i].l == 2 {
-				dIdx = i
-			}
-			if sIdx != -1 && dIdx != -1 {
+			if sIdx == -1 || dIdx == -1 || configShells[sIdx].count == 0 {
 				break
 			}
-		}
-		if sIdx != -1 && dIdx != -1 {
 			configShells[sIdx].count--
 			configShells[dIdx].count++
 			if configShells[sIdx].count == 0 {
