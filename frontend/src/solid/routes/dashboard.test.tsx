@@ -80,12 +80,11 @@ function renderDashboard(): ReturnType<typeof render> {
 }
 describe("Dashboard", function (): void {
     let renderBarChartSpy: ReturnType<typeof vi.spyOn>;
-    let destroyChartSpy: ReturnType<typeof vi.spyOn>;
     beforeEach(function (): void {
         ChartRenderer.resetInstance();
         let instance = ChartRenderer.getInstance();
         renderBarChartSpy = vi.spyOn(Object.getPrototypeOf(instance), "renderBarChart").mockImplementation(function (): void { return; });
-        destroyChartSpy = vi.spyOn(Object.getPrototypeOf(instance), "destroyChart").mockImplementation(function (): void { return; });
+        vi.spyOn(Object.getPrototypeOf(instance), "destroyChart").mockImplementation(function (): void { return; });
         mocks.mockRefresh.mockReset();
         mocks.mockStats.mockReset();
         mocks.mockRecent.mockReset();
