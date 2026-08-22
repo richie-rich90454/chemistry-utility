@@ -30,6 +30,7 @@ export class CompoundSearchUI {
     private errorContainer: HTMLElement | null;
     private initialized: boolean;
     private loading: boolean;
+    private detailRequestSeq: number;
 
     private constructor() {
         this.container = null;
@@ -39,6 +40,7 @@ export class CompoundSearchUI {
         this.errorContainer = null;
         this.initialized = false;
         this.loading = false;
+        this.detailRequestSeq = 0;
     }
 
     public static getInstance(): CompoundSearchUI {
@@ -261,15 +263,26 @@ export class CompoundSearchUI {
         if (!this.detailContainer) {
             return;
         }
+        // Sequence guard: clicking details on compound B while A's fetch is in
+        // flight must never let A's late response overwrite B's panel.
+        let requestId: number = ++this.detailRequestSeq;
         this.clearDetail();
         this.showDetailLoading(true);
         try {
             let detail: CompoundDetail = await fetchCompoundDetail(id);
+            if (requestId !== this.detailRequestSeq) {
+                return;
+            }
             this.renderDetail(detail);
         } catch (e) {
+            if (requestId !== this.detailRequestSeq) {
+                return;
+            }
             this.handleDetailError(e);
         } finally {
-            this.showDetailLoading(false);
+            if (requestId === this.detailRequestSeq) {
+                this.showDetailLoading(false);
+            }
         }
     }
 
@@ -434,9 +447,12 @@ export function buildFormulaSegments(formula: string): FormulaSegment[] {
     }
     return segments;
 }
-export async function searchCompounds(query: string, _type: string): Promise<CompoundResult[]> {
+export async function searchCompounds(query: string, type: string): Promise<CompoundResult[]> {
     let client: ApiClient = ApiClient.getInstance();
     let path: string = "/api/v1/compounds?q=" + encodeURIComponent(query);
+    if (type) {
+        path += "&type=" + encodeURIComponent(type);
+    }
     let response: CompoundSearchResponse = await client.get<CompoundSearchResponse>(path);
     return (response && response.compounds) ? response.compounds : [];
 }
