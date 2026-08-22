@@ -1,6 +1,6 @@
 {
   "name": "chemistry-utility",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "scripts": {
     "start": "npm run start:web",
     "start:wails": "set PATH=C:\\msys64\\ucrt64\\bin;%PATH% && wails dev",
