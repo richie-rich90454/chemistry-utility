@@ -29,8 +29,10 @@ func (a *API) searchCompounds(c *gin.Context) {
 	if offset < 0 {
 		offset = 0
 	}
+	// Optional search-type filter: name, formula, cas, or smiles.
+	field := c.Query("type")
 
-	compounds, err := a.compoundStore.Search(c.Request.Context(), q, limit, offset)
+	compounds, err := a.compoundStore.Search(c.Request.Context(), q, field, limit, offset)
 	if err != nil {
 		WriteError(c, err)
 		return
