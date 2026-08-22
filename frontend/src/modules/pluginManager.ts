@@ -75,7 +75,7 @@ export class PluginManager {
             for (i = 0; i < entries.length; i++) {
                 try {
                     entries[i].plugin.uninstall();
-                } catch (e) {
+                } catch (_e) {
                     // Swallow uninstall errors during teardown.
                 }
             }
@@ -130,12 +130,12 @@ export class PluginManager {
             if (entry.plugin.onDisable) {
                 entry.plugin.onDisable();
             }
-        } catch (e) {
+        } catch (_e) {
             // Swallow disable errors so unregister always completes.
         }
         try {
             entry.plugin.uninstall();
-        } catch (e) {
+        } catch (_e) {
             // Swallow uninstall errors so the entry is still removed.
         }
         this.plugins.delete(pluginId);
@@ -285,7 +285,7 @@ export class PluginManager {
         let stored: string | null;
         try {
             stored = localStorage.getItem(STORAGE_KEY);
-        } catch (e) {
+        } catch (_e) {
             return;
         }
         if (!stored) {
@@ -294,7 +294,7 @@ export class PluginManager {
         let parsed: Record<string, boolean>;
         try {
             parsed = JSON.parse(stored) as Record<string, boolean>;
-        } catch (e) {
+        } catch (_e) {
             return;
         }
         let self: PluginManager = this;
@@ -330,7 +330,7 @@ export class PluginManager {
         });
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch (e) {
+        } catch (_e) {
             // Swallow storage errors — non-critical.
         }
     }
