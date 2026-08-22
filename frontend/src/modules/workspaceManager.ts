@@ -725,14 +725,18 @@ export class WorkspaceManager {
             if (Array.isArray(parsed)) {
                 return parsed as Workspace[];
             }
-        } catch (e) {
+        } catch (_e) {
             // fall through to empty array
         }
         return [];
     }
 
     private writeWorkspaces(workspaces: Workspace[]): void {
-        localStorage.setItem(WORKSPACES_STORAGE_KEY, JSON.stringify(workspaces));
+        try {
+            localStorage.setItem(WORKSPACES_STORAGE_KEY, JSON.stringify(workspaces));
+        } catch (_e) {
+            // localStorage may be unavailable (quota exceeded / private browsing)
+        }
     }
 
     private readMembers(workspaceId: string): WorkspaceMember[] {
@@ -745,14 +749,18 @@ export class WorkspaceManager {
             if (Array.isArray(parsed)) {
                 return parsed as WorkspaceMember[];
             }
-        } catch (e) {
+        } catch (_e) {
             // fall through to empty array
         }
         return [];
     }
 
     private writeMembers(workspaceId: string, members: WorkspaceMember[]): void {
-        localStorage.setItem(MEMBERS_STORAGE_KEY_PREFIX + workspaceId, JSON.stringify(members));
+        try {
+            localStorage.setItem(MEMBERS_STORAGE_KEY_PREFIX + workspaceId, JSON.stringify(members));
+        } catch (_e) {
+            // localStorage may be unavailable (quota exceeded / private browsing)
+        }
     }
 
     private readCalculations(workspaceId: string): SharedCalculation[] {
@@ -765,14 +773,18 @@ export class WorkspaceManager {
             if (Array.isArray(parsed)) {
                 return parsed as SharedCalculation[];
             }
-        } catch (e) {
+        } catch (_e) {
             // fall through to empty array
         }
         return [];
     }
 
     private writeCalculations(workspaceId: string, calculations: SharedCalculation[]): void {
-        localStorage.setItem(CALCULATIONS_STORAGE_KEY_PREFIX + workspaceId, JSON.stringify(calculations));
+        try {
+            localStorage.setItem(CALCULATIONS_STORAGE_KEY_PREFIX + workspaceId, JSON.stringify(calculations));
+        } catch (_e) {
+            // localStorage may be unavailable (quota exceeded / private browsing)
+        }
     }
 
     private generateId(prefix: string): string {
