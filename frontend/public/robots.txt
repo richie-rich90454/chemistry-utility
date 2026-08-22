@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /assets/
-Disallow: /src/
-Disallow: /wailsjs/
 
 Sitemap: https://chemutil.richardsblogs.com/sitemap.xml
