@@ -107,7 +107,7 @@ function Titration(): JSX.Element {
                 error={error}
             >
                 <Show when={chartData() !== null}>
-                    {() => <ChartCanvas type="line" data={chartData() as ChartData} options={chartOptions} canvasId="titration-chart" />}
+                    <ChartCanvas type="line" data={chartData() as ChartData} options={chartOptions} canvasId="titration-chart" />
                 </Show>
             </CalculatorForm>
         </CalculatorCard>
