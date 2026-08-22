@@ -15,15 +15,15 @@
         },
         {
             "src": "/favicon.png",
-            "sizes": "192x192",
+            "sizes": "301x301",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         },
         {
-            "src": "/favicon.png",
-            "sizes": "512x512",
+            "src": "/app-image.png",
+            "sizes": "1220x1220",
             "type": "image/png",
-            "purpose": "any maskable"
+            "purpose": "any"
         }
     ]
 }
