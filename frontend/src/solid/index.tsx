@@ -14,7 +14,7 @@ function clearStaleServiceWorker(): void {
         return;
     }
     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (regs: ServiceWorkerRegistration[]): void {
+        navigator.serviceWorker.getRegistrations().then(function (regs: readonly ServiceWorkerRegistration[]): void {
             for (let i = 0; i < regs.length; i++) {
                 regs[i].unregister();
             }
@@ -35,6 +35,18 @@ function initializeSolidApp(): void {
         return;
     }
     render(function (): JSX.Element { return <App />; }, root);
+}
+
+// Register the PWA service worker on the web build only (production). Wails
+// hosts get no worker (see clearStaleServiceWorker), and dev mode is skipped
+// so Vite HMR is never intercepted.
+function registerServiceWorker(): void {
+    if (RuntimeDetector.getInstance().isWails || !import.meta.env.PROD || !("serviceWorker" in navigator)) {
+        return;
+    }
+    navigator.serviceWorker.register("/sw.js").catch(function (): void {
+        /* best effort: app works without offline support */
+    });
 }
 
 // In the Wails desktop app the API runs in-process on a loopback port exposed
@@ -60,3 +72,4 @@ async function configureApiClientForWails(): Promise<void> {
 clearStaleServiceWorker();
 void configureApiClientForWails();
 initializeSolidApp();
+registerServiceWorker();
