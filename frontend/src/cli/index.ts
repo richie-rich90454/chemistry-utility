@@ -114,9 +114,11 @@ export function cmdIdealGas(args: string[]): string {
     let solveFor = args[4] as "P" | "V" | "n" | "T";
     let R = args.length >= 6 ? parseNumber(args[5]) : 0.08206;
     let result = computeIdealGasLaw({ P, V, n, T, R }, solveFor);
+    // SI units when the SI constant is used, otherwise L-atm units.
+    let siUnits = Math.abs(R - 8.314) < 0.01 || Math.abs(R - 8.31446261815324) < 1e-6;
     let unit: string;
-    if (solveFor === "P") unit = R === 8.314 ? "Pa" : "atm";
-    else if (solveFor === "V") unit = R === 8.314 ? "m^3" : "L";
+    if (solveFor === "P") unit = siUnits ? "Pa" : "atm";
+    else if (solveFor === "V") unit = siUnits ? "m^3" : "L";
     else if (solveFor === "n") unit = "mol";
     else unit = "K";
     return result.toFixed(4) + " " + unit;
