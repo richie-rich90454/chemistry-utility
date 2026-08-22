@@ -185,8 +185,14 @@ func IntegratedRateLaw(ctx context.Context, input CalculationInput) (Calculation
 	if C0 <= 0 {
 		return CalculationResult{}, errors.New("initial concentration must be positive")
 	}
+	if order != math.Trunc(order) {
+		return CalculationResult{}, errors.New("reaction order must be an integer (0, 1, or 2)")
+	}
 
 	solveFor := getStringWithDefault(input, "solveFor", "concentration")
+	if solveFor != "concentration" && solveFor != "time" {
+		return CalculationResult{}, fmt.Errorf("invalid solveFor: %s (must be \"concentration\" or \"time\")", solveFor)
+	}
 
 	var result float64
 	var unit string
