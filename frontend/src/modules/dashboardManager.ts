@@ -364,7 +364,15 @@ export class DashboardManager {
     }
 
     private getDayLabels(): string[] {
-        return ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        // Labels must match the bars: index 6 is always today, so derive each
+        // label from its actual date instead of a fixed Mon..Sun list.
+        let labels: string[] = [];
+        for (let offset: number = 6; offset >= 0; offset--) {
+            let d: Date = new Date();
+            d.setDate(d.getDate() - offset);
+            labels.push(d.toLocaleDateString(undefined, { "weekday": "short" }));
+        }
+        return labels;
     }
 
     public renderFavorites(calculations: CalculationRecord[]): void {
