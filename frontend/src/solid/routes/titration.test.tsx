@@ -7,12 +7,11 @@ afterEach(function (): void {
 });
 describe("Titration route", function (): void {
     let renderLineChartSpy: ReturnType<typeof vi.spyOn>;
-    let destroyChartSpy: ReturnType<typeof vi.spyOn>;
     beforeEach(function (): void {
         ChartRenderer.resetInstance();
         let instance = ChartRenderer.getInstance();
         renderLineChartSpy = vi.spyOn(Object.getPrototypeOf(instance), "renderLineChart").mockImplementation(function (): void { return; });
-        destroyChartSpy = vi.spyOn(Object.getPrototypeOf(instance), "destroyChart").mockImplementation(function (): void { return; });
+        vi.spyOn(Object.getPrototypeOf(instance), "destroyChart").mockImplementation(function (): void { return; });
     });
     afterEach(function (): void {
         ChartRenderer.resetInstance();
