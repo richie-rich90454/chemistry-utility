@@ -27,7 +27,7 @@ function ThemeToggle(): JSX.Element {
         }
         return "Switch to dark mode";
     }
-    function getAriaPressed(): string {
+    function getAriaPressed(): "true" | "false" {
         if (isDark()) {
             return "true";
         }
