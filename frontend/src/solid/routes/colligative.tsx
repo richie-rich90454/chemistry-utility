@@ -22,6 +22,7 @@ let requiredFields: CalculatorField[] = [
     {"id": "collig-vanthoff", "label": "Van't Hoff factor (i)", "placeholder": "Van't Hoff factor (i)", "ariaLabel": "Van't Hoff factor"}
 ];
 let optionalFields: CalculatorField[] = [
+    {"id": "collig-solvent-molar-mass", "label": "Solvent molar mass", "placeholder": "Solvent molar mass g/mol (default: water 18.015)", "ariaLabel": "Solvent molar mass"},
     {"id": "collig-Kb", "label": "Kb", "placeholder": "Kb (C kg/mol)", "ariaLabel": "Boiling point constant"},
     {"id": "collig-Kf", "label": "Kf", "placeholder": "Kf (C kg/mol)", "ariaLabel": "Freezing point constant"},
     {"id": "collig-solvent-bp", "label": "Solvent bp", "placeholder": "Solvent boiling point (C)", "ariaLabel": "Solvent boiling point"},
