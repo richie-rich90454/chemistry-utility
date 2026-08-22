@@ -135,13 +135,20 @@ export class ExportManager {
 	}
 
 	/**
-	 * Escapes a field for CSV output (wraps in quotes if it contains commas, quotes, or newlines).
+	 * Escapes a field for CSV output (wraps in quotes if it contains commas,
+	 * quotes, or newlines) and neutralizes spreadsheet formula injection:
+	 * values starting with =, +, -, or @ are prefixed with a single quote so
+	 * Excel/LibreOffice do not evaluate them on open.
 	 */
 	private static escapeCsvField(field: string): string {
-		if (field.indexOf(",") !== -1 || field.indexOf('"') !== -1 || field.indexOf("\n") !== -1) {
-			return '"' + field.replace(/"/g, '""') + '"';
+		let value = field;
+		if (/^[=+\-@\t\r]/.test(value)) {
+			value = "'" + value;
 		}
-		return field;
+		if (value.indexOf(",") !== -1 || value.indexOf('"') !== -1 || value.indexOf("\n") !== -1) {
+			return '"' + value.replace(/"/g, '""') + '"';
+		}
+		return value;
 	}
 
 	/** Resets the singleton instance. For testing only. */
