@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -57,7 +58,7 @@ func securityHeadersMiddleware() gin.HandlerFunc {
 		c.Header("X-Frame-Options", "DENY")
 		c.Header("X-XSS-Protection", "1; mode=block")
 		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
-		c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:")
+		c.Header("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:")
 		c.Next()
 	}
 }
@@ -74,25 +75,40 @@ func cacheHeadersMiddleware() gin.HandlerFunc {
 	}
 }
 
-func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "6005"
+// trustedProxies parses the TRUSTED_PROXIES env var (comma-separated CIDRs).
+// Empty means distrust every proxy: ClientIP ignores spoofable
+// X-Forwarded-For headers, so the rate limiter cannot be bypassed. Deploy
+// behind a reverse proxy by listing that proxy's CIDR here.
+func trustedProxies() []string {
+	tp := os.Getenv("TRUSTED_PROXIES")
+	if tp == "" {
+		return nil
 	}
-	distDir := os.Getenv("DIST_DIR")
-	if distDir == "" {
-		distDir = "frontend/dist"
+	var cidrs []string
+	for _, part := range strings.Split(tp, ",") {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			cidrs = append(cidrs, part)
+		}
 	}
+	return cidrs
+}
+
+// buildRouter constructs the full Gin engine: security/cache/gzip middleware,
+// the API sub-router mounted under /api, static files from distDir, and SPA
+// fallback to index.html.
+func buildRouter(distDir string, rateLimitPerMinute int) *gin.Engine {
 	// The anonymous web build stores nothing on the server: no database is
 	// opened and DB-backed API features (compound search, plugins) are
 	// disabled. The desktop app runs its own in-process database instead.
-	apiCfg := api.Config{
-		RateLimitPerMinute: 100,
+	apiInstance := api.New(nil, "", api.Config{
+		RateLimitPerMinute: rateLimitPerMinute,
 		CORSAllowedOrigins: []string{"*"},
-	}
-	apiInstance := api.New(nil, "", apiCfg)
+		TrustedProxies:     trustedProxies(),
+	})
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
+	r.SetTrustedProxies(trustedProxies())
 	r.Use(gin.Recovery())
 	r.Use(cacheHeadersMiddleware())
 	r.Use(securityHeadersMiddleware())
@@ -139,6 +155,7 @@ func main() {
 	r.StaticFile("/EBGaramond-VariableFont_wght.ttf", filepath.Join(distDir, "EBGaramond-VariableFont_wght.ttf"))
 	r.StaticFile("/app-image.png", filepath.Join(distDir, "app-image.png"))
 	r.StaticFile("/apple-touch-icon.png", filepath.Join(distDir, "apple-touch-icon.png"))
+	r.StaticFile("/sw.js", filepath.Join(distDir, "sw.js"))
 	r.StaticFile("/ptable.json", filepath.Join(distDir, "ptable.json"))
 	indexPath := filepath.Join(distDir, "index.html")
 	r.NoRoute(func(c *gin.Context) {
@@ -152,9 +169,29 @@ func main() {
 		}
 		c.File(indexPath)
 	})
+	return r
+}
+
+func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "6005"
+	}
+	distDir := os.Getenv("DIST_DIR")
+	if distDir == "" {
+		distDir = "frontend/dist"
+	}
+	rateLimitPerMinute := 100
+	if v := os.Getenv("RATE_LIMIT_PER_MINUTE"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			rateLimitPerMinute = n
+		}
+	}
+	r := buildRouter(distDir, rateLimitPerMinute)
 	srv := &http.Server{
-		Addr:    ":" + port,
-		Handler: r,
+		Addr:              ":" + port,
+		Handler:           r,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 	go func() {
 		log.Printf("Starting server on :%s (no database)", port)
