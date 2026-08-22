@@ -38,7 +38,7 @@ function MobileNavSheet(): JSX.Element {
                                                 activeClass={styles.active}
                                                 onClick={handleClose}
                                             >
-                                                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20">
+                                                <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20">
                                                     <circle cx="12" cy="12" r="4" fill="currentColor" />
                                                 </svg>
                                                 <span>{calc.name}</span>
