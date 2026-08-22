@@ -3,7 +3,7 @@ import {For, Show, createSignal, onMount} from "solid-js";
 import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
-import {GroupedCalculators, groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
+import {groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
 import {RuntimeDetector} from "../../modules/runtimeDetector.js";
 import {ThemeToggle} from "./ThemeToggle";
 import {WorkspaceList} from "./WorkspaceList";
@@ -79,12 +79,12 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                 <h1>Chemistry Utility</h1>
                 <div class={styles.headerTop}>
                     <div class={styles.logoIcon}>
-                        <svg width="16" height="16" aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+                        <svg width="16" height="16" aria-hidden="true" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="6" fill="currentColor" />
                         </svg>
                     </div>
                     <button class={styles.sidebarToggle} type="button" aria-label={collapsed() ? "Expand sidebar" : "Collapse sidebar"} onClick={handleToggleSidebar}>
-                        <svg width="22" height="22" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <svg width="22" height="22" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             {collapsed() ?
                                 <polyline points="9 18 15 12 9 6" /> :
                                 <polyline points="15 18 9 12 15 6" />
@@ -96,7 +96,7 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
             </div>
             <div class={styles.sidebarSearch} role="search" data-tour="sidebar-search">
                 <span class={styles.searchIcon}>
-                    <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="16" height="16">
+                    <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16">
                         <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
                         <line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="2" />
                     </svg>
@@ -115,7 +115,7 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                                     {(calc) => (
                                         <li>
                                             <A href={calculatorIdToRoute(calc.id)} class={styles.navLink} activeClass={styles.active} title={calc.name}>
-                                                <svg class={styles.navIcon} aria-hidden="true" focusable="false" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <svg class={styles.navIcon} aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     {getIconContent(calc.id)}
                                                 </svg>
                                                 <span class={styles.navLabel}>{calc.name}</span>
