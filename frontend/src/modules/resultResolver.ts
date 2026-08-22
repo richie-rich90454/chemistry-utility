@@ -12,7 +12,7 @@ export function resolveResult(
 ): void {
     let value: string = res.value;
     let explanation: string = res.explanation !== undefined ? res.explanation : "";
-    if (value === "" || explanation.indexOf("Error") !== -1) {
+    if (value === "" || explanation.startsWith("Error")) {
         setError(explanation !== "" ? explanation : "Calculation failed");
         setResult("");
         return;
