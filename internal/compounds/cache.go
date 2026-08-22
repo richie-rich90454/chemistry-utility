@@ -30,7 +30,7 @@ func NewCompoundCache(store *db.CompoundStore, pubchem *PubChemClient) *Compound
 func (c *CompoundCache) Search(ctx context.Context, query string, searchType string) ([]db.Compound, error) {
 	// Try local DB first. If search fails (e.g., FTS not available),
 	// fall through to PubChem rather than returning an error.
-	localResults, err := c.store.Search(ctx, query, 10, 0)
+	localResults, err := c.store.Search(ctx, query, searchType, 10, 0)
 	if err == nil && len(localResults) > 0 {
 		results := make([]db.Compound, len(localResults))
 		for i, r := range localResults {
