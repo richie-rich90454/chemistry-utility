@@ -26,7 +26,7 @@ describe("MolecularViewerRoute", function (): void {
         mocks.mockParse.mockReset();
         mocks.capturedDrawerOptions.length = 0;
         mocks.mockDraw.mockImplementation(function (): void { return; });
-        mocks.mockParse.mockImplementation(function (smiles: string, success: (g: unknown) => void): void {
+        mocks.mockParse.mockImplementation(function (_smiles: string, success: (g: unknown) => void): void {
             success({"vertices": []});
         });
     });
