@@ -345,6 +345,8 @@ class NavigationManager {
 		links.forEach(function (link: HTMLElement): void {
 			let href = link.getAttribute("href");
 			if (!href) return;
+			// Idempotent: repeated invocations must not stack duplicate stars.
+			if (link.querySelector(".fav-star-icon")) return;
 			let id = href.slice(1);
 			let star = document.createElement("span");
 			star.className = "fav-star-icon";
