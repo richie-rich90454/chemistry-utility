@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +16,7 @@ type ProblemDetail struct {
 	Instance string `json:"instance"`
 }
 
-// WriteProblem writes an RFC 7807 Problem Details JSON response.
+// WriteProblem writes an RFC 9457 (formerly RFC 7807) Problem Details response.
 func WriteProblem(c *gin.Context, status int, title, detail string) {
 	problem := ProblemDetail{
 		Type:     fmt.Sprintf("https://chemistry-utility.dev/errors/%d", status),
@@ -24,12 +25,16 @@ func WriteProblem(c *gin.Context, status int, title, detail string) {
 		Detail:   detail,
 		Instance: c.Request.URL.Path,
 	}
+	c.Header("Content-Type", "application/problem+json")
 	c.JSON(status, problem)
 }
 
-// WriteError writes a 500 Internal Server Error response.
+// WriteError writes a 500 Internal Server Error response. The full error is
+// logged server-side; clients receive only a generic detail so internal
+// messages (DSNs, SQL text) never leak.
 func WriteError(c *gin.Context, err error) {
-	WriteProblem(c, 500, "Internal Server Error", err.Error())
+	log.Printf("internal error on %s %s: %v", c.Request.Method, c.Request.URL.Path, err)
+	WriteProblem(c, 500, "Internal Server Error", "An unexpected error occurred. Please try again later.")
 }
 
 // WriteValidation writes a 400 Bad Request validation error response.
