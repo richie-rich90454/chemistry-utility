@@ -6,17 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type Calculation struct {
-	ID             uuid.UUID
-	UserID         uuid.UUID
-	CalculatorType string
-	Inputs         string
-	Result         string
-	Annotation     string
-	Starred        bool
-	WorkspaceID    uuid.UUID
-	CreatedAt      time.Time
-}
 type Compound struct {
 	ID         uuid.UUID
 	Name       string
