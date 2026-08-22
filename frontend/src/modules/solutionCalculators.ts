@@ -580,6 +580,21 @@ export class ColligativePropertiesCalculator extends Calculator {
         ]);
     }
 
+    /**
+     * Reads the optional solvent molar mass input (g/mol), falling back to
+     * water. Returns kg/mol for the mole-fraction math.
+     */
+    private getSolventMolarMassKgPerMol(): number {
+        let el: HTMLElement | null = document.getElementById("collig-solvent-molar-mass");
+        if (el instanceof HTMLInputElement && el.value.trim() !== "") {
+            let v: number = parseFloat(el.value);
+            if (!isNaN(v) && v > 0) {
+                return v / 1000;
+            }
+        }
+        return 0.018015;
+    }
+
     protected performCalculation(): void {
         const soluteMass = this.getInput("collig-solute-mass").getValue();
         const molarMass = this.getInput("collig-molar-mass").getValue();
@@ -590,6 +605,7 @@ export class ColligativePropertiesCalculator extends Calculator {
         const solventBp = this.getInput("collig-solvent-bp").getValue();
         const solventFp = this.getInput("collig-solvent-fp").getValue();
         const Psolvent = this.getInput("collig-Psolvent").getValue();
+
         InputValidator.validateValues(
             [soluteMass, molarMass, solventMass, i],
             ["collig-solute-mass", "collig-molar-mass", "collig-solvent-mass", "collig-vanthoff"]
@@ -613,8 +629,9 @@ export class ColligativePropertiesCalculator extends Calculator {
             html += "<p>&Delta;T<sub>f</sub> = " + this.numberFormatter.format(deltaTf, 4) + " &deg;C</p>";
             html += "<p>New Freezing Point = " + this.numberFormatter.format(newFp, 4) + " &deg;C</p>";
         }
-        let molesSolvent = (solventMass / 1000) / 0.018015;
-        let xSolute = molesSolute / (molesSolute + molesSolvent);
+        // Solvent molar mass defaults to water (18.015 g/mol); Raoult's law
+        // needs the real solvent value for any other solvent.
+        let molesSolvent = (solventMass / 1000) / this.getSolventMolarMassKgPerMol();        let xSolute = molesSolute / (molesSolute + molesSolvent);
         let molarity = molesSolute / (solventMass / 1000);
         let osmoticPressure = molarity * 0.08206 * 298.15 * i;
         html += "<p>Osmotic Pressure (&pi;) = " + this.numberFormatter.format(osmoticPressure, 4) + " atm (at 298.15 K)</p>";
@@ -665,7 +682,12 @@ export class ColligativePropertiesCalculator extends Calculator {
             metadata.deltaTf = deltaTf;
             metadata.newFp = newFp;
         }
-        let molesSolvent = (solventMass / 1000) / 0.018015;
+        let solventMM = parseFloat(inputs["collig-solvent-molar-mass"] ?? "");
+        if (isNaN(solventMM) || solventMM <= 0) {
+            // ponytail: default assumes water; pass collig-solvent-molar-mass for other solvents
+            solventMM = 18.015;
+        }
+        let molesSolvent = (solventMass / 1000) / (solventMM / 1000);
         let xSolute = molesSolute / (molesSolute + molesSolvent);
         let molarity = molesSolute / (solventMass / 1000);
         let osmoticPressure = molarity * 0.08206 * 298.15 * i;
