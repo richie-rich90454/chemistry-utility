@@ -19,7 +19,7 @@ function ViewHeader(props: ViewHeaderProps): JSX.Element {
     return (
         <div class={styles.viewHeader}>
             <button class={styles.backButton} aria-label="Go back" onClick={handleBack}>
-                <svg width="18" height="18" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="15 18 9 12 15 6" />
                 </svg>
             </button>
