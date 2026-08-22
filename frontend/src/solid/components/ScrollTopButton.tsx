@@ -24,7 +24,7 @@ function ScrollTopButton(): JSX.Element {
     return (
         <Show when={visible()} fallback={null}>
             <button class={styles.scrollTop} aria-label="Scroll to top" onClick={handleClick}>
-                <svg width="20" height="20" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="20" height="20" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="18 15 12 9 6 15" />
                 </svg>
             </button>
