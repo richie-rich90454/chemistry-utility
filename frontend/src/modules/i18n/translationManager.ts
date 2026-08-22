@@ -39,7 +39,8 @@ export class TranslationManager {
 			let paramKeys = Object.keys(params);
 			for (let i = 0; i < paramKeys.length; i++) {
 				let paramKey = paramKeys[i];
-				result = result.replace(new RegExp("\\{" + paramKey + "\\}", "g"), params[paramKey]);
+				let escaped = paramKey.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+				result = result.replace(new RegExp("\\{" + escaped + "\\}", "g"), params[paramKey]);
 			}
 			return result;
 		}
