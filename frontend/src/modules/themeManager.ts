@@ -62,6 +62,11 @@ class ThemeManager {
 	}
 
 	public toggle(): void {
+		// A manual choice wins: stop the auto-dark timer so it cannot flip
+		// the theme back on its next tick.
+		if (this.autoDarkModeEnabled) {
+			this.setAutoDarkMode(false);
+		}
 		if (this.currentTheme === "light") {
 			this.currentTheme = "dark";
 		} else if (this.currentTheme === "dark") {
@@ -74,8 +79,13 @@ class ThemeManager {
 	}
 
 	public setTheme(theme: Theme): void {
+		// Explicit setTheme is a user choice: it must override auto-dark.
+		// (updateAutoDarkTheme writes currentTheme directly, not via this.)
+		if (this.autoDarkModeEnabled) {
+			this.setAutoDarkMode(false);
+		}
 		this.currentTheme = theme;
-		localStorage.setItem("theme", theme);
+		localStorage.setItem("theme", this.currentTheme);
 		this.applyTheme();
 	}
 
