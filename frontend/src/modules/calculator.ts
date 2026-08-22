@@ -63,7 +63,7 @@ export abstract class Calculator {
 	 * transform inputs or results. This method is not meant to be
 	 * overridden by subclasses.
 	 */
-	public calculate(): void {
+	public async calculate(): Promise<void> {
 		this.clearAllErrors();
 		this.showSkeleton();
 		try {
@@ -76,7 +76,7 @@ export abstract class Calculator {
 			let beforeResult: unknown = pm.executeHook("beforeCalculation", beforePayload);
 			let beforeFinal: BeforeCalculationPayload = beforeResult as BeforeCalculationPayload;
 			this.applyHookInputs(beforeFinal.inputs);
-			this.performCalculation();
+			await this.performCalculation();
 			let resultText: string = this.readResultForHook();
 			let afterPayload: AfterCalculationPayload = {
 				calculatorId: this.calculatorId,
@@ -136,8 +136,11 @@ export abstract class Calculator {
 		}
 	}
 
-	/** Subclasses implement the calculator-specific logic here. */
-	protected abstract performCalculation(): void;
+	/**
+	 * Subclasses implement the calculator-specific logic here. May be async;
+	 * calculate() awaits the result before running after-hooks.
+	 */
+	protected abstract performCalculation(): void | Promise<void>;
 
 	/**
 	 * DOM-free calculation hook. Subclasses override this to expose the same
