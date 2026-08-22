@@ -4,13 +4,12 @@ import {ThemeManager} from "../../modules/themeManager.js";
 import {ThemeToggle} from "./ThemeToggle";
 
 describe("ThemeToggle", function (): void {
-    let matchMediaSpy: ReturnType<typeof vi.spyOn>;
     let toggleSpy: ReturnType<typeof vi.spyOn>;
 
     beforeEach(function (): void {
         document.documentElement.classList.remove("dark", "light", "amoled");
         localStorage.clear();
-        matchMediaSpy = vi.spyOn(window, "matchMedia").mockReturnValue({
+        vi.spyOn(window, "matchMedia").mockReturnValue({
             matches: false,
             media: "(prefers-color-scheme: dark)",
             onchange: null,
