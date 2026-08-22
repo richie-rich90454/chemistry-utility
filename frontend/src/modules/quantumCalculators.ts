@@ -304,15 +304,6 @@ export class ElectronConfigurationGenerator extends Calculator {
             exceptionSet.add(exception[i][0] + "-" + exception[i][1]);
         }
 
-        let standardElectrons: number = 0;
-        for (let i = 0; i < ElectronConfigurationGenerator.AUFBAU_ORDER.length; i++) {
-            let n: number = ElectronConfigurationGenerator.AUFBAU_ORDER[i][0];
-            let l: number = ElectronConfigurationGenerator.AUFBAU_ORDER[i][1];
-            if (exceptionSet.has(n + "-" + l)) {
-                continue;
-            }
-            standardElectrons += ElectronConfigurationGenerator.MAX_ELECTRONS[l];
-        }
         let exceptionElectrons: number = 0;
         for (let i = 0; i < exception.length; i++) {
             exceptionElectrons += exception[i][2];
@@ -463,11 +454,12 @@ export class ElectronConfigurationGenerator extends Calculator {
             // Determine number of orbitals
             let orbitalCount: Record<string, number> = { "s": 1, "p": 3, "d": 5, "f": 7 };
             let numOrbitals: number = orbitalCount[l] || 1;
-            // Build spin arrows
+            // Build spin arrows following Hund's rule: every orbital gets one
+            // electron with parallel spin before any orbital is paired.
             let orbitals: string[] = [];
             for (let j = 0; j < numOrbitals; j++) {
-                let up: boolean = (j * 2) < electronCount;
-                let down: boolean = (j * 2 + 1) < electronCount;
+                let up: boolean = j < electronCount;
+                let down: boolean = (j + numOrbitals) < electronCount;
                 if (up && down) {
                     orbitals.push("\u2191\u2193");
                 } else if (up) {
@@ -700,9 +692,6 @@ export class DeBroglieWavelengthCalculator extends Calculator {
         if (lambdaM < 1e-12) {
             lambdaDisplay = lambdaM * 1e12;
             unit = "pm";
-        } else if (lambdaM < 1e-9) {
-            lambdaDisplay = lambdaM * 1e9;
-            unit = "nm";
         } else if (lambdaM < 1e-7) {
             lambdaDisplay = lambdaM * 1e9;
             unit = "nm";
@@ -744,9 +733,6 @@ export class DeBroglieWavelengthCalculator extends Calculator {
         if (lambdaM < 1e-12) {
             lambdaDisplay = lambdaM * 1e12;
             unit = "pm";
-        } else if (lambdaM < 1e-9) {
-            lambdaDisplay = lambdaM * 1e9;
-            unit = "nm";
         } else if (lambdaM < 1e-7) {
             lambdaDisplay = lambdaM * 1e9;
             unit = "nm";
