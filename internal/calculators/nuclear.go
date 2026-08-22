@@ -60,6 +60,9 @@ func HalfLife(ctx context.Context, input CalculationInput) (CalculationResult, e
 		if Nt <= 0 {
 			return CalculationResult{}, errors.New("remaining quantity must be positive")
 		}
+		if Nt >= N0 {
+			return CalculationResult{}, errors.New("remaining quantity must be less than initial quantity (decay only decreases quantity)")
+		}
 		result = (math.Log(Nt/N0) / math.Log(0.5)) * tHalf
 		unit = ""
 	case "halfLife":
