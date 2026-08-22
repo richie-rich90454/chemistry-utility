@@ -58,13 +58,21 @@ func New(cfg Config) (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
+	// Release the connection pool if setup fails after Open.
+	defer func() {
+		if err != nil {
+			db.Close()
+		}
+	}()
 	db.SetMaxOpenConns(cfg.MaxOpenConns)
 	db.SetMaxIdleConns(cfg.MaxIdleConns)
 	db.SetConnMaxLifetime(cfg.ConnMaxLifetime)
-	if err := db.Ping(); err != nil {
+	err = db.Ping()
+	if err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
-	if err := runMigrations(db, cfg); err != nil {
+	err = runMigrations(db, cfg)
+	if err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 	return db, nil
