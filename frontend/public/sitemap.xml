@@ -5,73 +5,157 @@
     <url>
         <loc>https://chemutil.richardsblogs.com/</loc>
         <priority>1.0</priority>
-        <lastmod>2026-06-22</lastmod>
+        <lastmod>2026-08-22</lastmod>
         <changefreq>weekly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/molar-mass</loc>
+        <priority>0.9</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
     </url>
     <url>
         <loc>https://chemutil.richardsblogs.com/element-lookup</loc>
         <priority>0.9</priority>
-        <lastmod>2026-06-22</lastmod>
+        <lastmod>2026-08-22</lastmod>
         <changefreq>monthly</changefreq>
     </url>
     <url>
-        <loc>https://chemutil.richardsblogs.com/mass-calc</loc>
+        <loc>https://chemutil.richardsblogs.com/periodic-table</loc>
         <priority>0.9</priority>
-        <lastmod>2026-06-22</lastmod>
+        <lastmod>2026-08-22</lastmod>
         <changefreq>monthly</changefreq>
     </url>
     <url>
-        <loc>https://chemutil.richardsblogs.com/balancing</loc>
+        <loc>https://chemutil.richardsblogs.com/equation-balancer</loc>
         <priority>0.9</priority>
-        <lastmod>2026-06-22</lastmod>
-        <changefreq>monthly</changefreq>
-    </url>
-    <url>
-        <loc>https://chemutil.richardsblogs.com/dilution-calc</loc>
-        <priority>0.8</priority>
-        <lastmod>2026-06-22</lastmod>
-        <changefreq>monthly</changefreq>
-    </url>
-    <url>
-        <loc>https://chemutil.richardsblogs.com/mass-percent-calc</loc>
-        <priority>0.8</priority>
-        <lastmod>2026-06-22</lastmod>
-        <changefreq>monthly</changefreq>
-    </url>
-    <url>
-        <loc>https://chemutil.richardsblogs.com/solution-mixing-calc</loc>
-        <priority>0.8</priority>
-        <lastmod>2026-06-22</lastmod>
-        <changefreq>monthly</changefreq>
-    </url>
-    <url>
-        <loc>https://chemutil.richardsblogs.com/nuclear-chemistry</loc>
-        <priority>0.8</priority>
-        <lastmod>2026-06-22</lastmod>
-        <changefreq>monthly</changefreq>
-    </url>
-    <url>
-        <loc>https://chemutil.richardsblogs.com/gas-laws</loc>
-        <priority>0.8</priority>
-        <lastmod>2026-06-22</lastmod>
-        <changefreq>monthly</changefreq>
-    </url>
-    <url>
-        <loc>https://chemutil.richardsblogs.com/electrochemistry</loc>
-        <priority>0.8</priority>
-        <lastmod>2026-06-22</lastmod>
+        <lastmod>2026-08-22</lastmod>
         <changefreq>monthly</changefreq>
     </url>
     <url>
         <loc>https://chemutil.richardsblogs.com/stoichiometry</loc>
         <priority>0.9</priority>
-        <lastmod>2026-06-22</lastmod>
+        <lastmod>2026-08-22</lastmod>
         <changefreq>monthly</changefreq>
     </url>
     <url>
-        <loc>https://chemutil.richardsblogs.com/bond-type-predictor</loc>
+        <loc>https://chemutil.richardsblogs.com/unit-converter</loc>
         <priority>0.8</priority>
-        <lastmod>2026-06-22</lastmod>
+        <lastmod>2026-08-22</lastmod>
         <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/dilution</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/mass-percent</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/solution-mixing</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/buffer</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/pka-pkb</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/ksp</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/colligative</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/titration</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/debye-huckel</loc>
+        <priority>0.7</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/common-ion</loc>
+        <priority>0.7</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/nuclear</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/gas-laws</loc>
+        <priority>0.9</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/electrochemistry</loc>
+        <priority>0.9</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/thermodynamics</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/kinetics</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/quantum-atomic</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/bond-type</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/molecular-viewer</loc>
+        <priority>0.7</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/compound-search</loc>
+        <priority>0.7</priority>
+        <lastmod>2026-08-22</lastmod>
+        <changefreq>weekly</changefreq>
     </url>
 </urlset>
