@@ -42,6 +42,7 @@ export class CrystalStructureCalculator extends Calculator {
 
     protected performCalculation(): void {
         let system: string = this.getInput("crystal-system").getStringValue();
+        let lattice: string = this.getLatticeType();
         let a: number = this.getInput("crystal-a").getValue();
         let b: number = this.getInput("crystal-b").getValue();
         let c: number = this.getInput("crystal-c").getValue();
@@ -55,7 +56,7 @@ export class CrystalStructureCalculator extends Calculator {
 
         let params: LatticeParameters = this.applySystemConstraints(system, a, b, c, alpha, beta, gamma);
         let volume: number = this.computeVolume(params.a, params.b, params.c, params.alpha, params.beta, params.gamma);
-        let packingFraction: number | null = this.computePackingFraction(system);
+        let packingFraction: number | null = this.computePackingFraction(system, lattice);
         let density: number | null = null;
         if (!isNaN(atomicMass) && atomicMass > 0 && !isNaN(z) && z > 0) {
             let volumeCm3: number = volume * ANG3_TO_CM3;
@@ -66,7 +67,7 @@ export class CrystalStructureCalculator extends Calculator {
         if (packingFraction !== null) {
             html += "<p>Packing fraction: " + this.numberFormatter.format(packingFraction, 4) + "</p>";
         } else {
-            html += "<p>Packing fraction: not defined for " + system + "</p>";
+            html += "<p>Packing fraction: requires a cubic system with lattice type (sc, bcc, or fcc)</p>";
         }
         if (density !== null) {
             html += "<p>Density: " + this.numberFormatter.format(density, 4) + " g/cm³</p>";
@@ -118,11 +119,37 @@ export class CrystalStructureCalculator extends Calculator {
         return a * b * c * Math.sqrt(sinSq);
     }
 
-    private computePackingFraction(system: string): number | null {
-        if (system === "cubic" || system === "hexagonal") {
+    /**
+     * Packing fraction is only a constant for the cubic lattice types
+     * (sc = pi/6, bcc = sqrt(3)pi/8, fcc = pi/(3*sqrt2)). For every other
+     * system it depends on atomic radius / c-a ratio, which are not inputs,
+     * so no value is reported rather than returning a misleading constant.
+     */
+    private computePackingFraction(system: string, lattice: string): number | null {
+        if (system !== "cubic") {
+            return null;
+        }
+        if (lattice === "sc") {
+            return Math.PI / 6;
+        }
+        if (lattice === "bcc") {
+            return (Math.sqrt(3) * Math.PI) / 8;
+        }
+        if (lattice === "fcc") {
             return Math.PI / (3 * Math.sqrt(2));
         }
         return null;
+    }
+
+    private getLatticeType(): string {
+        let el: HTMLElement | null = document.getElementById("crystal-lattice");
+        if (el instanceof HTMLSelectElement || el instanceof HTMLInputElement) {
+            let v: string = (el as HTMLSelectElement).value.trim().toLowerCase();
+            if (v === "sc" || v === "bcc" || v === "fcc") {
+                return v;
+            }
+        }
+        return "";
     }
 }
 
@@ -208,6 +235,7 @@ export class CrystalStructurePlugin implements Plugin {
         section.innerHTML =
             '<h2>Crystal Structure</h2>' +
             '<label>Crystal system<select id="crystal-system">' + systemOptions + '</select></label>' +
+            '<label>Cubic lattice type<select id="crystal-lattice"><option value="">(not cubic / unknown)</option><option value="sc">simple cubic</option><option value="bcc">body-centered</option><option value="fcc">face-centered</option></select></label>' +
             '<label>a (Å)<input id="crystal-a" type="number" step="any"></label>' +
             '<label>b (Å)<input id="crystal-b" type="number" step="any"></label>' +
             '<label>c (Å)<input id="crystal-c" type="number" step="any"></label>' +
