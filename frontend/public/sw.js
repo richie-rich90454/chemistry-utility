@@ -1,6 +1,6 @@
 // Service Worker for Chemistry Utility PWA
 // Update CACHE_VERSION when deploying new assets to bust the cache
-var CACHE_VERSION = 'chemutil-v2';
+var CACHE_VERSION = 'chemutil-v3';
 
 // Wails serves the app from its own local asset server (hostname starts with
 // "wails"). A PWA service worker must never intercept requests there: the
@@ -33,16 +33,16 @@ if (isWailsHost) {
     // File extensions that should use cache-first strategy (immutable assets)
     var CACHE_FIRST_EXTENSIONS = [
         '.css', '.js', '.woff2', '.woff', '.ttf', '.png', '.jpg', '.jpeg',
-        '.svg', '.ico', '.webp', '.json'
+        '.svg', '.ico', '.webp'
     ];
 
-    // Install event: pre-cache critical assets
+    // Install event: pre-cache critical assets. Deliberately no skipWaiting():
+    // the new worker waits until every tab running the old build closes, so an
+    // open page can never lose lazy chunks it still needs.
     self.addEventListener('install', function(event) {
         event.waitUntil(
             caches.open(CACHE_VERSION).then(function(cache) {
                 return cache.addAll(PRECACHE_URLS);
-            }).then(function() {
-                return self.skipWaiting();
             })
         );
     });
