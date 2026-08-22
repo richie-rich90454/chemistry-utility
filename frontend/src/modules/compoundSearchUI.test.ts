@@ -146,25 +146,25 @@ describe("CompoundSearchUI", function () {
         it("should construct search URL with encoded query", async function () {
             mockGet.mockResolvedValue({ "compounds": [] as CompoundResult[], "query": "water & co" });
             await ui.search("water & co", "name");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=water%20%26%20co");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=water%20%26%20co&type=name");
         });
 
-        it("should ignore type parameter", async function () {
+        it("should pass the type parameter to the API", async function () {
             mockGet.mockResolvedValue({ "compounds": [] as CompoundResult[], "query": "H2O" });
             await ui.search("H2O", "formula");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=H2O");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=H2O&type=formula");
         });
 
         it("should support CAS type", async function () {
             mockGet.mockResolvedValue({ "compounds": [] as CompoundResult[], "query": "7732-18-5" });
             await ui.search("7732-18-5", "cas");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=7732-18-5");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=7732-18-5&type=cas");
         });
 
         it("should support SMILES type", async function () {
             mockGet.mockResolvedValue({ "compounds": [] as CompoundResult[], "query": "O" });
             await ui.search("O", "smiles");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=O");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=O&type=smiles");
         });
 
         it("should call renderResults with compounds from response", async function () {
@@ -556,7 +556,7 @@ describe("CompoundSearchUI", function () {
         it("should call ApiClient.get with encoded query", async function () {
             mockGet.mockResolvedValue({"compounds": [makeCompound()], "query": "water"});
             let results = await searchCompounds("water & co", "name");
-            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=water%20%26%20co");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds?q=water%20%26%20co&type=name");
             expect(results.length).toBe(1);
             expect(results[0].name).toBe("Water");
         });
