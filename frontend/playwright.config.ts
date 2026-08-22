@@ -15,7 +15,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npx vite --port 5173",
+    command: "npm run build:web && npx vite preview --port 5173",
     reuseExistingServer: true,
   },
 });
