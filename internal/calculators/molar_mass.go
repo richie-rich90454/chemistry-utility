@@ -59,16 +59,23 @@ func parseElement(formula string, index int) (string, int, error) {
 
 // parseNumber parses a subscript number starting at the given index.
 // Returns the number and the new index. Returns 1 if no number is found.
-func parseNumber(formula string, index int) (int, int) {
+// Subscripts longer than 6 digits are chemically meaningless and rejected
+// rather than silently overflowing int arithmetic.
+func parseNumber(formula string, index int) (int, int, error) {
 	number := 0
+	digits := 0
 	for index < len(formula) && unicode.IsDigit(rune(formula[index])) {
 		number = number*10 + int(formula[index]-'0')
 		index++
+		digits++
+		if digits > 6 || number > 999999 {
+			return 0, index, fmt.Errorf("subscript too large at position %d", index-digits)
+		}
 	}
 	if number == 0 {
 		number = 1
 	}
-	return number, index
+	return number, index, nil
 }
 
 // elementCounts holds the count of each element in a formula.
@@ -92,7 +99,10 @@ func parseFormulaWithCounts(formula string) (elementCounts, error) {
 			top := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			i++
-			mul, newIndex := parseNumber(formula, i)
+			mul, newIndex, err := parseNumber(formula, i)
+			if err != nil {
+				return nil, err
+			}
 			i = newIndex
 			for el, cnt := range top {
 				stack[len(stack)-1][el] += cnt * float64(mul)
@@ -103,7 +113,10 @@ func parseFormulaWithCounts(formula string) (elementCounts, error) {
 				return nil, err
 			}
 			i = newIndex
-			count, newIndex := parseNumber(formula, i)
+			count, newIndex, err := parseNumber(formula, i)
+			if err != nil {
+				return nil, err
+			}
 			i = newIndex
 			stack[len(stack)-1][symbol] += float64(count)
 		} else {
