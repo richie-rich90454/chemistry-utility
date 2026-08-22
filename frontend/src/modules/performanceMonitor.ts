@@ -9,6 +9,8 @@ export class PerformanceMonitor {
 	private calculationMetrics: Record<string, number> = {};
 	private apiCallMetrics: Record<string, number> = {};
 	private isProd: boolean;
+	private observers: PerformanceObserver[] = [];
+	private measured: boolean = false;
 
 	private constructor() {
 		this.isProd = this.detectProduction();
@@ -32,6 +34,11 @@ export class PerformanceMonitor {
 		if (typeof window === "undefined" || typeof performance === "undefined") {
 			return;
 		}
+		// Observers live for the page lifetime; never stack a second set.
+		if (this.measured) {
+			return;
+		}
+		this.measured = true;
 
 		// TTFB from Navigation Timing API
 		this.measureTtfb();
@@ -95,6 +102,7 @@ export class PerformanceMonitor {
 				}
 			}.bind(this));
 			observer.observe({ type: "largest-contentful-paint", buffered: true });
+			this.observers.push(observer);
 		} catch {
 			// PerformanceObserver or LCP not supported
 		}
@@ -115,6 +123,7 @@ export class PerformanceMonitor {
 				this.metrics["cls"] = clsValue;
 			}.bind(this));
 			observer.observe({ type: "layout-shift", buffered: true });
+			this.observers.push(observer);
 		} catch {
 			// PerformanceObserver or CLS not supported
 		}
@@ -135,6 +144,7 @@ export class PerformanceMonitor {
 				this.metrics["inp"] = maxDuration;
 			}.bind(this));
 			observer.observe({ type: "event", buffered: true });
+			this.observers.push(observer);
 		} catch {
 			// PerformanceObserver or INP not supported
 		}
@@ -169,14 +179,21 @@ export class PerformanceMonitor {
 
 	/** Detects whether the app is running in production mode. */
 	private detectProduction(): boolean {
-		if (typeof process !== "undefined" && process.env && process.env.NODE_ENV) {
-			return process.env.NODE_ENV === "production";
+		// Vite replaces import.meta.env.PROD at build time; process.env is
+		// not defined in browser bundles.
+		if (typeof import.meta !== "undefined" && import.meta.env) {
+			return import.meta.env.PROD === true;
 		}
 		return false;
 	}
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
+		if (PerformanceMonitor.instance && PerformanceMonitor.instance.observers) {
+			for (let i = 0; i < PerformanceMonitor.instance.observers.length; i++) {
+				PerformanceMonitor.instance.observers[i].disconnect();
+			}
+		}
 		PerformanceMonitor.instance = null as unknown as PerformanceMonitor;
 	}
 }
