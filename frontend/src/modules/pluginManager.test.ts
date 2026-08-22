@@ -762,7 +762,7 @@ describe("CrystalStructurePlugin integration", function (): void {
 });
 
 describe("CrystalStructureCalculator calculations", function (): void {
-    it("computes cubic unit cell volume (a=5 → V=125)", function (): void {
+    it("computes cubic unit cell volume (a=5 -> V=125)", async function (): Promise<void> {
         let pm: PluginManager = PluginManager.getInstance();
         let plugin: CrystalStructurePlugin = new CrystalStructurePlugin();
         pm.registerPlugin(plugin);
@@ -773,7 +773,7 @@ describe("CrystalStructureCalculator calculations", function (): void {
         aInput.value = "5";
 
         let calc: { calculate: () => void } = CalculatorRegistry.getInstance().get("crystal-structure") as unknown as { calculate: () => void };
-        calc.calculate();
+        await calc.calculate();
 
         let resultEl: HTMLElement = document.getElementById("crystal-structure-result") as HTMLElement;
         let text: string = (resultEl.textContent || "").trim();
@@ -783,7 +783,7 @@ describe("CrystalStructureCalculator calculations", function (): void {
         expect(text).toContain("processed by CrystalStructurePlugin");
     });
 
-    it("computes density when atomic mass and Z are provided", function (): void {
+    it("computes density when atomic mass and Z are provided", async function (): Promise<void> {
         let pm: PluginManager = PluginManager.getInstance();
         let plugin: CrystalStructurePlugin = new CrystalStructurePlugin();
         pm.registerPlugin(plugin);
@@ -798,7 +798,7 @@ describe("CrystalStructureCalculator calculations", function (): void {
         zInput.value = "4";
 
         let calc: { calculate: () => void } = CalculatorRegistry.getInstance().get("crystal-structure") as unknown as { calculate: () => void };
-        calc.calculate();
+        await calc.calculate();
 
         let resultEl: HTMLElement = document.getElementById("crystal-structure-result") as HTMLElement;
         let text: string = (resultEl.textContent || "").trim();
@@ -806,7 +806,7 @@ describe("CrystalStructureCalculator calculations", function (): void {
         expect(text).toContain("g/cm³");
     });
 
-    it("shows an error when required lattice parameter is missing", function (): void {
+    it("shows an error when required lattice parameter is missing", async function (): Promise<void> {
         let pm: PluginManager = PluginManager.getInstance();
         let plugin: CrystalStructurePlugin = new CrystalStructurePlugin();
         pm.registerPlugin(plugin);
@@ -817,14 +817,14 @@ describe("CrystalStructureCalculator calculations", function (): void {
         aInput.value = "";
 
         let calc: { calculate: () => void } = CalculatorRegistry.getInstance().get("crystal-structure") as unknown as { calculate: () => void };
-        calc.calculate();
+        await calc.calculate();
 
         let resultEl: HTMLElement = document.getElementById("crystal-structure-result") as HTMLElement;
         let text: string = (resultEl.textContent || "").trim();
         expect(text).toContain("Error");
     });
 
-    it("does not append plugin metadata when the plugin is disabled", function (): void {
+    it("does not append plugin metadata when the plugin is disabled", async function (): Promise<void> {
         let pm: PluginManager = PluginManager.getInstance();
         let plugin: CrystalStructurePlugin = new CrystalStructurePlugin();
         pm.registerPlugin(plugin);
@@ -836,7 +836,7 @@ describe("CrystalStructureCalculator calculations", function (): void {
         aInput.value = "5";
 
         let calc: { calculate: () => void } = CalculatorRegistry.getInstance().get("crystal-structure") as unknown as { calculate: () => void };
-        calc.calculate();
+        await calc.calculate();
 
         let resultEl: HTMLElement = document.getElementById("crystal-structure-result") as HTMLElement;
         let text: string = (resultEl.textContent || "").trim();
