@@ -78,13 +78,15 @@ export class DebugLogger {
 		return "[" + prefix + "] " + message;
 	}
 
-	/** Detects whether the app is running in production mode. */
-	private detectProduction(): boolean {
-		if (typeof process !== "undefined" && process.env && process.env.NODE_ENV) {
-			return process.env.NODE_ENV === "production";
-		}
-		return false;
-	}
+    /** Detects whether the app is running in production mode. */
+    private detectProduction(): boolean {
+        // Vite replaces import.meta.env.PROD at build time; process.env is
+        // not defined in browser bundles.
+        if (typeof import.meta !== "undefined" && import.meta.env) {
+            return import.meta.env.PROD === true;
+        }
+        return false;
+    }
 
 	/** Resets the singleton instance. For testing only. */
 	public static resetInstance(): void {
