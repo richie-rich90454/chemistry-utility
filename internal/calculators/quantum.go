@@ -10,8 +10,8 @@ import (
 const (
 	// Planck constant in J·s
 	planck = 6.626e-34
-	// Reduced Planck constant (ℏ) in J·s
-	hbar = 1.055e-34
+	// Reduced Planck constant (ℏ) in J·s (CODATA 2018)
+	hbar = 1.054571817e-34
 	// Elementary charge in C
 	elementaryCharge = 1.602e-19
 )
@@ -38,14 +38,31 @@ func QuantumNumbers(ctx context.Context, input CalculationInput) (CalculationRes
 
 	var validationErrors []string
 
-	if n != math.Floor(n) || n < 1 {
+	nValid := n == math.Floor(n) && n >= 1
+	if !nValid {
 		validationErrors = append(validationErrors, "n must be a positive integer (1, 2, 3, ...)")
 	}
-	if l != math.Floor(l) || l < 0 || l >= n {
-		validationErrors = append(validationErrors, "l must be an integer from 0 to n-1")
+	// l can only be checked against n when n itself is a valid positive
+	// integer; otherwise fall back to requiring a non-negative integer.
+	lValid := l == math.Floor(l) && l >= 0 && (!nValid || l < n)
+	if !lValid {
+		if nValid {
+			validationErrors = append(validationErrors, "l must be an integer from 0 to n-1")
+		} else {
+			validationErrors = append(validationErrors, "l must be a non-negative integer (n is invalid, so its range cannot be checked)")
+		}
 	}
-	if ml != math.Floor(ml) || ml < -l || ml > l {
-		validationErrors = append(validationErrors, "ml must be an integer from -l to +l")
+	// ml can only be checked against l when l is a valid non-negative integer.
+	mlValid := ml == math.Floor(ml)
+	if lValid {
+		mlValid = mlValid && ml >= -l && ml <= l
+	}
+	if !mlValid {
+		if lValid {
+			validationErrors = append(validationErrors, "ml must be an integer from -l to +l")
+		} else {
+			validationErrors = append(validationErrors, "ml must be an integer (l is invalid, so its range cannot be checked)")
+		}
 	}
 	if ms != 0.5 && ms != -0.5 {
 		validationErrors = append(validationErrors, "ms must be +1/2 or -1/2")
@@ -55,8 +72,14 @@ func QuantumNumbers(ctx context.Context, input CalculationInput) (CalculationRes
 	shellNames := map[float64]string{1: "K", 2: "L", 3: "M", 4: "N", 5: "O", 6: "P", 7: "Q"}
 	subshellNames := map[float64]string{0: "s", 1: "p", 2: "d", 3: "f"}
 
-	shell := shellNames[n]
-	subshell := subshellNames[l]
+	shell, ok := shellNames[n]
+	if !ok {
+		shell = fmt.Sprintf("n=%.0f", n)
+	}
+	subshell, ok := subshellNames[l]
+	if !ok {
+		subshell = fmt.Sprintf("l=%.0f", l)
+	}
 
 	steps := []string{
 		fmt.Sprintf("n = %d (shell %s)", int(n), shell),
@@ -98,6 +121,9 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 	}
 	if atomicNumber < 1 || atomicNumber > 118 {
 		return CalculationResult{}, errors.New("atomic number must be between 1 and 118")
+	}
+	if atomicNumber != math.Trunc(atomicNumber) {
+		return CalculationResult{}, errors.New("atomic number must be an integer")
 	}
 	z := int(atomicNumber)
 
@@ -221,15 +247,21 @@ func DeBroglieWavelength(ctx context.Context, input CalculationInput) (Calculati
 }
 
 // PhotoelectricEffect calculates KE = hf - φ.
-// Input keys: "frequency" (Hz), "workFunction" (in J or eV),
-// "unit" (optional: "J" or "eV", default "eV").
+// Input keys: "frequency" (Hz, must be positive), "workFunction" (must be
+// non-negative, in J or eV), "unit" ("J" or "eV", default "eV").
 // "solveFor" (optional: "KE", "frequency", "workFunction").
+// A negative KE result means no electron emission (photon energy below the
+// work function) and is reported with an explanatory step, not an error.
 func PhotoelectricEffect(ctx context.Context, input CalculationInput) (CalculationResult, error) {
 	solveFor := getStringWithDefault(input, "solveFor", "KE")
 	unit := getStringWithDefault(input, "unit", "eV")
+	if unit != "eV" && unit != "J" {
+		return CalculationResult{}, fmt.Errorf("invalid unit: %s (must be \"eV\" or \"J\")", unit)
+	}
 
 	var result float64
 	var resultUnit string
+	var steps []string
 
 	switch solveFor {
 	case "KE":
@@ -240,6 +272,12 @@ func PhotoelectricEffect(ctx context.Context, input CalculationInput) (Calculati
 		phi, err := getFloat(input, "workFunction")
 		if err != nil {
 			return CalculationResult{}, err
+		}
+		if freq <= 0 {
+			return CalculationResult{}, errors.New("frequency must be positive")
+		}
+		if phi < 0 {
+			return CalculationResult{}, errors.New("work function cannot be negative")
 		}
 		workJ := phi
 		if unit == "eV" {
@@ -252,6 +290,10 @@ func PhotoelectricEffect(ctx context.Context, input CalculationInput) (Calculati
 			result = KE
 		}
 		resultUnit = unit
+		steps = []string{fmt.Sprintf("KE = hf - φ, solving for %s", solveFor)}
+		if KE < 0 {
+			steps = append(steps, "KE < 0: no electron emission (photon energy below the work function)")
+		}
 	case "frequency":
 		KE, err := getFloat(input, "KE")
 		if err != nil {
@@ -261,6 +303,12 @@ func PhotoelectricEffect(ctx context.Context, input CalculationInput) (Calculati
 		if err != nil {
 			return CalculationResult{}, err
 		}
+		if KE < 0 {
+			return CalculationResult{}, errors.New("kinetic energy cannot be negative")
+		}
+		if phi < 0 {
+			return CalculationResult{}, errors.New("work function cannot be negative")
+		}
 		keJ := KE
 		workJ := phi
 		if unit == "eV" {
@@ -269,6 +317,7 @@ func PhotoelectricEffect(ctx context.Context, input CalculationInput) (Calculati
 		}
 		result = (keJ + workJ) / planck
 		resultUnit = "Hz"
+		steps = []string{fmt.Sprintf("KE = hf - φ, solving for %s", solveFor)}
 	case "workFunction":
 		KE, err := getFloat(input, "KE")
 		if err != nil {
@@ -277,6 +326,12 @@ func PhotoelectricEffect(ctx context.Context, input CalculationInput) (Calculati
 		freq, err := getFloat(input, "frequency")
 		if err != nil {
 			return CalculationResult{}, err
+		}
+		if KE < 0 {
+			return CalculationResult{}, errors.New("kinetic energy cannot be negative")
+		}
+		if freq <= 0 {
+			return CalculationResult{}, errors.New("frequency must be positive")
 		}
 		keJ := KE
 		if unit == "eV" {
@@ -289,6 +344,7 @@ func PhotoelectricEffect(ctx context.Context, input CalculationInput) (Calculati
 			result = workJ
 		}
 		resultUnit = unit
+		steps = []string{fmt.Sprintf("KE = hf - φ, solving for %s", solveFor)}
 	default:
 		return CalculationResult{}, fmt.Errorf("invalid solveFor: %s", solveFor)
 	}
@@ -296,12 +352,13 @@ func PhotoelectricEffect(ctx context.Context, input CalculationInput) (Calculati
 	return CalculationResult{
 		Value: result,
 		Unit:  resultUnit,
-		Steps: []string{fmt.Sprintf("KE = hf - φ, solving for %s", solveFor)},
+		Steps: steps,
 	}, nil
 }
 
 // HeisenbergUncertainty calculates ΔxΔp ≥ ℏ/2.
-// Input keys: "deltaX" (or "deltaP"), "solveFor" ("deltaX" or "deltaP" or "minDeltaX" or "minDeltaP").
+// Input keys: "deltaP" with solveFor "minDeltaX", or "deltaX" with solveFor
+// "minDeltaP".
 func HeisenbergUncertainty(ctx context.Context, input CalculationInput) (CalculationResult, error) {
 	solveFor := getStringWithDefault(input, "solveFor", "minDeltaX")
 	minProduct := hbar / 2.0
