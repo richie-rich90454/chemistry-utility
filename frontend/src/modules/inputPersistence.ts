@@ -36,9 +36,22 @@ export class InputPersistence {
 		try {
 			let key = "calc-inputs-" + calculatorId;
 			let stored = localStorage.getItem(key);
-			if (stored) {
-				return JSON.parse(stored);
+			if (!stored) {
+				return null;
 			}
+			let parsed: unknown = JSON.parse(stored);
+			if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+				return null;
+			}
+			let out: Record<string, string> = {};
+			for (let [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+				if (typeof v === "string") {
+					out[k] = v;
+				} else if (typeof v === "number" || typeof v === "boolean") {
+					out[k] = String(v);
+				}
+			}
+			return out;
 		} catch {}
 		return null;
 	}
