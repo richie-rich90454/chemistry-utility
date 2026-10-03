@@ -852,7 +852,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("NaHCO3 -> Na2CO3 + H2O + CO2")).toBe("2NaHCO3 -> Na2CO3 + H2O + CO2");
     });
     it("procedural case 33: AlCl3 with K2SO4", function(){
-        expect(balanceEquation("AlCl3 + K2SO4 -> Al2(2SO4)3 + KCl")).toBe("2AlCl3 + 3K2SO4 -> Al2(2SO4)3 + 6KCl");
+        expect(balanceEquation("AlCl3 + K2SO4 -> Al2(SO4)3 + KCl")).toBe("2AlCl3 + 3K2SO4 -> Al2(SO4)3 + 6KCl");
     });
     it("procedural case 34: CoO with HBr", function(){
         expect(balanceEquation("CoO + HBr -> CoBr2 + H2O")).toBe("CoO + 2HBr -> CoBr2 + H2O");
@@ -1002,7 +1002,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("Zn(NO3)2 + RbCl -> RbNO3 + ZnCl2")).toBe("Zn(NO3)2 + 2RbCl -> 2RbNO3 + ZnCl2");
     });
     it("procedural case 83: AlCl3 with Na2SO4", function(){
-        expect(balanceEquation("AlCl3 + Na2SO4 -> Al2(2SO4)3 + NaCl")).toBe("2AlCl3 + 3Na2SO4 -> Al2(2SO4)3 + 6NaCl");
+        expect(balanceEquation("AlCl3 + Na2SO4 -> Al2(SO4)3 + NaCl")).toBe("2AlCl3 + 3Na2SO4 -> Al2(SO4)3 + 6NaCl");
     });
     it("procedural case 84: Ag with HBr", function(){
         expect(balanceEquation("Ag + HBr -> AgBr + H2")).toBe("2Ag + 2HBr -> 2AgBr + H2");
@@ -1038,7 +1038,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("Fe(NO2)2 + HF -> FeF2 + HNO2")).toBe("Fe(NO2)2 + 2HF -> FeF2 + 2HNO2");
     });
     it("procedural case 95: AlCl3 with Li2SO4", function(){
-        expect(balanceEquation("AlCl3 + Li2SO4 -> Al2(2SO4)3 + LiCl")).toBe("2AlCl3 + 3Li2SO4 -> Al2(2SO4)3 + 6LiCl");
+        expect(balanceEquation("AlCl3 + Li2SO4 -> Al2(SO4)3 + LiCl")).toBe("2AlCl3 + 3Li2SO4 -> Al2(SO4)3 + 6LiCl");
     });
     it("procedural case 96: CoO with HF", function(){
         expect(balanceEquation("CoO + HF -> CoF2 + H2O")).toBe("CoO + 2HF -> CoF2 + H2O");
@@ -1206,7 +1206,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("Pb(NO2)2 + HCl -> PbCl2 + HNO2")).toBe("Pb(NO2)2 + 2HCl -> PbCl2 + 2HNO2");
     });
     it("procedural case 151: CrCl3 with K2SO4", function(){
-        expect(balanceEquation("CrCl3 + K2SO4 -> Cr2(2SO4)3 + KCl")).toBe("2CrCl3 + 3K2SO4 -> Cr2(2SO4)3 + 6KCl");
+        expect(balanceEquation("CrCl3 + K2SO4 -> Cr2(SO4)3 + KCl")).toBe("2CrCl3 + 3K2SO4 -> Cr2(SO4)3 + 6KCl");
     });
     it("procedural case 152: Pb with HI", function(){
         expect(balanceEquation("Pb + HI -> PbI2 + H2")).toBe("Pb + 2HI -> PbI2 + H2");
@@ -1635,7 +1635,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("Cs2C2O4 + HI -> CsI + H2C2O4")).toBe("Cs2C2O4 + 2HI -> 2CsI + H2C2O4");
     });
     it("procedural case 294: AlCl3 with Rb2SO4", function(){
-        expect(balanceEquation("AlCl3 + Rb2SO4 -> Al2(2SO4)3 + RbCl")).toBe("2AlCl3 + 3Rb2SO4 -> Al2(2SO4)3 + 6RbCl");
+        expect(balanceEquation("AlCl3 + Rb2SO4 -> Al2(SO4)3 + RbCl")).toBe("2AlCl3 + 3Rb2SO4 -> Al2(SO4)3 + 6RbCl");
     });
     it("procedural case 295: MgCl2 with Fe2(SO4)3", function(){
         expect(balanceEquation("MgCl2 + Fe2(SO4)3 -> Mg2(SO4)3 + FeCl2")).toBe("2MgCl2 + Fe2(SO4)3 -> Mg2(SO4)3 + 2FeCl2");
@@ -2550,7 +2550,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("Zn + HCl -> ZnCl2 + H2")).toBe("Zn + 2HCl -> ZnCl2 + H2");
     });
     it("procedural case 599: AlCl3 with Ag2SO4", function(){
-        expect(balanceEquation("AlCl3 + Ag2SO4 -> Al2(2SO4)3 + AgCl")).toBe("2AlCl3 + 3Ag2SO4 -> Al2(2SO4)3 + 6AgCl");
+        expect(balanceEquation("AlCl3 + Ag2SO4 -> Al2(SO4)3 + AgCl")).toBe("2AlCl3 + 3Ag2SO4 -> Al2(SO4)3 + 6AgCl");
     });
     it("procedural case 600: CuO with H3PO4", function(){
         expect(balanceEquation("CuO + H3PO4 -> Cu3(PO4)2 + H2O")).toBe("3CuO + 2H3PO4 -> Cu3(PO4)2 + 3H2O");
@@ -2901,7 +2901,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("Mn(NO3)2 + K2SO4 -> KNO3 + MnSO4")).toBe("Mn(NO3)2 + K2SO4 -> 2KNO3 + MnSO4");
     });
     it("procedural case 716: CrCl3 with Ag2SO4", function(){
-        expect(balanceEquation("CrCl3 + Ag2SO4 -> Cr2(2SO4)3 + AgCl")).toBe("2CrCl3 + 3Ag2SO4 -> Cr2(2SO4)3 + 6AgCl");
+        expect(balanceEquation("CrCl3 + Ag2SO4 -> Cr2(SO4)3 + AgCl")).toBe("2CrCl3 + 3Ag2SO4 -> Cr2(SO4)3 + 6AgCl");
     });
     it("procedural case 717: Na with H2CO3", function(){
         expect(balanceEquation("Na + H2CO3 -> Na(CO3)2 + H2")).toBe("Na + 2H2CO3 -> Na(CO3)2 + 2H2");
@@ -2970,7 +2970,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("Sr(NO3)2 + Rb2SO4 -> RbNO3 + SrSO4")).toBe("Sr(NO3)2 + Rb2SO4 -> 2RbNO3 + SrSO4");
     });
     it("procedural case 739: CrCl3 with Li2SO4", function(){
-        expect(balanceEquation("CrCl3 + Li2SO4 -> Cr2(2SO4)3 + LiCl")).toBe("2CrCl3 + 3Li2SO4 -> Cr2(2SO4)3 + 6LiCl");
+        expect(balanceEquation("CrCl3 + Li2SO4 -> Cr2(SO4)3 + LiCl")).toBe("2CrCl3 + 3Li2SO4 -> Cr2(SO4)3 + 6LiCl");
     });
     it("procedural case 740: Ca(NO3)2 with Rb2SO4", function(){
         expect(balanceEquation("Ca(NO3)2 + Rb2SO4 -> RbNO3 + CaSO4")).toBe("Ca(NO3)2 + Rb2SO4 -> 2RbNO3 + CaSO4");
@@ -3516,7 +3516,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("MgS + HBr -> MgBr2 + H2S")).toBe("MgS + 2HBr -> MgBr2 + H2S");
     });
     it("procedural case 921: CrCl3 with Na2SO4", function(){
-        expect(balanceEquation("CrCl3 + Na2SO4 -> Cr2(2SO4)3 + NaCl")).toBe("2CrCl3 + 3Na2SO4 -> Cr2(2SO4)3 + 6NaCl");
+        expect(balanceEquation("CrCl3 + Na2SO4 -> Cr2(SO4)3 + NaCl")).toBe("2CrCl3 + 3Na2SO4 -> Cr2(SO4)3 + 6NaCl");
     });
     it("procedural case 922: Ba with HCl", function(){
         expect(balanceEquation("Ba + HCl -> BaCl2 + H2")).toBe("Ba + 2HCl -> BaCl2 + H2");
@@ -3525,7 +3525,7 @@ describe("procedurally generated reactions", function(){
         expect(balanceEquation("Mg(NO3)2 + LiCl -> LiNO3 + MgCl2")).toBe("Mg(NO3)2 + 2LiCl -> 2LiNO3 + MgCl2");
     });
     it("procedural case 924: CrCl3 with Rb2SO4", function(){
-        expect(balanceEquation("CrCl3 + Rb2SO4 -> Cr2(2SO4)3 + RbCl")).toBe("2CrCl3 + 3Rb2SO4 -> Cr2(2SO4)3 + 6RbCl");
+        expect(balanceEquation("CrCl3 + Rb2SO4 -> Cr2(SO4)3 + RbCl")).toBe("2CrCl3 + 3Rb2SO4 -> Cr2(SO4)3 + 6RbCl");
     });
     it("procedural case 925: MnC2O4 with HBr", function(){
         expect(balanceEquation("MnC2O4 + HBr -> MnBr2 + H2C2O4")).toBe("MnC2O4 + 2HBr -> MnBr2 + H2C2O4");
