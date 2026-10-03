@@ -38,7 +38,7 @@ import {CommandPalette} from "./components/CommandPalette";
 import {OnboardingTour} from "./components/OnboardingTour";
 import {ComparisonModal} from "./components/ComparisonModal";
 import {createSignal} from "solid-js";
-import {RuntimeDetector} from "../modules/runtimeDetector.js";
+import {isDesktop} from "./lib/desktopOnly";
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -76,8 +76,8 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
 function App(): JSX.Element {
     // Reactive (not a one-time snapshot) so tests/devtools toggling the
     // runtime mode re-resolves the desktop-only routes.
-    let isDesktop = createMemo(function (): boolean {
-        return !RuntimeDetector.getInstance().isWebMode;
+    let desktop = createMemo(function (): boolean {
+        return isDesktop();
     });
     onMount(function (): void {
         if (window.location.hash === "#mass-calc") {
@@ -276,8 +276,8 @@ function App(): JSX.Element {
                 <Route path="/bond-type" component={BondType} />
                 <Route path="/molecular-viewer" component={MolecularViewerRoute} />
                 <Route path="/compound-search" component={CompoundSearch} />
-                {isDesktop() ? <Route path="/batch-calc" component={BatchCalc} /> : <Route path="/batch-calc" component={DesktopOnlyNotice} />}
-                {isDesktop() ? <Route path="/dashboard" component={Dashboard} /> : <Route path="/dashboard" component={DesktopOnlyNotice} />}
+                {desktop() ? <Route path="/batch-calc" component={BatchCalc} /> : <Route path="/batch-calc" component={DesktopOnlyNotice} />}
+                {desktop() ? <Route path="/dashboard" component={Dashboard} /> : <Route path="/dashboard" component={DesktopOnlyNotice} />}
                 <Route path="*" component={CatchAllRedirect} />
             </Route>
         </Router>
