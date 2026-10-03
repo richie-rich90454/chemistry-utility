@@ -45,14 +45,27 @@ class ThemeManager {
 	}
 
 	public init(): void {
-		this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-		let stored = localStorage.getItem("theme");
+		try {
+			this.mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+		} catch {
+			this.mediaQuery = null;
+		}
+		let stored: string | null = null;
+		let autoStored: string | null = null;
+		try {
+			stored = localStorage.getItem("theme");
+			autoStored = localStorage.getItem("auto-dark-mode");
+		} catch {
+			stored = null;
+			autoStored = null;
+		}
 		if (stored === "dark" || stored === "light" || stored === "amoled") {
 			this.currentTheme = stored;
-		} else {
+		} else if (this.mediaQuery) {
 			this.currentTheme = this.mediaQuery.matches ? "dark" : "light";
+		} else {
+			this.currentTheme = "light";
 		}
-		let autoStored = localStorage.getItem("auto-dark-mode");
 		if (autoStored === "true") {
 			this.autoDarkModeEnabled = true;
 			this.applyAutoDarkMode();
@@ -74,7 +87,9 @@ class ThemeManager {
 		} else {
 			this.currentTheme = "light";
 		}
-		localStorage.setItem("theme", this.currentTheme);
+		try {
+			localStorage.setItem("theme", this.currentTheme);
+		} catch {}
 		this.applyTheme();
 	}
 
@@ -85,7 +100,9 @@ class ThemeManager {
 			this.setAutoDarkMode(false);
 		}
 		this.currentTheme = theme;
-		localStorage.setItem("theme", this.currentTheme);
+		try {
+			localStorage.setItem("theme", this.currentTheme);
+		} catch {}
 		this.applyTheme();
 	}
 
@@ -95,7 +112,9 @@ class ThemeManager {
 
 	public setAutoDarkMode(enabled: boolean): void {
 		this.autoDarkModeEnabled = enabled;
-		localStorage.setItem("auto-dark-mode", String(enabled));
+		try {
+			localStorage.setItem("auto-dark-mode", String(enabled));
+		} catch {}
 		if (enabled) {
 			this.applyAutoDarkMode();
 		} else {
@@ -173,13 +192,25 @@ class ThemeManager {
 
 	private listenForSystemChanges(): void {
 		if (!this.mediaQuery) return;
-		this.mediaQuery.addEventListener("change", (e: MediaQueryListEvent) => {
-			let stored = localStorage.getItem("theme");
+		let handler = (e: MediaQueryListEvent): void => {
+			let stored: string | null = null;
+			try {
+				stored = localStorage.getItem("theme");
+			} catch {
+				stored = null;
+			}
 			if (!stored) {
 				this.currentTheme = e.matches ? "dark" : "light";
 				this.applyTheme();
 			}
-		});
+		};
+		// addEventListener is modern; fall back to addListener for old Safari.
+		let mq = this.mediaQuery as MediaQueryList & {addListener?: (l: (e: MediaQueryListEvent) => void) => void};
+		if (typeof this.mediaQuery.addEventListener === "function") {
+			this.mediaQuery.addEventListener("change", handler);
+		} else if (typeof mq.addListener === "function") {
+			mq.addListener(handler);
+		}
 	}
 }
 
