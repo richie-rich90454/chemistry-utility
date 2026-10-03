@@ -33,6 +33,57 @@ func newTestAPI() *API {
 	}
 }
 
+// TestHealthz tests the unauthenticated liveness probe.
+func TestHealthz(t *testing.T) {
+	a := newTestAPI()
+	router := a.Router()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/healthz", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var result map[string]interface{}
+	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
+		t.Fatalf("failed to parse response: %v", err)
+	}
+	if result["status"] != "ok" {
+		t.Errorf("expected status ok, got %v", result["status"])
+	}
+}
+
+// TestRateLimitExceeded tests that the limiter returns 429 with Retry-After.
+func TestRateLimitExceeded(t *testing.T) {
+	cfg := Config{
+		RateLimitPerMinute: 1,
+		CORSAllowedOrigins: []string{"*"},
+	}
+	a := &API{cfg: cfg, calcRegistry: calculators.NewRegistry()}
+	router := a.Router()
+
+	for i := 0; i < 2; i++ {
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/calculators", nil)
+		// Distinct RemoteAddr per attempt would reset the bucket; reuse one IP.
+		req.RemoteAddr = "192.0.2.9:1234"
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		if i == 0 && w.Code != http.StatusOK {
+			t.Fatalf("expected first request 200, got %d", w.Code)
+		}
+		if i == 1 {
+			if w.Code != http.StatusTooManyRequests {
+				t.Fatalf("expected second request 429, got %d", w.Code)
+			}
+			if w.Header().Get("Retry-After") == "" {
+				t.Error("expected Retry-After header on 429")
+			}
+		}
+	}
+}
+
 // TestCalculatorEndpoint tests the molar mass calculator endpoint.
 func TestCalculatorEndpoint(t *testing.T) {
 	a := newTestAPI()
