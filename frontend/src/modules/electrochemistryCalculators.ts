@@ -22,7 +22,7 @@ export class CellPotentialCalculator extends Calculator {
 		const E_cathode = Math.max(E1, E2);
 		const E_anode = Math.min(E1, E2);
 		const E_cell = E_cathode - E_anode;
-		const html = "<p>The half-reaction with E&deg;=" + E_cathode + " V is the cathode, and the one with E&deg;=" + E_anode + " V is the anode.</p>" + "<p>The standard cell potential E&deg;_cell=" + this.numberFormatter.format(E_cell, 3) + " V</p>";
+		const html = "<p>The half-reaction with E&deg;=" + this.numberFormatter.format(E_cathode, 3) + " V is the cathode, and the one with E&deg;=" + this.numberFormatter.format(E_anode, 3) + " V is the anode.</p>" + "<p>The standard cell potential E&deg;_cell=" + this.numberFormatter.format(E_cell, 3) + " V</p>";
 		this.resultDisplay.showResult(html);
 	}
 
@@ -37,7 +37,7 @@ export class CellPotentialCalculator extends Calculator {
 		const E_cell = E_cathode - E_anode;
 		return {
 			value: "E_cell = " + this.numberFormatter.format(E_cell, 3) + " V",
-			explanation: "Cathode E = " + E_cathode + " V; Anode E = " + E_anode + " V; E_cell = E_cathode - E_anode = " + this.numberFormatter.format(E_cell, 3) + " V",
+			explanation: "Cathode E = " + this.numberFormatter.format(E_cathode, 3) + " V; Anode E = " + this.numberFormatter.format(E_anode, 3) + " V; E_cell = E_cathode - E_anode = " + this.numberFormatter.format(E_cell, 3) + " V",
 			metadata: {
 				E_cell: E_cell,
 				E_cathode: E_cathode,
@@ -70,6 +70,10 @@ export class NernstCalculator extends Calculator {
 			this.getInput("Q-reaction").markError();
 			throw new Error("Please enter valid positive numbers for all fields.");
 		}
+		if (n !== Math.floor(n)) {
+			this.getInput("n-electrons").markError();
+			throw new Error("Number of electrons must be an integer");
+		}
 		const gasConstant = 8.314;
 		const faradayConstant = 96485;
 		const E = E_standard - ((gasConstant * T) / (n * faradayConstant)) * Math.log(Q);
@@ -83,6 +87,9 @@ export class NernstCalculator extends Calculator {
 		const Q = parseFloat(inputs["Q-reaction"] ?? "");
 		if (isNaN(E_standard) || isNaN(T) || isNaN(n) || isNaN(Q) || T <= 0 || n <= 0 || Q <= 0) {
 			throw new Error("Please enter valid positive numbers for all fields.");
+		}
+		if (n !== Math.floor(n)) {
+			throw new Error("Number of electrons must be an integer");
 		}
 		const gasConstant = 8.314;
 		const faradayConstant = 96485;
@@ -128,6 +135,10 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 				this.getInput("electrolysis-M").markError();
 				throw new Error("Please enter valid positive numbers for I, t, z, and M.");
 			}
+			if (z !== Math.floor(z)) {
+				this.getInput("electrolysis-z").markError();
+				throw new Error("Charge number z must be an integer");
+			}
 			const n = (I * t) / (faradayConstant * z);
 			const mass = n * M;
 			this.resultDisplay.showResult("<p>The mass deposited m=" + this.numberFormatter.format(mass, 3) + " g</p>");
@@ -139,6 +150,10 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 				this.getInput("electrolysis-M").markError();
 				throw new Error("Please enter valid positive numbers for m, t, z, and M.");
 			}
+			if (z !== Math.floor(z)) {
+				this.getInput("electrolysis-z").markError();
+				throw new Error("Charge number z must be an integer");
+			}
 			const n = m / M;
 			const current = (n * faradayConstant * z) / t;
 			this.resultDisplay.showResult("<p>The current I=" + this.numberFormatter.format(current, 3) + " A</p>");
@@ -149,6 +164,10 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 				this.getInput("electrolysis-z").markError();
 				this.getInput("electrolysis-M").markError();
 				throw new Error("Please enter valid positive numbers for m, I, z, and M.");
+			}
+			if (z !== Math.floor(z)) {
+				this.getInput("electrolysis-z").markError();
+				throw new Error("Charge number z must be an integer");
 			}
 			const n = m / M;
 			const time = (n * faradayConstant * z) / I;
@@ -170,6 +189,9 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 			if (isNaN(I) || isNaN(t) || isNaN(z) || isNaN(M) || I <= 0 || t <= 0 || z <= 0 || M <= 0) {
 				throw new Error("Please enter valid positive numbers for I, t, z, and M.");
 			}
+			if (z !== Math.floor(z)) {
+				throw new Error("Charge number z must be an integer");
+			}
 			const n = (I * t) / (faradayConstant * z);
 			const mass = n * M;
 			return {
@@ -181,6 +203,9 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 			if (isNaN(m) || isNaN(t) || isNaN(z) || isNaN(M) || m <= 0 || t <= 0 || z <= 0 || M <= 0) {
 				throw new Error("Please enter valid positive numbers for m, t, z, and M.");
 			}
+			if (z !== Math.floor(z)) {
+				throw new Error("Charge number z must be an integer");
+			}
 			const n = m / M;
 			const current = (n * faradayConstant * z) / t;
 			return {
@@ -191,6 +216,9 @@ export class ElectrolysisCalculator extends SolveForCalculator {
 		} else if (solveFor === "time") {
 			if (isNaN(m) || isNaN(I) || isNaN(z) || isNaN(M) || m <= 0 || I <= 0 || z <= 0 || M <= 0) {
 				throw new Error("Please enter valid positive numbers for m, I, z, and M.");
+			}
+			if (z !== Math.floor(z)) {
+				throw new Error("Charge number z must be an integer");
 			}
 			const n = m / M;
 			const time = (n * faradayConstant * z) / I;
