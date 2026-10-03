@@ -197,10 +197,10 @@ func parseFormulaWithCounts(formula string) (elementCounts, error) {
 				stack[len(stack)-1][el] += cnt * float64(mul)
 			}
 		} else if unicode.IsUpper(ch) {
-			symbol, newIndex, err := parseElement(formula, i)
-			if err != nil {
-				return nil, err
-			}
+			// parseElement cannot fail here: ch is the byte at i and is
+			// an uppercase ASCII letter, so neither of its error branches
+			// (out-of-range index, non-uppercase start) can trigger.
+			symbol, newIndex, _ := parseElement(formula, i)
 			i = newIndex
 			count, newIndex, err := parseNumber(formula, i)
 			if err != nil {
