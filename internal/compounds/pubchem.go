@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,6 +43,114 @@ func (c *PubChemClient) waitForRate(ctx context.Context) {
 	select {
 	case <-c.rateTicker.C:
 	case <-ctx.Done():
+	}
+}
+
+// maxRetries bounds transient-error retries for every PubChem request.
+// Only 429 and 5xx responses (plus transport errors) are retried.
+const maxRetries = 3
+
+// maxRetryDelay caps any single retry sleep so a large Retry-After value
+// cannot stall a request indefinitely. Cancellation is always honored.
+const maxRetryDelay = 30 * time.Second
+
+// doGet performs a rate-limited GET with bounded retries, and is the only
+// path that executes PubChem HTTP requests. Retryable failures (429 and
+// 5xx) are retried up to maxRetries with exponential backoff plus jitter,
+// honoring the server's Retry-After header when present. All other
+// statuses are returned to the caller for handling (e.g. 404 means "no
+// match" for identifier searches). The caller owns the response body.
+func (c *PubChemClient) doGet(ctx context.Context, rawURL string) (*http.Response, error) {
+	c.waitForRate(ctx)
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	var lastErr error
+	for attempt := 0; ; attempt++ {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
+		if err != nil {
+			return nil, fmt.Errorf("creating request: %w", err)
+		}
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			lastErr = fmt.Errorf("executing request: %w", err)
+			if attempt >= maxRetries || !sleepOrDone(ctx, backoffDelay(nil, attempt)) {
+				if ctx.Err() != nil {
+					return nil, ctx.Err()
+				}
+				return nil, lastErr
+			}
+			continue
+		}
+		if resp.StatusCode != http.StatusTooManyRequests && resp.StatusCode < 500 {
+			return resp, nil
+		}
+		delay := backoffDelay(resp, attempt)
+		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 4<<10))
+		resp.Body.Close()
+		lastErr = fmt.Errorf("unexpected status code %d from %s", resp.StatusCode, rawURL)
+		if attempt >= maxRetries || !sleepOrDone(ctx, delay) {
+			if ctx.Err() != nil {
+				return nil, ctx.Err()
+			}
+			return nil, lastErr
+		}
+	}
+}
+
+// backoffDelay computes how long to wait before the next attempt:
+// exponential backoff (500ms * 2^attempt) plus up to 250ms of jitter. When
+// the failed response carried a Retry-After header, that value wins.
+func backoffDelay(resp *http.Response, attempt int) time.Duration {
+	if resp != nil {
+		if d, ok := retryAfterDelay(resp); ok {
+			return d
+		}
+	}
+	d := (500 * time.Millisecond) << attempt
+	d += time.Duration(rand.Int63n(int64(250 * time.Millisecond)))
+	if d > maxRetryDelay {
+		d = maxRetryDelay
+	}
+	return d
+}
+
+// retryAfterDelay parses a Retry-After header (delay seconds or HTTP
+// date) into a bounded duration.
+func retryAfterDelay(resp *http.Response) (time.Duration, bool) {
+	v := strings.TrimSpace(resp.Header.Get("Retry-After"))
+	if v == "" {
+		return 0, false
+	}
+	if secs, err := strconv.Atoi(v); err == nil {
+		if secs < 0 {
+			secs = 0
+		}
+		return min(time.Duration(secs)*time.Second, maxRetryDelay), true
+	}
+	if t, err := http.ParseTime(v); err == nil {
+		d := time.Until(t)
+		if d < 0 {
+			d = 0
+		}
+		return min(d, maxRetryDelay), true
+	}
+	return 0, false
+}
+
+// sleepOrDone waits for d (which may be zero) and reports whether the
+// context is still alive afterwards.
+func sleepOrDone(ctx context.Context, d time.Duration) bool {
+	if d <= 0 {
+		return ctx.Err() == nil
+	}
+	t := time.NewTimer(d)
+	defer t.Stop()
+	select {
+	case <-ctx.Done():
+		return false
+	case <-t.C:
+		return true
 	}
 }
 
@@ -156,19 +267,9 @@ func (c *PubChemClient) searchIdentifiers(ctx context.Context, domain, namespace
 }
 
 func (c *PubChemClient) doSearchRequest(ctx context.Context, rawURL string) ([]int, error) {
-	c.waitForRate(ctx)
-	if err := ctx.Err(); err != nil {
+	resp, err := c.doGet(ctx, rawURL)
+	if err != nil {
 		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
-	if err != nil {
-		return nil, fmt.Errorf("creating request: %w", err)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("executing request: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -281,19 +382,9 @@ func (c *PubChemClient) fetchProperties(ctx context.Context, cidList string) (ma
 		c.baseURL, cidList,
 	)
 
-	c.waitForRate(ctx)
-	if err := ctx.Err(); err != nil {
+	resp, err := c.doGet(ctx, u)
+	if err != nil {
 		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-	if err != nil {
-		return nil, fmt.Errorf("creating property request: %w", err)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("executing property request: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -349,19 +440,9 @@ func (c *PubChemClient) fetchProperties(ctx context.Context, cidList string) (ma
 func (c *PubChemClient) fetchDescriptions(ctx context.Context, cidList string) ([]pubChemInformation, error) {
 	u := fmt.Sprintf("%s/compound/cid/%s/description/JSON", c.baseURL, cidList)
 
-	c.waitForRate(ctx)
-	if err := ctx.Err(); err != nil {
+	resp, err := c.doGet(ctx, u)
+	if err != nil {
 		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-	if err != nil {
-		return nil, fmt.Errorf("creating description request: %w", err)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("executing description request: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -385,19 +466,9 @@ func (c *PubChemClient) fetchDescriptions(ctx context.Context, cidList string) (
 func (c *PubChemClient) fetchCASNumbers(ctx context.Context, cidList string) (map[int]string, error) {
 	u := fmt.Sprintf("%s/compound/cid/%s/xrefs/CAS/JSON", c.baseURL, cidList)
 
-	c.waitForRate(ctx)
-	if err := ctx.Err(); err != nil {
+	resp, err := c.doGet(ctx, u)
+	if err != nil {
 		return nil, err
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
-	if err != nil {
-		return nil, fmt.Errorf("creating CAS request: %w", err)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("executing CAS request: %w", err)
 	}
 	defer resp.Body.Close()
 
