@@ -1,4 +1,5 @@
 import { UrlStateManager } from "./urlStateManager.js";
+import { buildHistoryPrintHtml, ensurePrintStyles, openHistoryPrintView } from "./exportPrintView.js";
 
 const HISTORY_KEY = "calc-history";
 const MAX_HISTORY = 50;
@@ -96,6 +97,38 @@ export class ExportManager {
 		link.click();
 		document.body.removeChild(link);
 		URL.revokeObjectURL(url);
+	}
+
+	/**
+	 * Builds the standalone printable HTML document over the current
+	 * history. The browser's "Save as PDF" destination turns it into a
+	 * PDF export with zero dependencies. See exportPrintView.ts.
+	 * @returns Full HTML document string for the dedicated print view
+	 */
+	public buildPrintDocument(): string {
+		return buildHistoryPrintHtml(this.getHistory());
+	}
+
+	/**
+	 * PDF export via the print stylesheet + dedicated print view over
+	 * history entries: opens the print view in a new window and prints
+	 * it (the user picks "Save as PDF"). Falls back to printing the
+	 * current window when popups are blocked.
+	 */
+	public exportPdf(): void {
+		let history = this.getHistory();
+		ensurePrintStyles();
+		let printWindow: Window | null = null;
+		try {
+			printWindow = openHistoryPrintView(history);
+		} catch {
+			printWindow = null;
+		}
+		if (printWindow !== null && typeof printWindow.print === "function") {
+			printWindow.print();
+		} else {
+			window.print();
+		}
 	}
 
 	/**
