@@ -1,6 +1,7 @@
 import { Calculator } from "./calculator.js";
 import type { CalculatorResult } from "./calculator.js";
 import { NumberFormatter } from "./i18n/numberFormatter.js";
+import { HtmlSanitizer } from "./htmlSanitizer.js";
 
 /**
  * Represents a single term in a chemical equation (e.g., "2H2O").
@@ -89,7 +90,7 @@ export class StoichiometryCalculator extends Calculator {
     }
 
     private static sanitizeId(formula: string): string {
-        return formula.replace(/[\(\)\[\]\{\}\,\s]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+        return formula.replace(/[^A-Za-z0-9-_]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || "formula";
     }
 
     public getCalculationType(equation: string): void {
@@ -103,14 +104,16 @@ export class StoichiometryCalculator extends Calculator {
             let reactantOptions = "";
             for (let i = 0; i < reactants.length; i++) {
                 let reactant = reactants[i];
-                reactantOptions = reactantOptions + "<option value=\"" + reactant.getFormula() + "\">" + reactant.getFormula() + "</option>";
+                let esc = HtmlSanitizer.escape(reactant.getFormula());
+                reactantOptions = reactantOptions + "<option value=\"" + esc + "\">" + esc + "</option>";
             }
             let reactantSelect = "<select id=\"reactant-select\">" + reactantOptions + "</select>";
             let molesInput = "<input type=\"number\" id=\"reactant-moles\" placeholder=\"Moles of reactant\" min=\"0\" step=\"any\">";
             let productOptions = "";
             for (let i = 0; i < products.length; i++) {
                 let product = products[i];
-                productOptions = productOptions + "<option value=\"" + product.getFormula() + "\">" + product.getFormula() + "</option>";
+                let esc = HtmlSanitizer.escape(product.getFormula());
+                productOptions = productOptions + "<option value=\"" + esc + "\">" + esc + "</option>";
             }
             let productSelect = "<select id=\"product-select\">" + productOptions + "</select>";
             inputsDiv.innerHTML = "<label for=\"reactant-select\">Select reactant</label>" + reactantSelect + "<label for=\"reactant-moles\">Enter moles</label>" + molesInput + "<label for=\"product-select\">Select product</label>" + productSelect;
@@ -120,14 +123,16 @@ export class StoichiometryCalculator extends Calculator {
             let productOptions = "";
             for (let i = 0; i < products.length; i++) {
                 let product = products[i];
-                productOptions = productOptions + "<option value=\"" + product.getFormula() + "\">" + product.getFormula() + "</option>";
+                let esc = HtmlSanitizer.escape(product.getFormula());
+                productOptions = productOptions + "<option value=\"" + esc + "\">" + esc + "</option>";
             }
             let productSelect = "<select id=\"product-select\">" + productOptions + "</select>";
             let molesInput = "<input type=\"number\" id=\"product-moles\" placeholder=\"Moles of product\" min=\"0\" step=\"any\">";
             let reactantOptions = "";
             for (let i = 0; i < reactants.length; i++) {
                 let reactant = reactants[i];
-                reactantOptions = reactantOptions + "<option value=\"" + reactant.getFormula() + "\">" + reactant.getFormula() + "</option>";
+                let esc = HtmlSanitizer.escape(reactant.getFormula());
+                reactantOptions = reactantOptions + "<option value=\"" + esc + "\">" + esc + "</option>";
             }
             let reactantSelect = "<select id=\"reactant-select\">" + reactantOptions + "</select>";
             inputsDiv.innerHTML = "<label for=\"product-select\">Select product</label>" + productSelect + "<label for=\"product-moles\">Enter moles</label>" + molesInput + "<label for=\"reactant-select\">Select reactant</label>" + reactantSelect;
@@ -138,12 +143,14 @@ export class StoichiometryCalculator extends Calculator {
             for (let i = 0; i < reactants.length; i++) {
                 let reactant = reactants[i];
                 let sanitizedId = StoichiometryCalculator.sanitizeId(reactant.getFormula());
-                reactantInputs = reactantInputs + "<label for=\"moles-" + sanitizedId + "\">Moles of " + reactant.getFormula() + "</label><input type=\"number\" id=\"moles-" + sanitizedId + "\" placeholder=\"Moles of " + reactant.getFormula() + "\" min=\"0\" step=\"any\">";
+                let esc = HtmlSanitizer.escape(reactant.getFormula());
+                reactantInputs = reactantInputs + "<label for=\"moles-" + sanitizedId + "\">Moles of " + esc + "</label><input type=\"number\" id=\"moles-" + sanitizedId + "\" placeholder=\"Moles of " + esc + "\" min=\"0\" step=\"any\">";
             }
             let productOptions = "";
             for (let i = 0; i < products.length; i++) {
                 let product = products[i];
-                productOptions = productOptions + "<option value=\"" + product.getFormula() + "\">" + product.getFormula() + "</option>";
+                let esc = HtmlSanitizer.escape(product.getFormula());
+                productOptions = productOptions + "<option value=\"" + esc + "\">" + esc + "</option>";
             }
             let productSelect = "<select id=\"product-select\">" + productOptions + "</select>";
             inputsDiv.innerHTML = reactantInputs + "<label for=\"product-select\">Select product to calculate</label>" + productSelect;
@@ -187,7 +194,7 @@ export class StoichiometryCalculator extends Calculator {
                 throw new Error("Selected compound not found");
             }
             let molesProduct = (molesReactant / reactant.getCoefficient()) * product.getCoefficient();
-            this.resultDisplay.showResult("<p>Moles of " + productFormula + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
+            this.resultDisplay.showResult("<p>Moles of " + HtmlSanitizer.escape(productFormula) + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
         }
         else if (type == "reactant-from-product") {
             let productSelect = document.getElementById("product-select") as HTMLSelectElement;
@@ -220,7 +227,7 @@ export class StoichiometryCalculator extends Calculator {
                 throw new Error("Selected compound not found");
             }
             let molesReactant = (molesProduct / product.getCoefficient()) * reactant.getCoefficient();
-            this.resultDisplay.showResult("<p>Moles of " + reactantFormula + ": " + this.numberFormatter.format(molesReactant, 2) + "</p>");
+            this.resultDisplay.showResult("<p>Moles of " + HtmlSanitizer.escape(reactantFormula) + ": " + this.numberFormatter.format(molesReactant, 2) + "</p>");
         }
         else if (type == "limiting-reactant") {
             let reactantMoles: Record<string, number> = {};
@@ -259,7 +266,7 @@ export class StoichiometryCalculator extends Calculator {
                 }
             }
             let molesProduct = minRatio * product.getCoefficient();
-            this.resultDisplay.showResult("<p>Limiting reactant: " + limitingReactant + "</p><p>Moles of " + productFormula + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
+            this.resultDisplay.showResult("<p>Limiting reactant: " + HtmlSanitizer.escape(limitingReactant ?? "") + "</p><p>Moles of " + HtmlSanitizer.escape(productFormula) + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
         }
         else {
             throw new Error("Invalid calculation type");
