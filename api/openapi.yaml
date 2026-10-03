@@ -43,7 +43,29 @@ tags:
     description: Plugin management
   - name: Docs
     description: Interactive API documentation
+  - name: Ops
+    description: Service operations
 paths:
+  /healthz:
+    get:
+      tags: [Ops]
+      summary: Liveness probe
+      description: |
+        Returns `{"status": "ok"}` when the server is running. Unversioned
+        and outside the rate-limited group; suitable for uptime checks and
+        container `HEALTHCHECK` instructions.
+      responses:
+        '200':
+          description: Server is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                required: [status]
   /calculators:
     get:
       tags: [Calculators]
@@ -378,7 +400,13 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
     RateLimitError:
-      description: Rate limit exceeded (RFC 7807).
+      description: Rate limit exceeded (RFC 7807). Responses carry a `Retry-After` header (seconds until the window resets).
+      headers:
+        Retry-After:
+          description: Seconds until the rate-limit window resets.
+          schema:
+            type: integer
+            example: 60
       content:
         application/problem+json:
           schema:
