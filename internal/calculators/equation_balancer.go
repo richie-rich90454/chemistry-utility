@@ -10,6 +10,13 @@ import (
 	"unicode"
 )
 
+// Precompiled patterns for the equation parser (compiled once, not per call).
+var (
+	equationArrowRe = regexp.MustCompile(`->|=`)
+	formulaDigitRe  = regexp.MustCompile(`^\d+`)
+	stoichCoeffRe   = regexp.MustCompile(`^(\d*\.?\d+)?(.+)$`)
+)
+
 // Fraction represents a rational number with exact arithmetic.
 type Fraction struct {
 	N int
@@ -127,7 +134,6 @@ func parseFormulaToCounts(formula string) (map[string]int, error) {
 	}
 	stack := []map[string]int{{}}
 	i := 0
-	digitRe := regexp.MustCompile(`^\d+`)
 
 	for i < len(formula) {
 		ch := rune(formula[i])
@@ -141,7 +147,7 @@ func parseFormulaToCounts(formula string) (map[string]int, error) {
 			top := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			i++
-			matches := digitRe.FindString(formula[i:])
+			matches := formulaDigitRe.FindString(formula[i:])
 			mul := 1
 			if matches != "" {
 				mul = atoi(matches)
@@ -256,7 +262,7 @@ func ParseEquation(equation string) (reactants []string, products []string, err 
 	normalized = strings.ReplaceAll(normalized, "→", "->")
 	normalized = strings.ReplaceAll(normalized, "<=>", "->")
 	normalized = strings.ReplaceAll(normalized, "•", "·")
-	sides := regexp.MustCompile(`->|=`).Split(normalized, -1)
+	sides := equationArrowRe.Split(normalized, -1)
 	if len(sides) != 2 {
 		return nil, nil, errors.New("invalid equation format: expected exactly one '->' or '='")
 	}
