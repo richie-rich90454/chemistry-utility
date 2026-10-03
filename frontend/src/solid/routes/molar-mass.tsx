@@ -20,20 +20,29 @@ function MolarMass(): JSX.Element {
     let [loading, setLoading] = createSignal(true);
     let [loadError, setLoadError] = createSignal("");
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let aborter: AbortController | null = null;
+    let disposed: boolean = false;
 
     onMount(function (): void {
         loadElements();
     });
 
     onCleanup(function (): void {
+        disposed = true;
         if (debounceTimer !== null) {
             clearTimeout(debounceTimer);
+        }
+        if (aborter !== null) {
+            aborter.abort();
         }
     });
 
     function loadElements(): void {
         let cache = DataCache.getInstance();
         cache.get("ptable").then(function (cached: string | null): void {
+            if (disposed) {
+                return;
+            }
             if (cached !== null) {
                 try {
                     let parsed: ChemicalElement[] = JSON.parse(cached) as ChemicalElement[];
@@ -45,17 +54,28 @@ function MolarMass(): JSX.Element {
                     // Corrupt cache — fall through to fetch
                 }
             }
-            fetch("/ptable.json").then(function (response: Response): Promise<unknown> {
+            aborter = new AbortController();
+            // Relative URL keeps subpath deployments working.
+            fetch("ptable.json", {signal: aborter.signal}).then(function (response: Response): Promise<unknown> {
                 if (!response.ok) {
                     throw new Error("HTTP error! status: " + response.status);
                 }
                 return response.json();
             }).then(function (data: unknown): void {
+                if (disposed) {
+                    return;
+                }
                 let elementData = data as ChemicalElement[];
                 setElements(elementData);
                 cache.set("ptable", JSON.stringify(elementData));
                 setLoading(false);
             }).catch(function (err: unknown): void {
+                if (disposed) {
+                    return;
+                }
+                if (err instanceof DOMException && err.name === "AbortError") {
+                    return;
+                }
                 let message = err instanceof Error ? err.message : String(err);
                 setLoadError(message);
                 setLoading(false);
@@ -137,7 +157,7 @@ function MolarMass(): JSX.Element {
                 autocomplete="off"
                 spellcheck={false}
             />
-            <div class={getResultClass()}>
+            <div class={getResultClass()} role={result().startsWith("Error") ? "alert" : undefined} aria-live="polite">
                 {getResultText() && <p>{getResultText()}</p>}
             </div>
         </CalculatorCard>
