@@ -15,7 +15,7 @@
  */
 import type {JSX} from "solid-js";
 import type {CompoundResult, CompoundDetail, FormulaSegment} from "../../modules/compoundSearchUI.js";
-import {createSignal, For} from "solid-js";
+import {createSignal, For, Show} from "solid-js";
 import {useNavigate} from "@solidjs/router";
 import {searchCompounds, fetchCompoundDetail, buildFormulaSegments} from "../../modules/compoundSearchUI.js";
 import {CalculatorCard} from "../components/CalculatorCard";
@@ -114,34 +114,30 @@ function CompoundSearch(): JSX.Element {
     function handleOpenInStoichiometry(): void {
         navigate("/stoichiometry");
     }
-    function renderDetail(): JSX.Element {
-        let d: CompoundDetail | null = detail();
-        if (d === null) {
-            return <></>;
-        }
-        let propKeys: string[] = d.properties ? Object.keys(d.properties) : [];
+    function renderDetail(initialDetail: CompoundDetail): JSX.Element {
+        let propKeys: string[] = initialDetail.properties ? Object.keys(initialDetail.properties) : [];
         return (
             <div class={styles.detailCard}>
-                <h3 class={styles.detailTitle}>{d.name}</h3>
+                <h3 class={styles.detailTitle}>{initialDetail.name}</h3>
                 <div class={styles.resultRow}>
                     <span class={styles.resultLabel}>Formula:</span>
-                    <span class={styles.resultValue}>{renderFormula(d.formula)}</span>
+                    <span class={styles.resultValue}>{renderFormula(initialDetail.formula)}</span>
                 </div>
                 <div class={styles.resultRow}>
                     <span class={styles.resultLabel}>Molar Mass:</span>
-                    <span class={styles.resultValue}>{d.molarMass + " g/mol"}</span>
+                    <span class={styles.resultValue}>{initialDetail.molarMass + " g/mol"}</span>
                 </div>
                 <div class={styles.resultRow}>
                     <span class={styles.resultLabel}>CAS Number:</span>
-                    <span class={styles.resultValue}>{d.casNumber}</span>
+                    <span class={styles.resultValue}>{initialDetail.casNumber}</span>
                 </div>
                 <div class={styles.resultRow}>
                     <span class={styles.resultLabel}>SMILES:</span>
-                    <span class={styles.resultValue}>{d.smiles}</span>
+                    <span class={styles.resultValue}>{initialDetail.smiles}</span>
                 </div>
                 <div class={styles.resultRow}>
                     <span class={styles.resultLabel}>InChI:</span>
-                    <span class={styles.resultValue}>{d.inchi}</span>
+                    <span class={styles.resultValue}>{initialDetail.inchi}</span>
                 </div>
                 {propKeys.length > 0 && (
                     <div>
@@ -150,16 +146,16 @@ function CompoundSearch(): JSX.Element {
                             {(key) => (
                                 <div class={styles.resultRow}>
                                     <span class={styles.resultLabel}>{key + ":"}</span>
-                                    <span class={styles.resultValue}>{d.properties[key]}</span>
+                                    <span class={styles.resultValue}>{initialDetail.properties[key]}</span>
                                 </div>
                             )}
                         </For>
                     </div>
                 )}
-                {d.source !== "" && (
+                {initialDetail.source !== "" && (
                     <div class={styles.resultRow}>
                         <span class={styles.resultLabel}>Source:</span>
-                        <span class={styles.resultValue}>{d.source}</span>
+                        <span class={styles.resultValue}>{initialDetail.source}</span>
                     </div>
                 )}
                 <div class={styles.resultActions}>
@@ -231,7 +227,9 @@ function CompoundSearch(): JSX.Element {
             )}
             {detailLoading() && <div class={styles.status}>Loading compound details...</div>}
             {detailError() !== "" && <div class={styles.status + " " + styles.error} role="alert">{detailError()}</div>}
-            {detail() !== null && renderDetail()}
+            <Show when={detail()} keyed fallback={<></>}>
+                {(current) => renderDetail(current)}
+            </Show>
         </CalculatorCard>
     );
 }
