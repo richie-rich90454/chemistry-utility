@@ -475,7 +475,9 @@ describe("calculateDebyeHuckel", () => {
         calculateDebyeHuckel();
 
         const text = getResultText("debye-huckel-result");
-        expect(text).toContain("0.002500");
+        // MX2 salt at c=0.001: I = 0.5*c*(1*4 + 2*1) = 3c = 0.003.
+        expect(text).toContain("0.003000");
+        expect(text).toContain("M1X2");
     });
 
     it("should show error for zero ion charge", () => {
