@@ -14,7 +14,8 @@ export class InputValidator {
 	public static validate(inputs: InputElement[]): void {
 		let hasError = false;
 		for (let i = 0; i < inputs.length; i++) {
-			if (isNaN(inputs[i].getValue())) {
+			let v = inputs[i].getValue();
+			if (isNaN(v) || !isFinite(v)) {
 				inputs[i].markError();
 				hasError = true;
 			}
@@ -31,10 +32,12 @@ export class InputValidator {
 	 */
 	public static validateValues(values: number[], ids: string[]): void {
 		for (let i = 0; i < values.length; i++) {
-			if (isNaN(values[i])) {
+			if (isNaN(values[i]) || !isFinite(values[i])) {
 				if (ids && i < ids.length && ids[i]) {
-					const input = document.getElementById(ids[i]) as HTMLInputElement;
-					input.classList.add("error");
+					const el = document.getElementById(ids[i]);
+					if (el) {
+						el.classList.add("error");
+					}
 				}
 				throw new Error("Please fill all required fields with valid numbers");
 			}
