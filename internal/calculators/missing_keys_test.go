@@ -93,10 +93,26 @@ func TestMissingKeys_AllCalculators(t *testing.T) {
 			t.Errorf("IntegratedRateLaw without %s: expected error", k)
 		}
 	}
+	for _, order := range []float64{1.0, 2.0} {
+		noTime := CalculationInput{"order": order, "k": 0.05, "initialConcentration": 1.0, "solveFor": "concentration"}
+		if _, err := IntegratedRateLaw(ctx, noTime); err == nil {
+			t.Errorf("IntegratedRateLaw order %v without time: expected error", order)
+		}
+		negT := CalculationInput{"order": order, "k": 0.05, "initialConcentration": 1.0, "time": -1.0, "solveFor": "concentration"}
+		if _, err := IntegratedRateLaw(ctx, negT); err == nil {
+			t.Errorf("IntegratedRateLaw order %v with negative time: expected error", order)
+		}
+	}
 	irlTBase := CalculationInput{"order": 1.0, "k": 0.05, "initialConcentration": 1.0, "concentration": 0.5, "solveFor": "time"}
 	for _, k := range []string{"order", "k", "initialConcentration", "concentration"} {
 		if _, err := IntegratedRateLaw(ctx, without(irlTBase, k)); err == nil {
 			t.Errorf("IntegratedRateLaw time without %s: expected error", k)
+		}
+	}
+	irlT2Base := CalculationInput{"order": 2.0, "k": 0.05, "initialConcentration": 1.0, "concentration": 0.5, "solveFor": "time"}
+	for _, k := range []string{"order", "k", "initialConcentration", "concentration"} {
+		if _, err := IntegratedRateLaw(ctx, without(irlT2Base, k)); err == nil {
+			t.Errorf("IntegratedRateLaw order-2 time without %s: expected error", k)
 		}
 	}
 	gibbsBase := CalculationInput{"deltaH": 1.0, "deltaS": 1.0, "T": 298.0}
@@ -162,11 +178,13 @@ func TestMissingKeys_AllCalculators(t *testing.T) {
 		}
 	}
 	elCBase := CalculationInput{"m": 1.0, "t": 1.0, "z": 1.0, "M": 1.0, "solveFor": "current"}
-	if _, err := Electrolysis(ctx, without(elCBase, "m")); err == nil {
-		t.Error("Electrolysis current without m: expected error")
+	for _, k := range []string{"m", "t", "z", "M"} {
+		if _, err := Electrolysis(ctx, without(elCBase, k)); err == nil {
+			t.Errorf("Electrolysis current without %s: expected error", k)
+		}
 	}
 	elTBase := CalculationInput{"m": 1.0, "I": 1.0, "z": 1.0, "M": 1.0, "solveFor": "time"}
-	for _, k := range []string{"m", "I"} {
+	for _, k := range []string{"m", "I", "z", "M"} {
 		if _, err := Electrolysis(ctx, without(elTBase, k)); err == nil {
 			t.Errorf("Electrolysis time without %s: expected error", k)
 		}
