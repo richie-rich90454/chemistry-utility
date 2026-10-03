@@ -62,6 +62,9 @@ func HessLaw(ctx context.Context, input CalculationInput) (CalculationResult, er
 	if !ok {
 		return CalculationResult{}, errors.New("deltaHValues must be a slice of float64")
 	}
+	if len(values) == 0 {
+		return CalculationResult{}, errors.New("deltaHValues must contain at least one value")
+	}
 
 	var total float64
 	steps := make([]string, len(values)+1)
@@ -101,6 +104,9 @@ func Entropy(ctx context.Context, input CalculationInput) (CalculationResult, er
 	sReactants, ok := toFloat64Slice(sr)
 	if !ok {
 		return CalculationResult{}, errors.New("SReactants must be a slice of float64")
+	}
+	if len(sProducts) == 0 || len(sReactants) == 0 {
+		return CalculationResult{}, errors.New("SProducts and SReactants must each contain at least one value")
 	}
 
 	var sumProducts, sumReactants float64
@@ -146,6 +152,12 @@ func HeatCapacity(ctx context.Context, input CalculationInput) (CalculationResul
 		if err != nil {
 			return CalculationResult{}, err
 		}
+		if m <= 0 {
+			return CalculationResult{}, errors.New("mass must be positive")
+		}
+		if c <= 0 {
+			return CalculationResult{}, errors.New("specific heat must be positive")
+		}
 		result = m * c * deltaT
 		unit = "J"
 	case "m":
@@ -161,8 +173,11 @@ func HeatCapacity(ctx context.Context, input CalculationInput) (CalculationResul
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		if c == 0 || deltaT == 0 {
-			return CalculationResult{}, errors.New("c and deltaT cannot be zero")
+		if c <= 0 {
+			return CalculationResult{}, errors.New("specific heat must be positive")
+		}
+		if deltaT == 0 {
+			return CalculationResult{}, errors.New("deltaT cannot be zero")
 		}
 		result = q / (c * deltaT)
 		unit = "g"
@@ -179,8 +194,11 @@ func HeatCapacity(ctx context.Context, input CalculationInput) (CalculationResul
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		if m == 0 || deltaT == 0 {
-			return CalculationResult{}, errors.New("m and deltaT cannot be zero")
+		if m <= 0 {
+			return CalculationResult{}, errors.New("mass must be positive")
+		}
+		if deltaT == 0 {
+			return CalculationResult{}, errors.New("deltaT cannot be zero")
 		}
 		result = q / (m * deltaT)
 		unit = "J/(g·K)"
@@ -197,8 +215,11 @@ func HeatCapacity(ctx context.Context, input CalculationInput) (CalculationResul
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		if m == 0 || c == 0 {
-			return CalculationResult{}, errors.New("m and c cannot be zero")
+		if m <= 0 {
+			return CalculationResult{}, errors.New("mass must be positive")
+		}
+		if c <= 0 {
+			return CalculationResult{}, errors.New("specific heat must be positive")
 		}
 		result = q / (m * c)
 		unit = "K"
