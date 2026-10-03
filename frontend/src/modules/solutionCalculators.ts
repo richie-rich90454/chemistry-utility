@@ -499,7 +499,8 @@ export class KspCalculator extends Calculator {
             "<p>K<sub>sp</sub> = " + this.numberFormatter.format(resultKsp, 6) + "</p>" +
             "<p>Molar Solubility (s) = " + this.numberFormatter.format(resultS, 6) + " M</p>" +
             "<p>[A<sup>" + stoichB + "+</sup>] = " + this.numberFormatter.format(concA, 6) + " M</p>" +
-            "<p>[B<sup>" + stoichA + "-</sup>] = " + this.numberFormatter.format(concB, 6) + " M</p>"
+            "<p>[B<sup>" + stoichA + "-</sup>] = " + this.numberFormatter.format(concB, 6) + " M</p>" +
+            "<p>Charges shown are the minimal integer charges satisfying neutrality for salt type " + saltType + "</p>"
         );
     }
 
@@ -614,6 +615,22 @@ export class ColligativePropertiesCalculator extends Calculator {
         if (molarMass <= 0) throw new Error("Molar mass must be positive");
         if (solventMass <= 0) throw new Error("Solvent mass must be positive");
         if (i < 1) throw new Error("Van't Hoff factor must be >= 1");
+        // Optional solution density (g/mL == kg/L, defaults to water-like 1).
+        // Molarity needs solution volume, which is NOT the solvent mass
+        // except at density 1 — hence the explicit, labelled input.
+        let density = 1;
+        let densityEl: HTMLElement | null = document.getElementById("collig-density");
+        if (densityEl instanceof HTMLInputElement && densityEl.value.trim() !== "") {
+            density = parseFloat(densityEl.value);
+            if (isNaN(density) || density <= 0) throw new Error("Solution density must be positive");
+        }
+        // Optional temperature for osmotic pressure (K, defaults to 298.15).
+        let osmoticTemp = 298.15;
+        let tempEl: HTMLElement | null = document.getElementById("collig-temp");
+        if (tempEl instanceof HTMLInputElement && tempEl.value.trim() !== "") {
+            osmoticTemp = parseFloat(tempEl.value);
+            if (isNaN(osmoticTemp) || osmoticTemp <= 0) throw new Error("Temperature must be positive (Kelvin)");
+        }
         let molesSolute = soluteMass / molarMass;
         let molality = molesSolute / (solventMass / 1000);
         let html = "<p>Molality (m) = " + this.numberFormatter.format(molality, 4) + " mol/kg</p>";
@@ -632,9 +649,11 @@ export class ColligativePropertiesCalculator extends Calculator {
         // Solvent molar mass defaults to water (18.015 g/mol); Raoult's law
         // needs the real solvent value for any other solvent.
         let molesSolvent = (solventMass / 1000) / this.getSolventMolarMassKgPerMol();        let xSolute = molesSolute / (molesSolute + molesSolvent);
-        let molarity = molesSolute / (solventMass / 1000);
-        let osmoticPressure = molarity * 0.08206 * 298.15 * i;
-        html += "<p>Osmotic Pressure (&pi;) = " + this.numberFormatter.format(osmoticPressure, 4) + " atm (at 298.15 K)</p>";
+        let solutionVolumeL = (solventMass / 1000) / density;
+        let molarity = molesSolute / solutionVolumeL;
+        let osmoticPressure = molarity * 0.08206 * osmoticTemp * i;
+        html += "<p>Molarity (M) = " + this.numberFormatter.format(molarity, 4) + " mol/L (solution density " + this.numberFormatter.format(density, 4) + " g/mL)</p>";
+        html += "<p>Osmotic Pressure (&pi;) = " + this.numberFormatter.format(osmoticPressure, 4) + " atm (at " + this.numberFormatter.format(osmoticTemp, 2) + " K)</p>";
         if (!isNaN(Psolvent) && Psolvent > 0) {
             let deltaP = xSolute * Psolvent;
             html += "<p>&Delta;P = " + this.numberFormatter.format(deltaP, 4) + " atm</p>";
@@ -660,6 +679,16 @@ export class ColligativePropertiesCalculator extends Calculator {
         if (molarMass <= 0) throw new Error("Molar mass must be positive");
         if (solventMass <= 0) throw new Error("Solvent mass must be positive");
         if (i < 1) throw new Error("Van't Hoff factor must be >= 1");
+        let density = parseFloat(inputs["collig-density"] ?? "");
+        if (isNaN(density)) {
+            density = 1;
+        }
+        if (density <= 0) throw new Error("Solution density must be positive");
+        let osmoticTemp = parseFloat(inputs["collig-temp"] ?? "");
+        if (isNaN(osmoticTemp)) {
+            osmoticTemp = 298.15;
+        }
+        if (osmoticTemp <= 0) throw new Error("Temperature must be positive (Kelvin)");
         let molesSolute = soluteMass / molarMass;
         let molality = molesSolute / (solventMass / 1000);
         let explanation: string = "Molality (m) = " + this.numberFormatter.format(molality, 4) + " mol/kg";
@@ -689,12 +718,16 @@ export class ColligativePropertiesCalculator extends Calculator {
         }
         let molesSolvent = (solventMass / 1000) / (solventMM / 1000);
         let xSolute = molesSolute / (molesSolute + molesSolvent);
-        let molarity = molesSolute / (solventMass / 1000);
-        let osmoticPressure = molarity * 0.08206 * 298.15 * i;
-        explanation += "; Osmotic Pressure = " + this.numberFormatter.format(osmoticPressure, 4) + " atm (at 298.15 K)";
+        let solutionVolumeL = (solventMass / 1000) / density;
+        let molarity = molesSolute / solutionVolumeL;
+        let osmoticPressure = molarity * 0.08206 * osmoticTemp * i;
+        explanation += "; Molarity = " + this.numberFormatter.format(molarity, 4) + " mol/L (density " + this.numberFormatter.format(density, 4) + " g/mL)";
+        explanation += "; Osmotic Pressure = " + this.numberFormatter.format(osmoticPressure, 4) + " atm (at " + this.numberFormatter.format(osmoticTemp, 2) + " K)";
         metadata.osmoticPressure = osmoticPressure;
         metadata.xSolute = xSolute;
         metadata.molarity = molarity;
+        metadata.density = density;
+        metadata.osmoticTemp = osmoticTemp;
         if (!isNaN(Psolvent) && Psolvent > 0) {
             let deltaP = xSolute * Psolvent;
             explanation += "; Delta P = " + this.numberFormatter.format(deltaP, 4) + " atm; New Vapor Pressure = " + this.numberFormatter.format(Psolvent - deltaP, 4) + " atm";
@@ -759,7 +792,9 @@ export class TitrationCurveCalculator extends Calculator {
                 if (acidType === "strong") {
                     pH = -Math.log10(acidConc);
                 } else {
-                    pH = -Math.log10(Math.sqrt(Ka * acidConc));
+                    // Exact [H+] from Ka = x^2/(C - x): x = (-Ka + sqrt(Ka^2 + 4*Ka*C))/2.
+                    // Valid at any dilution, unlike sqrt(Ka*C) which needs C >> Ka.
+                    pH = -Math.log10((-Ka + Math.sqrt(Ka * Ka + 4 * Ka * acidConc)) / 2);
                 }
             } else if (Math.abs(Vb - equivVol) <= stepSize / 2) {
                 // Nearest grid point to the equivalence point. Clamp to the
@@ -771,7 +806,8 @@ export class TitrationCurveCalculator extends Calculator {
                 } else {
                     let concA = totalAcid / totalVolumeEq;
                     let Kb = 1e-14 / Ka;
-                    let concOH = Math.sqrt(Kb * concA);
+                    // Exact [OH-] from Kb = x^2/(C - x), valid at any dilution.
+                    let concOH = (-Kb + Math.sqrt(Kb * Kb + 4 * Kb * concA)) / 2;
                     pH = 14 + Math.log10(concOH);
                 }
             } else if (Vb < equivVol) {
@@ -847,7 +883,9 @@ export class TitrationCurveCalculator extends Calculator {
                 if (acidType === "strong") {
                     pH = -Math.log10(acidConc);
                 } else {
-                    pH = -Math.log10(Math.sqrt(Ka * acidConc));
+                    // Exact [H+] from Ka = x^2/(C - x): x = (-Ka + sqrt(Ka^2 + 4*Ka*C))/2.
+                    // Valid at any dilution, unlike sqrt(Ka*C) which needs C >> Ka.
+                    pH = -Math.log10((-Ka + Math.sqrt(Ka * Ka + 4 * Ka * acidConc)) / 2);
                 }
             } else if (Math.abs(Vb - equivVol) <= stepSize / 2) {
                 // Nearest grid point to the equivalence point. Clamp to the
@@ -859,7 +897,8 @@ export class TitrationCurveCalculator extends Calculator {
                 } else {
                     let concA = totalAcid / totalVolumeEq;
                     let Kb = 1e-14 / Ka;
-                    let concOH = Math.sqrt(Kb * concA);
+                    // Exact [OH-] from Kb = x^2/(C - x), valid at any dilution.
+                    let concOH = (-Kb + Math.sqrt(Kb * Kb + 4 * Kb * concA)) / 2;
                     pH = 14 + Math.log10(concOH);
                 }
             } else if (Vb < equivVol) {
@@ -905,7 +944,30 @@ export class TitrationCurveCalculator extends Calculator {
 /**
  * Extended Debye-Huckel equation for activity coefficients.
  * log(γ±) = -0.509 * |z+*z-| * sqrt(I) / (1 + 3.28 * a * sqrt(I))
+ *
+ * The input concentration is the *salt* concentration. Ion concentrations
+ * follow from charge neutrality with minimal integer stoichiometry:
+ * nu+ = |z-|/g, nu- = |z+|/g, g = gcd(|z+|, |z-|), so
+ * I = 0.5 * c * (nu+*z+^2 + nu-*z-^2) and the mean molality is
+ * m± = c * (nu+^nu+ * nu-^nu-)^(1/(nu+ + nu-)).
  */
+function saltStoichiometry(zplus: number, zminus: number): { nuPlus: number; nuMinus: number } {
+    let a: number = Math.abs(Math.round(zplus));
+    let b: number = Math.abs(Math.round(zminus));
+    let g: number = saltGcd(a, b);
+    return { nuPlus: b / g, nuMinus: a / g };
+}
+
+function saltGcd(a: number, b: number): number {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    while (b !== 0) {
+        let t: number = a % b;
+        a = b;
+        b = t;
+    }
+    return a === 0 ? 1 : a;
+}
 export class DebyeHuckelCalculator extends Calculator {
     constructor() {
         super("debye-huckel-result", [
@@ -923,19 +985,24 @@ export class DebyeHuckelCalculator extends Calculator {
             ["dh-zplus", "dh-zminus", "dh-concentration", "dh-ion-size"]
         );
         if (zplus === 0 || zminus === 0) throw new Error("Ion charges cannot be zero");
+        if (!Number.isInteger(zplus) || !Number.isInteger(zminus)) throw new Error("Ion charges must be integers");
         if (concentration <= 0) throw new Error("Concentration must be positive");
         if (ionSize <= 0) throw new Error("Ion size parameter must be positive");
-        let I = 0.5 * concentration * (zplus * zplus + zminus * zminus);
+        let stoich = saltStoichiometry(zplus, zminus);
+        let I = 0.5 * concentration * (stoich.nuPlus * zplus * zplus + stoich.nuMinus * zminus * zminus);
         let sqrtI = Math.sqrt(I);
         let absProduct = Math.abs(zplus * zminus);
         let logGamma = -0.509 * absProduct * sqrtI / (1 + 3.28 * ionSize * sqrtI);
         let gamma = Math.pow(10, logGamma);
-        let meanActivity = gamma * Math.pow(concentration, 1);
+        let nuTotal = stoich.nuPlus + stoich.nuMinus;
+        let meanMolality = concentration * Math.pow(Math.pow(stoich.nuPlus, stoich.nuPlus) * Math.pow(stoich.nuMinus, stoich.nuMinus), 1 / nuTotal);
+        let meanActivity = gamma * meanMolality;
         this.resultDisplay.showResult(
             "<p>Ionic Strength (I) = " + this.numberFormatter.format(I, 6) + " M</p>" +
             "<p>log(&gamma;<sub>&plusmn;</sub>) = " + this.numberFormatter.format(logGamma, 6) + "</p>" +
             "<p>&gamma;<sub>&plusmn;</sub> = " + this.numberFormatter.format(gamma, 6) + "</p>" +
-            "<p>Mean Activity (a<sub>&plusmn;</sub>) = " + this.numberFormatter.format(meanActivity, 6) + "</p>"
+            "<p>Mean Activity (a<sub>&plusmn;</sub>) = " + this.numberFormatter.format(meanActivity, 6) + "</p>" +
+            "<p>Salt stoichiometry assumed from charge neutrality: M<sub>" + stoich.nuPlus + "</sub>X<sub>" + stoich.nuMinus + "</sub>; concentration is the salt concentration</p>"
         );
     }
 
@@ -948,18 +1015,23 @@ export class DebyeHuckelCalculator extends Calculator {
             throw new Error("Missing or invalid inputs for dh-zplus, dh-zminus, dh-concentration, dh-ion-size");
         }
         if (zplus === 0 || zminus === 0) throw new Error("Ion charges cannot be zero");
+        if (!Number.isInteger(zplus) || !Number.isInteger(zminus)) throw new Error("Ion charges must be integers");
         if (concentration <= 0) throw new Error("Concentration must be positive");
         if (ionSize <= 0) throw new Error("Ion size parameter must be positive");
-        let I = 0.5 * concentration * (zplus * zplus + zminus * zminus);
+        let stoich = saltStoichiometry(zplus, zminus);
+        let I = 0.5 * concentration * (stoich.nuPlus * zplus * zplus + stoich.nuMinus * zminus * zminus);
         let sqrtI = Math.sqrt(I);
         let absProduct = Math.abs(zplus * zminus);
         let logGamma = -0.509 * absProduct * sqrtI / (1 + 3.28 * ionSize * sqrtI);
         let gamma = Math.pow(10, logGamma);
-        let meanActivity = gamma * Math.pow(concentration, 1);
+        let nuTotal = stoich.nuPlus + stoich.nuMinus;
+        let meanMolality = concentration * Math.pow(Math.pow(stoich.nuPlus, stoich.nuPlus) * Math.pow(stoich.nuMinus, stoich.nuMinus), 1 / nuTotal);
+        let meanActivity = gamma * meanMolality;
         let explanation: string = "Ionic Strength (I) = " + this.numberFormatter.format(I, 6) + " M; ";
         explanation += "log(gamma) = " + this.numberFormatter.format(logGamma, 6) + "; ";
         explanation += "gamma = " + this.numberFormatter.format(gamma, 6) + "; ";
-        explanation += "Mean Activity = " + this.numberFormatter.format(meanActivity, 6);
+        explanation += "Mean Activity = " + this.numberFormatter.format(meanActivity, 6) + "; ";
+        explanation += "salt stoichiometry M" + stoich.nuPlus + "X" + stoich.nuMinus + " from charge neutrality (concentration is the salt concentration)";
         return {
             value: "I = " + this.numberFormatter.format(I, 6) + " M; gamma = " + this.numberFormatter.format(gamma, 6),
             explanation: explanation,
@@ -968,6 +1040,9 @@ export class DebyeHuckelCalculator extends Calculator {
                 logGamma: logGamma,
                 gamma: gamma,
                 meanActivity: meanActivity,
+                meanMolality: meanMolality,
+                nuPlus: stoich.nuPlus,
+                nuMinus: stoich.nuMinus,
                 zplus: zplus,
                 zminus: zminus,
                 concentration: concentration,
@@ -1023,12 +1098,19 @@ export class CommonIonEffectCalculator extends Calculator {
         let exponent = stoichA + stoichB;
         let coeff = Math.pow(stoichA, stoichA) * Math.pow(stoichB, stoichB);
         let solubilityWithout = Math.pow(Ksp / coeff, 1 / exponent);
+        // The closed form assumes s << C (dissolved B negligible vs the
+        // common ion). Flag it when that assumption breaks down.
+        let approxWarning = "";
+        if ((stoichB * s) / commonIonConc > 0.05) {
+            approxWarning = "<p>Warning: dissolved B (" + this.numberFormatter.format(stoichB * s, 6) + " M) exceeds 5% of the common ion concentration, so the s &lt;&lt; C approximation may be inaccurate; solve the exact polynomial for a rigorous result.</p>";
+        }
         this.resultDisplay.showResult(
             "<p>Molar Solubility (with common ion) = " + this.numberFormatter.format(s, 6) + " M</p>" +
             "<p>Molar Solubility (without common ion) = " + this.numberFormatter.format(solubilityWithout, 6) + " M</p>" +
             "<p>[A] = " + this.numberFormatter.format(concA, 6) + " M</p>" +
             "<p>[B] = " + this.numberFormatter.format(concB, 6) + " M</p>" +
-            "<p>Solubility Ratio = " + this.numberFormatter.format(s / solubilityWithout, 6) + "</p>"
+            "<p>Solubility Ratio = " + this.numberFormatter.format(s / solubilityWithout, 6) + "</p>" +
+            approxWarning
         );
     }
 
@@ -1073,6 +1155,10 @@ export class CommonIonEffectCalculator extends Calculator {
         explanation += "[A] = " + this.numberFormatter.format(concA, 6) + " M; ";
         explanation += "[B] = " + this.numberFormatter.format(concB, 6) + " M; ";
         explanation += "Solubility Ratio = " + this.numberFormatter.format(s / solubilityWithout, 6);
+        let approxValid: boolean = (stoichB * s) / commonIonConc <= 0.05;
+        if (!approxValid) {
+            explanation += "; WARNING: dissolved B exceeds 5% of the common ion concentration, so the s << C approximation may be inaccurate";
+        }
         return {
             value: "s (with common ion) = " + this.numberFormatter.format(s, 6) + " M; s (without) = " + this.numberFormatter.format(solubilityWithout, 6) + " M",
             explanation: explanation,
@@ -1084,7 +1170,8 @@ export class CommonIonEffectCalculator extends Calculator {
                 solubilityRatio: s / solubilityWithout,
                 saltType: saltType,
                 stoichA: stoichA,
-                stoichB: stoichB
+                stoichB: stoichB,
+                approxValid: approxValid
             }
         };
     }
