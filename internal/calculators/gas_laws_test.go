@@ -99,6 +99,47 @@ func TestCombinedGasLaw_AllBranches(t *testing.T) {
 	}
 }
 
+func TestCombinedGasLaw_ValidationPerBranch(t *testing.T) {
+	ctx := context.Background()
+	base := CalculationInput{"P1": 1.0, "V1": 1.0, "T1": 273.15, "P2": 2.0, "V2": 1.0, "T2": 273.15}
+	// Each branch reads every variable except the one it solves for.
+	reads := map[string][]string{
+		"P1": {"V1", "T1", "P2", "V2", "T2"},
+		"V1": {"P1", "T1", "P2", "V2", "T2"},
+		"T1": {"P1", "V1", "P2", "V2", "T2"},
+		"P2": {"P1", "V1", "T1", "V2", "T2"},
+		"V2": {"P1", "V1", "T1", "P2", "T2"},
+		"T2": {"P1", "V1", "T1", "P2", "V2"},
+	}
+	for _, s := range []string{"P1", "V1", "T1", "P2", "V2", "T2"} {
+		for _, k := range reads[s] {
+			bad := CalculationInput{}
+			for kk, v := range base {
+				bad[kk] = v
+			}
+			bad["solveFor"] = s
+			bad[k] = -1.0
+			if _, err := CombinedGasLaw(ctx, bad); err == nil {
+				t.Errorf("CombinedGasLaw %s with %s=-1: expected error", s, k)
+			}
+		}
+	}
+	// Zero-divisor branches per solveFor.
+	zeroCases := []CalculationInput{
+		{"P1": 1.0, "V1": 0.0, "T1": 273.15, "P2": 1.0, "V2": 1.0, "T2": 273.15, "solveFor": "P1"},
+		{"P1": 0.0, "V1": 1.0, "T1": 273.15, "P2": 1.0, "V2": 1.0, "T2": 273.15, "solveFor": "V1"},
+		{"P1": 1.0, "V1": 1.0, "T1": 273.15, "P2": 0.0, "V2": 1.0, "T2": 273.15, "solveFor": "T1"},
+		{"P1": 1.0, "V1": 1.0, "T1": 273.15, "P2": 1.0, "V2": 0.0, "T2": 273.15, "solveFor": "P2"},
+		{"P1": 1.0, "V1": 1.0, "T1": 273.15, "P2": 0.0, "V2": 1.0, "T2": 273.15, "solveFor": "V2"},
+		{"P1": 0.0, "V1": 1.0, "T1": 273.15, "P2": 1.0, "V2": 1.0, "T2": 273.15, "solveFor": "T2"},
+	}
+	for _, in := range zeroCases {
+		if _, err := CombinedGasLaw(ctx, in); err == nil {
+			t.Errorf("expected division error for %+v", in)
+		}
+	}
+}
+
 func TestVanDerWaals_AllBranches(t *testing.T) {
 	ctx := context.Background()
 	got, err := VanDerWaals(ctx, CalculationInput{"V": 22.4, "n": 1.0, "T": 273.15, "a": 3.59, "b": 0.0427})
