@@ -126,6 +126,15 @@ describe("ChartRenderer", function () {
             expect(instance).toBeInstanceOf(ChartRenderer);
         });
 
+        it("uses the Chart constructor owned by registerChartPlugins (single registration site)", async function () {
+            let owner = await import("../solid/third-party/registerChartPlugins.js");
+            expect(owner.Chart).toBeDefined();
+            expect(typeof owner.Chart.register).toBe("function");
+            createCanvas("ownership-canvas");
+            ChartRenderer.getInstance().renderLineChart("ownership-canvas", createSampleData(), createSampleOptions());
+            expect(ChartRenderer.getInstance().hasChart("ownership-canvas")).toBe(true);
+        });
+
         it("returns the same instance on subsequent calls", function () {
             let a: ChartRenderer = ChartRenderer.getInstance();
             let b: ChartRenderer = ChartRenderer.getInstance();
