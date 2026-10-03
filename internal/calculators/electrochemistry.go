@@ -69,6 +69,9 @@ func Nernst(ctx context.Context, input CalculationInput) (CalculationResult, err
 	if n <= 0 {
 		return CalculationResult{}, errors.New("number of electrons must be positive")
 	}
+	if n != math.Trunc(n) {
+		return CalculationResult{}, errors.New("number of electrons must be an integer")
+	}
 	if Q <= 0 {
 		return CalculationResult{}, errors.New("reaction quotient Q must be positive")
 	}
@@ -116,6 +119,9 @@ func Electrolysis(ctx context.Context, input CalculationInput) (CalculationResul
 		if I <= 0 || t <= 0 || z <= 0 || M <= 0 {
 			return CalculationResult{}, errors.New("I, t, z, and M must be positive")
 		}
+		if z != math.Trunc(z) {
+			return CalculationResult{}, errors.New("charge number z must be an integer")
+		}
 		moles := (I * t) / (Faraday * z)
 		result = moles * M
 		unit = "g"
@@ -139,6 +145,9 @@ func Electrolysis(ctx context.Context, input CalculationInput) (CalculationResul
 		if m <= 0 || t <= 0 || z <= 0 || M <= 0 {
 			return CalculationResult{}, errors.New("m, t, z, and M must be positive")
 		}
+		if z != math.Trunc(z) {
+			return CalculationResult{}, errors.New("charge number z must be an integer")
+		}
 		moles := m / M
 		result = (moles * Faraday * z) / t
 		unit = "A"
@@ -161,6 +170,9 @@ func Electrolysis(ctx context.Context, input CalculationInput) (CalculationResul
 		}
 		if m <= 0 || I <= 0 || z <= 0 || M <= 0 {
 			return CalculationResult{}, errors.New("m, I, z, and M must be positive")
+		}
+		if z != math.Trunc(z) {
+			return CalculationResult{}, errors.New("charge number z must be an integer")
 		}
 		moles := m / M
 		result = (moles * Faraday * z) / I
