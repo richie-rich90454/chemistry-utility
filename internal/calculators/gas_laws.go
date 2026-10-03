@@ -23,6 +23,9 @@ func IdealGasLaw(ctx context.Context, input CalculationInput) (CalculationResult
 		return CalculationResult{}, err
 	}
 	units := getStringWithDefault(input, "units", "atm-L")
+	if units != "atm-L" && units != "SI" {
+		return CalculationResult{}, errors.New("invalid units: must be \"atm-L\" or \"SI\"")
+	}
 
 	R := RAtmL
 	if units == "SI" {
@@ -47,8 +50,14 @@ func IdealGasLaw(ctx context.Context, input CalculationInput) (CalculationResult
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		if V == 0 {
-			return CalculationResult{}, errors.New("volume cannot be zero")
+		if V <= 0 {
+			return CalculationResult{}, errors.New("volume must be positive")
+		}
+		if n < 0 {
+			return CalculationResult{}, errors.New("moles cannot be negative")
+		}
+		if T <= 0 {
+			return CalculationResult{}, errors.New("temperature must be positive (Kelvin)")
 		}
 		result = (n * R * T) / V
 		formula = "P = (nRT) / V"
@@ -70,8 +79,14 @@ func IdealGasLaw(ctx context.Context, input CalculationInput) (CalculationResult
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		if P == 0 {
-			return CalculationResult{}, errors.New("pressure cannot be zero")
+		if P <= 0 {
+			return CalculationResult{}, errors.New("pressure must be positive")
+		}
+		if n < 0 {
+			return CalculationResult{}, errors.New("moles cannot be negative")
+		}
+		if T <= 0 {
+			return CalculationResult{}, errors.New("temperature must be positive (Kelvin)")
 		}
 		result = (n * R * T) / P
 		formula = "V = (nRT) / P"
@@ -93,8 +108,11 @@ func IdealGasLaw(ctx context.Context, input CalculationInput) (CalculationResult
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		if T == 0 {
-			return CalculationResult{}, errors.New("temperature cannot be zero")
+		if T <= 0 {
+			return CalculationResult{}, errors.New("temperature must be positive (Kelvin)")
+		}
+		if P < 0 || V < 0 {
+			return CalculationResult{}, errors.New("pressure and volume cannot be negative")
 		}
 		result = (P * V) / (R * T)
 		formula = "n = (PV) / (RT)"
@@ -112,8 +130,11 @@ func IdealGasLaw(ctx context.Context, input CalculationInput) (CalculationResult
 		if err != nil {
 			return CalculationResult{}, err
 		}
-		if n == 0 {
-			return CalculationResult{}, errors.New("moles cannot be zero")
+		if n <= 0 {
+			return CalculationResult{}, errors.New("moles must be positive")
+		}
+		if P < 0 || V < 0 {
+			return CalculationResult{}, errors.New("pressure and volume cannot be negative")
 		}
 		result = (P * V) / (n * R)
 		formula = "T = (PV) / (nR)"
@@ -135,6 +156,8 @@ func IdealGasLaw(ctx context.Context, input CalculationInput) (CalculationResult
 
 // CombinedGasLaw solves (P1*V1)/T1 = (P2*V2)/T2 for any one variable.
 // Input keys: "P1", "V1", "T1", "P2", "V2", "T2", "solveFor".
+// Temperatures are absolute (Kelvin) and must be positive; pressures and
+// volumes must be non-negative.
 func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationResult, error) {
 	solveFor, err := getString(input, "solveFor")
 	if err != nil {
@@ -167,6 +190,21 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		if err != nil {
 			return CalculationResult{}, err
 		}
+		if err := requirePositiveTemp("T1", T1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requirePositiveTemp("T2", T2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V1", V1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P2", P2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V2", V2); err != nil {
+			return CalculationResult{}, err
+		}
 		if V1 == 0 || T2 == 0 {
 			return CalculationResult{}, errors.New("division by zero: V1 and T2 must be non-zero")
 		}
@@ -192,6 +230,21 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		}
 		T2, err := getFloat(input, "T2")
 		if err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requirePositiveTemp("T1", T1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requirePositiveTemp("T2", T2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P1", P1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P2", P2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V2", V2); err != nil {
 			return CalculationResult{}, err
 		}
 		if P1 == 0 || T2 == 0 {
@@ -221,6 +274,21 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		if err != nil {
 			return CalculationResult{}, err
 		}
+		if err := requirePositiveTemp("T2", T2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P1", P1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V1", V1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P2", P2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V2", V2); err != nil {
+			return CalculationResult{}, err
+		}
 		if P2 == 0 || V2 == 0 {
 			return CalculationResult{}, errors.New("division by zero: P2 and V2 must be non-zero")
 		}
@@ -246,6 +314,21 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		}
 		T2, err := getFloat(input, "T2")
 		if err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requirePositiveTemp("T1", T1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requirePositiveTemp("T2", T2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P1", P1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V1", V1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V2", V2); err != nil {
 			return CalculationResult{}, err
 		}
 		if V2 == 0 || T1 == 0 {
@@ -275,6 +358,21 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		if err != nil {
 			return CalculationResult{}, err
 		}
+		if err := requirePositiveTemp("T1", T1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requirePositiveTemp("T2", T2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P1", P1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V1", V1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P2", P2); err != nil {
+			return CalculationResult{}, err
+		}
 		if P2 == 0 || T1 == 0 {
 			return CalculationResult{}, errors.New("division by zero: P2 and T1 must be non-zero")
 		}
@@ -300,6 +398,21 @@ func CombinedGasLaw(ctx context.Context, input CalculationInput) (CalculationRes
 		}
 		V2, err := getFloat(input, "V2")
 		if err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requirePositiveTemp("T1", T1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P1", P1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V1", V1); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("P2", P2); err != nil {
+			return CalculationResult{}, err
+		}
+		if err := requireNonNegative("V2", V2); err != nil {
 			return CalculationResult{}, err
 		}
 		if P1 == 0 || V1 == 0 {
@@ -350,6 +463,15 @@ func VanDerWaals(ctx context.Context, input CalculationInput) (CalculationResult
 	if V <= 0 {
 		return CalculationResult{}, errors.New("volume must be positive")
 	}
+	if n <= 0 {
+		return CalculationResult{}, errors.New("moles must be positive")
+	}
+	if T <= 0 {
+		return CalculationResult{}, errors.New("temperature must be positive (Kelvin)")
+	}
+	if a < 0 || b < 0 {
+		return CalculationResult{}, errors.New("van der Waals constants a and b cannot be negative")
+	}
 	if V-n*b <= 0 {
 		return CalculationResult{}, errors.New("volume is too small for the given amount of gas (V must be greater than n*b)")
 	}
@@ -380,4 +502,20 @@ func getStringWithDefault(input CalculationInput, key string, defaultVal string)
 		return defaultVal
 	}
 	return s
+}
+
+// requirePositiveTemp rejects non-positive absolute temperatures (Kelvin).
+func requirePositiveTemp(name string, T float64) error {
+	if T <= 0 {
+		return fmt.Errorf("temperature %s must be positive (Kelvin)", name)
+	}
+	return nil
+}
+
+// requireNonNegative rejects negative pressures and volumes.
+func requireNonNegative(name string, v float64) error {
+	if v < 0 {
+		return fmt.Errorf("%s cannot be negative", name)
+	}
+	return nil
 }
