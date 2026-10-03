@@ -1,9 +1,10 @@
 import {render, fireEvent, waitFor} from "@solidjs/testing-library";
 import {Router, Route, useLocation} from "@solidjs/router";
 import type {JSX} from "solid-js";
-import {describe, it, expect, beforeEach, afterEach} from "vitest";
+import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 import {CommandPalette} from "./CommandPalette";
 import {reset as resetPalette} from "../stores/palette";
+import {RuntimeDetector} from "../../modules/runtimeDetector.js";
 function PathLabel(): JSX.Element {
     let location = useLocation();
     return <div data-testid="path-label">{location.pathname}</div>;
@@ -34,6 +35,7 @@ describe("CommandPalette", function (): void {
     });
     afterEach(function (): void {
         resetPalette();
+        vi.restoreAllMocks();
     });
     it("is not visible initially", function (): void {
         let result = renderHost();
@@ -94,5 +96,19 @@ describe("CommandPalette", function (): void {
         let input = result.getByLabelText("Search calculators");
         fireEvent.keyDown(input, {key: "Escape"});
         expect(result.queryByRole("dialog", {name: "Calculator search"})).toBeNull();
+    });
+    it("shows desktop-only calculators on desktop", function (): void {
+        let result = renderHost();
+        dispatchCtrlK();
+        expect(result.getByText("Dashboard")).toBeTruthy();
+        expect(result.getByText("Batch Calculator")).toBeTruthy();
+    });
+    it("hides desktop-only calculators in web mode", function (): void {
+        vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
+        let result = renderHost();
+        dispatchCtrlK();
+        expect(result.queryByText("Dashboard")).toBeNull();
+        expect(result.queryByText("Batch Calculator")).toBeNull();
+        expect(result.getByText("Molar Mass")).toBeTruthy();
     });
 });
