@@ -177,8 +177,10 @@ describe("SignificantFiguresEngine", () => {
         });
 
         it("should handle scientific notation", () => {
-            expect(SignificantFiguresEngine.countDecimalPlaces("1.23e5")).toBe(2);
-            expect(SignificantFiguresEngine.countDecimalPlaces("1.0E3")).toBe(1);
+            // Exponent-aware: 1.23e5 = 123000 has 0 decimal places.
+            expect(SignificantFiguresEngine.countDecimalPlaces("1.23e5")).toBe(0);
+            expect(SignificantFiguresEngine.countDecimalPlaces("1.0E3")).toBe(0);
+            expect(SignificantFiguresEngine.countDecimalPlaces("1.23e-2")).toBe(4);
         });
     });
 });
