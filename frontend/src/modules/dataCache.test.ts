@@ -149,6 +149,18 @@ describe("DataCache", () => {
             expect(localStorage.getItem("chem-cache-ptable")).toBeNull();
         });
 
+        it("returns null and clears non-object entries", async () => {
+            localStorage.setItem("chem-cache-ptable", JSON.stringify([42]));
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+            expect(localStorage.getItem("chem-cache-ptable")).toBeNull();
+        });
+
+        it("returns null and clears null entries", async () => {
+            localStorage.setItem("chem-cache-ptable", JSON.stringify([null]));
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+            expect(localStorage.getItem("chem-cache-ptable")).toBeNull();
+        });
+
         it("returns null when localStorage.getItem throws", async () => {
             const spy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
                 throw new Error("unavailable");
