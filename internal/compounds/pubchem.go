@@ -35,9 +35,12 @@ func NewPubChemClient() *PubChemClient {
 	}
 }
 
-// waitForRate blocks until a rate-limiter tick is available.
-func (c *PubChemClient) waitForRate() {
-	<-c.rateTicker.C
+// waitForRate blocks until a rate-limiter tick is available or ctx is done.
+func (c *PubChemClient) waitForRate(ctx context.Context) {
+	select {
+	case <-c.rateTicker.C:
+	case <-ctx.Done():
+	}
 }
 
 // Stop releases the rate-limiter ticker.
@@ -128,7 +131,23 @@ func (c *PubChemClient) GetCompoundDetail(ctx context.Context, cid int) (db.Comp
 
 // searchIdentifiers performs a PubChem identifier search and returns CIDs.
 func (c *PubChemClient) searchIdentifiers(ctx context.Context, domain, namespace, query string) ([]int, error) {
-	u := fmt.Sprintf("%s/%s/%s/%s/cids/JSON", c.baseURL, domain, namespace, url.PathEscape(query))
+	if strings.TrimSpace(query) == "" {
+		return nil, fmt.Errorf("query must not be empty")
+	}
+	var escaped string
+	if namespace == "xref" {
+		// "RN/<cas>" needs a literal slash for PubChem's
+		// /compound/xref/RN/{cas}/... route. Escape each segment
+		// separately so the slash survives.
+		parts := strings.Split(query, "/")
+		for i, p := range parts {
+			parts[i] = url.PathEscape(p)
+		}
+		escaped = strings.Join(parts, "/")
+	} else {
+		escaped = url.PathEscape(query)
+	}
+	u := fmt.Sprintf("%s/%s/%s/%s/cids/JSON", c.baseURL, domain, namespace, escaped)
 	cids, err := c.doSearchRequest(ctx, u)
 	if err != nil {
 		return nil, err
@@ -137,7 +156,10 @@ func (c *PubChemClient) searchIdentifiers(ctx context.Context, domain, namespace
 }
 
 func (c *PubChemClient) doSearchRequest(ctx context.Context, rawURL string) ([]int, error) {
-	c.waitForRate()
+	c.waitForRate(ctx)
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
@@ -233,6 +255,10 @@ func (c *PubChemClient) fetchCompounds(ctx context.Context, cids []int) ([]db.Co
 
 		compound.CreatedAt = time.Now()
 		compound.UpdatedAt = time.Now()
+		// Skip CIDs with no usable data rather than caching empty rows.
+		if compound.Name == "" && compound.Formula == "" && compound.SMILES == "" && compound.InChI == "" {
+			continue
+		}
 		results = append(results, compound)
 	}
 
@@ -255,7 +281,10 @@ func (c *PubChemClient) fetchProperties(ctx context.Context, cidList string) (ma
 		c.baseURL, cidList,
 	)
 
-	c.waitForRate()
+	c.waitForRate(ctx)
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
@@ -320,7 +349,10 @@ func (c *PubChemClient) fetchProperties(ctx context.Context, cidList string) (ma
 func (c *PubChemClient) fetchDescriptions(ctx context.Context, cidList string) ([]pubChemInformation, error) {
 	u := fmt.Sprintf("%s/compound/cid/%s/description/JSON", c.baseURL, cidList)
 
-	c.waitForRate()
+	c.waitForRate(ctx)
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
@@ -353,7 +385,10 @@ func (c *PubChemClient) fetchDescriptions(ctx context.Context, cidList string) (
 func (c *PubChemClient) fetchCASNumbers(ctx context.Context, cidList string) (map[int]string, error) {
 	u := fmt.Sprintf("%s/compound/cid/%s/xrefs/CAS/JSON", c.baseURL, cidList)
 
-	c.waitForRate()
+	c.waitForRate(ctx)
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
