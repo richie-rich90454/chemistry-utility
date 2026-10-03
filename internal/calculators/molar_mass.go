@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"unicode"
 )
 
@@ -141,17 +142,29 @@ func CalculateMolarMass(ctx context.Context, input CalculationInput) (Calculatio
 	if err != nil {
 		return CalculationResult{}, err
 	}
+	if len(formula) == 0 {
+		return CalculationResult{}, errors.New("formula is required")
+	}
 
 	counts, err := parseFormulaWithCounts(formula)
 	if err != nil {
 		return CalculationResult{}, err
+	}
+	if len(counts) == 0 {
+		return CalculationResult{}, errors.New("formula must contain at least one element")
 	}
 
 	var totalMass float64
 	var breakdown []BreakdownItem
 	var steps []string
 
-	for symbol, count := range counts {
+	symbols := make([]string, 0, len(counts))
+	for symbol := range counts {
+		symbols = append(symbols, symbol)
+	}
+	sort.Strings(symbols)
+	for _, symbol := range symbols {
+		count := counts[symbol]
 		mass, ok := atomicMasses[symbol]
 		if !ok {
 			return CalculationResult{}, fmt.Errorf("element not found: %s", symbol)
