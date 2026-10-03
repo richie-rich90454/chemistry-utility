@@ -338,8 +338,8 @@ describe("Half-life - edge cases", () => {
 		expect(html).toContain("positive");
 	});
 
-	it("solving for time when Nt > N0 yields negative time", () => {
-		// N0=100, Nt=200, t_half=5 → t = (log(200/100)/log(0.5))*5 = (log(2)/log(0.5))*5 = (-1)*5 = -5
+	it("solving for time when Nt > N0 is rejected (decay only decreases quantity)", () => {
+		// N0=100, Nt=200, t_half=5: growth, not decay — backend parity rejects it.
 		const select = document.getElementById("half-life-solve-for") as HTMLSelectElement;
 		select.value = "time";
 		(document.getElementById("initial-quantity") as HTMLInputElement).value = "100";
@@ -349,9 +349,55 @@ describe("Half-life - edge cases", () => {
 		calculateHalfLife();
 
 		const html = getResultHTML("half-life-result");
-		const match = html.match(/Time needed:\s*(-?[\d.]+)/);
-		expect(match).not.toBeNull();
-		expect(parseFloat(match![1])).toBeLessThan(0);
+		expect(html).toContain("Error");
+		expect(html).toContain("less than initial quantity");
+	});
+
+	it("solving for time when Nt equals N0 is rejected", () => {
+		const select = document.getElementById("half-life-solve-for") as HTMLSelectElement;
+		select.value = "time";
+		(document.getElementById("initial-quantity") as HTMLInputElement).value = "100";
+		(document.getElementById("half-life-input") as HTMLInputElement).value = "5";
+		(document.getElementById("remaining-quantity") as HTMLInputElement).value = "100";
+
+		calculateHalfLife();
+
+		const html = getResultHTML("half-life-result");
+		expect(html).toContain("Error");
+		expect(html).toContain("less than initial quantity");
+	});
+
+	it("solving for remaining with negative time is rejected", () => {
+		const select = document.getElementById("half-life-solve-for") as HTMLSelectElement;
+		select.value = "remaining";
+		(document.getElementById("initial-quantity") as HTMLInputElement).value = "100";
+		(document.getElementById("time-input") as HTMLInputElement).value = "-5";
+		(document.getElementById("half-life-input") as HTMLInputElement).value = "5";
+
+		calculateHalfLife();
+
+		const html = getResultHTML("half-life-result");
+		expect(html).toContain("Error");
+		expect(html).toContain("Time cannot be negative");
+	});
+
+	it("solving for half-life with Nt >= N0 or non-positive time is rejected", () => {
+		const select = document.getElementById("half-life-solve-for") as HTMLSelectElement;
+		select.value = "half-life";
+		(document.getElementById("initial-quantity") as HTMLInputElement).value = "100";
+		(document.getElementById("time-input") as HTMLInputElement).value = "10";
+		(document.getElementById("remaining-quantity") as HTMLInputElement).value = "150";
+
+		calculateHalfLife();
+
+		expect(getResultHTML("half-life-result")).toContain("less than initial quantity");
+
+		(document.getElementById("remaining-quantity") as HTMLInputElement).value = "25";
+		(document.getElementById("time-input") as HTMLInputElement).value = "0";
+
+		calculateHalfLife();
+
+		expect(getResultHTML("half-life-result")).toContain("Time must be positive");
 	});
 
 	it("solves for half-life with valid inputs", () => {
@@ -460,5 +506,91 @@ describe("Gas Laws - additional edge cases", () => {
 		calculateVanDerWaals();
 		const html = getResultHTML("vdw-result");
 		expect(html).not.toContain("Error");
+	});
+
+	it("Van der Waals: rejects non-positive n, non-positive T, and negative a/b", () => {
+		createContainer("van-der-waals");
+		createInput("vdw-V", "22.4", "van-der-waals");
+		createInput("vdw-n", "0", "van-der-waals");
+		createInput("vdw-T", "273", "van-der-waals");
+		createInput("vdw-a", "1.39", "van-der-waals");
+		createInput("vdw-b", "0.0391", "van-der-waals");
+		createResultDiv("vdw-result", "van-der-waals");
+		calculateVanDerWaals();
+		expect(getResultHTML("vdw-result")).toContain("Moles must be positive");
+
+		(document.getElementById("vdw-n") as HTMLInputElement).value = "1";
+		(document.getElementById("vdw-T") as HTMLInputElement).value = "0";
+		calculateVanDerWaals();
+		expect(getResultHTML("vdw-result")).toContain("Temperature must be positive");
+
+		(document.getElementById("vdw-T") as HTMLInputElement).value = "273";
+		(document.getElementById("vdw-a") as HTMLInputElement).value = "-1";
+		calculateVanDerWaals();
+		expect(getResultHTML("vdw-result")).toContain("cannot be negative");
+	});
+
+	it("Van der Waals: notes the R units in the result", () => {
+		createContainer("van-der-waals");
+		createInput("vdw-V", "22.4", "van-der-waals");
+		createInput("vdw-n", "1", "van-der-waals");
+		createInput("vdw-T", "273", "van-der-waals");
+		createInput("vdw-a", "1.39", "van-der-waals");
+		createInput("vdw-b", "0.0391", "van-der-waals");
+		createResultDiv("vdw-result", "van-der-waals");
+		calculateVanDerWaals();
+		expect(getResultHTML("vdw-result")).toContain("0.08206");
+	});
+
+	it("ideal gas SI: explicit litre select converts to cubic metres", () => {
+		// n=1, V=22.4 L (= 0.0224 m³), T=273.15 → P ≈ 101382 Pa, not 1000x off.
+		createContainer("ideal-gas-law");
+		createInput("ideal-P", "", "ideal-gas-law");
+		createInput("ideal-V", "22.4", "ideal-gas-law");
+		createInput("ideal-n", "1", "ideal-gas-law");
+		createInput("ideal-T", "273.15", "ideal-gas-law");
+		createSelect("ideal-solve-for", "P", ["P", "V", "n", "T"], "ideal-gas-law");
+		createSelect("ideal-R-units", "SI", ["atm-L", "SI"], "ideal-gas-law");
+		createSelect("ideal-volume-unit", "L", ["L", "m³"], "ideal-gas-law");
+		createResultDiv("ideal-result", "ideal-gas-law");
+		calculateIdealGasLaw();
+		const html = getResultHTML("ideal-result");
+		const result = extractResultNumber(html);
+		expect(result).not.toBeNull();
+		expect(result!).toBeCloseTo(101382.55, 0);
+		expect(html).toContain("Pa");
+	});
+
+	it("ideal gas SI: solving for V honours the litre select", () => {
+		// P=101325 Pa, n=1, T=273.15 → V = 0.0224 m³ = 22.4 L.
+		createContainer("ideal-gas-law");
+		createInput("ideal-P", "101325", "ideal-gas-law");
+		createInput("ideal-V", "", "ideal-gas-law");
+		createInput("ideal-n", "1", "ideal-gas-law");
+		createInput("ideal-T", "273.15", "ideal-gas-law");
+		createSelect("ideal-solve-for", "V", ["P", "V", "n", "T"], "ideal-gas-law");
+		createSelect("ideal-R-units", "SI", ["atm-L", "SI"], "ideal-gas-law");
+		createSelect("ideal-volume-unit", "L", ["L", "m³"], "ideal-gas-law");
+		createResultDiv("ideal-result", "ideal-gas-law");
+		calculateIdealGasLaw();
+		const html = getResultHTML("ideal-result");
+		const result = extractResultNumber(html);
+		expect(result).not.toBeNull();
+		expect(result!).toBeCloseTo(22.4, 1);
+	});
+
+	it("ideal gas: rejects an unknown volume unit", () => {
+		createContainer("ideal-gas-law");
+		createInput("ideal-P", "", "ideal-gas-law");
+		createInput("ideal-V", "22.4", "ideal-gas-law");
+		createInput("ideal-n", "1", "ideal-gas-law");
+		createInput("ideal-T", "273.15", "ideal-gas-law");
+		createSelect("ideal-solve-for", "P", ["P", "V", "n", "T"], "ideal-gas-law");
+		createSelect("ideal-R-units", "SI", ["atm-L", "SI"], "ideal-gas-law");
+		const volSelect = createSelect("ideal-volume-unit", "mL", ["L", "m³", "mL"], "ideal-gas-law");
+		volSelect.value = "mL";
+		createResultDiv("ideal-result", "ideal-gas-law");
+		calculateIdealGasLaw();
+		expect(getResultHTML("ideal-result")).toContain("Volume unit");
 	});
 });
