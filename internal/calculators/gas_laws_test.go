@@ -119,3 +119,55 @@ func TestVanDerWaals_AllBranches(t *testing.T) {
 		}
 	}
 }
+
+func without(in CalculationInput, key string) CalculationInput {
+	out := CalculationInput{}
+	for k, v := range in {
+		if k != key {
+			out[k] = v
+		}
+	}
+	return out
+}
+
+func TestGasLaw_MissingKeys(t *testing.T) {
+	ctx := context.Background()
+	ideal := map[string]CalculationInput{
+		"P": {"V": 1.0, "n": 1.0, "T": 273.15, "solveFor": "P"},
+		"V": {"P": 1.0, "n": 1.0, "T": 273.15, "solveFor": "V"},
+		"n": {"P": 1.0, "V": 1.0, "T": 273.15, "solveFor": "n"},
+		"T": {"P": 1.0, "V": 1.0, "n": 1.0, "solveFor": "T"},
+	}
+	for s, in := range ideal {
+		for _, k := range []string{"P", "V", "n", "T", "solveFor"} {
+			if k == s {
+				continue // solved-for variable is not read
+			}
+			if _, err := IdealGasLaw(ctx, without(in, k)); err == nil {
+				t.Errorf("IdealGasLaw %s without %s: expected error", s, k)
+			}
+		}
+	}
+	combined := CalculationInput{"P1": 1.0, "V1": 1.0, "T1": 273.15, "P2": 2.0, "V2": 1.0, "T2": 273.15}
+	for _, s := range []string{"P1", "V1", "T1", "P2", "V2", "T2"} {
+		in := CalculationInput{}
+		for k, v := range combined {
+			in[k] = v
+		}
+		in["solveFor"] = s
+		for _, k := range []string{"P1", "V1", "T1", "P2", "V2", "T2", "solveFor"} {
+			if k == s {
+				continue // solved-for variable is not read
+			}
+			if _, err := CombinedGasLaw(ctx, without(in, k)); err == nil {
+				t.Errorf("CombinedGasLaw %s without %s: expected error", s, k)
+			}
+		}
+	}
+	vdw := CalculationInput{"V": 22.4, "n": 1.0, "T": 273.15, "a": 3.59, "b": 0.0427}
+	for _, k := range []string{"V", "n", "T", "a", "b"} {
+		if _, err := VanDerWaals(ctx, without(vdw, k)); err == nil {
+			t.Errorf("VanDerWaals without %s: expected error", k)
+		}
+	}
+}
