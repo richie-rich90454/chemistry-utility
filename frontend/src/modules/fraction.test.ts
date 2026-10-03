@@ -71,7 +71,9 @@ describe("balanceEquation", () => {
 	});
 
 	it("should balance ionic equation with charge notation", () => {
-		expect(balanceEquation("Fe + Cu2+ -> Fe2+ + Cu")).toBe("2Fe + Cu2+ -> Fe2+ + 2Cu");
+		// Fe + Cu2+ -> Fe2+ + Cu is already balanced (Fe 1=1, Cu 1=1,
+		// charge +2=+2); the minimal coefficients are all 1.
+		expect(balanceEquation("Fe + Cu2+ -> Fe2+ + Cu")).toBe("Fe + Cu2+ -> Fe2+ + Cu");
 	});
 
 	it("should balance large molecule (C6H12O6)", () => {
