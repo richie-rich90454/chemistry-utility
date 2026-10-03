@@ -34,6 +34,9 @@ func Arrhenius(ctx context.Context, input CalculationInput) (CalculationResult, 
 		if T <= 0 {
 			return CalculationResult{}, errors.New("temperature must be positive")
 		}
+		if A <= 0 {
+			return CalculationResult{}, errors.New("pre-exponential factor A must be positive")
+		}
 		result = A * math.Exp(-Ea/(RSI*T))
 		unit = "s⁻¹"
 	case "Ea":
@@ -88,6 +91,9 @@ func Arrhenius(ctx context.Context, input CalculationInput) (CalculationResult, 
 		if T <= 0 {
 			return CalculationResult{}, errors.New("temperature must be positive")
 		}
+		if k <= 0 {
+			return CalculationResult{}, errors.New("rate constant k must be positive")
+		}
 		result = k / math.Exp(-Ea/(RSI*T))
 		unit = "s⁻¹"
 	default:
@@ -134,6 +140,9 @@ func RateLaw(ctx context.Context, input CalculationInput) (CalculationResult, er
 	}
 	if len(concentrations) != len(orders) {
 		return CalculationResult{}, errors.New("concentrations and orders must have the same length")
+	}
+	if len(concentrations) == 0 {
+		return CalculationResult{}, errors.New("at least one concentration/order pair is required")
 	}
 
 	rate := k
