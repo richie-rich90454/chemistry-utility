@@ -1,4 +1,4 @@
-import {createSignal, onCleanup} from "solid-js";
+import {createSignal, getOwner, onCleanup} from "solid-js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 interface NavigationStore {
     currentRoute: () => string;
@@ -19,8 +19,7 @@ function useNavigation(): NavigationStore {
         initialRoute = "";
     }
     let [currentRoute, setCurrentRouteSignal] = createSignal<string>(initialRoute);
-    let recentSignal = createSignal<string[]>(manager.getNavHistory().slice(-5));
-    let recentCalculators = recentSignal[0];
+    let [recentCalculators, setRecentCalculators] = createSignal<string[]>(manager.getNavHistory().slice(-5));
     let [favorites, setFavoritesSignal] = createSignal<string[]>(manager.getFavorites());
     let listener = function (id: string | null): void {
         if (id !== null) {
@@ -29,11 +28,19 @@ function useNavigation(): NavigationStore {
         else {
             setCurrentRouteSignal("");
         }
+        // Re-sync derived state on every navigation event instead of
+        // serving the one-time setup snapshot forever.
+        setRecentCalculators(manager.getNavHistory().slice(-5));
+        setFavoritesSignal(manager.getFavorites());
     };
-    manager.subscribe(listener);
-    onCleanup(function (): void {
-        manager.unsubscribe(listener);
-    });
+    // Subscribing outside a reactive owner would leak (onCleanup no-ops
+    // there), so only subscribe when an owner exists.
+    if (getOwner() !== undefined) {
+        manager.subscribe(listener);
+        onCleanup(function (): void {
+            manager.unsubscribe(listener);
+        });
+    }
     function setCurrentRoute(route: string): void {
         setCurrentRouteSignal(route);
         manager.setActiveViewId(route);
