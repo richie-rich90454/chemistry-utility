@@ -4,6 +4,8 @@
  * Pure TypeScript, no JSX or SolidJS imports.
  */
 
+import { normalizeArrows } from "fast-balance";
+
 export interface EquationTerm {
     coefficient: string;
     formula: string;
@@ -54,15 +56,16 @@ export function parseSide(side: string): EquationTerm[] {
 }
 
 export function parseBalancedEquation(equation: string): { reactants: EquationTerm[]; products: EquationTerm[] } {
-    let sides = equation.split(" -> ");
+    let normalized = normalizeArrows(equation);
+    let sides = normalized.split(" -> ");
     if (sides.length !== 2) {
-        sides = equation.split("->");
+        sides = normalized.split("->");
     }
     if (sides.length !== 2) {
-        sides = equation.split(" = ");
+        sides = normalized.split(" = ");
     }
     if (sides.length !== 2) {
-        sides = equation.split("=");
+        sides = normalized.split("=");
     }
     if (sides.length !== 2) {
         return { reactants: [{ coefficient: "", formula: equation }], products: [] };
