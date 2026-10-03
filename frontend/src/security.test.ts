@@ -1,23 +1,23 @@
 import { describe, it, expect } from "vitest";
+import { HtmlSanitizer } from "./modules/htmlSanitizer.js";
 
 describe("XSS prevention", () => {
-    it("escapeHtml should escape angle brackets", () => {
+    it("HtmlSanitizer escapes angle brackets", () => {
         const input = '<script>alert("xss")</script>';
-        const escaped = input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        const escaped = HtmlSanitizer.escape(input);
         expect(escaped).not.toContain("<script>");
         expect(escaped).toContain("&lt;script&gt;");
     });
 
-    it("escapeHtml should escape ampersands", () => {
+    it("HtmlSanitizer escapes ampersands", () => {
         const input = "H2O & NaCl";
-        const escaped = input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        const escaped = HtmlSanitizer.escape(input);
         expect(escaped).toContain("&amp;");
     });
 
-    it("escapeHtml should escape double quotes", () => {
-        const input = 'test"value';
-        const escaped = input.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-        expect(escaped).toContain("&quot;");
+    it("HtmlSanitizer escapes double and single quotes", () => {
+        expect(HtmlSanitizer.escape('test"value')).toContain("&quot;");
+        expect(HtmlSanitizer.escape("a'b")).toBe("a&#39;b");
     });
 
     it("formula input should not execute script tags", () => {
@@ -138,9 +138,16 @@ describe("Output sanitization", () => {
     it("result div with innerHTML should escape user input", () => {
         const div = document.createElement("div");
         const userInput = '<script>document.cookie</script>';
-        const escaped = userInput.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const escaped = HtmlSanitizer.escape(userInput);
         div.innerHTML = `<p>${escaped}</p>`;
         expect(div.querySelector("script")).toBeNull();
+    });
+
+    it("sanitized stoichiometry formula payload cannot inject markup", () => {
+        const div = document.createElement("div");
+        const payload = '<img src=x onerror=alert(1)>';
+        div.innerHTML = "<option value=\"" + HtmlSanitizer.escape(payload) + "\">" + HtmlSanitizer.escape(payload) + "</option>";
+        expect(div.querySelector("img")).toBeNull();
     });
 
     it("result div with textContent is safe from injection", () => {
