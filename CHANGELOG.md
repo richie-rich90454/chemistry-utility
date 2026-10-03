@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.0] - 2026-10-03
+
+### Fixed
+- Validation hardening
+- XSS fixes
+- Test robustness
+- API hardening
+
 ## [4.0.0] - 2026-07-15
 
 ### Features
