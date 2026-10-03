@@ -242,6 +242,80 @@ func TestTitrationCurve_AllBranches(t *testing.T) {
 	}
 }
 
+func TestDilution_MissingKeysPerBranch(t *testing.T) {
+	ctx := context.Background()
+	full := CalculationInput{"C1": 1.0, "V1": 1.0, "C2": 1.0, "V2": 1.0}
+	needed := map[string][]string{
+		"C1": {"V1", "C2", "V2", "solveFor"},
+		"V1": {"C1", "C2", "V2", "solveFor"},
+		"C2": {"C1", "V1", "V2", "solveFor"},
+		"V2": {"C1", "V1", "C2", "solveFor"},
+	}
+	for s, keys := range needed {
+		in := CalculationInput{}
+		for k, v := range full {
+			in[k] = v
+		}
+		in["solveFor"] = s
+		for _, k := range keys {
+			if k == s {
+				continue
+			}
+			if _, err := Dilution(ctx, without(in, k)); err == nil {
+				t.Errorf("Dilution %s without %s: expected error", s, k)
+			}
+		}
+	}
+}
+
+func TestTitrationCurve_ClampsAndCaps(t *testing.T) {
+	ctx := context.Background()
+	// Concentrated acid drives raw pH below 0 -> clamped.
+	got, err := TitrationCurve(ctx, CalculationInput{
+		"analyteConcentration": 12.0, "analyteVolume": 0.05,
+		"titrantConcentration": 0.1, "mode": "strong-acid-strong-base", "numPoints": 10.0,
+	})
+	if err != nil {
+		t.Fatalf("concentrated acid: %v", err)
+	}
+	curve := got.Metadata["curve"].([]map[string]float64)
+	if curve[0]["pH"] != 0 {
+		t.Errorf("expected clamped pH 0, got %v", curve[0]["pH"])
+	}
+	// Concentrated base drives raw pH above 14 -> clamped.
+	got, err = TitrationCurve(ctx, CalculationInput{
+		"analyteConcentration": 12.0, "analyteVolume": 0.05,
+		"titrantConcentration": 12.0, "mode": "strong-acid-strong-base", "numPoints": 10.0,
+	})
+	if err != nil {
+		t.Fatalf("concentrated base: %v", err)
+	}
+	curve = got.Metadata["curve"].([]map[string]float64)
+	last := curve[len(curve)-1]["pH"]
+	if last != 14 {
+		t.Errorf("expected clamped pH 14, got %v", last)
+	}
+	// numPoints above the cap is clamped to 5000.
+	got, err = TitrationCurve(ctx, CalculationInput{
+		"analyteConcentration": 0.1, "analyteVolume": 0.05,
+		"titrantConcentration": 0.1, "mode": "strong-acid-strong-base", "numPoints": 6000.0,
+	})
+	if err != nil {
+		t.Fatalf("capped numPoints: %v", err)
+	}
+	if len(got.Metadata["curve"].([]map[string]float64)) != 5001 {
+		t.Errorf("expected 5001 points, got %d", len(got.Metadata["curve"].([]map[string]float64)))
+	}
+	// Weak-acid clamps: very weak acid at low concentration.
+	got, err = TitrationCurve(ctx, CalculationInput{
+		"analyteConcentration": 1e-9, "analyteVolume": 0.05,
+		"titrantConcentration": 12.0, "mode": "weak-acid-strong-base", "pKa": 14.0, "numPoints": 10.0,
+	})
+	if err != nil {
+		t.Fatalf("weak extremes: %v", err)
+	}
+}
+
 func merge(a, b CalculationInput) CalculationInput {
 	out := CalculationInput{}
 	for k, v := range a {
