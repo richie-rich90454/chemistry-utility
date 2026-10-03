@@ -165,6 +165,34 @@ describe("RateLawCalculator", () => {
         const text = getResultText("rate-law-result");
         expect(text).toContain("Error");
     });
+
+    it("should flag the undetermined order when only one reactant varies", () => {
+        createInput("ratelaw-A1", "0.1", "rate-law-calc");
+        createInput("ratelaw-B1", "0.2", "rate-law-calc");
+        createInput("ratelaw-rate1", "0.004", "rate-law-calc");
+        createInput("ratelaw-A2", "0.2", "rate-law-calc");
+        createInput("ratelaw-B2", "0.2", "rate-law-calc");
+        createInput("ratelaw-rate2", "0.008", "rate-law-calc");
+
+        calculateRateLaw();
+
+        const text = getResultText("rate-law-result");
+        expect(text).toContain("underdetermined");
+    });
+
+    it("should report the grid-search fit error when both reactants vary", () => {
+        createInput("ratelaw-A1", "0.1", "rate-law-calc");
+        createInput("ratelaw-B1", "0.1", "rate-law-calc");
+        createInput("ratelaw-rate1", "0.001", "rate-law-calc");
+        createInput("ratelaw-A2", "0.2", "rate-law-calc");
+        createInput("ratelaw-B2", "0.2", "rate-law-calc");
+        createInput("ratelaw-rate2", "0.004", "rate-law-calc");
+
+        calculateRateLaw();
+
+        const text = getResultText("rate-law-result");
+        expect(text).toContain("fit error");
+    });
 });
 
 describe("IntegratedRateLawCalculator", () => {
@@ -210,6 +238,20 @@ describe("IntegratedRateLawCalculator", () => {
         expect(result).not.toBeNull();
         // t = ln(1/0.5)/0.05 = ln(2)/0.05 ≈ 13.86
         expect(result!).toBeCloseTo(13.86, 1);
+    });
+
+    it("should reject negative time when solving for concentration", () => {
+        createSelect("irl-solve-for", "concentration", ["concentration", "time"], "irl-calc");
+        createSelect("irl-order", "1", ["0", "1", "2"], "irl-calc");
+        createInput("irl-A0", "1", "irl-calc");
+        createInput("irl-k", "0.05", "irl-calc");
+        createInput("irl-t", "-5", "irl-calc");
+        createInput("irl-A", "", "irl-calc");
+
+        calculateIntegratedRateLaw();
+
+        const text = getResultText("integrated-rate-law-result");
+        expect(text).toContain("Error");
     });
 
     it("should calculate zero order concentration: [A]0=1, k=0.05, t=10", () => {
@@ -374,6 +416,15 @@ describe("ReactionOrderCalculator", () => {
         const text = getResultText("reaction-order-result");
         expect(text).toContain("Error");
     });
+
+    it("should show error when all time values are identical", () => {
+        createInput("reaction-order-data", "5,1.0; 5,0.5; 5,0.25", "reaction-order-calc", "text");
+
+        calculateReactionOrder();
+
+        const text = getResultText("reaction-order-result");
+        expect(text).toContain("Error");
+    });
 });
 
 describe("CollisionTheoryCalculator", () => {
@@ -460,6 +511,21 @@ describe("CollisionTheoryCalculator", () => {
         const text = getResultText("collision-theory-result");
         expect(text).toContain("Error");
         expect(text).toContain("positive");
+    });
+
+    it("should warn when solved steric factor lies outside [0, 1]", () => {
+        // k far larger than Z*exp(-Ea/RT) forces p > 1.
+        createSelect("collision-solve-for", "p", ["k", "Z", "p"], "collision-calc");
+        createInput("collision-Ea", "50", "collision-calc");
+        createInput("collision-T", "298", "collision-calc");
+        createInput("collision-Z", "1e11", "collision-calc");
+        createInput("collision-p", "", "collision-calc");
+        createInput("collision-k", "1e11", "collision-calc");
+
+        calculateCollisionTheory();
+
+        const text = getResultText("collision-theory-result");
+        expect(text).toContain("warning");
     });
 
     it("should show error when steric factor out of range", () => {
