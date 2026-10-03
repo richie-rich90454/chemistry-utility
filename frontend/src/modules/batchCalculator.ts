@@ -451,6 +451,43 @@ export class BatchCalculator {
     }
 
     /**
+     * Normalizes a CSV header the same way for validation and for
+     * request-body mapping: surrounding whitespace is trimmed and the
+     * comparison is case-insensitive. A header such as `"M1 "` therefore
+     * matches the required `"M1"` column end-to-end.
+     */
+    private static normalizeHeader(header: string): string {
+        return (header ?? "").trim().toLowerCase();
+    }
+
+    /**
+     * Maps raw CSV headers to the canonical body keys sent to the calculator
+     * endpoint. Headers matching a required column (case-insensitively, after
+     * trimming) use the required column's spelling; all other headers are
+     * sent trimmed as-is so the mapping agrees with {@link validateCsv}.
+     */
+    public canonicalizeHeaders(headers: string[], calculatorType: string): string[] {
+        let required: string[] | undefined = REQUIRED_HEADERS[calculatorType];
+        let canonical: string[] = [];
+        let h: number;
+        for (h = 0; h < headers.length; h++) {
+            let trimmed: string = (headers[h] ?? "").trim();
+            let key: string = trimmed;
+            if (required) {
+                let r: number;
+                for (r = 0; r < required.length; r++) {
+                    if (BatchCalculator.normalizeHeader(required[r]) === BatchCalculator.normalizeHeader(trimmed)) {
+                        key = required[r];
+                        break;
+                    }
+                }
+            }
+            canonical.push(key);
+        }
+        return canonical;
+    }
+
+    /**
      * Validates that the provided CSV headers are acceptable for the given
      * calculator type. Returns true if the headers contain all required
      * columns for the calculator (or if the calculator has no specific
@@ -463,7 +500,7 @@ export class BatchCalculator {
         let normalized: string[] = [];
         let i: number;
         for (i = 0; i < headers.length; i++) {
-            let trimmed: string = (headers[i] ?? "").trim().toLowerCase();
+            let trimmed: string = BatchCalculator.normalizeHeader(headers[i]);
             if (trimmed === "") {
                 return false;
             }
@@ -476,7 +513,7 @@ export class BatchCalculator {
         let foundCount: number = 0;
         let j: number;
         for (j = 0; j < required.length; j++) {
-            if (normalized.indexOf(required[j].trim().toLowerCase()) !== -1) {
+            if (normalized.indexOf(BatchCalculator.normalizeHeader(required[j])) !== -1) {
                 foundCount = foundCount + 1;
             }
         }
@@ -560,6 +597,7 @@ export class BatchCalculator {
         let dataRows: string[][] = rows.slice(1);
         let resultFields: ResultField[] = this.getResultFields(calculatorType);
         let outputHeaders: string[] = headers.slice();
+        let canonicalHeaders: string[] = this.canonicalizeHeaders(headers, calculatorType);
         let f: number;
         for (f = 0; f < resultFields.length; f++) {
             outputHeaders.push(resultFields[f].label);
@@ -575,9 +613,9 @@ export class BatchCalculator {
             let row: string[] = dataRows[d];
             let body: Record<string, string | number> = {};
             let h: number;
-            for (h = 0; h < headers.length; h++) {
+            for (h = 0; h < canonicalHeaders.length; h++) {
                 let raw: string = h < row.length ? row[h] : "";
-                body[headers[h]] = this.coerceValue(raw);
+                body[canonicalHeaders[h]] = this.coerceValue(raw);
             }
             let outRow: string[] = row.slice();
             // Pad ragged rows so every output row has the same column count.
