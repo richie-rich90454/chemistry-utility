@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 // StoichTerm represents a term in a balanced equation with a coefficient and formula.
@@ -15,8 +17,11 @@ type StoichTerm struct {
 }
 
 // parseStoichTerm parses a term like "2H2O" into coefficient=2, formula="H2O".
+// Supports integer and decimal coefficients ("0.5H2", "2.5H2O"); a missing
+// coefficient defaults to 1.
 func parseStoichTerm(term string) StoichTerm {
-	re := regexp.MustCompile(`^(\d+)?(.+)$`)
+	term = strings.TrimSpace(term)
+	re := regexp.MustCompile(`^(\d*\.?\d+)?(.+)$`)
 	matches := re.FindStringSubmatch(term)
 	if matches == nil {
 		return StoichTerm{Formula: term, Coefficient: 1}
@@ -24,24 +29,17 @@ func parseStoichTerm(term string) StoichTerm {
 	coeff := 1.0
 	if matches[1] != "" {
 		var err error
-		coeff, err = parseFloat(matches[1])
-		if err != nil {
+		coeff, err = strconv.ParseFloat(matches[1], 64)
+		if err != nil || math.IsNaN(coeff) || math.IsInf(coeff, 0) {
 			coeff = 1.0
 		}
 	}
-	return StoichTerm{Formula: matches[2], Coefficient: coeff}
-}
-
-func parseFloat(s string) (float64, error) {
-	var result float64
-	for _, ch := range s {
-		if ch >= '0' && ch <= '9' {
-			result = result*10 + float64(ch-'0')
-		} else {
-			break
-		}
+	formula := strings.TrimSpace(matches[2])
+	if formula == "" {
+		formula = term
+		coeff = 1.0
 	}
-	return result, nil
+	return StoichTerm{Formula: formula, Coefficient: coeff}
 }
 
 // parseStoichEquation parses a balanced equation into reactant and product terms.
@@ -78,6 +76,19 @@ func Stoichiometry(ctx context.Context, input CalculationInput) (CalculationResu
 	reactants, products, err := parseStoichEquation(equation)
 	if err != nil {
 		return CalculationResult{}, err
+	}
+	if len(reactants) == 0 || len(products) == 0 {
+		return CalculationResult{}, errors.New("equation must have at least one reactant and one product")
+	}
+	for _, r := range reactants {
+		if r.Coefficient <= 0 || math.IsNaN(r.Coefficient) || math.IsInf(r.Coefficient, 0) {
+			return CalculationResult{}, fmt.Errorf("invalid coefficient for reactant %s", r.Formula)
+		}
+	}
+	for _, p := range products {
+		if p.Coefficient <= 0 || math.IsNaN(p.Coefficient) || math.IsInf(p.Coefficient, 0) {
+			return CalculationResult{}, fmt.Errorf("invalid coefficient for product %s", p.Formula)
+		}
 	}
 
 	switch mode {
