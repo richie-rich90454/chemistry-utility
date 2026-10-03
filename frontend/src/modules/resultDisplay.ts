@@ -29,7 +29,7 @@ export class ResultDisplay {
 	/** Renders a formula and its numeric result with a unit, then makes it visible. */
 	public showFormula(formula: string, result: number, unit: string): void {
 		this.element.innerHTML =
-			"<p>" + formula + "</p><p>Result: " + this.numberFormatter.format(result, 4) + " " + HtmlSanitizer.escape(unit) + "</p>";
+			"<p>" + HtmlSanitizer.escape(formula) + "</p><p>Result: " + this.numberFormatter.format(result, 4) + " " + HtmlSanitizer.escape(unit) + "</p>";
 		this.element.classList.add("show");
 	}
 
