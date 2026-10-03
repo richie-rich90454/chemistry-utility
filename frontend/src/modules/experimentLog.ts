@@ -411,7 +411,7 @@ export class ExperimentLogManager {
             if (Array.isArray(parsed)) {
                 return parsed as ExperimentLog[];
             }
-        } catch (e) {
+        } catch {
             // fall through to empty array
         }
         return [];
@@ -435,7 +435,7 @@ export class ExperimentLogManager {
             if (Array.isArray(parsed)) {
                 return parsed as ExperimentStep[];
             }
-        } catch (e) {
+        } catch {
             // fall through to empty array
         }
         return [];
