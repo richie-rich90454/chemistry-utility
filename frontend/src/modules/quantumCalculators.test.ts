@@ -322,6 +322,16 @@ describe("quantumCalculators", () => {
             expect(html).toContain("Error");
             expect(html).toContain("Velocity must be positive");
         });
+
+        it("should render macroscopic wavelengths in nm or um, never angstroms", () => {
+            // lambda = 6.626e-34 / (1e-3 * 6.626e-4) = 1e-6 m = 1 um.
+            setOrCreateInput("db-mass", "0.001", "debroglie-section");
+            setOrCreateInput("db-velocity", "0.0006626", "debroglie-section");
+            setOrCreateSelect("db-mass-unit", "kg", "debroglie-section", ["kg", "amu"]);
+            calculateDeBroglie();
+            const html = getResultHTML("debroglie-result");
+            expect(html).not.toContain("10000");
+        });
     });
 
     describe("PhotoelectricEffectCalculator", () => {
@@ -383,6 +393,40 @@ describe("quantumCalculators", () => {
             setOrCreateInput("pe-frequency", "", "photoelectric-section", "text");
             setOrCreateInput("pe-work-function", "2.3", "photoelectric-section");
             setOrCreateInput("pe-ke", "", "photoelectric-section", "text");
+            calculatePhotoelectricEffect();
+            const html = getResultHTML("photoelectric-result");
+            expect(html).toContain("Error");
+        });
+
+        it("rejects negative frequency as an input error", () => {
+            setOrCreateSelect("pe-solve-for", "KE", "photoelectric-section", ["KE", "threshold-frequency", "work-function", "wavelength"]);
+            setOrCreateInput("pe-wavelength", "", "photoelectric-section", "text");
+            setOrCreateInput("pe-frequency", "-5e14", "photoelectric-section", "text");
+            setOrCreateInput("pe-work-function", "2.3", "photoelectric-section");
+            setOrCreateInput("pe-ke", "", "photoelectric-section", "text");
+            calculatePhotoelectricEffect();
+            const html = getResultHTML("photoelectric-result");
+            expect(html).toContain("Error");
+            expect(html).toContain("positive");
+        });
+
+        it("rejects negative work function as an input error", () => {
+            setOrCreateSelect("pe-solve-for", "KE", "photoelectric-section", ["KE", "threshold-frequency", "work-function", "wavelength"]);
+            setOrCreateInput("pe-wavelength", "400", "photoelectric-section");
+            setOrCreateInput("pe-frequency", "", "photoelectric-section", "text");
+            setOrCreateInput("pe-work-function", "-1", "photoelectric-section");
+            setOrCreateInput("pe-ke", "", "photoelectric-section", "text");
+            calculatePhotoelectricEffect();
+            const html = getResultHTML("photoelectric-result");
+            expect(html).toContain("Error");
+        });
+
+        it("rejects negative kinetic energy when solving for wavelength", () => {
+            setOrCreateSelect("pe-solve-for", "wavelength", "photoelectric-section", ["KE", "threshold-frequency", "work-function", "wavelength"]);
+            setOrCreateInput("pe-wavelength", "", "photoelectric-section", "text");
+            setOrCreateInput("pe-frequency", "", "photoelectric-section", "text");
+            setOrCreateInput("pe-work-function", "2.3", "photoelectric-section");
+            setOrCreateInput("pe-ke", "-0.5", "photoelectric-section", "text");
             calculatePhotoelectricEffect();
             const html = getResultHTML("photoelectric-result");
             expect(html).toContain("Error");
