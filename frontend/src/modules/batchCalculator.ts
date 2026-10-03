@@ -94,6 +94,9 @@ export class BatchCalculator {
     private progressCallback: ProgressCallback | null;
     private lastResults: string | null;
     private initialized: boolean;
+    private boundUpdateProcessButtonState: () => void = function (): void { return; };
+    private boundHandleProcessClick: () => void = function (): void { return; };
+    private boundHandleDownloadClick: () => void = function (): void { return; };
 
     private constructor() {
         this.progressCallback = null;
@@ -109,6 +112,9 @@ export class BatchCalculator {
     }
 
     public static resetInstance(): void {
+        if (BatchCalculator.instance) {
+            BatchCalculator.instance.destroy();
+        }
         BatchCalculator.instance = null;
     }
 
@@ -146,25 +152,50 @@ export class BatchCalculator {
     }
 
     private attachEventListeners(): void {
+        // Named handlers so destroy() can detach them; re-init after a
+        // destroy (HMR, tests) then re-attaches exactly once.
         let fileInput: HTMLElement | null = document.getElementById("batch-file-input");
         let processBtn: HTMLElement | null = document.getElementById("batch-process-btn");
         let downloadBtn: HTMLElement | null = document.getElementById("batch-download-btn");
         let self: BatchCalculator = this;
         if (fileInput) {
-            fileInput.addEventListener("change", function (): void {
+            fileInput.removeEventListener("change", this.boundUpdateProcessButtonState);
+            this.boundUpdateProcessButtonState = function (): void {
                 self.updateProcessButtonState();
-            });
+            };
+            fileInput.addEventListener("change", this.boundUpdateProcessButtonState);
         }
         if (processBtn) {
-            processBtn.addEventListener("click", function (): void {
+            processBtn.removeEventListener("click", this.boundHandleProcessClick);
+            this.boundHandleProcessClick = function (): void {
                 self.handleProcessClick();
-            });
+            };
+            processBtn.addEventListener("click", this.boundHandleProcessClick);
         }
         if (downloadBtn) {
-            downloadBtn.addEventListener("click", function (): void {
+            downloadBtn.removeEventListener("click", this.boundHandleDownloadClick);
+            this.boundHandleDownloadClick = function (): void {
                 self.handleDownloadClick();
-            });
+            };
+            downloadBtn.addEventListener("click", this.boundHandleDownloadClick);
         }
+    }
+
+    /** Detaches DOM listeners so re-init (HMR, tests) never stacks handlers. */
+    public destroy(): void {
+        let fileInput: HTMLElement | null = document.getElementById("batch-file-input");
+        let processBtn: HTMLElement | null = document.getElementById("batch-process-btn");
+        let downloadBtn: HTMLElement | null = document.getElementById("batch-download-btn");
+        if (fileInput) {
+            fileInput.removeEventListener("change", this.boundUpdateProcessButtonState);
+        }
+        if (processBtn) {
+            processBtn.removeEventListener("click", this.boundHandleProcessClick);
+        }
+        if (downloadBtn) {
+            downloadBtn.removeEventListener("click", this.boundHandleDownloadClick);
+        }
+        this.initialized = false;
     }
 
     private updateProcessButtonState(): void {
@@ -429,12 +460,14 @@ export class BatchCalculator {
         if (!headers || headers.length === 0) {
             return false;
         }
+        let normalized: string[] = [];
         let i: number;
         for (i = 0; i < headers.length; i++) {
-            let trimmed: string = headers[i].trim();
+            let trimmed: string = (headers[i] ?? "").trim().toLowerCase();
             if (trimmed === "") {
                 return false;
             }
+            normalized.push(trimmed);
         }
         let required: string[] | undefined = REQUIRED_HEADERS[calculatorType];
         if (!required || required.length === 0) {
@@ -443,7 +476,7 @@ export class BatchCalculator {
         let foundCount: number = 0;
         let j: number;
         for (j = 0; j < required.length; j++) {
-            if (headers.indexOf(required[j]) !== -1) {
+            if (normalized.indexOf(required[j].trim().toLowerCase()) !== -1) {
                 foundCount = foundCount + 1;
             }
         }
@@ -547,6 +580,10 @@ export class BatchCalculator {
                 body[headers[h]] = this.coerceValue(raw);
             }
             let outRow: string[] = row.slice();
+            // Pad ragged rows so every output row has the same column count.
+            while (outRow.length < headers.length) {
+                outRow.push("");
+            }
             let status: string = "ok";
             try {
                 let response: Record<string, unknown> = await client.post<Record<string, unknown>>("/api/v1/calculators/" + calculatorType, body);
