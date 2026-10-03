@@ -81,12 +81,13 @@ func lcm(a, b int) int {
 	if a == 0 || b == 0 {
 		return 0
 	}
-	return abs(a*b) / gcd(a, b)
+	g := gcd(a, b)
+	// Divide before multiplying to avoid intermediate overflow.
+	return abs(a/g) * abs(b)
 }
 
 // parseFormulaToCounts parses a chemical formula into element counts.
-// This is a port of the TypeScript EquationBalancer.parseFormulaToCounts.
-func parseFormulaToCounts(formula string) map[string]int {
+func parseFormulaToCounts(formula string) (map[string]int, error) {
 	stack := []map[string]int{{}}
 	i := 0
 	digitRe := regexp.MustCompile(`^\d+`)
@@ -97,6 +98,9 @@ func parseFormulaToCounts(formula string) map[string]int {
 			stack = append(stack, make(map[string]int))
 			i++
 		} else if ch == ')' || ch == ']' || ch == '}' {
+			if len(stack) < 2 {
+				return nil, errors.New("unmatched closing bracket")
+			}
 			top := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			i++
@@ -172,12 +176,23 @@ func parseFormulaToCounts(formula string) map[string]int {
 			}
 			if sign != 0 {
 				stack[len(stack)-1]["_charge"] += mag * sign
+			} else if unicode.IsDigit(ch) {
+				// Stray digit (e.g. a leading stoichiometric coefficient like
+				// "2H2"): consumed above and ignored so the solver can
+				// re-derive coefficients from scratch.
+			} else {
+				return nil, fmt.Errorf("invalid character in formula: %c", ch)
 			}
+		} else if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
+			return nil, errors.New("invalid character in formula: whitespace")
 		} else {
-			i++
+			return nil, fmt.Errorf("invalid character in formula: %c", ch)
 		}
 	}
-	return stack[0]
+	if len(stack) != 1 {
+		return nil, errors.New("unmatched opening bracket")
+	}
+	return stack[0], nil
 }
 
 // atoi parses a non-negative decimal integer. Inputs longer than 9 digits
@@ -370,11 +385,18 @@ func BalanceEquation(equation string, maxCoefficient int) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if len(reactants) == 0 || len(products) == 0 {
+		return "", errors.New("equation must have at least one reactant and one product")
+	}
 
 	all := append(reactants, products...)
 	parsed := make([]map[string]int, len(all))
 	for i, formula := range all {
-		parsed[i] = parseFormulaToCounts(formula)
+		counts, err := parseFormulaToCounts(formula)
+		if err != nil {
+			return "", err
+		}
+		parsed[i] = counts
 	}
 
 	keysSet := make(map[string]bool)
