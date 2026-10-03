@@ -37,19 +37,19 @@ describe("UrlStateManager", () => {
 
         it("serializes inputs for mass-calc", () => {
             const manager = UrlStateManager.getInstance();
-            const result = manager.serializeState("mass-calc", { "formula-input": "H2O" });
+            const result = manager.serializeState("molar-mass", { "formula-input": "H2O" });
             expect(result).toBe("formula=H2O");
         });
 
         it("skips empty values", () => {
             const manager = UrlStateManager.getInstance();
-            const result = manager.serializeState("mass-calc", { "formula-input": "" });
+            const result = manager.serializeState("molar-mass", { "formula-input": "" });
             expect(result).toBe("");
         });
 
         it("serializes multiple inputs for dilution-calc", () => {
             const manager = UrlStateManager.getInstance();
-            const result = manager.serializeState("dilution-calc", {
+            const result = manager.serializeState("dilution", {
                 "dilution-solve-for": "M1",
                 "dilution-M1": "",
                 "dilution-V1": "1",
@@ -65,13 +65,13 @@ describe("UrlStateManager", () => {
 
         it("returns empty string when all values are empty", () => {
             const manager = UrlStateManager.getInstance();
-            const result = manager.serializeState("mass-calc", { "formula-input": "" });
+            const result = manager.serializeState("molar-mass", { "formula-input": "" });
             expect(result).toBe("");
         });
 
         it("ignores input ids that are not in the param mapping", () => {
             const manager = UrlStateManager.getInstance();
-            const result = manager.serializeState("mass-calc", { "formula-input": "H2O", "unknown-input": "x" });
+            const result = manager.serializeState("molar-mass", { "formula-input": "H2O", "unknown-input": "x" });
             expect(result).toBe("formula=H2O");
         });
     });
@@ -85,7 +85,7 @@ describe("UrlStateManager", () => {
         it("returns null when no URL params match", () => {
             const manager = UrlStateManager.getInstance();
             window.location.search = "";
-            expect(manager.restoreState("mass-calc")).toBeNull();
+            expect(manager.restoreState("molar-mass")).toBeNull();
         });
 
         it("restores state from URL params", () => {
@@ -97,7 +97,7 @@ describe("UrlStateManager", () => {
                     value: { search: "?formula=NaCl", pathname: "/", href: "/?formula=NaCl" },
                     writable: true,
                 });
-                const result = manager.restoreState("mass-calc");
+                const result = manager.restoreState("molar-mass");
                 expect(result).toEqual({ "formula-input": "NaCl" });
             } finally {
                 Object.defineProperty(window, "location", { value: { href: original }, writable: true });
@@ -112,7 +112,7 @@ describe("UrlStateManager", () => {
                     value: { search: "?unknown=1", pathname: "/", href: "/?unknown=1" },
                     writable: true,
                 });
-                expect(manager.restoreState("mass-calc")).toBeNull();
+                expect(manager.restoreState("molar-mass")).toBeNull();
             } finally {
                 Object.defineProperty(window, "location", { value: { href: original }, writable: true });
             }
@@ -122,16 +122,16 @@ describe("UrlStateManager", () => {
     describe("updateUrl and updateUrlImmediate", () => {
         it("updateUrl calls replaceState with the serialized URL", () => {
             const manager = UrlStateManager.getInstance();
-            manager.updateUrl("mass-calc", { "formula-input": "H2O" });
+            manager.updateUrl("molar-mass", { "formula-input": "H2O" });
             expect(replaceStateSpy).toHaveBeenCalled();
             const args = replaceStateSpy.mock.calls[0];
-            expect(args[2]).toContain("mass-calc");
+            expect(args[2]).toContain("molar-mass");
             expect(args[2]).toContain("formula=H2O");
         });
 
         it("updateUrlImmediate calls replaceState without debouncing", () => {
             const manager = UrlStateManager.getInstance();
-            manager.updateUrlImmediate("mass-calc", { "formula-input": "H2O" });
+            manager.updateUrlImmediate("molar-mass", { "formula-input": "H2O" });
             expect(replaceStateSpy).toHaveBeenCalled();
             const args = replaceStateSpy.mock.calls[0];
             expect(args[2]).toContain("formula=H2O");
@@ -139,10 +139,10 @@ describe("UrlStateManager", () => {
 
         it("updateUrl does not include query string when inputs are empty", () => {
             const manager = UrlStateManager.getInstance();
-            manager.updateUrlImmediate("mass-calc", { "formula-input": "" });
+            manager.updateUrlImmediate("molar-mass", { "formula-input": "" });
             expect(replaceStateSpy).toHaveBeenCalled();
             const args = replaceStateSpy.mock.calls[0];
-            expect(args[2]).toBe("/mass-calc");
+            expect(args[2]).toBe("/molar-mass");
         });
     });
 
@@ -167,13 +167,13 @@ describe("UrlStateManager", () => {
             document.body.appendChild(input);
 
             const manager = UrlStateManager.getInstance();
-            const result = manager.readInputsFromDom("mass-calc");
+            const result = manager.readInputsFromDom("molar-mass");
             expect(result["formula-input"]).toBe("H2O");
         });
 
         it("skips inputs that do not exist in the DOM", () => {
             const manager = UrlStateManager.getInstance();
-            const result = manager.readInputsFromDom("mass-calc");
+            const result = manager.readInputsFromDom("molar-mass");
             expect(result).toEqual({});
         });
 
@@ -188,7 +188,7 @@ describe("UrlStateManager", () => {
             document.body.appendChild(input2);
 
             const manager = UrlStateManager.getInstance();
-            const result = manager.readInputsFromDom("dilution-calc");
+            const result = manager.readInputsFromDom("dilution");
             expect(result["dilution-V1"]).toBe("1");
             expect(result["dilution-M2"]).toBe("2");
         });
@@ -203,7 +203,7 @@ describe("UrlStateManager", () => {
             document.body.appendChild(select);
 
             const manager = UrlStateManager.getInstance();
-            const result = manager.readInputsFromDom("dilution-calc");
+            const result = manager.readInputsFromDom("dilution");
             expect(result["dilution-solve-for"]).toBe("M1");
         });
     });
@@ -215,7 +215,7 @@ describe("UrlStateManager", () => {
             document.body.appendChild(input);
 
             const manager = UrlStateManager.getInstance();
-            manager.fillInputs("mass-calc", { "formula-input": "NaCl" });
+            manager.fillInputs("molar-mass", { "formula-input": "NaCl" });
             expect(input.value).toBe("NaCl");
         });
 
@@ -231,20 +231,20 @@ describe("UrlStateManager", () => {
             document.body.appendChild(select);
 
             const manager = UrlStateManager.getInstance();
-            manager.fillInputs("dilution-calc", { "dilution-solve-for": "V1" });
+            manager.fillInputs("dilution", { "dilution-solve-for": "V1" });
             expect(select.value).toBe("V1");
         });
 
         it("does not crash for non-existent elements", () => {
             const manager = UrlStateManager.getInstance();
-            expect(() => manager.fillInputs("mass-calc", { "nonexistent": "x" })).not.toThrow();
+            expect(() => manager.fillInputs("molar-mass", { "nonexistent": "x" })).not.toThrow();
         });
     });
 
     describe("getInputIds", () => {
         it("returns input ids for a known calculator", () => {
             const manager = UrlStateManager.getInstance();
-            const ids = manager.getInputIds("mass-calc");
+            const ids = manager.getInputIds("molar-mass");
             expect(ids).toContain("formula-input");
         });
 
@@ -255,7 +255,7 @@ describe("UrlStateManager", () => {
 
         it("returns multiple input ids for dilution-calc", () => {
             const manager = UrlStateManager.getInstance();
-            const ids = manager.getInputIds("dilution-calc");
+            const ids = manager.getInputIds("dilution");
             expect(ids.length).toBeGreaterThan(1);
             expect(ids).toContain("dilution-M1");
             expect(ids).toContain("dilution-solve-for");
@@ -268,6 +268,50 @@ describe("UrlStateManager", () => {
             UrlStateManager.resetInstance();
             const instance2 = UrlStateManager.getInstance();
             expect(instance1).not.toBe(instance2);
+        });
+    });
+
+    describe("coverage and hardening", () => {
+        it("serializes a thermodynamics round-trip", () => {
+            const manager = UrlStateManager.getInstance();
+            const result = manager.serializeState("thermodynamics", {
+                "gibbs-deltaH": "-92.4",
+                "gibbs-deltaS": "-198.8",
+                "gibbs-T": "298",
+            });
+            expect(result).toContain("dH=-92.4");
+            expect(result).toContain("dS=-198.8");
+            expect(result).toContain("T=298");
+        });
+
+        it("serializes kinetics and quantum inputs", () => {
+            const manager = UrlStateManager.getInstance();
+            expect(manager.serializeState("kinetics", { "arrhenius-A": "1e13" })).toContain("A=1e13");
+            expect(manager.serializeState("quantum-atomic", { "ec-atomic-number": "26" })).toContain("Z=26");
+            expect(manager.serializeState("unit-converter", { "unit-converter-value": "5" })).toContain("v=5");
+        });
+
+        it("returns input ids for newly covered calculators", () => {
+            const manager = UrlStateManager.getInstance();
+            expect(manager.getInputIds("thermodynamics")).toContain("gibbs-deltaH");
+            expect(manager.getInputIds("kinetics")).toContain("ratelaw-A1");
+            expect(manager.getInputIds("quantum-atomic")).toContain("pe-work-function");
+            expect(manager.getInputIds("colligative")).toContain("collig-density");
+            expect(manager.getInputIds("titration")).toContain("titration-Ka");
+        });
+
+        it("drops over-long restored values", () => {
+            const manager = UrlStateManager.getInstance();
+            const original = window.location.href;
+            try {
+                Object.defineProperty(window, "location", {
+                    value: { search: "?formula=" + "H".repeat(600), pathname: "/", href: "/?formula=x" },
+                    writable: true,
+                });
+                expect(manager.restoreState("molar-mass")).toBeNull();
+            } finally {
+                Object.defineProperty(window, "location", { value: { href: original }, writable: true });
+            }
         });
     });
 });
