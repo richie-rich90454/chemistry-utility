@@ -26,7 +26,36 @@ interface ParsedEquation {
     reactants: TermObject[];
     products: TermObject[];
 }
-let stoichiometryCalculator = new StoichiometryCalculator();
+function containsFormula(terms: TermObject[], formula: string): boolean {
+    for (let i = 0; i < terms.length; i++) {
+        if (terms[i].formula === formula) {
+            return true;
+        }
+    }
+    return false;
+}
+function molesMapsEqual(a: Record<string, string>, b: Record<string, string>): boolean {
+    let aKeys: string[] = Object.keys(a);
+    let bKeys: string[] = Object.keys(b);
+    if (aKeys.length !== bKeys.length) {
+        return false;
+    }
+    for (let i = 0; i < aKeys.length; i++) {
+        if (a[aKeys[i]] !== b[aKeys[i]]) {
+            return false;
+        }
+    }
+    return true;
+}
+let sharedCalculator: StoichiometryCalculator | null = null;
+function getCalculator(): StoichiometryCalculator {
+    // Lazy: constructing at module scope would run document.getElementById
+    // at import time (before any DOM exists, or in non-DOM environments).
+    if (sharedCalculator === null) {
+        sharedCalculator = new StoichiometryCalculator();
+    }
+    return sharedCalculator;
+}
 let calculationTypeOptions: {"value": string; "label": string}[] = [
     {"value": "product-from-reactant", "label": "Product from Reactant"},
     {"value": "reactant-from-product", "label": "Reactant from Product"},
@@ -61,12 +90,31 @@ function Stoichiometry(): JSX.Element {
                 return;
             }
             let sanitizedMap: Record<string, string> = {};
+            let previousMap: Record<string, string> = reactantMolesMap();
             for (let i = 0; i < reactants.length; i++) {
-                sanitizedMap[reactants[i].formula] = "";
+                let formula: string = reactants[i].formula;
+                // Preserve already-entered moles when the formula survives
+                // re-parsing (e.g. typing the next character must not wipe
+                // the user's inputs); default new formulas to "".
+                if (previousMap[formula] !== undefined) {
+                    sanitizedMap[formula] = previousMap[formula];
+                } else {
+                    sanitizedMap[formula] = "";
+                }
             }
-            setReactantMolesMap(sanitizedMap);
-            setReactantSelect(reactants[0].formula);
-            setProductSelect(products[0].formula);
+            // Write only on actual change: unconditionally replacing the
+            // map object re-triggers this effect forever (infinite loop).
+            if (!molesMapsEqual(previousMap, sanitizedMap)) {
+                setReactantMolesMap(sanitizedMap);
+            }
+            // Keep the user's selections when they still exist; otherwise
+            // fall back to the first available option.
+            if (!containsFormula(reactants, reactantSelect())) {
+                setReactantSelect(reactants[0].formula);
+            }
+            if (!containsFormula(products, productSelect())) {
+                setProductSelect(products[0].formula);
+            }
             setParsedEquation({"reactants": reactants, "products": products});
             setLoadError("");
         }
@@ -138,7 +186,7 @@ function Stoichiometry(): JSX.Element {
             }
             inputs["product-select"] = productSelect();
         }
-        resolveResult(stoichiometryCalculator.calculatePure(inputs), setResult, setError);
+        resolveResult(getCalculator().calculatePure(inputs), setResult, setError);
     }
     function handleClear(): void {
         setEquation("");
@@ -239,14 +287,14 @@ function Stoichiometry(): JSX.Element {
                     {(opt) => <option value={opt.value}>{opt.label}</option>}
                 </For>
             </select>
-            {loadError() !== "" && <div class={styles.result + " " + styles.error}><p>{loadError()}</p></div>}
+            {loadError() !== "" && <div class={styles.result + " " + styles.error} role="alert"><p>{loadError()}</p></div>}
             {renderDynamicInputs()}
             <div class={styles.buttonRow}>
                 <button class={styles.button} onClick={handleCalculate}>Calculate</button>
                 <button class={styles.secondaryButton} onClick={handleClear}>Clear</button>
             </div>
-            {error() !== "" && <div class={styles.result + " " + styles.error}><p>{error()}</p></div>}
-            {result() !== "" && <div class={styles.result}><p>{result()}</p></div>}
+            {error() !== "" && <div class={styles.result + " " + styles.error} role="alert"><p>{error()}</p></div>}
+            {result() !== "" && <div class={styles.result} aria-live="polite"><p>{result()}</p></div>}
         </CalculatorCard>
     );
 }
