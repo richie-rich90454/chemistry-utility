@@ -36,6 +36,9 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 		if V1 == 0 {
 			return CalculationResult{}, errors.New("V1 cannot be zero")
 		}
+		if V1 < 0 || C2 < 0 || V2 < 0 {
+			return CalculationResult{}, errors.New("concentrations and volumes cannot be negative")
+		}
 		result = (C2 * V2) / V1
 		formula = "C1 = (C2 * V2) / V1"
 		unit = "M"
@@ -54,6 +57,9 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 		}
 		if C1 == 0 {
 			return CalculationResult{}, errors.New("C1 cannot be zero")
+		}
+		if C1 < 0 || C2 < 0 || V2 < 0 {
+			return CalculationResult{}, errors.New("concentrations and volumes cannot be negative")
 		}
 		result = (C2 * V2) / C1
 		formula = "V1 = (C2 * V2) / C1"
@@ -74,6 +80,9 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 		if V2 == 0 {
 			return CalculationResult{}, errors.New("V2 cannot be zero")
 		}
+		if C1 < 0 || V1 < 0 || V2 < 0 {
+			return CalculationResult{}, errors.New("concentrations and volumes cannot be negative")
+		}
 		result = (C1 * V1) / V2
 		formula = "C2 = (C1 * V1) / V2"
 		unit = "M"
@@ -92,6 +101,9 @@ func Dilution(ctx context.Context, input CalculationInput) (CalculationResult, e
 		}
 		if C2 == 0 {
 			return CalculationResult{}, errors.New("C2 cannot be zero")
+		}
+		if C1 < 0 || V1 < 0 || C2 < 0 {
+			return CalculationResult{}, errors.New("concentrations and volumes cannot be negative")
 		}
 		result = (C1 * V1) / C2
 		formula = "V2 = (C1 * V1) / C2"
@@ -119,11 +131,14 @@ func MassPercent(ctx context.Context, input CalculationInput) (CalculationResult
 	if err != nil {
 		return CalculationResult{}, err
 	}
-	if solution == 0 {
-		return CalculationResult{}, errors.New("solution mass cannot be zero")
+	if solution <= 0 {
+		return CalculationResult{}, errors.New("solution mass must be positive")
 	}
 	if solute < 0 {
 		return CalculationResult{}, errors.New("solute mass cannot be negative")
+	}
+	if solute > solution {
+		return CalculationResult{}, errors.New("solute mass cannot exceed solution mass")
 	}
 
 	unitType := getStringWithDefault(input, "unit", "percent")
@@ -174,6 +189,9 @@ func SolutionMixing(ctx context.Context, input CalculationInput) (CalculationRes
 	}
 	if V1 <= 0 || V2 <= 0 {
 		return CalculationResult{}, errors.New("volumes must be positive")
+	}
+	if C1 < 0 || C2 < 0 {
+		return CalculationResult{}, errors.New("concentrations cannot be negative")
 	}
 
 	totalMoles := C1*V1 + C2*V2
@@ -277,6 +295,9 @@ func Ksp(ctx context.Context, input CalculationInput) (CalculationResult, error)
 	if a <= 0 || b <= 0 {
 		return CalculationResult{}, errors.New("stoichiometric coefficients must be positive")
 	}
+	if a != math.Trunc(a) || b != math.Trunc(b) {
+		return CalculationResult{}, errors.New("stoichiometric coefficients must be integers")
+	}
 	ionCount := a + b
 
 	switch mode {
@@ -322,6 +343,9 @@ func Ksp(ctx context.Context, input CalculationInput) (CalculationResult, error)
 func ColligativeProperties(ctx context.Context, input CalculationInput) (CalculationResult, error) {
 	mode := getStringWithDefault(input, "mode", "boiling")
 	i := getFloatWithDefault(input, "i", 1.0)
+	if i <= 0 {
+		return CalculationResult{}, errors.New("van't Hoff factor i must be positive")
+	}
 
 	switch mode {
 	case "boiling":
@@ -332,6 +356,12 @@ func ColligativeProperties(ctx context.Context, input CalculationInput) (Calcula
 		m, err := getFloat(input, "m")
 		if err != nil {
 			return CalculationResult{}, err
+		}
+		if Kb <= 0 {
+			return CalculationResult{}, errors.New("Kb must be positive")
+		}
+		if m < 0 {
+			return CalculationResult{}, errors.New("molality cannot be negative")
 		}
 		deltaTb := i * Kb * m
 		return CalculationResult{
@@ -348,6 +378,12 @@ func ColligativeProperties(ctx context.Context, input CalculationInput) (Calcula
 		if err != nil {
 			return CalculationResult{}, err
 		}
+		if Kf <= 0 {
+			return CalculationResult{}, errors.New("Kf must be positive")
+		}
+		if m < 0 {
+			return CalculationResult{}, errors.New("molality cannot be negative")
+		}
 		deltaTf := i * Kf * m
 		return CalculationResult{
 			Value: deltaTf,
@@ -363,11 +399,18 @@ func ColligativeProperties(ctx context.Context, input CalculationInput) (Calcula
 		if err != nil {
 			return CalculationResult{}, err
 		}
+		if M < 0 {
+			return CalculationResult{}, errors.New("molarity cannot be negative")
+		}
+		if T <= 0 {
+			return CalculationResult{}, errors.New("temperature must be positive (Kelvin)")
+		}
+		// M is in mol/L: mol/L × J/(mol·K) × K = J/L = kPa.
 		pi := i * M * RSI * T
 		return CalculationResult{
 			Value: pi,
 			Unit:  "kPa",
-			Steps: []string{fmt.Sprintf("π = iMRT = %.4f × %.4f × %.4f × %.4f = %.4f", i, M, RSI, T, pi)},
+			Steps: []string{fmt.Sprintf("π = iMRT = %.4f × %.4f mol/L × %.4f × %.4f = %.4f kPa", i, M, RSI, T, pi)},
 		}, nil
 	default:
 		return CalculationResult{}, fmt.Errorf("invalid mode: %s", mode)
@@ -396,9 +439,12 @@ func TitrationCurve(ctx context.Context, input CalculationInput) (CalculationRes
 	}
 
 	mode := getStringWithDefault(input, "mode", "strong-acid-strong-base")
+	if mode != "strong-acid-strong-base" && mode != "weak-acid-strong-base" {
+		return CalculationResult{}, fmt.Errorf("invalid mode: %s", mode)
+	}
 	numPoints := int(getFloatWithDefault(input, "numPoints", 50))
 	if numPoints < 2 {
-		numPoints = 50
+		return CalculationResult{}, errors.New("numPoints must be at least 2")
 	}
 	if numPoints > 5000 {
 		numPoints = 5000
