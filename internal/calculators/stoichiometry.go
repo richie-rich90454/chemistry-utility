@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -21,8 +20,7 @@ type StoichTerm struct {
 // coefficient defaults to 1.
 func parseStoichTerm(term string) StoichTerm {
 	term = strings.TrimSpace(term)
-	re := regexp.MustCompile(`^(\d*\.?\d+)?(.+)$`)
-	matches := re.FindStringSubmatch(term)
+	matches := stoichCoeffRe.FindStringSubmatch(term)
 	if matches == nil {
 		return StoichTerm{Formula: term, Coefficient: 1}
 	}
