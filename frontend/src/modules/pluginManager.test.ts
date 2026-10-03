@@ -138,7 +138,7 @@ beforeEach(function (): void {
     buildSidebarNav();
     try {
         localStorage.clear();
-    } catch (e) {
+    } catch {
         // ignore
     }
 });
@@ -149,7 +149,7 @@ afterEach(function (): void {
     document.body.innerHTML = "";
     try {
         localStorage.clear();
-    } catch (e) {
+    } catch {
         // ignore
     }
 });
