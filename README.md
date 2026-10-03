@@ -50,6 +50,10 @@ A research-grade **chemistry utility** for chemists, researchers, and students. 
 - **Result annotation**, star/favorite, and comparison mode (local storage)
 - **PWA installability** with offline caching via service worker (web build)
 
+### No telemetry
+
+No telemetry: the anonymous web build stores nothing server-side; desktop data stays local.
+
 ### Infrastructure & Developer Experience
 - **REST API** with OpenAPI 3.1 documentation and Swagger UI (`/api/docs`)
 - **Lab Parchment** design system with responsive layouts (desktop, tablet, mobile)
@@ -101,7 +105,7 @@ One codebase, two targets:
 ### Prerequisites
 - **Go** 1.25 or higher
 - **Node.js** 20.19+ or 22.12+ with **npm**
-- A C toolchain for CGO (SQLite): MinGW-w64 on Windows (`C:\msys64\ucrt64\bin` is added to PATH automatically by the npm scripts), gcc/clang on macOS/Linux
+- A C toolchain for CGO (SQLite): MinGW-w64 on Windows (ensure `C:\msys64\ucrt64\bin` is on PATH), gcc/clang on macOS/Linux
 - [Wails v2 CLI](https://wails.io/docs/gettingstarted/installation) only for the desktop target
 
 ### Option 1: Development environment
