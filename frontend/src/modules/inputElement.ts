@@ -9,9 +9,18 @@ export class InputElement {
 		this.element = element !== undefined ? element : document.getElementById(elementId) as HTMLInputElement | HTMLSelectElement;
 	}
 
-	/** Returns the parsed numeric value of the element (NaN if empty or invalid). */
+	/** Returns the parsed numeric value of the element (NaN if empty or invalid).
+	 * Uses strict parsing: trailing garbage ("12abc") and hex ("0x10") are
+	 * rejected as NaN instead of being silently coerced by parseFloat. */
 	public getValue(): number {
-		return parseFloat(this.element.value);
+		let raw: string = this.element.value.trim();
+		if (raw === "") {
+			return NaN;
+		}
+		if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(raw)) {
+			return NaN;
+		}
+		return parseFloat(raw);
 	}
 
 	/** Returns the raw string value of the element. */
