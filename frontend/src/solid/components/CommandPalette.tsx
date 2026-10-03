@@ -6,6 +6,7 @@ import {NavigationManager} from "../../modules/navigationManager.js";
 import {fuzzyMatch} from "../lib/fuzzySearch";
 import {usePalette} from "../stores/palette";
 import {calculatorIdToRoute} from "../../modules/calculatorHelper.js";
+import {visibleCalculators} from "../lib/desktopOnly";
 import styles from "./CommandPalette.module.css";
 function CommandPalette(): JSX.Element {
     let palette = usePalette();
@@ -15,7 +16,7 @@ function CommandPalette(): JSX.Element {
     let inputRef: HTMLInputElement | undefined;
     onMount(function (): void {
         let nav = NavigationManager.getInstance();
-        setCalculators(nav.getCalculators());
+        setCalculators(visibleCalculators(nav.getCalculators()));
         function handleGlobalKey(e: KeyboardEvent): void {
             if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
                 e.preventDefault();
