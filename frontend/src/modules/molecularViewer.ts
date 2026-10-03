@@ -1,4 +1,5 @@
 import SmilesDrawer from "smiles-drawer";
+import { SketchState, sketchToSmiles } from "./structureSketch.js";
 
 /**
  * A single molecule preset entry used to populate the dropdown in the
@@ -193,6 +194,25 @@ class MolecularViewer {
         } catch (parseErr: unknown) {
             self.reportError(canvasId, parseErr);
         }
+    }
+
+    /**
+     * Converts a hand-drawn structure sketch to SMILES (see
+     * structureSketch.ts) and renders it onto the canvas identified by
+     * `canvasId`. Returns the emitted SMILES string. Throws when the
+     * sketch is empty, when it produces invalid SMILES, or when the
+     * canvas is missing (via {@link render}).
+     */
+    public renderSketch(sketch: SketchState, canvasId: string): string {
+        let smiles: string = sketchToSmiles(sketch);
+        if (smiles.trim().length === 0) {
+            throw new Error("Sketch is empty");
+        }
+        if (validateSmiles(smiles) === false) {
+            throw new Error("Sketch produced invalid SMILES: " + smiles);
+        }
+        this.render(smiles, canvasId);
+        return smiles;
     }
 
     /**
