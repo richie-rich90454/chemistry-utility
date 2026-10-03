@@ -2,6 +2,7 @@ import { Calculator } from "./calculator.js";
 import type { CalculatorResult } from "./calculator.js";
 import { NumberFormatter } from "./i18n/numberFormatter.js";
 import { HtmlSanitizer } from "./htmlSanitizer.js";
+import { normalizeArrows } from "fast-balance";
 
 /**
  * Represents a single term in a chemical equation (e.g., "2H2O").
@@ -55,7 +56,8 @@ export class BalancedEquation {
     }
 
     public static parse(equation: string): BalancedEquation {
-        let cleanedEquation = equation.replace(/\s+/g, "");
+        let normalizedEquation = normalizeArrows(equation);
+        let cleanedEquation = normalizedEquation.replace(/\s+/g, "");
         let parts = cleanedEquation.split(/->|=/);
         if (parts.length != 2) {
             throw new Error("Invalid equation format: missing \"->\"");
