@@ -336,6 +336,26 @@ describe("calculateColligativeProperties", () => {
         expect(text).toContain("Vapor Pressure");
     });
 
+    it("should honor explicit density and temperature inputs", () => {
+        createInput("collig-solute-mass", "10", "colligative-calc");
+        createInput("collig-molar-mass", "58.44", "colligative-calc");
+        createInput("collig-solvent-mass", "100", "colligative-calc");
+        createInput("collig-vanthoff", "2", "colligative-calc");
+        createInput("collig-Kb", "", "colligative-calc");
+        createInput("collig-Kf", "", "colligative-calc");
+        createInput("collig-solvent-bp", "", "colligative-calc");
+        createInput("collig-solvent-fp", "", "colligative-calc");
+        createInput("collig-Psolvent", "", "colligative-calc");
+        createInput("collig-density", "1.2", "colligative-calc");
+        createInput("collig-temp", "310", "colligative-calc");
+
+        calculateColligativeProperties();
+
+        const text = getResultText("colligative-result");
+        expect(text).toContain("1.2");
+        expect(text).toContain("310");
+    });
+
     it("should show error for zero solute mass", () => {
         createInput("collig-solute-mass", "0", "colligative-calc");
         createInput("collig-molar-mass", "58.44", "colligative-calc");
@@ -480,6 +500,18 @@ describe("calculateDebyeHuckel", () => {
         expect(text).toContain("M1X2");
     });
 
+    it("should reject non-integer ion charges", () => {
+        createInput("dh-zplus", "1.5", "debye-huckel-calc");
+        createInput("dh-zminus", "1", "debye-huckel-calc");
+        createInput("dh-concentration", "0.01", "debye-huckel-calc");
+        createInput("dh-ion-size", "9", "debye-huckel-calc");
+
+        calculateDebyeHuckel();
+
+        const text = getResultText("debye-huckel-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("integers");
+    });
     it("should show error for zero ion charge", () => {
         createInput("dh-zplus", "0", "debye-huckel-calc");
         createInput("dh-zminus", "1", "debye-huckel-calc");
@@ -562,6 +594,17 @@ describe("calculateCommonIonEffect", () => {
 
         const text = getResultText("common-ion-result");
         expect(text).toContain("0.050000");
+    });
+
+    it("should warn when the s << C approximation breaks down", () => {
+        createSelect("common-ion-salt-type", "AB", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+        createInput("common-ion-Ksp", "0.0001", "common-ion-calc");
+        createInput("common-ion-concentration", "0.001", "common-ion-calc");
+
+        calculateCommonIonEffect();
+
+        const text = getResultText("common-ion-result");
+        expect(text).toContain("Warning");
     });
 
     it("should show error for zero Ksp", () => {
