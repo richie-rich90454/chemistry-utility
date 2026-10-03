@@ -367,3 +367,45 @@ func TestDBSearchRequiresDatabase(t *testing.T) {
 		t.Errorf("expected status 501, got %d", w.Code)
 	}
 }
+
+// TestServeDocsPage tests that the Swagger UI page is served.
+func TestServeDocsPage(t *testing.T) {
+	a := newTestAPI()
+	router := a.Router()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/docs", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", w.Code)
+	}
+	if ct := w.Header().Get("Content-Type"); ct != "text/html; charset=utf-8" {
+		t.Errorf("expected text/html content type, got %q", ct)
+	}
+	if !strings.Contains(w.Body.String(), "swagger-ui") {
+		t.Error("docs page missing swagger-ui marker")
+	}
+}
+
+// TestServeSpec tests that the embedded OpenAPI spec is served as YAML.
+func TestServeSpec(t *testing.T) {
+	a := newTestAPI()
+	router := a.Router()
+
+	req := httptest.NewRequest(http.MethodGet, "/api/docs/openapi.yaml", nil)
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", w.Code)
+	}
+	if ct := w.Header().Get("Content-Type"); !strings.HasPrefix(ct, "application/yaml") {
+		t.Errorf("expected application/yaml content type, got %q", ct)
+	}
+	if w.Body.Len() == 0 {
+		t.Error("expected non-empty spec body")
+	}
+}
