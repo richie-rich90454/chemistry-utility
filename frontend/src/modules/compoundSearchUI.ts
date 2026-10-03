@@ -1,5 +1,6 @@
 import { ApiClient, ApiError } from "./apiClient.js";
 import { NavigationManager } from "./navigationManager.js";
+import { RuntimeDetector } from "./runtimeDetector.js";
 
 export interface CompoundResult {
     id: string;
@@ -52,6 +53,7 @@ export class CompoundSearchUI {
 
     public static resetInstance(): void {
         CompoundSearchUI.instance = null;
+        clearLookupDetailCache();
     }
 
     public init(): void {
@@ -449,15 +451,62 @@ export function buildFormulaSegments(formula: string): FormulaSegment[] {
 }
 export async function searchCompounds(query: string, type: string): Promise<CompoundResult[]> {
     let client: ApiClient = ApiClient.getInstance();
-    let path: string = "/api/v1/compounds?q=" + encodeURIComponent(query);
+    // Desktop talks to the local database; the anonymous web build has no
+    // database, so it uses the stateless PubChem lookup instead.
+    let base: string = isWebSearchMode() ? "/api/v1/compounds/lookup" : "/api/v1/compounds";
+    let path: string = base + "?q=" + encodeURIComponent(query);
     if (type) {
         path += "&type=" + encodeURIComponent(type);
     }
     let response: CompoundSearchResponse = await client.get<CompoundSearchResponse>(path);
-    return (response && response.compounds) ? response.compounds : [];
+    let compounds: CompoundResult[] = (response && response.compounds) ? response.compounds : [];
+    if (isWebSearchMode()) {
+        // The stateless lookup returns full records but offers no detail
+        // endpoint, so details are served from this request-scoped memory
+        // cache. Nothing is persisted.
+        rememberLookupDetails(compounds);
+    }
+    return compounds;
 }
 export async function fetchCompoundDetail(id: string): Promise<CompoundDetail> {
+    if (isWebSearchMode()) {
+        let cached: CompoundDetail | undefined = lookupDetailCache.get(id);
+        if (cached) {
+            return cached;
+        }
+        throw new Error("Compound details are only available from recent lookup results on the web build");
+    }
     let client: ApiClient = ApiClient.getInstance();
     let path: string = "/api/v1/compounds/" + id;
     return await client.get<CompoundDetail>(path);
+}
+function isWebSearchMode(): boolean {
+    return RuntimeDetector.getInstance().isWebMode;
+}
+interface LookupCompoundPayload extends CompoundResult {
+    inchi: string;
+    properties: Record<string, string>;
+    source: string;
+}
+let lookupDetailCache: Map<string, CompoundDetail> = new Map();
+export function clearLookupDetailCache(): void {
+    lookupDetailCache.clear();
+}
+function rememberLookupDetails(compounds: CompoundResult[]): void {
+    let i: number;
+    for (i = 0; i < compounds.length; i++) {
+        let payload: LookupCompoundPayload = compounds[i] as LookupCompoundPayload;
+        let detail: CompoundDetail = {
+            "id": compounds[i].id,
+            "name": compounds[i].name,
+            "formula": compounds[i].formula,
+            "molarMass": compounds[i].molarMass,
+            "casNumber": compounds[i].casNumber,
+            "smiles": compounds[i].smiles,
+            "inchi": typeof payload.inchi === "string" ? payload.inchi : "",
+            "properties": payload.properties && typeof payload.properties === "object" ? payload.properties : {},
+            "source": typeof payload.source === "string" ? payload.source : ""
+        };
+        lookupDetailCache.set(compounds[i].id, detail);
+    }
 }
