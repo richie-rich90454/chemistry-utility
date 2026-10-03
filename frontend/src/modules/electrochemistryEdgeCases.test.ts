@@ -52,6 +52,13 @@ describe("Electrochemistry Edge Cases", () => {
             const html = getResultHTML("cell-potential-result");
             expect(html).toContain("Please enter valid numbers for both potentials");
         });
+
+        it("should locale-format cathode and anode potentials", () => {
+            calculateCellPotential();
+            const html = getResultHTML("cell-potential-result");
+            expect(html).toContain("0.340");
+            expect(html).toContain("-0.760");
+        });
     });
 
     describe("Nernst Equation", () => {
@@ -100,6 +107,14 @@ describe("Electrochemistry Edge Cases", () => {
             calculateNernst();
             const html = getResultHTML("nernst-result");
             expect(html).toContain("Please enter valid positive numbers for all fields");
+        });
+
+        it("should reject a non-integer electron count", () => {
+            const n = document.getElementById("n-electrons") as HTMLInputElement;
+            n.value = "1.5";
+            calculateNernst();
+            const html = getResultHTML("nernst-result");
+            expect(html).toContain("Number of electrons must be an integer");
         });
     });
 
@@ -203,6 +218,12 @@ describe("Electrochemistry Edge Cases", () => {
             calculateElectrolysis();
             const html = getResultHTML("electrolysis-result");
             expect(html).toContain("Error");
+        });
+
+        it("should reject a non-integer charge number z", () => {
+            (document.getElementById("electrolysis-z") as HTMLInputElement).value = "1.5";
+            calculateElectrolysis();
+            expect(getResultHTML("electrolysis-result")).toContain("Charge number z must be an integer");
         });
     });
 });
