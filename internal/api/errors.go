@@ -2,10 +2,17 @@ package api
 
 import (
 	"fmt"
-	"log"
+	"os"
+
+	"log/slog"
 
 	"github.com/gin-gonic/gin"
 )
+
+// logger emits structured JSON logs to stderr. It never receives DSNs,
+// request bodies, or other sensitive payloads — callers pass only method,
+// path, and status-level metadata.
+var logger = slog.New(slog.NewJSONHandler(os.Stderr, nil))
 
 // ProblemDetail represents an RFC 7807 Problem Details response.
 type ProblemDetail struct {
@@ -33,7 +40,11 @@ func WriteProblem(c *gin.Context, status int, title, detail string) {
 // logged server-side; clients receive only a generic detail so internal
 // messages (DSNs, SQL text) never leak.
 func WriteError(c *gin.Context, err error) {
-	log.Printf("internal error on %s %s: %v", c.Request.Method, c.Request.URL.Path, err)
+	logger.Error("internal error",
+		"method", c.Request.Method,
+		"path", c.Request.URL.Path,
+		"error", err,
+	)
 	WriteProblem(c, 500, "Internal Server Error", "An unexpected error occurred. Please try again later.")
 }
 
