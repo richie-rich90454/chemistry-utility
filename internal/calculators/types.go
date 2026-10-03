@@ -2,7 +2,9 @@ package calculators
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"math"
 )
 
 // CalculationInput is a map of field name to value for calculator inputs.
@@ -33,16 +35,14 @@ func getFloat(input CalculationInput, key string) (float64, error) {
 	if !ok {
 		return 0, fmt.Errorf("missing required input: %s", key)
 	}
-	switch val := v.(type) {
-	case float64:
-		return val, nil
-	case int:
-		return float64(val), nil
-	case int64:
-		return float64(val), nil
-	default:
+	f, ok := toFloat64(v)
+	if !ok {
 		return 0, fmt.Errorf("invalid type for input %s: expected number", key)
 	}
+	if math.IsNaN(f) || math.IsInf(f, 0) {
+		return 0, fmt.Errorf("invalid value for input %s: must be finite", key)
+	}
+	return f, nil
 }
 
 // getString extracts a string from the input map by key.
@@ -64,16 +64,14 @@ func getFloatWithDefault(input CalculationInput, key string, defaultVal float64)
 	if !ok {
 		return defaultVal
 	}
-	switch val := v.(type) {
-	case float64:
-		return val
-	case int:
-		return float64(val)
-	case int64:
-		return float64(val)
-	default:
+	f, ok := toFloat64(v)
+	if !ok {
 		return defaultVal
 	}
+	if math.IsNaN(f) || math.IsInf(f, 0) {
+		return defaultVal
+	}
+	return f
 }
 
 // toFloat64 coerces JSON-decoded number values to float64.
@@ -81,10 +79,34 @@ func toFloat64(v interface{}) (float64, bool) {
 	switch n := v.(type) {
 	case float64:
 		return n, true
+	case float32:
+		return float64(n), true
 	case int:
+		return float64(n), true
+	case int8:
+		return float64(n), true
+	case int16:
+		return float64(n), true
+	case int32:
 		return float64(n), true
 	case int64:
 		return float64(n), true
+	case uint:
+		return float64(n), true
+	case uint8:
+		return float64(n), true
+	case uint16:
+		return float64(n), true
+	case uint32:
+		return float64(n), true
+	case uint64:
+		return float64(n), true
+	case json.Number:
+		f, err := n.Float64()
+		if err != nil {
+			return 0, false
+		}
+		return f, true
 	default:
 		return 0, false
 	}
@@ -117,6 +139,12 @@ func toFloat64Map(v interface{}) (map[string]float64, bool) {
 	switch m := v.(type) {
 	case map[string]float64:
 		return m, true
+	case map[string]int:
+		out := make(map[string]float64, len(m))
+		for k, e := range m {
+			out[k] = float64(e)
+		}
+		return out, true
 	case map[string]interface{}:
 		out := make(map[string]float64, len(m))
 		for k, e := range m {
