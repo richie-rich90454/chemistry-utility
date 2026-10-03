@@ -61,11 +61,31 @@ func TestMissingKeys_AllCalculators(t *testing.T) {
 			t.Errorf("Arrhenius without %s: expected error", k)
 		}
 	}
+	for _, tc := range []struct {
+		solveFor string
+		keys     []string
+		base     CalculationInput
+	}{
+		{"Ea", []string{"A", "k", "T"}, CalculationInput{"A": 1e13, "k": 1e-3, "T": 298.0, "solveFor": "Ea"}},
+		{"T", []string{"A", "k", "Ea"}, CalculationInput{"A": 1e13, "k": 1e-3, "Ea": 75000.0, "solveFor": "T"}},
+		{"A", []string{"k", "Ea", "T"}, CalculationInput{"k": 1e-3, "Ea": 75000.0, "T": 298.0, "solveFor": "A"}},
+	} {
+		for _, k := range tc.keys {
+			if _, err := Arrhenius(ctx, without(tc.base, k)); err == nil {
+				t.Errorf("Arrhenius %s without %s: expected error", tc.solveFor, k)
+			}
+		}
+	}
 	rlBase := CalculationInput{"k": 0.5, "concentrations": []float64{1.0}, "orders": []float64{1.0}}
 	for _, k := range []string{"k", "concentrations", "orders"} {
 		if _, err := RateLaw(ctx, without(rlBase, k)); err == nil {
 			t.Errorf("RateLaw without %s: expected error", k)
 		}
+	}
+	if _, err := RateLaw(ctx, CalculationInput{
+		"k": 1.0, "concentrations": []float64{1e308}, "orders": []float64{2.0},
+	}); err == nil {
+		t.Error("RateLaw overflow: expected error")
 	}
 	irlBase := CalculationInput{"order": 1.0, "k": 0.05, "initialConcentration": 1.0, "time": 1.0, "solveFor": "concentration"}
 	for _, k := range []string{"order", "k", "initialConcentration", "time"} {
@@ -74,8 +94,10 @@ func TestMissingKeys_AllCalculators(t *testing.T) {
 		}
 	}
 	irlTBase := CalculationInput{"order": 1.0, "k": 0.05, "initialConcentration": 1.0, "concentration": 0.5, "solveFor": "time"}
-	if _, err := IntegratedRateLaw(ctx, without(irlTBase, "concentration")); err == nil {
-		t.Error("IntegratedRateLaw time without concentration: expected error")
+	for _, k := range []string{"order", "k", "initialConcentration", "concentration"} {
+		if _, err := IntegratedRateLaw(ctx, without(irlTBase, k)); err == nil {
+			t.Errorf("IntegratedRateLaw time without %s: expected error", k)
+		}
 	}
 	gibbsBase := CalculationInput{"deltaH": 1.0, "deltaS": 1.0, "T": 298.0}
 	for _, k := range []string{"deltaH", "deltaS", "T"} {
@@ -102,6 +124,20 @@ func TestMissingKeys_AllCalculators(t *testing.T) {
 	for _, k := range []string{"N0", "t", "halfLife"} {
 		if _, err := HalfLife(ctx, without(hlBase, k)); err == nil {
 			t.Errorf("HalfLife without %s: expected error", k)
+		}
+	}
+	for _, tc := range []struct {
+		solveFor string
+		keys     []string
+		base     CalculationInput
+	}{
+		{"time", []string{"N0", "halfLife", "Nt"}, CalculationInput{"N0": 100.0, "halfLife": 5.0, "Nt": 25.0, "solveFor": "time"}},
+		{"halfLife", []string{"N0", "t", "Nt"}, CalculationInput{"N0": 100.0, "t": 10.0, "Nt": 25.0, "solveFor": "halfLife"}},
+	} {
+		for _, k := range tc.keys {
+			if _, err := HalfLife(ctx, without(tc.base, k)); err == nil {
+				t.Errorf("HalfLife %s without %s: expected error", tc.solveFor, k)
+			}
 		}
 	}
 	if _, err := HalfLife(ctx, without(CalculationInput{"N0": 100.0, "halfLife": 5.0, "Nt": 25.0, "solveFor": "time"}, "Nt")); err == nil {
