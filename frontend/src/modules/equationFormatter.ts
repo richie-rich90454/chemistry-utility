@@ -10,7 +10,36 @@ export interface EquationTerm {
 }
 
 export function parseSide(side: string): EquationTerm[] {
-    let terms = side.split(" + ");
+    // Accept both spaced ("H2 + O2") and spaceless ("H2+O2") terms. A "+"
+    // is a separator only when followed by a term start (uppercase letter,
+    // digit, or opening bracket), so ionic charges ("Fe2+", "Cl-") survive.
+    let parts: string[] = [];
+    let current: string = "";
+    for (let i = 0; i < side.length; i++) {
+        let ch: string = side[i];
+        if (ch === "+") {
+            let j: number = i + 1;
+            let next: string = j < side.length ? side[j] : "";
+            if (next >= "A" && next <= "Z") {
+                parts.push(current);
+                current = "";
+                continue;
+            }
+            if (next >= "0" && next <= "9") {
+                parts.push(current);
+                current = "";
+                continue;
+            }
+            if (next === "(" || next === "[") {
+                parts.push(current);
+                current = "";
+                continue;
+            }
+        }
+        current = current + ch;
+    }
+    parts.push(current);
+    let terms = parts.map(function (p: string): string { return p.trim(); }).filter(function (p: string): boolean { return p !== ""; });
     let result: EquationTerm[] = [];
     for (let i = 0; i < terms.length; i++) {
         let term = terms[i];
@@ -27,7 +56,13 @@ export function parseSide(side: string): EquationTerm[] {
 export function parseBalancedEquation(equation: string): { reactants: EquationTerm[]; products: EquationTerm[] } {
     let sides = equation.split(" -> ");
     if (sides.length !== 2) {
+        sides = equation.split("->");
+    }
+    if (sides.length !== 2) {
         sides = equation.split(" = ");
+    }
+    if (sides.length !== 2) {
+        sides = equation.split("=");
     }
     if (sides.length !== 2) {
         return { reactants: [{ coefficient: "", formula: equation }], products: [] };
@@ -39,5 +74,6 @@ export function parseBalancedEquation(equation: string): { reactants: EquationTe
  * Sanitize a chemical formula for use as a DOM element id.
  */
 export function sanitizeId(formula: string): string {
-    return formula.replace(/[\(\)\[\]\{\}\,\s]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    let safe: string = formula.replace(/[^A-Za-z0-9-_]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    return safe === "" ? "formula" : safe;
 }
