@@ -215,6 +215,23 @@ describe("BatchCalculator", function () {
             let calc: BatchCalculator = BatchCalculator.getInstance();
             expect(calc.validateCsv(["element1"], "bond-type")).toBe(false);
         });
+
+        it("should accept padded headers such as 'M1 '", function () {
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            expect(calc.validateCsv(["M1 ", "V1"], "dilution")).toBe(true);
+        });
+    });
+
+    describe("canonicalizeHeaders", function () {
+        it("should map padded headers to canonical required spelling", function () {
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            expect(calc.canonicalizeHeaders(["M1 ", " v1"], "dilution")).toEqual(["M1", "V1"]);
+        });
+
+        it("should trim unknown headers without changing their spelling", function () {
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            expect(calc.canonicalizeHeaders(["custom ", "formula"], "molar-mass")).toEqual(["custom", "formula"]);
+        });
     });
 
     describe("isAuthorized", function () {
@@ -280,6 +297,17 @@ describe("BatchCalculator", function () {
             expect(typeof body["M1"]).toBe("number");
             expect(body["V1"]).toBe(2);
             expect(typeof body["V1"]).toBe("number");
+        });
+
+        it("should normalize a padded 'M1 ' header to the canonical body key end-to-end", async function () {
+            mockPost.mockResolvedValue({ "Value": 1, "Unit": "M" });
+            let calc: BatchCalculator = BatchCalculator.getInstance();
+            let file: File = makeFile("M1 ,V1\n1.5,2\n", "input.csv");
+            await calc.processFile(file, "dilution");
+            let body: Record<string, unknown> = mockPost.mock.calls[0][1] as Record<string, unknown>;
+            expect(body["M1"]).toBe(1.5);
+            expect("M1 " in body).toBe(false);
+            expect(body["V1"]).toBe(2);
         });
 
         it("should count errors when API rejects a row", async function () {
