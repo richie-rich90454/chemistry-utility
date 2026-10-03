@@ -145,6 +145,26 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 		45: true, 46: true, 47: true, 78: true, 79: true,
 	}
 
+	// fBlockExceptions holds the established ground-state occupations for
+	// the lanthanides/actinides where an (n-2)f/(n-1)d rearrangement beats
+	// the naive Aufbau fill (experimental ground states, cf. the NIST
+	// Atomic Spectra Database): La [Xe] 5d1 6s2, Ce [Xe] 4f1 5d1 6s2,
+	// Gd [Xe] 4f7 5d1 6s2, Ac [Rn] 6d1 7s2, Th [Rn] 6d2 7s2,
+	// Pa [Rn] 5f2 6d1 7s2, U [Rn] 5f3 6d1 7s2, Np [Rn] 5f4 6d1 7s2,
+	// Cm [Rn] 5f7 6d1 7s2. Each entry maps an (n, l) subshell to its
+	// correct occupation; every entry conserves the total electron count.
+	fBlockExceptions := map[int]map[[2]int]int{
+		57: {{6, 0}: 2, {4, 3}: 0, {5, 2}: 1},
+		58: {{6, 0}: 2, {4, 3}: 1, {5, 2}: 1},
+		64: {{6, 0}: 2, {4, 3}: 7, {5, 2}: 1},
+		89: {{7, 0}: 2, {5, 3}: 0, {6, 2}: 1},
+		90: {{7, 0}: 2, {5, 3}: 0, {6, 2}: 2},
+		91: {{7, 0}: 2, {5, 3}: 2, {6, 2}: 1},
+		92: {{7, 0}: 2, {5, 3}: 3, {6, 2}: 1},
+		93: {{7, 0}: 2, {5, 3}: 4, {6, 2}: 1},
+		96: {{7, 0}: 2, {5, 3}: 7, {6, 2}: 1},
+	}
+
 	type shell struct{ n, l, count int }
 	var configShells []shell
 	remaining := z
@@ -195,6 +215,27 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 				configShells = append(configShells[:sIdx], configShells[sIdx+1:]...)
 			}
 		}
+	}
+
+	if tail, ok := fBlockExceptions[z]; ok {
+		counts := make(map[[2]int]int, len(configShells))
+		for _, s := range configShells {
+			counts[[2]int{s.n, s.l}] = s.count
+		}
+		for k, v := range tail {
+			if v == 0 {
+				delete(counts, k)
+			} else {
+				counts[k] = v
+			}
+		}
+		var rebuilt []shell
+		for _, sub := range aufbauOrder {
+			if c, ok := counts[[2]int{sub.n, sub.l}]; ok && c > 0 {
+				rebuilt = append(rebuilt, shell{sub.n, sub.l, c})
+			}
+		}
+		configShells = rebuilt
 	}
 
 	var config string
