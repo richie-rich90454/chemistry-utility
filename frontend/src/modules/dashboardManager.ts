@@ -355,7 +355,7 @@ export class DashboardManager {
         }
         try {
             ChartRenderer.getInstance().renderActivityChart("dashboard-activity-chart", dataPoints);
-        } catch (e) {
+        } catch {
             let fallback: HTMLElement = document.createElement("p");
             fallback.className = "dashboard-empty";
             fallback.textContent = "Weekly activity chart unavailable.";
@@ -457,7 +457,7 @@ export class DashboardManager {
             if (Array.isArray(parsed)) {
                 return parsed as CalculationRecord[];
             }
-        } catch (e) {
+        } catch {
             // fall through to empty array
         }
         return [];
