@@ -105,14 +105,26 @@ var searchFields = map[string]string{
 // Search returns compounds matching term. field restricts the search to one
 // column ("name", "formula", "cas", "smiles"); any other value searches all.
 func (s *CompoundStore) Search(ctx context.Context, term, field string, limit, offset int) ([]*Compound, error) {
+	if limit < 0 {
+		limit = 0
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
 	const columns = `id, name, formula, cas_number, smiles, inchi, molar_mass, properties, source, created_at, updated_at`
 	var query string
 	var args []interface{}
+	escapeLike := func(s string) string {
+		return strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(s)
+	}
 	if s.Driver == "sqlite3" {
 		// FTS5 requires the mattn/go-sqlite3 driver to be compiled with the
 		// sqlite_fts5 tag, which CI and Makefile builds don't set. Use a
 		// portable LIKE search instead so fresh databases work everywhere.
-		escaped := strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(term)
+		escaped := escapeLike(term)
 		pattern := "%" + escaped + "%"
 		if col, ok := searchFields[field]; ok {
 			query = `SELECT ` + columns + ` FROM compounds WHERE ` + col + ` LIKE ? ESCAPE '\' ORDER BY name LIMIT ? OFFSET ?`
@@ -123,13 +135,18 @@ func (s *CompoundStore) Search(ctx context.Context, term, field string, limit, o
 		}
 	} else {
 		if col, ok := searchFields[field]; ok {
-			query = `SELECT ` + columns + ` FROM compounds WHERE ` + col + ` ILIKE '%' || $1 || '%' ORDER BY name LIMIT $2 OFFSET $3`
+			escaped := escapeLike(term)
+			pattern := "%" + escaped + "%"
+			// ESCAPE '\' matches the sqlite branch so '%'/'_' are literal
+			// on both drivers.
+			query = `SELECT ` + columns + ` FROM compounds WHERE ` + col + ` ILIKE $1 ESCAPE '\' ORDER BY name LIMIT $2 OFFSET $3`
+			args = []interface{}{pattern, limit, offset}
 		} else {
 			// plainto_tsquery tolerates arbitrary user input (no tsquery
 			// metacharacter syntax errors) and ANDs the terms.
 			query = `SELECT ` + columns + ` FROM compounds WHERE to_tsvector('english', name || ' ' || formula || ' ' || cas_number) @@ plainto_tsquery('english', $1) ORDER BY created_at DESC LIMIT $2 OFFSET $3`
+			args = []interface{}{term, limit, offset}
 		}
-		args = []interface{}{term, limit, offset}
 	}
 	rows, err := s.DB.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -158,6 +175,15 @@ func (s *CompoundStore) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 func (s *CompoundStore) List(ctx context.Context, limit, offset int) ([]*Compound, error) {
+	if limit < 0 {
+		limit = 0
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	if offset < 0 {
+		offset = 0
+	}
 	query := placeholder(s.Driver, `SELECT id, name, formula, cas_number, smiles, inchi, molar_mass, properties, source, created_at, updated_at FROM compounds ORDER BY created_at DESC LIMIT $1 OFFSET $2`)
 	rows, err := s.DB.QueryContext(ctx, query, limit, offset)
 	if err != nil {
