@@ -252,8 +252,12 @@ export class WorkspaceManager {
             }
         }
         this.writeWorkspaces(filtered);
-        localStorage.removeItem(MEMBERS_STORAGE_KEY_PREFIX + id);
-        localStorage.removeItem(CALCULATIONS_STORAGE_KEY_PREFIX + id);
+        try {
+            localStorage.removeItem(MEMBERS_STORAGE_KEY_PREFIX + id);
+        } catch {}
+        try {
+            localStorage.removeItem(CALCULATIONS_STORAGE_KEY_PREFIX + id);
+        } catch {}
         if (this.currentWorkspace && this.currentWorkspace.id === id) {
             this.currentWorkspace = null;
             this.currentMembers = [];
