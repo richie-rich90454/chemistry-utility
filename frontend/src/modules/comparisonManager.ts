@@ -236,7 +236,7 @@ export class ComparisonManager {
                 if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
                     return parsed as Record<string, unknown>;
                 }
-            } catch (e) {
+            } catch {
                 return null;
             }
         }
@@ -255,7 +255,7 @@ export class ComparisonManager {
         }
         try {
             return JSON.stringify(value);
-        } catch (e) {
+        } catch {
             return String(value);
         }
     }
