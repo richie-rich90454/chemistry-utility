@@ -34,7 +34,7 @@ type API struct {
 
 // New creates a new API instance with all stores and services.
 func New(db *sql.DB, driver string, cfg Config) *API {
-	if cfg.RateLimitPerMinute == 0 {
+	if cfg.RateLimitPerMinute <= 0 {
 		cfg.RateLimitPerMinute = 100
 	}
 	if len(cfg.CORSAllowedOrigins) == 0 {
@@ -111,6 +111,9 @@ type rateLimitEntry struct {
 
 // RateLimitMiddleware returns a gin middleware that limits requests per minute per IP.
 func (a *API) RateLimitMiddleware(rpm int) gin.HandlerFunc {
+	if rpm <= 0 {
+		rpm = 100
+	}
 	var mu sync.Mutex
 	clients := make(map[string]*rateLimitEntry)
 	lastSweep := time.Now()
