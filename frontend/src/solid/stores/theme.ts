@@ -1,4 +1,4 @@
-import {createSignal, onCleanup} from "solid-js";
+import {createSignal, getOwner, onCleanup} from "solid-js";
 import {ThemeManager} from "../../modules/themeManager.js";
 import type {Theme} from "../../modules/themeManager.js";
 interface ThemeStore {
@@ -12,10 +12,14 @@ function useTheme(): ThemeStore {
     let listener = function (next: Theme): void {
         setThemeSignal(next);
     };
-    manager.subscribe(listener);
-    onCleanup(function (): void {
-        manager.unsubscribe(listener);
-    });
+    // Subscribing outside a reactive owner would leak (onCleanup no-ops
+    // there), so only subscribe when an owner exists.
+    if (getOwner() !== undefined) {
+        manager.subscribe(listener);
+        onCleanup(function (): void {
+            manager.unsubscribe(listener);
+        });
+    }
     function setTheme(t: Theme): void {
         manager.setTheme(t);
     }
