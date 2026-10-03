@@ -5,6 +5,7 @@ import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {useNavSheet} from "../stores/navSheet";
 import {groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
+import {visibleCalculators} from "../lib/desktopOnly";
 import styles from "./MobileNavSheet.module.css";
 
 function MobileNavSheet(): JSX.Element {
@@ -13,7 +14,7 @@ function MobileNavSheet(): JSX.Element {
 
     onMount(function (): void {
         let nav = NavigationManager.getInstance();
-        setCalculators(nav.getCalculators());
+        setCalculators(visibleCalculators(nav.getCalculators()));
     });
 
     function handleClose(): void {
