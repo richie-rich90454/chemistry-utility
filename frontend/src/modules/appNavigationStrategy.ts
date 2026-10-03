@@ -5,6 +5,7 @@ import { IdealGasLawCalculator } from "./gasLawCalculators.js";
 import { InputPersistence } from "./inputPersistence.js";
 import { UrlStateManager } from "./urlStateManager.js";
 import { ExportManager } from "./exportManager.js";
+import { HtmlSanitizer } from "./htmlSanitizer.js";
 
 const RECENT_KEY = "chem-utility-recent";
 const MAX_RECENT = 3;
@@ -195,7 +196,8 @@ export class AppNavigationStrategy implements NavigationStrategy {
 		let recent: string[] = [];
 		try {
 			let stored = localStorage.getItem(RECENT_KEY);
-			recent = stored ? JSON.parse(stored) : [];
+			let parsed: unknown = stored ? JSON.parse(stored) : [];
+			recent = Array.isArray(parsed) ? parsed.filter(function (x: unknown): x is string { return typeof x === "string"; }) : [];
 		} catch { recent = []; }
 		recent = recent.filter(function (r: string): boolean { return r !== id; });
 		recent.unshift(id);
@@ -210,7 +212,8 @@ export class AppNavigationStrategy implements NavigationStrategy {
 		let recent: string[] = [];
 		try {
 			let stored = localStorage.getItem(RECENT_KEY);
-			recent = stored ? JSON.parse(stored) : [];
+			let parsed: unknown = stored ? JSON.parse(stored) : [];
+			recent = Array.isArray(parsed) ? parsed.filter(function (x: unknown): x is string { return typeof x === "string"; }) : [];
 		} catch { recent = []; }
 		if (recent.length === 0) {
 			container.innerHTML = "";
@@ -220,7 +223,8 @@ export class AppNavigationStrategy implements NavigationStrategy {
 		recent.forEach(function (id: string): void {
 			let calc = CALCULATORS.find(function (c): boolean { return c.id === id; });
 			if (calc) {
-				html += '<a href="/' + id + '"><svg aria-hidden="true" focusable="false" class="recent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + calc.name + '</a>';
+				let safeId = HtmlSanitizer.escape(id);
+				html += '<a href="/' + safeId + '"><svg aria-hidden="true" focusable="false" class="recent-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' + HtmlSanitizer.escape(calc.name) + '</a>';
 			}
 		});
 		container.innerHTML = html;
