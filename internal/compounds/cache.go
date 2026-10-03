@@ -28,6 +28,12 @@ func NewCompoundCache(store *db.CompoundStore, pubchem *PubChemClient) *Compound
 // to the PubChem API. Results from PubChem are cached in the local database
 // with source="pubchem".
 func (c *CompoundCache) Search(ctx context.Context, query string, searchType string) ([]db.Compound, error) {
+	if c == nil || c.store == nil || c.pubchem == nil {
+		return nil, fmt.Errorf("compound cache is not initialized")
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	// Try local DB first. If search fails (e.g., FTS not available),
 	// fall through to PubChem rather than returning an error.
 	localResults, err := c.store.Search(ctx, query, searchType, 10, 0)
