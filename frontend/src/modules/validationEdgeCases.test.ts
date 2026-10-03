@@ -78,8 +78,8 @@ describe("validateInputs - edge cases", () => {
         input.type = "number";
         document.body.appendChild(input);
 
-        // Infinity is not NaN, so validateInputs does not throw
-        expect(() => validateInputs([Infinity], ["inf-test"])).not.toThrow();
+        // Infinity is non-finite and must be rejected like NaN.
+        expect(() => validateInputs([Infinity], ["inf-test"])).toThrow();
     });
 
     it("error class persists after validation failure", () => {
@@ -153,7 +153,7 @@ describe("validateInputs - additional edge cases", () => {
         input.type = "number";
         document.body.appendChild(input);
 
-        expect(() => validateInputs([-Infinity], ["neg-inf-test"])).not.toThrow();
+        expect(() => validateInputs([-Infinity], ["neg-inf-test"])).toThrow();
     });
 
     it("handles string NaN as NaN", () => {
