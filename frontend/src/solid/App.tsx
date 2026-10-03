@@ -1,5 +1,5 @@
 import type {JSX} from "solid-js";
-import {onMount} from "solid-js";
+import {createMemo, onMount} from "solid-js";
 import {Router, Route, Navigate} from "@solidjs/router";
 import {HomePage} from "./routes/HomePage";
 import {MolarMass} from "./routes/molar-mass";
@@ -45,6 +45,14 @@ function MassCalcRedirect(): JSX.Element {
 function CatchAllRedirect(): JSX.Element {
     return <Navigate href="/" />;
 }
+function DesktopOnlyNotice(): JSX.Element {
+    return (
+        <main aria-label="Desktop-only feature">
+            <h1>Desktop app only</h1>
+            <p>This feature is available in the desktop app, where all data stays on your machine. The anonymous web build does not include it.</p>
+        </main>
+    );
+}
 function AppShell(props: {children?: JSX.Element}): JSX.Element {
     let [collapsed, setCollapsed] = createSignal(false);
     return (
@@ -66,7 +74,11 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
     );
 }
 function App(): JSX.Element {
-    let desktopOnly: boolean = !RuntimeDetector.getInstance().isWebMode;
+    // Reactive (not a one-time snapshot) so tests/devtools toggling the
+    // runtime mode re-resolves the desktop-only routes.
+    let isDesktop = createMemo(function (): boolean {
+        return !RuntimeDetector.getInstance().isWebMode;
+    });
     onMount(function (): void {
         if (window.location.hash === "#mass-calc") {
             window.location.replace("/molar-mass");
@@ -264,8 +276,8 @@ function App(): JSX.Element {
                 <Route path="/bond-type" component={BondType} />
                 <Route path="/molecular-viewer" component={MolecularViewerRoute} />
                 <Route path="/compound-search" component={CompoundSearch} />
-                {desktopOnly ? <Route path="/batch-calc" component={BatchCalc} /> : null}
-                {desktopOnly ? <Route path="/dashboard" component={Dashboard} /> : null}
+                {isDesktop() ? <Route path="/batch-calc" component={BatchCalc} /> : <Route path="/batch-calc" component={DesktopOnlyNotice} />}
+                {isDesktop() ? <Route path="/dashboard" component={Dashboard} /> : <Route path="/dashboard" component={DesktopOnlyNotice} />}
                 <Route path="*" component={CatchAllRedirect} />
             </Route>
         </Router>
