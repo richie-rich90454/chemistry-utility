@@ -58,6 +58,19 @@ func getString(input CalculationInput, key string) (string, error) {
 	return s, nil
 }
 
+// getStringWithDefault extracts a string or returns a default value.
+func getStringWithDefault(input CalculationInput, key string, defaultVal string) string {
+	v, ok := input[key]
+	if !ok {
+		return defaultVal
+	}
+	s, ok := v.(string)
+	if !ok {
+		return defaultVal
+	}
+	return s
+}
+
 // getFloatWithDefault extracts a float64 or returns a default value.
 func getFloatWithDefault(input CalculationInput, key string, defaultVal float64) float64 {
 	v, ok := input[key]
