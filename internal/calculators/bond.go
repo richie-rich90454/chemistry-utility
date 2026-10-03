@@ -16,6 +16,14 @@ type ElementData struct {
 }
 
 // elementDB contains element data for bond type prediction.
+// Electronegativity values follow the Pauling scale compilations (cf.
+// WebElements/CRC Handbook data: Kr 3.00, Xe 2.60). Pauling-scale
+// compilations report no data for He, Ne, Ar, and Rn; the Ar (3.12) and
+// Rn (2.20) entries here are literature estimates for the heavier noble
+// gases (Allen-scale tabulations, e.g. Allen, L.C., J. Am. Chem. Soc.
+// 1989, 111, 9003, give Ar 3.24, Kr 2.97, Xe 2.58, Rn 2.60), kept only so
+// a delta-EN can be computed for their rare compounds. He and Ne keep the
+// -1 sentinel (no established value) and report Unknown bond type.
 var elementDB = map[string]ElementData{
 	"H":  {"H", 2.20, "non-metal"},
 	"Li": {"Li", 0.98, "alkali-metal"},
