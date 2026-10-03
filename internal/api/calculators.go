@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,10 +24,16 @@ func (a *API) runCalculator(c *gin.Context) {
 		return
 	}
 
+	// Bound request body to 1 MiB to cap slice allocation (deltaHValues,
+	// SProducts, ...) and equation-string length reaching the balancer.
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 1<<20)
 	var input map[string]interface{}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		WriteValidation(c, "invalid JSON body: "+err.Error())
 		return
+	}
+	if input == nil {
+		input = map[string]interface{}{}
 	}
 
 	result, err := calcFn(c.Request.Context(), input)
