@@ -88,6 +88,43 @@ func lcm(a, b int) int {
 
 // parseFormulaToCounts parses a chemical formula into element counts.
 func parseFormulaToCounts(formula string) (map[string]int, error) {
+	// Hydrate/adduct separators: "·" (U+00B7), "•" (U+2022), "*" (mirror fast-balance).
+	// e.g. CuSO4·5H2O, CaO·P2O5, NiSO4*7H2O.
+	if strings.Contains(formula, "·") || strings.Contains(formula, "•") || strings.Contains(formula, "*") {
+		normalized := strings.ReplaceAll(formula, "·", "*")
+		normalized = strings.ReplaceAll(normalized, "•", "*")
+		parts := strings.Split(normalized, "*")
+		if len(parts) > 1 {
+			merged := make(map[string]int)
+			for _, part := range parts {
+				part = strings.TrimSpace(part)
+				if part == "" {
+					continue
+				}
+				mult := 1
+				idx := 0
+				for idx < len(part) && part[idx] >= '0' && part[idx] <= '9' {
+					idx++
+				}
+				body := part
+				if idx > 0 {
+					mult = atoi(part[:idx])
+					body = part[idx:]
+				}
+				if body == "" {
+					continue
+				}
+				sub, err := parseFormulaToCounts(body)
+				if err != nil {
+					return nil, err
+				}
+				for el, cnt := range sub {
+					merged[el] += cnt * mult
+				}
+			}
+			return merged, nil
+		}
+	}
 	stack := []map[string]int{{}}
 	i := 0
 	digitRe := regexp.MustCompile(`^\d+`)
@@ -211,7 +248,15 @@ func atoi(s string) int {
 
 // ParseEquation splits a chemical equation string into reactants and products.
 func ParseEquation(equation string) (reactants []string, products []string, err error) {
-	sides := regexp.MustCompile(`->|=`).Split(equation, -1)
+	// Normalize reversible/unicode arrows to "->" (mirror fast-balance):
+	// "→" (U+2192), "⇌" (U+21CC), "<=>" all mean reversible/reaction arrow.
+	// Also normalize bullet hydrate separator "•" (U+2022) to "·" (U+00B7)
+	// so outputs agree with fast-balance which renders "•" as "·".
+	normalized := strings.ReplaceAll(equation, "⇌", "->")
+	normalized = strings.ReplaceAll(normalized, "→", "->")
+	normalized = strings.ReplaceAll(normalized, "<=>", "->")
+	normalized = strings.ReplaceAll(normalized, "•", "·")
+	sides := regexp.MustCompile(`->|=`).Split(normalized, -1)
 	if len(sides) != 2 {
 		return nil, nil, errors.New("invalid equation format: expected exactly one '->' or '='")
 	}
