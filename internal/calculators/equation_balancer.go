@@ -180,51 +180,45 @@ func parseFormulaToCounts(formula string) (map[string]int, error) {
 			}
 			stack[len(stack)-1][el] += cnt
 		} else if ch == '+' || ch == '-' || unicode.IsDigit(ch) {
+			// A charge suffix: optional digits followed by '+'/'-'
+			// (e.g. "2+", "2-", "+", "-"). Digits directly attached to an
+			// element were already rewound above when a sign follows, so a
+			// leading digit run here is either a charge magnitude or a
+			// stray stoichiometric coefficient ("2H2"), handled below.
 			start := i
 			for i < len(formula) && unicode.IsDigit(rune(formula[i])) {
 				i++
 			}
 			num := formula[start:i]
-			sign := 0
-			mag := 0
+			// Note: when ch itself is '+'/'-', the scan above cannot
+			// advance, so num is empty and formula[i] == ch: the sign
+			// branch below always applies and sign is always set. When
+			// ch is a digit, either a sign follows (sign set) or it is a
+			// stray coefficient (sign stays 0).
 			if i < len(formula) && (formula[i] == '+' || formula[i] == '-') {
 				if formula[i] == '+' {
-					sign = 1
-				} else {
-					sign = -1
-				}
-				if num == "" {
-					mag = 1
-				} else {
-					mag = atoi(num)
-				}
-				i++
-			} else if ch == '+' || ch == '-' {
-				if ch == '+' {
-					sign = 1
-				} else {
-					sign = -1
-				}
-				i++
-				s := i
-				for i < len(formula) && unicode.IsDigit(rune(formula[i])) {
+					sign := 1
+					mag := 1
+					if num != "" {
+						mag = atoi(num)
+					}
 					i++
-				}
-				num2 := formula[s:i]
-				if num2 == "" {
-					mag = 1
+					stack[len(stack)-1]["_charge"] += mag * sign
 				} else {
-					mag = atoi(num2)
+					sign := -1
+					mag := 1
+					if num != "" {
+						mag = atoi(num)
+					}
+					i++
+					stack[len(stack)-1]["_charge"] += mag * sign
 				}
-			}
-			if sign != 0 {
-				stack[len(stack)-1]["_charge"] += mag * sign
-			} else if unicode.IsDigit(ch) {
+			} else {
 				// Stray digit (e.g. a leading stoichiometric coefficient like
 				// "2H2"): consumed above and ignored so the solver can
-				// re-derive coefficients from scratch.
-			} else {
-				return nil, fmt.Errorf("invalid character in formula: %c", ch)
+				// re-derive coefficients from scratch. Reached only when ch
+				// is a digit: a leading '+'/'-' always takes the sign branch
+				// above, so sign is set in that case.
 			}
 		} else if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 			return nil, errors.New("invalid character in formula: whitespace")
@@ -385,16 +379,8 @@ func solveHomogeneous(matrix [][]Fraction) []Fraction {
 		for i, x := range sol {
 			ints[i] = x.N * (den / x.D)
 		}
-		allZero := true
-		for _, v := range ints {
-			if v != 0 {
-				allZero = false
-				break
-			}
-		}
-		if allZero {
-			continue
-		}
+		// ints is never all zero: every free variable was set to the
+		// nonzero trial value above, so at least one entry is nonzero.
 		sign := 1
 		for _, v := range ints {
 			if v != 0 {
