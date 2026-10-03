@@ -67,6 +67,50 @@ var elementDB = map[string]ElementData{
 	"Bi": {"Bi", 2.02, "metal"},
 	"Pt": {"Pt", 2.28, "transition-metal"},
 	"Pd": {"Pd", 2.20, "transition-metal"},
+	"He": {"He", -1, "noble-gas"},
+	"Ne": {"Ne", -1, "noble-gas"},
+	"Ar": {"Ar", 3.12, "noble-gas"},
+	"Kr": {"Kr", 3.00, "noble-gas"},
+	"Xe": {"Xe", 2.61, "noble-gas"},
+	"Rn": {"Rn", 2.20, "noble-gas"},
+	"Y":  {"Y", 1.22, "transition-metal"},
+	"Zr": {"Zr", 1.33, "transition-metal"},
+	"Nb": {"Nb", 1.60, "transition-metal"},
+	"Mo": {"Mo", 2.16, "transition-metal"},
+	"Tc": {"Tc", 1.90, "transition-metal"},
+	"Ru": {"Ru", 2.20, "transition-metal"},
+	"Rh": {"Rh", 2.28, "transition-metal"},
+	"Hf": {"Hf", 1.30, "transition-metal"},
+	"Ta": {"Ta", 1.50, "transition-metal"},
+	"W":  {"W", 2.36, "transition-metal"},
+	"Re": {"Re", 1.90, "transition-metal"},
+	"Os": {"Os", 2.20, "transition-metal"},
+	"Ir": {"Ir", 2.20, "transition-metal"},
+	"Fr": {"Fr", 0.70, "alkali-metal"},
+	"Ra": {"Ra", 0.90, "alkaline-earth-metal"},
+	"La": {"La", 1.10, "lanthanide"},
+	"Ce": {"Ce", 1.12, "lanthanide"},
+	"Pr": {"Pr", 1.13, "lanthanide"},
+	"Nd": {"Nd", 1.14, "lanthanide"},
+	"Pm": {"Pm", 1.13, "lanthanide"},
+	"Sm": {"Sm", 1.17, "lanthanide"},
+	"Eu": {"Eu", 1.20, "lanthanide"},
+	"Gd": {"Gd", 1.20, "lanthanide"},
+	"Tb": {"Tb", 1.10, "lanthanide"},
+	"Dy": {"Dy", 1.22, "lanthanide"},
+	"Ho": {"Ho", 1.23, "lanthanide"},
+	"Er": {"Er", 1.24, "lanthanide"},
+	"Tm": {"Tm", 1.25, "lanthanide"},
+	"Yb": {"Yb", 1.10, "lanthanide"},
+	"Lu": {"Lu", 1.27, "lanthanide"},
+	"Ac": {"Ac", 1.10, "actinide"},
+	"Th": {"Th", 1.30, "actinide"},
+	"Pa": {"Pa", 1.50, "actinide"},
+	"U":  {"U", 1.38, "actinide"},
+	"Np": {"Np", 1.36, "actinide"},
+	"Pu": {"Pu", 1.28, "actinide"},
+	"At": {"At", 2.20, "metalloid"},
+	"Po": {"Po", 2.00, "metal"},
 }
 
 // isMetal checks if an element type is a metal.
@@ -102,6 +146,24 @@ func BondType(ctx context.Context, input CalculationInput) (CalculationResult, e
 		return CalculationResult{}, fmt.Errorf("one or both elements not found: %s, %s", elem1Str, elem2Str)
 	}
 
+	// He and Ne have no established electronegativity (sentinel -1): they
+	// rarely form bonds, so report Unknown instead of a meaningless ΔEN.
+	if elem1.Electronegativity < 0 || elem2.Electronegativity < 0 {
+		return CalculationResult{
+			Value: 0,
+			Unit:  "",
+			Steps: []string{
+				fmt.Sprintf("%s and %s: insufficient electronegativity data (noble gas)", elem1.Symbol, elem2.Symbol),
+				"Bond type: Unknown (noble gases rarely form bonds)",
+			},
+			Metadata: map[string]interface{}{
+				"element1": elem1.Symbol,
+				"element2": elem2.Symbol,
+				"bondType": "Unknown",
+			},
+		}, nil
+	}
+
 	deltaEN := math.Abs(elem1.Electronegativity - elem2.Electronegativity)
 	isMetal1 := isMetal(elem1.Type)
 	isMetal2 := isMetal(elem2.Type)
@@ -109,7 +171,11 @@ func BondType(ctx context.Context, input CalculationInput) (CalculationResult, e
 	var bondType string
 	if isMetal1 && isMetal2 {
 		bondType = "Metallic"
-	} else if isMetal1 != isMetal2 || deltaEN >= 1.7 {
+	} else if isMetal1 != isMetal2 {
+		bondType = "Ionic"
+	} else if deltaEN >= 2.0 {
+		// ΔEN ≥ 2.0 between two non-metals is essentially ionic character
+		// (no common non-metal pair other than H–F even reaches 1.7).
 		bondType = "Ionic"
 	} else if deltaEN >= 0.4 {
 		bondType = "Polar Covalent"
