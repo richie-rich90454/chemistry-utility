@@ -99,12 +99,12 @@ function CommandPalette(): JSX.Element {
                             <line x1="16" y1="16" x2="21" y2="21" stroke="currentColor" stroke-width="2" />
                         </svg>
                     </span>
-                    <input type="text" ref={inputRef} placeholder="Search calculators..." aria-label="Search calculators" onInput={handleInput} onKeyDown={handleKeyDown} autocomplete="off" spellcheck={false} />
+                    <input type="text" ref={inputRef} placeholder="Search calculators..." aria-label="Search calculators" role="combobox" aria-expanded="true" aria-controls="palette-listbox" aria-activedescendant={filtered().length > 0 ? "palette-option-" + palette.selectedIndex() : undefined} onInput={handleInput} onKeyDown={handleKeyDown} autocomplete="off" spellcheck={false} />
                 </div>
-                <ul class={styles.paletteList}>
+                <ul class={styles.paletteList} id="palette-listbox" role="listbox" aria-label="Matching calculators">
                     <For each={filtered()}>
                         {(calc, index) => (
-                            <li>
+                            <li role="option" id={"palette-option-" + index()} aria-selected={index() === palette.selectedIndex()}>
                                 <button type="button" class={getItemClass(index())} onClick={function () { navigateToCalculator(calc.id); }}>
                                     <span class={styles.paletteItemName}>{calc.name}</span>
                                     <span class={styles.paletteItemCategory}>{calc.category}</span>
