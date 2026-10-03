@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"compress/gzip"
 	"encoding/json"
 	"io"
@@ -238,4 +239,103 @@ func itoa(n int) string {
 		n /= 10
 	}
 	return digits
+}
+
+func TestGzipResponseWriterWriteString(t *testing.T) {
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	rec := httptest.NewRecorder()
+	ginCtx, _ := gin.CreateTestContext(rec)
+	w := &gzipResponseWriter{Writer: gz, ResponseWriter: ginCtx.Writer}
+	if _, err := w.WriteString("hello gzip"); err != nil {
+		t.Fatalf("WriteString: %v", err)
+	}
+	if err := gz.Close(); err != nil {
+		t.Fatalf("close gzip writer: %v", err)
+	}
+	zr, err := gzip.NewReader(&buf)
+	if err != nil {
+		t.Fatalf("payload is not valid gzip: %v", err)
+	}
+	defer zr.Close()
+	raw, err := io.ReadAll(zr)
+	if err != nil {
+		t.Fatalf("decompress: %v", err)
+	}
+	if string(raw) != "hello gzip" {
+		t.Errorf("round-trip = %q, want %q", raw, "hello gzip")
+	}
+}
+
+func TestTrustedProxiesParsing(t *testing.T) {
+	t.Setenv("TRUSTED_PROXIES", "10.0.0.0/8, , 192.168.0.0/16 ")
+	got := trustedProxies()
+	want := []string{"10.0.0.0/8", "192.168.0.0/16"}
+	if len(got) != len(want) {
+		t.Fatalf("trustedProxies() = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("trustedProxies() = %v, want %v", got, want)
+		}
+	}
+
+	t.Setenv("TRUSTED_PROXIES", "")
+	if got := trustedProxies(); got != nil {
+		t.Errorf("empty TRUSTED_PROXIES = %v, want nil", got)
+	}
+}
+
+func TestBuildRouterDeepAPIRoutes(t *testing.T) {
+	r := newTestRouter(t, newTestDist(t), 100)
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPatch, "/api/v1/plugins/123e4567-e89b-12d3-a456-426614174000/enable", nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusNotImplemented {
+		t.Errorf("3-segment plugin route status = %d, want 501 (no database)", w.Code)
+	}
+
+	w2 := httptest.NewRecorder()
+	req2 := httptest.NewRequest(http.MethodGet, "/api/v1/plugins/123e4567-e89b-12d3-a456-426614174000/enable/extra", nil)
+	r.ServeHTTP(w2, req2)
+	if w2.Code != http.StatusNotFound {
+		t.Errorf("4-segment unknown route status = %d, want 404", w2.Code)
+	}
+}
+
+func TestNoRouteUnknownAPIPath(t *testing.T) {
+	r := newTestRouter(t, newTestDist(t), 100)
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/unknown-path", nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404", w.Code)
+	}
+	var problem struct {
+		Title  string `json:"title"`
+		Detail string `json:"detail"`
+		Status int    `json:"status"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &problem); err != nil {
+		t.Fatalf("decode problem details: %v", err)
+	}
+	if problem.Detail != "API endpoint not found" || problem.Status != 404 {
+		t.Errorf("problem = %+v, want API 404 details", problem)
+	}
+}
+
+func TestNoRouteMissingIndex(t *testing.T) {
+	r := newTestRouter(t, t.TempDir(), 100)
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), "index.html not found") {
+		t.Errorf("body = %q, want missing-index hint", w.Body.String())
+	}
 }
