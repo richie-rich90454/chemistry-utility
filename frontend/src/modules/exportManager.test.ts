@@ -133,21 +133,21 @@ describe("ExportManager", () => {
             document.body.appendChild(input);
 
             const manager = ExportManager.getInstance();
-            manager.shareViaUrl("mass-calc");
+            manager.shareViaUrl("molar-mass");
 
             expect(navigator.clipboard.writeText).toHaveBeenCalled();
             const copiedText = (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
-            expect(copiedText).toContain("mass-calc");
+            expect(copiedText).toContain("molar-mass");
             expect(copiedText).toContain("formula=H2O");
         });
 
         it("generates a URL without query string when inputs are empty", () => {
             const manager = ExportManager.getInstance();
-            manager.shareViaUrl("mass-calc");
+            manager.shareViaUrl("molar-mass");
 
             expect(navigator.clipboard.writeText).toHaveBeenCalled();
             const copiedText = (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
-            expect(copiedText).toContain("mass-calc");
+            expect(copiedText).toContain("molar-mass");
             expect(copiedText).not.toContain("?");
         });
     });
