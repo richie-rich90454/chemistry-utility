@@ -209,6 +209,8 @@ export class RateLawCalculator extends Calculator {
         // If neither pair is equal, we can only solve if one variable changes
         let m: number;
         let n: number;
+        let orderNote = "";
+        let fitErrorText = "";
         if (Math.abs(B1 - B2) < 1e-10) {
             // B is constant, find order m from A
             if (Math.abs(A1 - A2) < 1e-10) {
@@ -216,30 +218,36 @@ export class RateLawCalculator extends Calculator {
             }
             m = Math.log(rate2 / rate1) / Math.log(A2 / A1);
             m = Math.round(m * 100) / 100;
-            // Now find order n - need another experiment or assume n=0 if only A varies
-            // With two experiments where B is constant, we can only determine m
-            // Assume n=0 if B doesn't change (or require user input)
+            // With two experiments where B is constant, only m is determined;
+            // n is underdetermined (reported as 0 = not measurable here).
             n = 0;
+            orderNote = "Order n is underdetermined: B does not vary, so n is reported as 0 (not measurable from these experiments).";
         } else if (Math.abs(A1 - A2) < 1e-10) {
             // A is constant, find order n from B
             n = Math.log(rate2 / rate1) / Math.log(B2 / B1);
             n = Math.round(n * 100) / 100;
             m = 0;
+            orderNote = "Order m is underdetermined: A does not vary, so m is reported as 0 (not measurable from these experiments).";
         } else {
             // Both A and B change - try to determine both orders
             // This requires solving a system; we'll try rounding to nearest integer
             // Method: solve for m and n from the ratio equation
             // rate2/rate1 = (A2/A1)^m * (B2/B1)^n
             // This is one equation with two unknowns, so we need additional assumption
-            // We try integer orders 0, 1, 2 for m and n and find the best fit
+            // We try half-integer orders 0..3 for m and n and find the best fit.
+            // Negative or higher orders need more experiments; the fit error is
+            // reported so a poor integer fit is visible instead of silent.
             let bestM = 0;
             let bestN = 0;
             let bestError = Infinity;
             let rateRatio = rate2 / rate1;
             let aRatio = A2 / A1;
             let bRatio = B2 / B1;
-            for (let mi = 0; mi <= 3; mi++) {
-                for (let ni = 0; ni <= 3; ni++) {
+            let grid = [0, 0.5, 1, 1.5, 2, 2.5, 3];
+            for (let gi = 0; gi < grid.length; gi++) {
+                for (let gj = 0; gj < grid.length; gj++) {
+                    let mi = grid[gi];
+                    let ni = grid[gj];
                     let predicted = Math.pow(aRatio, mi) * Math.pow(bRatio, ni);
                     let err = Math.abs(predicted - rateRatio);
                     if (err < bestError) {
@@ -251,6 +259,7 @@ export class RateLawCalculator extends Calculator {
             }
             m = bestM;
             n = bestN;
+            fitErrorText = "Grid-search fit error |predicted - observed rate ratio| = " + this.numberFormatter.format(bestError, 6) + " (half-integer grid 0..3; a large error means the true orders lie outside the grid or more experiments are needed).";
         }
         // Calculate rate constant k from experiment 1
         let k = rate1 / (Math.pow(A1, m) * Math.pow(B1, n));
@@ -274,6 +283,12 @@ export class RateLawCalculator extends Calculator {
         html += "<p>Order with respect to B: <strong>" + n + "</strong></p>";
         html += "<p>Rate constant k = " + this.numberFormatter.format(k, 4) + "</p>";
         html += "<p>Rate law: <strong>" + expression + "</strong></p>";
+        if (orderNote !== "") {
+            html += "<p>" + orderNote + "</p>";
+        }
+        if (fitErrorText !== "") {
+            html += "<p>" + fitErrorText + "</p>";
+        }
         this.resultDisplay.showResult(html);
     }
 
@@ -298,6 +313,8 @@ export class RateLawCalculator extends Calculator {
         }
         let m: number;
         let n: number;
+        let orderNote = "";
+        let fitError = NaN;
         if (Math.abs(B1 - B2) < 1e-10) {
             if (Math.abs(A1 - A2) < 1e-10) {
                 throw new Error("Experiments must differ in at least one concentration");
@@ -305,10 +322,12 @@ export class RateLawCalculator extends Calculator {
             m = Math.log(rate2 / rate1) / Math.log(A2 / A1);
             m = Math.round(m * 100) / 100;
             n = 0;
+            orderNote = "Order n is underdetermined: B does not vary, so n is reported as 0 (not measurable from these experiments).";
         } else if (Math.abs(A1 - A2) < 1e-10) {
             n = Math.log(rate2 / rate1) / Math.log(B2 / B1);
             n = Math.round(n * 100) / 100;
             m = 0;
+            orderNote = "Order m is underdetermined: A does not vary, so m is reported as 0 (not measurable from these experiments).";
         } else {
             let bestM = 0;
             let bestN = 0;
@@ -316,8 +335,11 @@ export class RateLawCalculator extends Calculator {
             let rateRatio = rate2 / rate1;
             let aRatio = A2 / A1;
             let bRatio = B2 / B1;
-            for (let mi = 0; mi <= 3; mi++) {
-                for (let ni = 0; ni <= 3; ni++) {
+            let grid = [0, 0.5, 1, 1.5, 2, 2.5, 3];
+            for (let gi = 0; gi < grid.length; gi++) {
+                for (let gj = 0; gj < grid.length; gj++) {
+                    let mi = grid[gi];
+                    let ni = grid[gj];
                     let predicted = Math.pow(aRatio, mi) * Math.pow(bRatio, ni);
                     let err = Math.abs(predicted - rateRatio);
                     if (err < bestError) {
@@ -329,6 +351,7 @@ export class RateLawCalculator extends Calculator {
             }
             m = bestM;
             n = bestN;
+            fitError = bestError;
         }
         let k = rate1 / (Math.pow(A1, m) * Math.pow(B1, n));
         let expression = "rate = " + this.numberFormatter.format(k, 4);
@@ -347,11 +370,11 @@ export class RateLawCalculator extends Calculator {
             }
         }
         const kFormatted = this.numberFormatter.format(k, 4);
-        const explanation = "Order with respect to A: " + m + "; Order with respect to B: " + n + "; Rate constant k = " + kFormatted + "; Rate law: " + expression;
+        const explanation = "Order with respect to A: " + m + "; Order with respect to B: " + n + "; Rate constant k = " + kFormatted + "; Rate law: " + expression + (orderNote !== "" ? "; " + orderNote : "") + (isNaN(fitError) ? "" : "; grid-search fit error = " + this.numberFormatter.format(fitError, 6));
         return {
             value: expression,
             explanation: explanation,
-            metadata: { orderA: m, orderB: n, k: k, rateLaw: expression }
+            metadata: { orderA: m, orderB: n, k: k, rateLaw: expression, underdeterminedNote: orderNote, fitError: fitError }
         };
     }
 }
@@ -376,8 +399,14 @@ export class IntegratedRateLawCalculator extends SolveForCalculator {
 
     protected performCalculation(): void {
         const solveFor = this.getSolveFor();
-        const orderSelect = document.getElementById("irl-order") as HTMLSelectElement;
+        const orderSelect = document.getElementById("irl-order");
+        if (!(orderSelect instanceof HTMLSelectElement)) {
+            throw new Error("Reaction order selector is missing");
+        }
         const order = parseInt(orderSelect.value, 10);
+        if (isNaN(order)) {
+            throw new Error("Invalid reaction order");
+        }
         const A0 = this.getInput("irl-A0").getValue();
         const k = this.getInput("irl-k").getValue();
         const t = this.getInput("irl-t").getValue();
@@ -392,6 +421,9 @@ export class IntegratedRateLawCalculator extends SolveForCalculator {
             }
             if (k < 0) {
                 throw new Error("Rate constant cannot be negative");
+            }
+            if (t < 0) {
+                throw new Error("Time cannot be negative");
             }
             if (order === 0) {
                 result = Math.max(0, A0 - k * t);
@@ -475,6 +507,9 @@ export class IntegratedRateLawCalculator extends SolveForCalculator {
             }
             if (k < 0) {
                 throw new Error("Rate constant cannot be negative");
+            }
+            if (t < 0) {
+                throw new Error("Time cannot be negative");
             }
             if (order === 0) {
                 result = Math.max(0, A0 - k * t);
@@ -570,7 +605,7 @@ export class IntegratedRateLawCalculator extends SolveForCalculator {
  * Zero order: [A] vs t (linear)
  * First order: ln[A] vs t (linear)
  * Second order: 1/[A] vs t (linear)
- * Requires at least 4 data points.
+ * Requires at least 3 data points.
  */
 export class ReactionOrderCalculator extends Calculator {
     constructor() {
@@ -755,7 +790,11 @@ export class ReactionOrderCalculator extends Calculator {
             sumXY += x * y;
             sumX2 += x * x;
         }
-        return (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        let denom = n * sumX2 - sumX * sumX;
+        if (denom === 0) {
+            throw new Error("Cannot determine slope: all time values are identical");
+        }
+        return (n * sumXY - sumX * sumY) / denom;
     }
 }
 
@@ -840,6 +879,9 @@ export class CollisionTheoryCalculator extends SolveForCalculator {
             result = k / denominator;
             unit = "";
             formula = "p = k / (Z\u00B7e^(-Ea/RT))";
+            if (result < 0 || result > 1) {
+                formula += " (warning: steric factor should lie in [0, 1]; check inputs)";
+            }
         } else {
             throw new Error("Invalid solveFor value");
         }
@@ -919,6 +961,9 @@ export class CollisionTheoryCalculator extends SolveForCalculator {
             result = k / denominator;
             unit = "";
             formula = "p = k / (Z\u00B7e^(-Ea/RT))";
+            if (result < 0 || result > 1) {
+                formula += " (warning: steric factor should lie in [0, 1]; check inputs)";
+            }
         } else {
             throw new Error("Invalid solveFor value");
         }
