@@ -48,7 +48,13 @@ func TestParseFormulaErrors(t *testing.T) {
 		"()",
 		"H9999999",
 		"Fe2+",
+		"Fe2-",
 		"Cl-",
+		"Ca(OH)2",
+		"*5H2O",
+		"5*H2",
+		"*(H2",
+		"CuSO4·5H2O",
 	} {
 		counts, err := parseFormulaToCounts(f)
 		t.Logf("formula %q -> %+v, %v", f, counts, err)
@@ -94,7 +100,6 @@ func TestBalanceEquationFailures(t *testing.T) {
 	if _, err := BalanceEquation("H2 -> He", 4000); err == nil {
 		t.Error("expected error for unbalanceable equation")
 	}
-	// Empty sides.
 	if _, err := BalanceEquation("-> H2O", 4000); err == nil {
 		t.Error("expected error for empty reactants")
 	}
@@ -112,6 +117,56 @@ func TestBalanceEquationFailures(t *testing.T) {
 	// solveHomogeneous with no rows returns nil via unbalanceable input.
 	if _, err := BalanceEquation("Xy + Zz -> Qq", 4000); err == nil {
 		t.Log("unknown elements balanced (no charge/element mismatch detected)")
+	}
+	// Bracketed formulas balance through the multiplier path.
+	if got, err := BalanceEquation("Ca(OH)2 + CO2 -> CaCO3 + H2O", 4000); err != nil {
+		t.Errorf("brackets: %v", err)
+	} else if got == "" {
+		t.Error("brackets: empty result")
+	}
+	// Empty formulas parse to empty counts: no elements, no solution.
+	if _, err := BalanceEquation("() -> ()", 4000); err == nil {
+		t.Error("expected error for empty formulas")
+	}
+	// Parse failure surfaces through BalanceEquation.
+	if _, err := BalanceEquation("H2 + O2", 4000); err == nil {
+		t.Error("expected error for missing arrow")
+	}
+}
+
+func TestSolveHomogeneousEdgeCases(t *testing.T) {
+	// x + y - z = 0: trial solutions contain a zero, so every trial is
+	// rejected and the solver returns nil.
+	if sol := solveHomogeneous([][]Fraction{
+		{newFraction(1, 1), newFraction(1, 1), newFraction(-1, 1)},
+	}); sol != nil {
+		t.Errorf("expected nil, got %+v", sol)
+	}
+	// x - y = 0 with a negated first column: the raw solution leads with a
+	// negative coefficient, exercising the sign flip.
+	if sol := solveHomogeneous([][]Fraction{
+		{newFraction(-1, 1), newFraction(1, 1)},
+	}); sol == nil {
+		t.Error("expected a solution")
+	} else if sol[0].N <= 0 || sol[1].N <= 0 {
+		t.Errorf("expected positive solution, got %+v", sol)
+	}
+}
+
+func TestParseFormulaChargeMagnitudes(t *testing.T) {
+	counts, err := parseFormulaToCounts("Fe2-")
+	if err != nil {
+		t.Fatalf("Fe2-: %v", err)
+	}
+	if counts["Fe"] != 1 || counts["_charge"] != -2 {
+		t.Errorf("Fe2- = %+v", counts)
+	}
+	counts, err = parseFormulaToCounts("Fe+")
+	if err != nil {
+		t.Fatalf("Fe+: %v", err)
+	}
+	if counts["Fe"] != 1 || counts["_charge"] != 1 {
+		t.Errorf("Fe+ = %+v", counts)
 	}
 }
 
