@@ -4,7 +4,7 @@ import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
-import {RuntimeDetector} from "../../modules/runtimeDetector.js";
+import {isDesktop, visibleCalculators} from "../lib/desktopOnly";
 import {ThemeToggle} from "./ThemeToggle";
 import {WorkspaceList} from "./WorkspaceList";
 import {ExportImportButtons} from "./ExportImportButtons";
@@ -55,10 +55,11 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
 
     function filteredCalculators(): CalculatorInfo[] {
         let q = searchQuery().toLowerCase().trim();
+        let all = visibleCalculators(calculators());
         if (q === "") {
-            return calculators();
+            return all;
         }
-        return calculators().filter(function (calc: CalculatorInfo): boolean {
+        return all.filter(function (calc: CalculatorInfo): boolean {
             return calc.name.toLowerCase().indexOf(q) !== -1 ||
                 calc.category.toLowerCase().indexOf(q) !== -1 ||
                 calc.description.toLowerCase().indexOf(q) !== -1;
@@ -103,7 +104,9 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                 </span>
                 <input type="text" placeholder="Search calculators..." aria-label="Search calculators" value={searchQuery()} onInput={handleSearchInput} autocomplete="off" spellcheck={false} />
             </div>
-            <WorkspaceList />
+            <Show when={isDesktop()}>
+                <WorkspaceList />
+            </Show>
             <div class={styles.navRecent} />
             <nav class={styles.sidebarNav} data-tour="sidebar-nav">
                 <ul>
@@ -129,7 +132,7 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                 </ul>
             </nav>
             <div class={styles.sidebarFooter}>
-                <Show when={!RuntimeDetector.getInstance().isWebMode}>
+                <Show when={isDesktop()}>
                     <ExportImportButtons />
                     <PluginManagerPanel />
                 </Show>
