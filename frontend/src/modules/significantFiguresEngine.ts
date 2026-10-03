@@ -135,6 +135,9 @@ export class SignificantFiguresEngine {
         if (value === 0) {
             return 0;
         }
+        if (!isFinite(value)) {
+            return NaN;
+        }
         let magnitude = Math.floor(Math.log10(Math.abs(value)));
         let factor = Math.pow(10, sigFigs - 1 - magnitude);
         let rounded = Math.round(value * factor) / factor;
@@ -197,13 +200,21 @@ export class SignificantFiguresEngine {
      */
     public static countDecimalPlaces(value: string): number {
         let trimmed = value.trim();
-        let dotIndex = trimmed.indexOf(".");
-        if (dotIndex === -1) {
-            return 0;
-        }
-        // Handle scientific notation
         let eIndex = trimmed.toLowerCase().indexOf("e");
-        let fractionalEnd = eIndex !== -1 ? eIndex : trimmed.length;
-        return fractionalEnd - dotIndex - 1;
+        let exponent = 0;
+        let mantissa = trimmed;
+        if (eIndex !== -1) {
+            exponent = parseInt(trimmed.slice(eIndex + 1), 10);
+            if (isNaN(exponent)) {
+                exponent = 0;
+            }
+            mantissa = trimmed.slice(0, eIndex);
+        }
+        let dotIndex = mantissa.indexOf(".");
+        if (dotIndex === -1) {
+            return Math.max(0, -exponent);
+        }
+        let fracLen = mantissa.length - dotIndex - 1;
+        return Math.max(0, fracLen - exponent);
     }
 }
