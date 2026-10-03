@@ -90,6 +90,9 @@ func (a *API) Router() *gin.Engine {
 	{
 		public.GET("/calculators", a.listCalculators)
 		public.POST("/calculators/:type", a.runCalculator)
+		// Stateless PubChem proxy: no database required, so it stays up on
+		// the anonymous web build while the DB-backed routes below 501 there.
+		public.GET("/compounds/lookup", a.lookupCompounds)
 		public.GET("/compounds", a.searchCompounds)
 		public.GET("/compounds/:id", a.getCompound)
 
