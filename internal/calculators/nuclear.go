@@ -36,6 +36,9 @@ func HalfLife(ctx context.Context, input CalculationInput) (CalculationResult, e
 		if N0 <= 0 {
 			return CalculationResult{}, errors.New("initial quantity must be positive")
 		}
+		if t < 0 {
+			return CalculationResult{}, errors.New("time cannot be negative")
+		}
 		result = N0 * math.Pow(0.5, t/tHalf)
 		unit = ""
 	case "time":
@@ -86,6 +89,9 @@ func HalfLife(ctx context.Context, input CalculationInput) (CalculationResult, e
 		}
 		if Nt >= N0 {
 			return CalculationResult{}, errors.New("remaining quantity must be less than initial quantity")
+		}
+		if t <= 0 {
+			return CalculationResult{}, errors.New("time must be positive")
 		}
 		result = t / (math.Log(Nt/N0) / math.Log(0.5))
 		unit = ""
