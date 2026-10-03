@@ -686,18 +686,22 @@ export class DeBroglieWavelengthCalculator extends Calculator {
 
         let lambdaM: number = PLANCK / (massKg * velocity);
 
-        // Choose appropriate unit based on scale
+        // Choose appropriate unit based on scale. Large wavelengths use
+        // nm/µm — never angstroms above 1e-7 m (1 µm as 10000 Å is noise).
         let lambdaDisplay: number;
         let unit: string;
         if (lambdaM < 1e-12) {
             lambdaDisplay = lambdaM * 1e12;
             unit = "pm";
-        } else if (lambdaM < 1e-7) {
+        } else if (lambdaM < 1e-6) {
             lambdaDisplay = lambdaM * 1e9;
             unit = "nm";
+        } else if (lambdaM < 1e-3) {
+            lambdaDisplay = lambdaM * 1e6;
+            unit = "µm";
         } else {
-            lambdaDisplay = lambdaM * 1e10;
-            unit = "\u00C5";
+            lambdaDisplay = lambdaM;
+            unit = "m";
         }
 
         let html: string = "";
@@ -733,12 +737,15 @@ export class DeBroglieWavelengthCalculator extends Calculator {
         if (lambdaM < 1e-12) {
             lambdaDisplay = lambdaM * 1e12;
             unit = "pm";
-        } else if (lambdaM < 1e-7) {
+        } else if (lambdaM < 1e-6) {
             lambdaDisplay = lambdaM * 1e9;
             unit = "nm";
+        } else if (lambdaM < 1e-3) {
+            lambdaDisplay = lambdaM * 1e6;
+            unit = "\u00B5m";
         } else {
-            lambdaDisplay = lambdaM * 1e10;
-            unit = "\u00C5";
+            lambdaDisplay = lambdaM;
+            unit = "m";
         }
         let value: string = this.numberFormatter.format(lambdaDisplay, 4) + " " + unit;
         let explanation: string = "\u03BB = h / (m\u00B7v); ";
@@ -802,8 +809,14 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             if (isNaN(freq)) {
                 throw new Error("Please enter wavelength or frequency");
             }
+            if (freq <= 0) {
+                throw new Error("Frequency must be positive");
+            }
             if (isNaN(workFunctionEv)) {
                 throw new Error("Please enter the work function");
+            }
+            if (workFunctionEv < 0) {
+                throw new Error("Work function cannot be negative");
             }
             let energyEv: number = (PLANCK * freq) / ELEMENTARY_CHARGE;
             let ke: number = energyEv - workFunctionEv;
@@ -825,6 +838,9 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             if (isNaN(workFunctionEv)) {
                 throw new Error("Please enter the work function");
             }
+            if (workFunctionEv < 0) {
+                throw new Error("Work function cannot be negative");
+            }
             let thresholdFreq: number = (workFunctionEv * ELEMENTARY_CHARGE) / PLANCK;
             let thresholdWavelengthNm: number = (SPEED_OF_LIGHT / thresholdFreq) * 1e9;
             html += "<p>Threshold frequency: <strong>" + this.numberFormatter.format(thresholdFreq, 4) + " Hz</strong></p>";
@@ -844,6 +860,9 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             if (isNaN(keEv)) {
                 throw new Error("Please enter the kinetic energy");
             }
+            if (keEv < 0) {
+                throw new Error("Kinetic energy cannot be negative");
+            }
             let photonEnergyEv: number = (PLANCK * freq) / ELEMENTARY_CHARGE;
             let phi: number = photonEnergyEv - keEv;
             html += "<p>Photon energy: " + this.numberFormatter.format(photonEnergyEv, 4) + " eV</p>";
@@ -852,10 +871,16 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             if (isNaN(keEv)) {
                 throw new Error("Please enter the kinetic energy");
             }
+            if (keEv < 0) {
+                throw new Error("Kinetic energy cannot be negative");
+            }
             if (isNaN(workFunctionEv)) {
                 throw new Error("Please enter the work function");
             }
             let totalEnergyEv: number = keEv + workFunctionEv;
+            if (totalEnergyEv <= 0) {
+                throw new Error("Photon energy (KE + work function) must be positive");
+            }
             let totalEnergyJ: number = totalEnergyEv * ELEMENTARY_CHARGE;
             let freq: number = totalEnergyJ / PLANCK;
             let lambdaM: number = SPEED_OF_LIGHT / freq;
@@ -888,8 +913,14 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             if (isNaN(freq)) {
                 throw new Error("Please enter wavelength or frequency");
             }
+            if (freq <= 0) {
+                throw new Error("Frequency must be positive");
+            }
             if (isNaN(workFunctionEv)) {
                 throw new Error("Please enter the work function");
+            }
+            if (workFunctionEv < 0) {
+                throw new Error("Work function cannot be negative");
             }
             let energyEv: number = (PLANCK * freq) / ELEMENTARY_CHARGE;
             let ke: number = energyEv - workFunctionEv;
@@ -924,6 +955,9 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             if (isNaN(workFunctionEv)) {
                 throw new Error("Please enter the work function");
             }
+            if (workFunctionEv < 0) {
+                throw new Error("Work function cannot be negative");
+            }
             let thresholdFreq: number = (workFunctionEv * ELEMENTARY_CHARGE) / PLANCK;
             let thresholdWavelengthNm: number = (SPEED_OF_LIGHT / thresholdFreq) * 1e9;
             let value: string = this.numberFormatter.format(thresholdFreq, 4) + " Hz";
@@ -953,6 +987,9 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             if (isNaN(keEv)) {
                 throw new Error("Please enter the kinetic energy");
             }
+            if (keEv < 0) {
+                throw new Error("Kinetic energy cannot be negative");
+            }
             let photonEnergyEv: number = (PLANCK * freq) / ELEMENTARY_CHARGE;
             let phi: number = photonEnergyEv - keEv;
             let value: string = this.numberFormatter.format(phi, 4) + " eV";
@@ -971,10 +1008,16 @@ export class PhotoelectricEffectCalculator extends SolveForCalculator {
             if (isNaN(keEv)) {
                 throw new Error("Please enter the kinetic energy");
             }
+            if (keEv < 0) {
+                throw new Error("Kinetic energy cannot be negative");
+            }
             if (isNaN(workFunctionEv)) {
                 throw new Error("Please enter the work function");
             }
             let totalEnergyEv: number = keEv + workFunctionEv;
+            if (totalEnergyEv <= 0) {
+                throw new Error("Photon energy (KE + work function) must be positive");
+            }
             let totalEnergyJ: number = totalEnergyEv * ELEMENTARY_CHARGE;
             let freq: number = totalEnergyJ / PLANCK;
             let lambdaM: number = SPEED_OF_LIGHT / freq;
