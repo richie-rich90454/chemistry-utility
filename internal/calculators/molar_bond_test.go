@@ -44,6 +44,18 @@ func TestMolarMass_ExtraBranches(t *testing.T) {
 			t.Errorf("expected error for %q", f)
 		}
 	}
+	// Bracket-multiplier overflow and hydrate edge parts.
+	for _, f := range []string{"(H2)99999999", "*(H2", "12-", "()"} {
+		if _, err := CalculateMolarMass(ctx, CalculationInput{"formula": f}); err == nil {
+			t.Errorf("expected error for %q", f)
+		}
+	}
+	for _, f := range []string{"5*H2", "*H2"} {
+		// Degenerate hydrate parts are skipped; the remainder still parses.
+		if _, err := CalculateMolarMass(ctx, CalculationInput{"formula": f}); err != nil {
+			t.Errorf("unexpected error for %q: %v", f, err)
+		}
+	}
 	if _, err := CalculateMolarMass(ctx, CalculationInput{}); err == nil {
 		t.Error("expected error for missing formula")
 	}
@@ -83,6 +95,11 @@ func TestBondType_ExtraBranches(t *testing.T) {
 		t.Fatalf("H-F: %v", err)
 	}
 	t.Logf("H-F bond type = %v", got.Metadata["bondType"])
+	// F-Si: ΔEN = 2.08 ≥ 2.0 between two non-metals -> Ionic.
+	got, err = BondType(ctx, CalculationInput{"element1": "F", "element2": "Si"})
+	if err != nil || got.Metadata["bondType"] != "Ionic" {
+		t.Errorf("F-Si = %+v, %v", got, err)
+	}
 	// Noble gas without EN data.
 	got, err = BondType(ctx, CalculationInput{"element1": "He", "element2": "O"})
 	if err != nil || got.Metadata["bondType"] != "Unknown" {
