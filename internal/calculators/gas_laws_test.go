@@ -48,6 +48,8 @@ func TestIdealGasLaw_AllBranches(t *testing.T) {
 		{"P": 1.0, "V": 1.0, "n": 0.0, "solveFor": "T"},
 		{"P": 1.0, "V": 1.0, "n": -1.0, "solveFor": "T"},
 		{"P": -1.0, "V": 1.0, "n": 1.0, "solveFor": "T"},
+		{"P": 1.0, "V": 1.0, "n": -1.0, "T": 273.15, "solveFor": "V"},
+		{"P": 1.0, "V": 1.0, "n": -1.0, "solveFor": "T"},
 		{"P": 1.0, "V": 1.0, "n": 1.0},
 	} {
 		if _, err := IdealGasLaw(ctx, bad); err == nil {
