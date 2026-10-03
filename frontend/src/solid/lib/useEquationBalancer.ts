@@ -17,6 +17,17 @@ export interface BalanceResult {
     };
 }
 
+function splitSpecies(s: string): BalancedSpecies {
+    let m = /^(\d+)(.*)$/.exec(s);
+    if (m) {
+        return {coefficient: parseInt(m[1], 10), formula: m[2]};
+    }
+    return {coefficient: 1, formula: s};
+}
+function speciesFromTerms(terms: string[]): BalancedSpecies[] {
+    return terms.map(splitSpecies);
+}
+
 function useEquationBalancer(): {
     equation: () => string;
     setEquation: (next: string) => void;
@@ -45,17 +56,6 @@ function useEquationBalancer(): {
         setResult(null);
         setError("");
         setLoading(false);
-    }
-
-    function splitSpecies(s: string): BalancedSpecies {
-        let m = /^(\d*)(.*)$/.exec(s);
-        if (m && m[1]) {
-            return {coefficient: parseInt(m[1], 10), formula: m[2]};
-        }
-        return {coefficient: 1, formula: s};
-    }
-    function speciesFromTerms(terms: string[]): BalancedSpecies[] {
-        return terms.map(splitSpecies);
     }
 
     function balance(): void {
@@ -130,4 +130,4 @@ function useEquationBalancer(): {
         clear: clear
     };
 }
-export {useEquationBalancer};
+export {useEquationBalancer, splitSpecies, speciesFromTerms};
