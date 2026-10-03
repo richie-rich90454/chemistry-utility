@@ -160,7 +160,14 @@ func buildRouter(distDir string, rateLimitPerMinute int) *gin.Engine {
 	indexPath := filepath.Join(distDir, "index.html")
 	r.NoRoute(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/api/") {
-			c.JSON(http.StatusNotFound, gin.H{"error": "API endpoint not found"})
+			c.Header("Content-Type", "application/problem+json")
+			c.JSON(http.StatusNotFound, gin.H{
+				"type":     "https://chemistry-utility.dev/errors/404",
+				"title":    "Not Found",
+				"status":   404,
+				"detail":   "API endpoint not found",
+				"instance": c.Request.URL.Path,
+			})
 			return
 		}
 		if _, err := os.Stat(indexPath); err != nil {
@@ -192,6 +199,9 @@ func main() {
 		Addr:              ":" + port,
 		Handler:           r,
 		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 	go func() {
 		log.Printf("Starting server on :%s (no database)", port)
