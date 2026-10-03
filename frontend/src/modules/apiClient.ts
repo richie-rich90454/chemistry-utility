@@ -50,12 +50,15 @@ export class ApiClient {
         try {
             let stored: string | null = localStorage.getItem("chemutil_auth");
             if (stored) {
-                let parsed: { accessToken: string } = JSON.parse(stored);
-                if (parsed && parsed.accessToken) {
-                    this.token = parsed.accessToken;
+                let parsed: unknown = JSON.parse(stored);
+                if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+                    let token: unknown = (parsed as Record<string, unknown>)["accessToken"];
+                    if (typeof token === "string" && token !== "") {
+                        this.token = token;
+                    }
                 }
             }
-        } catch (e) {
+        } catch {
             this.token = null;
         }
     }
@@ -65,13 +68,18 @@ export class ApiClient {
             let stored: string | null = localStorage.getItem("chemutil_auth");
             let data: Record<string, unknown>;
             if (stored) {
-                data = JSON.parse(stored);
+                let parsed: unknown = JSON.parse(stored);
+                if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+                    data = parsed as Record<string, unknown>;
+                } else {
+                    data = {};
+                }
             } else {
                 data = {};
             }
             data["accessToken"] = token;
             localStorage.setItem("chemutil_auth", JSON.stringify(data));
-        } catch (e) {
+        } catch {
             // storage unavailable
         }
     }
@@ -80,12 +88,15 @@ export class ApiClient {
         try {
             let stored: string | null = localStorage.getItem("chemutil_auth");
             if (stored) {
-                let data: Record<string, unknown> = JSON.parse(stored);
-                delete data["accessToken"];
-                delete data["refreshToken"];
-                localStorage.setItem("chemutil_auth", JSON.stringify(data));
+                let parsed: unknown = JSON.parse(stored);
+                if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+                    let data: Record<string, unknown> = parsed as Record<string, unknown>;
+                    delete data["accessToken"];
+                    delete data["refreshToken"];
+                    localStorage.setItem("chemutil_auth", JSON.stringify(data));
+                }
             }
-        } catch (e) {
+        } catch {
             // storage unavailable
         }
     }
@@ -129,12 +140,15 @@ export class ApiClient {
         try {
             let stored: string | null = localStorage.getItem("chemutil_auth");
             if (stored) {
-                let parsed: { refreshToken: string } = JSON.parse(stored);
-                if (parsed && parsed.refreshToken) {
-                    refreshToken = parsed.refreshToken;
+                let parsed: unknown = JSON.parse(stored);
+                if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+                    let rt: unknown = (parsed as Record<string, unknown>)["refreshToken"];
+                    if (typeof rt === "string" && rt !== "") {
+                        refreshToken = rt;
+                    }
                 }
             }
-        } catch (e) {
+        } catch {
             refreshToken = null;
         }
         if (!refreshToken) {
@@ -151,23 +165,31 @@ export class ApiClient {
             this.clearToken();
             return;
         }
-        let data: { accessToken: string; refreshToken: string } = await response.json();
-        if (data && data.accessToken) {
-            this.setToken(data.accessToken);
-        }
-        if (data && data.refreshToken) {
-            try {
-                let stored: string | null = localStorage.getItem("chemutil_auth");
-                let authData: Record<string, unknown>;
-                if (stored) {
-                    authData = JSON.parse(stored);
-                } else {
-                    authData = {};
+        let data: unknown = await response.json();
+        if (data !== null && typeof data === "object" && !Array.isArray(data)) {
+            let obj: Record<string, unknown> = data as Record<string, unknown>;
+            if (typeof obj["accessToken"] === "string") {
+                this.setToken(obj["accessToken"] as string);
+            }
+            if (typeof obj["refreshToken"] === "string") {
+                try {
+                    let stored: string | null = localStorage.getItem("chemutil_auth");
+                    let authData: Record<string, unknown>;
+                    if (stored) {
+                        let parsed: unknown = JSON.parse(stored);
+                        if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+                            authData = parsed as Record<string, unknown>;
+                        } else {
+                            authData = {};
+                        }
+                    } else {
+                        authData = {};
+                    }
+                    authData["refreshToken"] = obj["refreshToken"];
+                    localStorage.setItem("chemutil_auth", JSON.stringify(authData));
+                } catch {
+                    // storage unavailable
                 }
-                authData["refreshToken"] = data.refreshToken;
-                localStorage.setItem("chemutil_auth", JSON.stringify(authData));
-            } catch (e) {
-                // storage unavailable
             }
         }
     }
@@ -194,6 +216,9 @@ export class ApiClient {
             response = await fetch(url, options);
         } catch (e) {
             clearTimeout(timeoutId);
+            if (e instanceof DOMException && e.name === "AbortError") {
+                throw new ApiError(0, "about:blank", "Request timed out");
+            }
             throw new ApiError(0, "about:blank", "Network error");
         }
         clearTimeout(timeoutId);
@@ -218,6 +243,9 @@ export class ApiClient {
                     retryResponse = await fetch(url, retryOptions);
                 } catch (e) {
                     clearTimeout(retryTimeoutId);
+                    if (e instanceof DOMException && e.name === "AbortError") {
+                        throw new ApiError(0, "about:blank", "Request timed out");
+                    }
                     throw new ApiError(0, "about:blank", "Network error");
                 }
                 clearTimeout(retryTimeoutId);
@@ -225,24 +253,38 @@ export class ApiClient {
                     let errorBody: unknown;
                     try {
                         errorBody = await retryResponse.json();
-                    } catch (e) {
+                    } catch {
                         errorBody = null;
                     }
                     throw this.parseRfc7807Error(errorBody);
                 }
-                return (await retryResponse.json()) as T;
+                if (retryResponse.status === 204 || retryResponse.status === 205) {
+                    return undefined as unknown as T;
+                }
+                try {
+                    return (await retryResponse.json()) as T;
+                } catch {
+                    throw new ApiError(retryResponse.status, url, "Invalid JSON response");
+                }
             }
         }
         if (!response.ok) {
             let errorBody: unknown;
             try {
                 errorBody = await response.json();
-            } catch (e) {
+            } catch {
                 errorBody = null;
             }
             throw this.parseRfc7807Error(errorBody);
         }
-        return (await response.json()) as T;
+        if (response.status === 204 || response.status === 205) {
+            return undefined as unknown as T;
+        }
+        try {
+            return (await response.json()) as T;
+        } catch {
+            throw new ApiError(response.status, url, "Invalid JSON response");
+        }
     }
     public async get<T>(path: string): Promise<T> {
         return this.request<T>("GET", path);
