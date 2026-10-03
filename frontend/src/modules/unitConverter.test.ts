@@ -145,14 +145,16 @@ describe("UnitConverter", () => {
             expect(result.value).toBeCloseTo(10000, 0);
         });
 
-        it("should convert 1 M to 1000000 ppm", () => {
-            let result = UnitConverter.convert(1, "M", "ppm", "concentration");
-            expect(result.value).toBeCloseTo(1e6, 0);
+        it("should refuse M to ppm without molar mass and density", () => {
+            expect(function (): void {
+                UnitConverter.convert(1, "M", "ppm", "concentration");
+            }).toThrow("molar mass");
         });
 
-        it("should convert 1 ppm to 1e-6 M", () => {
-            let result = UnitConverter.convert(1, "ppm", "M", "concentration");
-            expect(result.value).toBeCloseTo(1e-6, 10);
+        it("should refuse ppm to M without molar mass and density", () => {
+            expect(function (): void {
+                UnitConverter.convert(1, "ppm", "M", "concentration");
+            }).toThrow("molar mass");
         });
 
         it("should convert 1 ppm to 1000 ppb", () => {
