@@ -1,9 +1,10 @@
 import {render, fireEvent} from "@solidjs/testing-library";
 import {Router, Route} from "@solidjs/router";
 import type {JSX} from "solid-js";
-import {describe, it, expect, beforeEach} from "vitest";
+import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 import {MobileBottomTabs} from "./MobileBottomTabs";
 import {useNavSheet, reset as resetNavSheet} from "../stores/navSheet";
+import {RuntimeDetector} from "../../modules/runtimeDetector.js";
 function Host(): JSX.Element {
     return <MobileBottomTabs />;
 }
@@ -19,6 +20,9 @@ function renderHost() {
 describe("MobileBottomTabs", function (): void {
     beforeEach(function (): void {
         resetNavSheet();
+    });
+    afterEach(function (): void {
+        vi.restoreAllMocks();
     });
     it("renders the top banner with a navigation landmark", function (): void {
         let result = renderHost();
@@ -36,5 +40,15 @@ describe("MobileBottomTabs", function (): void {
         fireEvent.click(menuButton);
         let sheet = useNavSheet();
         expect(sheet.isOpen()).toBe(true);
+    });
+    it("shows the dashboard title for the root path on desktop", function (): void {
+        let result = renderHost();
+        expect(result.getByText("Dashboard")).toBeTruthy();
+    });
+    it("falls back to the app title for desktop-only paths in web mode", function (): void {
+        vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
+        let result = renderHost();
+        expect(result.queryByText("Dashboard")).toBeNull();
+        expect(result.getByText("Chemistry Utility")).toBeTruthy();
     });
 });
