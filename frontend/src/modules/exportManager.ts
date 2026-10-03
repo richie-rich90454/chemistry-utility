@@ -34,7 +34,14 @@ export class ExportManager {
 	public getHistory(): HistoryEntry[] {
 		try {
 			let stored = localStorage.getItem(HISTORY_KEY);
-			return stored ? JSON.parse(stored) : [];
+			if (!stored) {
+				return [];
+			}
+			let parsed: unknown = JSON.parse(stored);
+			if (!Array.isArray(parsed)) {
+				return [];
+			}
+			return parsed as HistoryEntry[];
 		} catch {
 			return [];
 		}
