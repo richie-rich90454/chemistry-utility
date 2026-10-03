@@ -1,0 +1,25 @@
+# One-command local environment with seeded defaults (see .env.example).
+# Usage:
+#   docker compose up --build      # foreground, rebuilds on source changes
+#   docker compose up -d --build   # detached
+#   docker compose down
+#
+# The app is then available at http://localhost:6005.
+# The web server is anonymous by design: no database is opened and
+# compound search / plugin storage respond 501 (desktop app only).
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: chemistry-utility:latest
+    container_name: chemistry-utility
+    ports:
+      - "${PORT:-6005}:6005"
+    environment:
+      PORT: "6005"
+      DIST_DIR: /app/frontend/dist
+      RATE_LIMIT_PER_MINUTE: "${RATE_LIMIT_PER_MINUTE:-100}"
+      # TRUSTED_PROXIES: "${TRUSTED_PROXIES:-}"
+    restart: unless-stopped
