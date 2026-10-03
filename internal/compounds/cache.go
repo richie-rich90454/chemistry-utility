@@ -64,10 +64,15 @@ func (c *CompoundCache) Search(ctx context.Context, query string, searchType str
 		return nil, fmt.Errorf("pubchem search: %w", err)
 	}
 
-	// Cache PubChem results in the local database
+	// Cache PubChem results in the local database, skipping rows already
+	// present (same source, name, and formula) so repeated searches do not
+	// insert duplicates.
 	for i := range remoteResults {
 		compound := &remoteResults[i]
 		compound.Source = "pubchem"
+		if c.isCached(ctx, compound) {
+			continue
+		}
 		if saveErr := c.store.Create(ctx, compound); saveErr != nil {
 			// Log the error but don't fail the search; caching is best-effort.
 			// In production, replace with structured logging.
@@ -76,6 +81,22 @@ func (c *CompoundCache) Search(ctx context.Context, query string, searchType str
 	}
 
 	return remoteResults, nil
+}
+
+// isCached reports whether a compound with the same (source, name,
+// formula) is already stored. Lookup failures return false so caching
+// stays best-effort; the insert path is unchanged.
+func (c *CompoundCache) isCached(ctx context.Context, compound *db.Compound) bool {
+	existing, err := c.store.GetByFormula(ctx, compound.Formula)
+	if err != nil {
+		return false
+	}
+	for _, e := range existing {
+		if e.Source == compound.Source && e.Name == compound.Name && e.Formula == compound.Formula {
+			return true
+		}
+	}
+	return false
 }
 
 // GetByID retrieves a compound from the local cache by its UUID.
