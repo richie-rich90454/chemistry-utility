@@ -268,7 +268,9 @@ export class StoichiometryCalculator extends Calculator {
                 }
             }
             let molesProduct = minRatio * product.getCoefficient();
-            this.resultDisplay.showResult("<p>Limiting reactant: " + HtmlSanitizer.escape(limitingReactant ?? "") + "</p><p>Moles of " + HtmlSanitizer.escape(productFormula) + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
+            // reactants is never empty here (BalancedEquation.parse throws
+            // on empty terms), so the loop above always assigns a reactant.
+            this.resultDisplay.showResult("<p>Limiting reactant: " + HtmlSanitizer.escape(limitingReactant as string) + "</p><p>Moles of " + HtmlSanitizer.escape(productFormula) + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
         }
         else {
             throw new Error("Invalid calculation type");
