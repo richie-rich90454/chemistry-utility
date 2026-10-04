@@ -56,8 +56,9 @@ export class RuntimeDetector {
      *  batch calculator, export/import, and plugins are hidden. False in the
      *  Wails desktop app and in unit tests. */
     public get isWebMode(): boolean {
-        let env = (import.meta as unknown as { env?: { MODE?: string } }).env;
-        let mode: string = env ? (env.MODE || "") : "";
+        // import.meta.env is always defined in Vite bundles; tests set
+        // MODE per case below so every path is reachable in unit tests.
+        let mode: string = import.meta.env.MODE || "";
         if (mode === "web") {
             return true;
         }
