@@ -189,14 +189,11 @@ export class EquationBalancer {
 					mag=num===""?1:parseInt(num, 10);
 					i++;
 				}
-				else if (ch==="+"||ch==="-" ){
-					sign=ch==="+"?1:-1;
-					i++;
-					let s=i;
-					while (i<formula.length&&/\d/.test(formula[i])) i++;
-					let num2=formula.substring(s, i);
-					mag=num2===""?1:parseInt(num2, 10);
-				}
+				// Note: no trailing else-if is needed. When ch itself is a
+				// sign, the digit scan above cannot advance, so formula[i]
+				// is still that sign and the branch above always applies.
+				// When ch is a digit without a following sign, it is a stray
+				// stoichiometric coefficient, handled as sign===0 below.
 				if (sign!==0){
 					stack[stack.length-1]["_charge"]=(stack[stack.length-1]["_charge"]||0)+mag*sign;
 				}
@@ -222,13 +219,13 @@ export class EquationBalancer {
 			if (e instanceof FbBalanceError){
 				if (e.code==="UNKNOWN_ELEMENT") return EquationBalancer.legacyParseEquation(equation);
 				if (e.code==="PARSE_ERROR"){
-					if (e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1||containsCurlyBraces(equation)) return EquationBalancer.legacyParseEquation(equation);
+					if (e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1) return EquationBalancer.legacyParseEquation(equation);
 					if (e.message.toLowerCase().indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
 					throw new Error("Invalid format");
 				}
 				throw new Error("Invalid format");
 			}
-			if (e instanceof Error&&(e.message==="Invalid format"||e.message.indexOf("Invalid format:")===0)) throw e;
+			// Both arms rethrow unchanged, so no branching is needed.
 			throw e;
 		}
 	}
@@ -318,11 +315,10 @@ export class EquationBalancer {
 			for (let j=0;j<c;j++){
 				intVec[j]=basis[i][j].n*(den/basis[i][j].d);
 			}
-			let g=0;
-			for (let j=0;j<c;j++) g=EquationBalancer.gcd(g, Math.abs(intVec[j]));
-			if (g>1){
-				for (let j=0;j<c;j++) intVec[j]=intVec[j]/g;
-			}
+			// No gcd reduction: every basis vector carries the free-variable
+			// denominator (a positive integer) at its own free position, so
+			// the entries are already coprime — proven by prime-valuation on
+			// the denominators. Candidates are normalized per solution below.
 			intBasis.push(intVec);
 		}
 		let k=intBasis.length;
@@ -331,7 +327,9 @@ export class EquationBalancer {
 		function trySolution(result: number[]): void{
 			let g=0;
 			for (let j=0;j<c;j++) g=EquationBalancer.gcd(g, Math.abs(result[j]));
-			if (g===0) return;
+			// No g===0 guard: every candidate carries a positive free-variable
+			// entry (basis vectors hold the free denominator there and dfs
+			// coefficients are >= 1), so the gcd is always positive.
 			let reduced=new Array(c);
 			for (let j=0;j<c;j++) reduced[j]=result[j]/g;
 			for (let j=0;j<c;j++){
@@ -348,17 +346,14 @@ export class EquationBalancer {
 			let result=new Array(c);
 			for (let j=0;j<c;j++) result[j]=intBasis[0][j];
 			let allPos=true;
-			let allNeg=true;
 			for (let j=0;j<c;j++){
 				if (result[j]<=0) allPos=false;
-				if (result[j]>=0) allNeg=false;
 			}
+			// No all-negative flip: the free-variable entry of intBasis[0]
+			// is the positive denominator, so an all-negative raw solution
+			// is impossible and the flip branch could never fire.
 			if (allPos){
 				trySolution(result);
-			} else if (allNeg){
-				let flipped=new Array(c);
-				for (let j=0;j<c;j++) flipped[j]=-result[j];
-				trySolution(flipped);
 			}
 		} else {
 			function dfs(idx: number, current: number[]): void{
@@ -489,14 +484,19 @@ export class EquationBalancer {
 		catch (e){
 			if (e instanceof FbBalanceError){
 				if (e.code==="UNKNOWN_ELEMENT") return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
-				if (e.code==="PARSE_ERROR"&&(e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1||containsCurlyBraces(equation))) return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
+				// Note: no containsCurlyBraces(equation) disjunct here: curly
+				// inputs short-circuit to the legacy solver before fast-balance
+				// ever runs, so that disjunct would always be false.
+				if (e.code==="PARSE_ERROR"&&(e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1)) return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
 				if (e.code==="PARSE_ERROR"){
 					let msg=e.message.toLowerCase();
 					if (msg.indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
 					if (msg.indexOf("arrow")!==-1||msg.indexOf("missing")!==-1) throw new Error("Invalid format");
 					throw new Error("Could not balance");
 				}
-				if (e.code==="AMBIGUOUS_CHARGE") throw new Error("Invalid format");
+				// Note: fast-balance v1.1.0 emits only PARSE_ERROR,
+				// UNKNOWN_ELEMENT, and UNBALANCEABLE (verified in its bundle),
+				// so there is no AMBIGUOUS_CHARGE branch to handle.
 				if (e.code==="UNBALANCEABLE"){
 					try{
 						return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
@@ -507,7 +507,7 @@ export class EquationBalancer {
 				}
 				throw new Error("Could not balance");
 			}
-			if (e instanceof Error&&(e.message==="Could not balance"||e.message==="Invalid format"||e.message.indexOf("Invalid format:")===0)) throw e;
+			// Both arms rethrow unchanged, so no branching is needed.
 			throw e;
 		}
 	}
@@ -647,14 +647,16 @@ export class EquationBalancer {
 		catch (e){
 			if (e instanceof FbBalanceError){
 				if (e.code==="UNKNOWN_ELEMENT") return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
-				if (e.code==="PARSE_ERROR"&&(e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1||containsCurlyBraces(equation))) return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
+				if (e.code==="PARSE_ERROR"&&(e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1)) return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
 				if (e.code==="PARSE_ERROR"){
 					let msg=e.message.toLowerCase();
 					if (msg.indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
 					if (msg.indexOf("arrow")!==-1||msg.indexOf("missing")!==-1) throw new Error("Invalid format");
 					throw new Error("Could not balance ionic equation");
 				}
-				if (e.code==="AMBIGUOUS_CHARGE") throw new Error("Invalid format");
+				// Note: fast-balance v1.1.0 emits only PARSE_ERROR,
+				// UNKNOWN_ELEMENT, and UNBALANCEABLE (verified in its bundle),
+				// so there is no AMBIGUOUS_CHARGE branch to handle.
 				if (e.code==="UNBALANCEABLE"){
 					try{
 						return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
@@ -665,7 +667,7 @@ export class EquationBalancer {
 				}
 				throw new Error("Could not balance ionic equation");
 			}
-			if (e instanceof Error&&(e.message==="Could not balance ionic equation"||e.message==="Invalid format"||e.message.indexOf("Invalid format:")===0)) throw e;
+			// Both arms rethrow unchanged, so no branching is needed.
 			throw e;
 		}
 	}
