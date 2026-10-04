@@ -219,15 +219,15 @@ export class CombinedGasLawCalculator extends SolveForCalculator {
 		} else {
 			throw new Error("Invalid solveFor");
 		}
-		let unit: string;
+		let unit: string = "";
 		if (solveFor.includes("P")) {
 			unit = "pressure units";
 		} else if (solveFor.includes("V")) {
 			unit = "volume units";
-		} else if (solveFor.includes("T")) {
-			unit = "K";
 		} else {
-			unit = "";
+			// solveFor is validated above to one of P1/V1/T1/P2/V2/T2, so
+			// reaching here means it contains "T".
+			unit = "K";
 		}
 		this.resultDisplay.showFormula(formula, result, unit);
 	}
@@ -286,15 +286,15 @@ export class CombinedGasLawCalculator extends SolveForCalculator {
 		} else {
 			throw new Error("Invalid solveFor");
 		}
-		let unit: string;
+		let unit: string = "";
 		if (solveFor.includes("P")) {
 			unit = "pressure units";
 		} else if (solveFor.includes("V")) {
 			unit = "volume units";
-		} else if (solveFor.includes("T")) {
-			unit = "K";
 		} else {
-			unit = "";
+			// solveFor is validated above to one of P1/V1/T1/P2/V2/T2, so
+			// reaching here means it contains "T".
+			unit = "K";
 		}
 		const formatted = this.numberFormatter.format(result, 4);
 		return { value: formatted + " " + unit, explanation: formula + " = " + formatted + " " + unit };
