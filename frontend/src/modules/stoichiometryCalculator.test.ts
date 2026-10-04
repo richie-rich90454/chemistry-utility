@@ -70,6 +70,10 @@ describe("stoichiometryCalculator", () => {
         it("should default coefficient to 1 when omitted", () => {
             expect(parseTerm("O2")).toEqual({ formula: "O2", coefficient: 1 });
         });
+
+        it("should throw for an empty term", () => {
+            expect(() => parseTerm("")).toThrow("Invalid term");
+        });
     });
 
     describe("calculateStoichiometry", () => {
@@ -186,6 +190,56 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
             expect(() => calculateStoichiometry(equation)).toThrow("Invalid calculation type");
         });
+
+        it("should throw for unknown product in product-from-reactant", () => {
+            setOrCreateSelect("calculation-type", "product-from-reactant", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
+            setOrCreateInput("reactant-moles", "2", "stoich-inputs");
+            setOrCreateSelect("product-select", "CO2", "stoich-inputs", ["H2O", "CO2"]);
+            expect(() => calculateStoichiometry(equation)).toThrow("Selected compound not found");
+        });
+
+        it("should throw for unknown reactant in reactant-from-product", () => {
+            setOrCreateSelect("calculation-type", "reactant-from-product", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
+            setOrCreateInput("product-moles", "4", "stoich-inputs");
+            setOrCreateSelect("reactant-select", "N2", "stoich-inputs", ["H2", "O2", "N2"]);
+            expect(() => calculateStoichiometry(equation)).toThrow("Selected compound not found");
+        });
+
+        it("should throw for unknown product in limiting-reactant", () => {
+            setOrCreateSelect("calculation-type", "limiting-reactant", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateInput("moles-H2", "2", "stoich-inputs");
+            setOrCreateInput("moles-O2", "2", "stoich-inputs");
+            setOrCreateSelect("product-select", "CO2", "stoich-inputs", ["H2O", "CO2"]);
+            expect(() => calculateStoichiometry(equation)).toThrow("Selected product not found");
+        });
+
+        it("should throw for unknown reactant in product-from-reactant", () => {
+            setOrCreateSelect("calculation-type", "product-from-reactant", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateSelect("reactant-select", "N2", "stoich-inputs", ["H2", "O2", "N2"]);
+            setOrCreateInput("reactant-moles", "2", "stoich-inputs");
+            setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
+            expect(() => calculateStoichiometry(equation)).toThrow("Selected compound not found");
+        });
+
+        it("should throw for unknown product in reactant-from-product", () => {
+            setOrCreateSelect("calculation-type", "reactant-from-product", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateSelect("product-select", "CO2", "stoich-inputs", ["H2O", "CO2"]);
+            setOrCreateInput("product-moles", "4", "stoich-inputs");
+            setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
+            expect(() => calculateStoichiometry(equation)).toThrow("Selected compound not found");
+        });
     });
 
     describe("Term class", () => {
@@ -297,6 +351,24 @@ describe("stoichiometryCalculator", () => {
             inputsDiv.innerHTML = "<p>stale content</p>";
             getCalculationType(equation);
             expect(inputsDiv.innerHTML).not.toContain("stale content");
+        });
+
+        it("falls back to a generic id for unsanitizable formulas", () => {
+            const typeSelect = document.getElementById("calculation-type") as HTMLSelectElement;
+            typeSelect.value = "limiting-reactant";
+            getCalculationType("() + H2 -> H2O");
+            const inputs = document.getElementById("stoich-inputs") as HTMLElement;
+            expect(inputs.innerHTML).toContain("moles-formula");
+            expect(inputs.innerHTML).toContain("moles-H2");
+        });
+
+        it("renders nothing for an unknown calculation type", () => {
+            const typeSelect = document.getElementById("calculation-type") as HTMLSelectElement;
+            typeSelect.value = "bogus";
+            getCalculationType(equation);
+            const inputs = document.getElementById("stoich-inputs") as HTMLElement;
+            expect(inputs.innerHTML).not.toContain("reactant-select");
+            expect(inputs.innerHTML).not.toContain("product-select");
         });
     });
 
@@ -450,6 +522,71 @@ describe("stoichiometryCalculator", () => {
             calc.callPerformCalculation();
 
             expect(h2Input.classList.contains("error")).toBe(false);
+        });
+
+        it("throws for unknown product in product-from-reactant via class", () => {
+            setOrCreateSelect("calculation-type", "product-from-reactant", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
+            setOrCreateInput("reactant-moles", "2", "stoich-inputs");
+            setOrCreateSelect("product-select", "CO2", "stoich-inputs", ["H2O", "CO2"]);
+
+            const calc = new TestableStoichiometryCalculator();
+            calc.setTestEquation(equation);
+            expect(() => calc.callPerformCalculation()).toThrow("Selected compound not found");
+        });
+
+        it("throws for unknown reactant in reactant-from-product via class", () => {
+            setOrCreateSelect("calculation-type", "reactant-from-product", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
+            setOrCreateInput("product-moles", "4", "stoich-inputs");
+            setOrCreateSelect("reactant-select", "N2", "stoich-inputs", ["H2", "O2", "N2"]);
+
+            const calc = new TestableStoichiometryCalculator();
+            calc.setTestEquation(equation);
+            expect(() => calc.callPerformCalculation()).toThrow("Selected compound not found");
+        });
+
+        it("throws for unknown product in limiting-reactant via class", () => {
+            setOrCreateSelect("calculation-type", "limiting-reactant", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateInput("moles-H2", "2", "stoich-inputs");
+            setOrCreateInput("moles-O2", "2", "stoich-inputs");
+            setOrCreateSelect("product-select", "CO2", "stoich-inputs", ["H2O", "CO2"]);
+
+            const calc = new TestableStoichiometryCalculator();
+            calc.setTestEquation(equation);
+            expect(() => calc.callPerformCalculation()).toThrow("Selected product not found");
+        });
+
+        it("throws for unknown reactant in product-from-reactant via class", () => {
+            setOrCreateSelect("calculation-type", "product-from-reactant", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateSelect("reactant-select", "N2", "stoich-inputs", ["H2", "O2", "N2"]);
+            setOrCreateInput("reactant-moles", "2", "stoich-inputs");
+            setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
+
+            const calc = new TestableStoichiometryCalculator();
+            calc.setTestEquation(equation);
+            expect(() => calc.callPerformCalculation()).toThrow("Selected compound not found");
+        });
+
+        it("throws for unknown product in reactant-from-product via class", () => {
+            setOrCreateSelect("calculation-type", "reactant-from-product", "stoich-inputs", [
+                "product-from-reactant", "reactant-from-product", "limiting-reactant",
+            ]);
+            setOrCreateSelect("product-select", "CO2", "stoich-inputs", ["H2O", "CO2"]);
+            setOrCreateInput("product-moles", "4", "stoich-inputs");
+            setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
+
+            const calc = new TestableStoichiometryCalculator();
+            calc.setTestEquation(equation);
+            expect(() => calc.callPerformCalculation()).toThrow("Selected compound not found");
         });
     });
 });
