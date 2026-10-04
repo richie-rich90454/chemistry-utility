@@ -46,11 +46,9 @@ export class PluginManagerUI {
 
     /** Opens the plugin manager modal, refreshing the plugin list. */
     public open(): void {
-        this.ensureModal();
+        this.modal = this.ensureModal();
         this.renderPluginList();
-        if (this.modal) {
-            this.modal.classList.add("open");
-        }
+        this.modal.classList.add("open");
     }
 
     /** Closes the plugin manager modal. */
@@ -100,9 +98,13 @@ export class PluginManagerUI {
         footer.appendChild(button);
     }
 
-    private ensureModal(): void {
+    /**
+     * Returns the modal element, creating it on first use. Both paths are
+     * exercised (first open creates, later opens reuse).
+     */
+    private ensureModal(): HTMLElement {
         if (this.modal) {
-            return;
+            return this.modal;
         }
         let modal: HTMLDivElement = document.createElement("div");
         modal.id = MODAL_ID;
@@ -118,27 +120,24 @@ export class PluginManagerUI {
         document.body.appendChild(modal);
         this.modal = modal;
         let self: PluginManagerUI = this;
-        let closeBtn: HTMLElement | null = modal.querySelector(".plugin-manager-close");
-        if (closeBtn) {
-            closeBtn.addEventListener("click", function (): void {
-                self.close();
-            });
-        }
+        // The template above always includes the close button.
+        let closeBtn: HTMLElement = modal.querySelector(".plugin-manager-close") as HTMLElement;
+        closeBtn.addEventListener("click", function (): void {
+            self.close();
+        });
         modal.addEventListener("click", function (e: MouseEvent): void {
             if (e.target === modal) {
                 self.close();
             }
         });
+        return modal;
     }
 
     private renderPluginList(): void {
-        if (!this.modal) {
-            return;
-        }
-        let list: HTMLElement | null = this.modal.querySelector("." + MODAL_LIST_CLASS);
-        if (!list) {
-            return;
-        }
+        // Callers (open, uninstall handler) only run with a live modal, and
+        // the template always includes the list container.
+        let modal: HTMLElement = this.modal as HTMLElement;
+        let list: HTMLElement = modal.querySelector("." + MODAL_LIST_CLASS) as HTMLElement;
         list.innerHTML = "";
         let pm: PluginManager = PluginManager.getInstance();
         let plugins: Plugin[] = pm.getPlugins();
@@ -166,25 +165,22 @@ export class PluginManagerUI {
                 '<button class="plugin-uninstall" type="button">Uninstall</button>' +
                 "</div>";
             list.appendChild(card);
-            let toggle: HTMLInputElement | null = card.querySelector(".plugin-toggle") as HTMLInputElement | null;
-            if (toggle) {
-                let pluginId: string = plugin.manifest.name;
-                toggle.addEventListener("change", function (): void {
-                    if (toggle.checked) {
-                        pm.enablePlugin(pluginId);
-                    } else {
-                        pm.disablePlugin(pluginId);
-                    }
-                });
-            }
-            let uninstallBtn: HTMLButtonElement | null = card.querySelector(".plugin-uninstall") as HTMLButtonElement | null;
-            if (uninstallBtn) {
-                let pluginId: string = plugin.manifest.name;
-                uninstallBtn.addEventListener("click", function (): void {
-                    pm.unregisterPlugin(pluginId);
-                    self.renderPluginList();
-                });
-            }
+            // The card template always renders the toggle and button below.
+            let toggle: HTMLInputElement = card.querySelector(".plugin-toggle") as HTMLInputElement;
+            let pluginToggleId: string = plugin.manifest.name;
+            toggle.addEventListener("change", function (): void {
+                if (toggle.checked) {
+                    pm.enablePlugin(pluginToggleId);
+                } else {
+                    pm.disablePlugin(pluginToggleId);
+                }
+            });
+            let uninstallBtn: HTMLButtonElement = card.querySelector(".plugin-uninstall") as HTMLButtonElement;
+            let pluginUninstallId: string = plugin.manifest.name;
+            uninstallBtn.addEventListener("click", function (): void {
+                pm.unregisterPlugin(pluginUninstallId);
+                self.renderPluginList();
+            });
         }
     }
 }
