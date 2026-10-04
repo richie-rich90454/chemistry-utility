@@ -161,7 +161,7 @@ describe("solid entrypoint", () => {
 
     it("registers the service worker on production web builds", async () => {
         mocks.isWails = false;
-        vi.stubEnv("PROD", "true");
+        vi.stubEnv("PROD", true);
         const register = vi.fn(() => Promise.resolve(undefined));
         setServiceWorker({ getRegistrations: () => Promise.resolve([]), register });
         const root = document.createElement("div");
@@ -173,7 +173,7 @@ describe("solid entrypoint", () => {
 
     it("tolerates service-worker registration failure", async () => {
         mocks.isWails = false;
-        vi.stubEnv("PROD", "true");
+        vi.stubEnv("PROD", true);
         setServiceWorker({
             getRegistrations: () => Promise.resolve([]),
             register: () => Promise.reject(new Error("denied")),
