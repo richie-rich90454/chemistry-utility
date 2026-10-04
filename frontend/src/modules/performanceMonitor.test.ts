@@ -49,6 +49,30 @@ describe("PerformanceMonitor", () => {
             expect(() => PerformanceMonitor.getInstance().measure()).not.toThrow();
         });
 
+        it("ignores repeated measure calls", () => {
+            const monitor = PerformanceMonitor.getInstance();
+            monitor.measure();
+            expect(() => monitor.measure()).not.toThrow();
+        });
+
+        it("returns early without a window global", () => {
+            vi.stubGlobal("window", undefined);
+            try {
+                expect(() => PerformanceMonitor.getInstance().measure()).not.toThrow();
+            } finally {
+                vi.unstubAllGlobals();
+            }
+        });
+
+        it("returns early without a performance global", () => {
+            vi.stubGlobal("performance", undefined);
+            try {
+                expect(() => PerformanceMonitor.getInstance().measure()).not.toThrow();
+            } finally {
+                vi.unstubAllGlobals();
+            }
+        });
+
         it("measures TTFB from navigation timing entries", () => {
             const mockPerformance = {
                 getEntriesByType: vi.fn().mockReturnValue([
