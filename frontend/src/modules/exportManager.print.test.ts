@@ -55,4 +55,17 @@ describe("ExportManager print/PDF export", () => {
         manager.exportPdf();
         expect(printSpy).toHaveBeenCalledTimes(1);
     });
+
+    it("exportPdf falls back to window.print when the popup has no print function", () => {
+        const manager = ExportManager.getInstance();
+        const popup = {
+            document: { write: vi.fn(), close: vi.fn() },
+            focus: vi.fn()
+        };
+        vi.spyOn(window, "open").mockReturnValue(popup as unknown as Window);
+        const printSpy = vi.fn();
+        Object.defineProperty(window, "print", { value: printSpy, writable: true, configurable: true });
+        manager.exportPdf();
+        expect(printSpy).toHaveBeenCalledTimes(1);
+    });
 });
