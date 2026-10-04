@@ -712,10 +712,11 @@ export class ColligativePropertiesCalculator extends Calculator {
             metadata.newFp = newFp;
         }
         let solventMM = parseFloat(inputs["collig-solvent-molar-mass"] ?? "");
-        if (isNaN(solventMM) || solventMM <= 0) {
+        if (isNaN(solventMM)) {
             // ponytail: default assumes water; pass collig-solvent-molar-mass for other solvents
             solventMM = 18.015;
         }
+        if (solventMM <= 0) throw new Error("Solvent molar mass must be positive");
         let molesSolvent = (solventMass / 1000) / (solventMM / 1000);
         let xSolute = molesSolute / (molesSolute + molesSolvent);
         let solutionVolumeL = (solventMass / 1000) / density;
