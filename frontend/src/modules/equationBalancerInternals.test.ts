@@ -1,5 +1,5 @@
 import {describe, it, expect} from "vitest";
-import {Fraction, EquationBalancer, parseEquation, balanceEquation, balanceIonic} from "./equationBalancer.js";
+import {Fraction, parseEquation, balanceEquation, balanceIonic} from "./equationBalancer.js";
 
 describe("Fraction exact arithmetic", function(){
     it("constructs and simplifies", function(){
