@@ -103,9 +103,30 @@ func TestStoichiometry_LimitingReactant(t *testing.T) {
 		{"equation": "2H2 + O2 -> 2H2O", "mode": "limiting-reactant", "reactantMoles": map[string]float64{"H2": 0.0, "O2": 1.0}, "targetProduct": "H2O"},
 		{"equation": "-> H2O", "mode": "limiting-reactant", "reactantMoles": map[string]float64{}, "targetProduct": "H2O"},
 		{"equation": "2H2 + O2 -> 2H2O", "mode": "bogus"},
+		{"equation": "H2 + O2", "mode": "product-from-reactant", "reactantFormula": "H2", "productFormula": "H2O", "moles": 1.0},
 	} {
 		if _, err := Stoichiometry(ctx, bad); err == nil {
 			t.Errorf("expected error for %+v", bad)
 		}
+	}
+}
+
+func TestParseStoichTerm_EdgeCases(t *testing.T) {
+	if got := parseStoichTerm(""); got.Coefficient != 1.0 {
+		t.Errorf("empty term = %+v", got)
+	}
+	// 400-digit coefficient overflows float64 -> falls back to 1.
+	long := ""
+	for i := 0; i < 400; i++ {
+		long += "9"
+	}
+	if got := parseStoichTerm(long + "H2"); got.Coefficient != 1.0 || got.Formula != "H2" {
+		t.Errorf("overflow term = %+v", got)
+	}
+	if got := parseStoichTerm("2H2O"); got.Coefficient != 2.0 || got.Formula != "H2O" {
+		t.Errorf("normal term = %+v", got)
+	}
+	if _, _, err := parseStoichEquation("H2 + O2"); err == nil {
+		t.Error("expected error for arrow-less equation")
 	}
 }
