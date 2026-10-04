@@ -172,14 +172,15 @@ export class UnitConverter extends Calculator {
      * refusing cross-family ones with an explicit message instead of a
      * silently wrong number (which would assume water-like density).
      */
-    private static concentrationGroup(unit: string): "molar" | "mass" | null {
+    private static concentrationGroup(unit: string): "molar" | "mass" {
+        // Every validated concentration unit belongs to a family below;
+        // anything else cannot reach here (convert/convertToAll validate
+        // units first) and is treated as mass-family so cross-family
+        // conversion still refuses rather than silently converting.
         if (unit === "µM" || unit === "mM" || unit === "M") {
             return "molar";
         }
-        if (unit === "ppt" || unit === "ppb" || unit === "ppm" || unit === "%") {
-            return "mass";
-        }
-        return null;
+        return "mass";
     }
 
     public static convert(value: number, fromUnit: string, toUnit: string, category: string): ConversionResult {
@@ -196,7 +197,8 @@ export class UnitConverter extends Calculator {
         if (category === "concentration") {
             let fromGroup = UnitConverter.concentrationGroup(fromUnit);
             let toGroup = UnitConverter.concentrationGroup(toUnit);
-            if (fromGroup !== null && toGroup !== null && fromGroup !== toGroup) {
+            // Groups are never null for validated units (see above).
+            if (fromGroup !== toGroup) {
                 throw new Error("Cannot convert " + fromUnit + " to " + toUnit + ": molarity/mass-fraction conversion requires the solute molar mass and solution density");
             }
         }
