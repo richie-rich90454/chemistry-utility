@@ -1,4 +1,4 @@
-import {describe, it, expect, beforeEach, afterEach} from "vitest";
+import {describe, it, expect, afterEach} from "vitest";
 import {
     calculateIdealGasLaw,
     calculateCombinedGasLaw,
@@ -155,6 +155,18 @@ describe("gasLaw coverage: ideal SI and volume units", () => {
         expect(r.value).toContain("m³");
     });
 
+    it("pure solves V in atm-L with explicit litres and cubic metres, and in SI", () => {
+        expect(idealPure("V", "atm-L", "1", "", "1", "273", "L").value).toContain("L");
+        expect(idealPure("V", "atm-L", "1", "", "1", "273", "m³").value).toContain("m³");
+        const si = idealPure("V", "SI", "101325", "", "1", "273", "L");
+        expect(si.value).toContain("L");
+    });
+
+    it("pure solves n and T in SI units", () => {
+        expect(idealPure("n", "SI", "101325", "0.0224", "", "273", "m³").value).toContain("mol");
+        expect(idealPure("T", "SI", "101325", "0.0224", "1", "", "m³").value).toContain("K");
+    });
+
     it("pure rejects an invalid volume unit", () => {
         const r = idealPure("P", "atm-L", "", "22.4", "1", "273", "gal");
         expect(r.explanation).toContain("Error");
@@ -303,8 +315,7 @@ describe("gasLaw coverage: VdW and half-life validation", () => {
         }
     });
 
-    it("DOM and pure reject bad half-life inputs per branch", () => {
-        function halfDom(solveFor: string, vals: Record<string, string>): void {
+    it("DOM and pure reject bad half-life inputs per branch", () => {        function halfDom(solveFor: string, vals: Record<string, string>): void {
             document.body.innerHTML = "";
             createContainer("half-life-calc");
             createResultDiv("half-life-result", "half-life-calc");
@@ -361,5 +372,163 @@ describe("gasLaw coverage: VdW and half-life validation", () => {
         calculateHalfLife();
         expect(getResultText("half-life-result")).toContain("Error");
         expect(halfPure("bogus", {"initial-quantity": "100", "time-input": "10", "half-life-input": "5", "remaining-quantity": "25"}).explanation).toContain("Error");
+    });
+});
+
+describe("gasLaw coverage: per-operand validation branches", () => {
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("DOM solves P in atm-L with cubic metres", () => {
+        idealDom("P", "atm-L", "", "0.0224", "1", "273", "m³");
+        calculateIdealGasLaw();
+        const text = getResultText("ideal-result");
+        expect(text).toContain("atm");
+    });
+
+    it("DOM solves V in atm-L with explicit litres and cubic metres", () => {
+        idealDom("V", "atm-L", "1", "", "1", "273", "L");
+        calculateIdealGasLaw();
+        expect(getResultText("ideal-result")).toContain("L");
+        idealDom("V", "atm-L", "1", "", "1", "273", "m³");
+        calculateIdealGasLaw();
+        expect(getResultText("ideal-result")).toContain("m³");
+    });
+
+    it("DOM reports the second zero divisor per combined branch", () => {
+        combinedDom("P1", {"combined-V1": "1", "combined-T1": "273", "combined-P2": "1", "combined-V2": "1", "combined-T2": "0"});
+        calculateCombinedGasLaw();
+        expect(getResultText("combined-result")).toContain("Error");
+        combinedDom("V1", {"combined-P1": "1", "combined-T1": "273", "combined-P2": "1", "combined-V2": "1", "combined-T2": "0"});
+        calculateCombinedGasLaw();
+        expect(getResultText("combined-result")).toContain("Error");
+        combinedDom("T1", {"combined-P1": "1", "combined-V1": "1", "combined-P2": "1", "combined-V2": "0", "combined-T2": "273"});
+        calculateCombinedGasLaw();
+        expect(getResultText("combined-result")).toContain("Error");
+        combinedDom("P2", {"combined-P1": "1", "combined-V1": "1", "combined-T1": "0", "combined-V2": "1", "combined-T2": "273"});
+        calculateCombinedGasLaw();
+        expect(getResultText("combined-result")).toContain("Error");
+        combinedDom("V2", {"combined-P1": "1", "combined-V1": "1", "combined-T1": "0", "combined-P2": "1", "combined-T2": "273"});
+        calculateCombinedGasLaw();
+        expect(getResultText("combined-result")).toContain("Error");
+        combinedDom("T2", {"combined-P1": "1", "combined-V1": "0", "combined-T1": "273", "combined-P2": "1", "combined-V2": "1"});
+        calculateCombinedGasLaw();
+        expect(getResultText("combined-result")).toContain("Error");
+    });
+
+    it("pure reports each missing operand per combined branch", () => {
+        const full: Record<string, string> = {"combined-P1": "1", "combined-V1": "1", "combined-T1": "273", "combined-P2": "1", "combined-V2": "1", "combined-T2": "273"};
+        const needed: Record<string, string[]> = {
+            "P1": ["combined-V1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"],
+            "V1": ["combined-P1", "combined-T1", "combined-P2", "combined-V2", "combined-T2"],
+            "T1": ["combined-P1", "combined-V1", "combined-P2", "combined-V2", "combined-T2"],
+            "P2": ["combined-P1", "combined-V1", "combined-T1", "combined-V2", "combined-T2"],
+            "V2": ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-T2"],
+            "T2": ["combined-P1", "combined-V1", "combined-T1", "combined-P2", "combined-V2"],
+        };
+        for (const solveFor of Object.keys(needed)) {
+            const ids = needed[solveFor];
+            const none: Record<string, string> = {};
+            expect(combinedPure(solveFor, none).explanation).toContain("Error");
+            for (const missing of ids) {
+                const vals: Record<string, string> = {};
+                for (const id of ids) {
+                    vals[id] = id === missing ? "" : full[id];
+                }
+                expect(combinedPure(solveFor, vals).explanation).toContain("Error");
+            }
+        }
+    });
+
+    it("pure reports each missing operand per ideal branch", () => {
+        const needed: Record<string, string[]> = {
+            "P": ["ideal-V", "ideal-n", "ideal-T"],
+            "V": ["ideal-P", "ideal-n", "ideal-T"],
+            "n": ["ideal-P", "ideal-V", "ideal-T"],
+            "T": ["ideal-P", "ideal-V", "ideal-n"],
+        };
+        for (const solveFor of Object.keys(needed)) {
+            const ids = needed[solveFor];
+            expect(idealPure(solveFor, "atm-L", "", "", "", "").explanation).toContain("Error");
+            const idToArg: Record<string, string> = {"ideal-P": "P", "ideal-V": "V", "ideal-n": "n", "ideal-T": "T"};
+            for (const missing of ids) {
+                const vals: Record<string, string> = {P: "1", V: "22.4", n: "1", T: "273"};
+                vals[idToArg[missing]] = "";
+                expect(idealPure(solveFor, "atm-L", vals.P, vals.V, vals.n, vals.T).explanation).toContain("Error");
+            }
+        }
+    });
+
+    it("pure handles absent input objects", () => {
+        expect(idealPure("P", "atm-L", "", "", "", "").explanation).toContain("Error");
+        const empty = new IdealGasLawCalculator().calculatePure({});
+        expect(empty.explanation).toContain("Error");
+        expect(new CombinedGasLawCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new VanDerWaalsCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new HalfLifeCalculator().calculatePure({}).explanation).toContain("Error");
+    });
+
+    it("pure solves half-life time and half-life branches", () => {
+        const calc = new HalfLifeCalculator();
+        const t = calc.calculatePure({
+            "half-life-solve-for": "time",
+            "initial-quantity": "100",
+            "time-input": "",
+            "half-life-input": "5",
+            "remaining-quantity": "25"
+        });
+        expect(t.value).toContain("Time needed:");
+        const h = calc.calculatePure({
+            "half-life-solve-for": "half-life",
+            "initial-quantity": "100",
+            "time-input": "10",
+            "half-life-input": "",
+            "remaining-quantity": "25"
+        });
+        expect(h.value).toContain("Half-life:");
+    });
+
+    it("pure reports each missing VdW operand", () => {
+        const full: Record<string, string> = {"vdw-V": "22.4", "vdw-n": "1", "vdw-T": "273", "vdw-a": "1", "vdw-b": "0.01"};
+        expect(vdwPure({}).explanation).toContain("Error");
+        for (const missing of Object.keys(full)) {
+            const vals: Record<string, string> = {};
+            for (const id of Object.keys(full)) {
+                vals[id] = id === missing ? "" : full[id];
+            }
+            expect(vdwPure(vals).explanation).toContain("Error");
+        }
+    });
+
+    it("pure rejects V equal to n*b", () => {
+        expect(vdwPure({"vdw-V": "0.01", "vdw-n": "1", "vdw-T": "273", "vdw-a": "1", "vdw-b": "0.01"}).explanation).toContain("Error");
+    });
+
+    it("pure reports each missing half-life operand", () => {
+        function halfPure(solveFor: string, vals: Record<string, string>) {
+            const calc = new HalfLifeCalculator();
+            const inputs: Record<string, string> = {"half-life-solve-for": solveFor};
+            for (const id of ["initial-quantity", "time-input", "half-life-input", "remaining-quantity"]) {
+                inputs[id] = vals[id] ?? "";
+            }
+            return calc.calculatePure(inputs);
+        }
+        const groups: Record<string, string[]> = {
+            "remaining": ["initial-quantity", "time-input", "half-life-input"],
+            "time": ["initial-quantity", "half-life-input", "remaining-quantity"],
+            "half-life": ["initial-quantity", "time-input", "remaining-quantity"],
+        };
+        const full: Record<string, string> = {"initial-quantity": "100", "time-input": "10", "half-life-input": "5", "remaining-quantity": "25"};
+        for (const solveFor of Object.keys(groups)) {
+            expect(halfPure(solveFor, {}).explanation).toContain("Error");
+            for (const missing of groups[solveFor]) {
+                const vals: Record<string, string> = {};
+                for (const id of groups[solveFor]) {
+                    vals[id] = id === missing ? "" : full[id];
+                }
+                expect(halfPure(solveFor, vals).explanation).toContain("Error");
+            }
+        }
     });
 });
