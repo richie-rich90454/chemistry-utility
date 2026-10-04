@@ -212,6 +212,20 @@ describe("electrochemistryCalculators", () => {
             const html = getResultHTML("electrolysis-result");
             expect(html).toContain("Please enter valid positive numbers");
         });
+
+        it("should show error when z is not an integer for current solve", () => {
+            setupElectrolysisInputs("current", { m: "63.5", t: "96500", z: "1.5", M: "63.5" });
+            calculateElectrolysis();
+            const html = getResultHTML("electrolysis-result");
+            expect(html).toContain("must be an integer");
+        });
+
+        it("should show error when z is not an integer for time solve", () => {
+            setupElectrolysisInputs("time", { m: "63.5", I: "1", z: "2.5", M: "63.5" });
+            calculateElectrolysis();
+            const html = getResultHTML("electrolysis-result");
+            expect(html).toContain("must be an integer");
+        });
     });
 });
 
@@ -278,6 +292,18 @@ describe("NernstCalculator.calculatePure", () => {
         expect(result.value).toBe("");
         expect(result.explanation).toContain("Error:");
         expect(result.explanation).toContain("valid positive numbers");
+    });
+
+    it("should return error result when n is not an integer", () => {
+        const calc = new NernstCalculator();
+        const result = calc.calculatePure({
+            "E-standard": "1.10",
+            "temperature": "298",
+            "n-electrons": "1.5",
+            "Q-reaction": "1"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("integer");
     });
 });
 
@@ -382,6 +408,48 @@ describe("ElectrolysisCalculator.calculatePure", () => {
         expect(result.value).toBe("");
         expect(result.explanation).toContain("Error:");
         expect(result.explanation).toContain("Invalid solve-for selection");
+    });
+
+    it("should return error result for non-integer z solving for mass", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "mass",
+            "electrolysis-m": "",
+            "electrolysis-I": "1",
+            "electrolysis-t": "96500",
+            "electrolysis-z": "1.5",
+            "electrolysis-M": "63.5"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("integer");
+    });
+
+    it("should return error result for non-integer z solving for current", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "current",
+            "electrolysis-m": "63.5",
+            "electrolysis-I": "",
+            "electrolysis-t": "96500",
+            "electrolysis-z": "2.5",
+            "electrolysis-M": "63.5"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("integer");
+    });
+
+    it("should return error result for non-integer z solving for time", () => {
+        const calc = new ElectrolysisCalculator();
+        const result = calc.calculatePure({
+            "electrolysis-solve-for": "time",
+            "electrolysis-m": "63.5",
+            "electrolysis-I": "1",
+            "electrolysis-t": "",
+            "electrolysis-z": "1.5",
+            "electrolysis-M": "63.5"
+        });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("integer");
     });
 
     it("exercises ?? fallback for m/I/t/z/M keys when solve-for is mass", () => {
