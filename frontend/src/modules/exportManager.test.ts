@@ -1,6 +1,24 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { ExportManager } from "./exportManager.js";
 
+const printViewMocks = vi.hoisted(() => ({ throwOnPrintView: false }));
+
+vi.mock("./exportPrintView.js", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("./exportPrintView.js")>();
+    return {
+        ...actual,
+        openHistoryPrintView: (...args: [unknown[], (string | undefined)?]) => {
+            if (printViewMocks.throwOnPrintView) {
+                throw new Error("popup boom");
+            }
+            return actual.openHistoryPrintView(
+                args[0] as Parameters<typeof actual.openHistoryPrintView>[0],
+                args[1] as Parameters<typeof actual.openHistoryPrintView>[1],
+            );
+        },
+    };
+});
+
 describe("ExportManager", () => {
     let createObjectURLSpy: ReturnType<typeof vi.spyOn>;
     let revokeObjectURLSpy: ReturnType<typeof vi.spyOn>;
@@ -47,6 +65,11 @@ describe("ExportManager", () => {
 
         it("returns empty array when localStorage has invalid JSON", () => {
             localStorage.setItem("calc-history", "invalid-json");
+            expect(ExportManager.getInstance().getHistory()).toEqual([]);
+        });
+
+        it("returns empty array when stored history is not an array", () => {
+            localStorage.setItem("calc-history", JSON.stringify({ oops: true }));
             expect(ExportManager.getInstance().getHistory()).toEqual([]);
         });
     });
@@ -123,6 +146,17 @@ describe("ExportManager", () => {
             manager.exportCsv();
             expect(revokeObjectURLSpy).toHaveBeenCalled();
         });
+
+        it("neutralizes spreadsheet formula injection in fields", async () => {
+            const manager = ExportManager.getInstance();
+            manager.addToHistory("mass-calc", { "formula-input": "H2O" }, "=1+1");
+            manager.addToHistory("mass-calc", { "formula-input": "NaCl" }, "@evil");
+            manager.exportCsv();
+            const blob = createObjectURLSpy.mock.calls[0][0] as Blob;
+            const text = await blob.text();
+            expect(text).toContain("'=1+1");
+            expect(text).toContain("'@evil");
+        });
     });
 
     describe("shareViaUrl", () => {
@@ -150,6 +184,43 @@ describe("ExportManager", () => {
             expect(copiedText).toContain("molar-mass");
             expect(copiedText).not.toContain("?");
         });
+
+        it("shows a failure toast when copying fails", async () => {
+            vi.useFakeTimers();
+            try {
+                (navigator.clipboard.writeText as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("denied"));
+                const manager = ExportManager.getInstance();
+                manager.shareViaUrl("molar-mass");
+                await Promise.resolve();
+                await Promise.resolve();
+                const toast = document.querySelector(".export-toast");
+                expect(toast).not.toBeNull();
+                expect(toast!.textContent).toBe("Failed to copy");
+                vi.advanceTimersByTime(10);
+                expect(toast!.classList.contains("visible")).toBe(true);
+                vi.advanceTimersByTime(2000);
+                vi.advanceTimersByTime(300);
+                expect(document.querySelector(".export-toast")).toBeNull();
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("replaces an existing toast on repeat shares", async () => {
+            vi.useFakeTimers();
+            try {
+                const manager = ExportManager.getInstance();
+                manager.shareViaUrl("molar-mass");
+                manager.shareViaUrl("molar-mass");
+                await Promise.resolve();
+                await Promise.resolve();
+                const toasts = document.querySelectorAll(".export-toast");
+                expect(toasts.length).toBe(1);
+                expect(toasts[0].textContent).toBe("Copied!");
+            } finally {
+                vi.useRealTimers();
+            }
+        });
     });
 
     describe("resetInstance", () => {
@@ -158,6 +229,20 @@ describe("ExportManager", () => {
             ExportManager.resetInstance();
             const instance2 = ExportManager.getInstance();
             expect(instance1).not.toBe(instance2);
+        });
+    });
+
+    describe("exportPdf", () => {
+        it("falls back to window.print when the print view throws", () => {
+            printViewMocks.throwOnPrintView = true;
+            try {
+                const printSpy = vi.fn();
+                Object.defineProperty(window, "print", { value: printSpy, writable: true, configurable: true });
+                ExportManager.getInstance().exportPdf();
+                expect(printSpy).toHaveBeenCalledTimes(1);
+            } finally {
+                printViewMocks.throwOnPrintView = false;
+            }
         });
     });
 });
