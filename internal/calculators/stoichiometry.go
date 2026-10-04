@@ -33,10 +33,6 @@ func parseStoichTerm(term string) StoichTerm {
 		}
 	}
 	formula := strings.TrimSpace(matches[2])
-	if formula == "" {
-		formula = term
-		coeff = 1.0
-	}
 	return StoichTerm{Formula: formula, Coefficient: coeff}
 }
 
