@@ -96,5 +96,36 @@ describe("exportPrintView", () => {
             vi.spyOn(window, "open").mockReturnValue(null);
             expect(openHistoryPrintView([makeEntry()])).toBeNull();
         });
+
+        it("returns null when window.open is unavailable", () => {
+            const originalOpen: typeof window.open = window.open;
+            Object.defineProperty(window, "open", { value: undefined, writable: true, configurable: true });
+            try {
+                expect(openHistoryPrintView([makeEntry()])).toBeNull();
+            } finally {
+                Object.defineProperty(window, "open", { value: originalOpen, writable: true, configurable: true });
+            }
+        });
+
+        it("returns null when window.open throws", () => {
+            vi.spyOn(window, "open").mockImplementation(() => {
+                throw new Error("denied");
+            });
+            expect(openHistoryPrintView([makeEntry()])).toBeNull();
+        });
+
+        it("returns null when writing to the popup fails", () => {
+            const popup = {
+                document: {
+                    write: () => {
+                        throw new Error("closed");
+                    },
+                    close: vi.fn(),
+                },
+                focus: vi.fn(),
+            };
+            vi.spyOn(window, "open").mockReturnValue(popup as unknown as Window);
+            expect(openHistoryPrintView([makeEntry()])).toBeNull();
+        });
     });
 });
