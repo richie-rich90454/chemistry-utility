@@ -228,8 +228,11 @@ class MolecularViewer {
         }
         let canvasId: string = containerId + "-canvas";
         let existing: HTMLElement | null = document.getElementById(canvasId);
-        if (existing !== null && existing.parentNode !== null) {
-            existing.parentNode.removeChild(existing);
+        // An element returned by getElementById is always attached, so a
+        // detached-node guard would never fire; remove() is a safe no-op
+        // for detached nodes in any case.
+        if (existing !== null) {
+            existing.remove();
         }
         let canvas: HTMLCanvasElement = document.createElement("canvas");
         canvas.id = canvasId;
@@ -316,10 +319,9 @@ class MolecularViewer {
     }
 
     private applyTransform(canvasId: string): void {
-        let state: CanvasViewState | undefined = this.states.get(canvasId);
-        if (state === undefined) {
-            return;
-        }
+        // Callers (applyZoom, resetView) return early when no state exists,
+        // so the state lookup below always succeeds.
+        let state: CanvasViewState = this.states.get(canvasId) as CanvasViewState;
         let canvas: HTMLCanvasElement | null = document.getElementById(canvasId) as HTMLCanvasElement | null;
         if (canvas === null) {
             return;
@@ -368,6 +370,9 @@ class MolecularViewer {
         canvas.addEventListener("mousemove", function (e: MouseEvent): void {
             let state: CanvasViewState | undefined = self.states.get(canvasId);
             if (state === undefined) {
+                // State was cleared after the listeners were attached;
+                // handleHover no-ops without state, preserving prior behavior.
+                self.handleHover(canvasId, e);
                 return;
             }
             if (state.isDragging) {
