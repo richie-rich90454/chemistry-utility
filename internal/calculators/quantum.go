@@ -193,6 +193,10 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 			promoted = 2
 		}
 		for p := 0; p < promoted; p++ {
+			// Every entry in aufbauExceptions has both an outermost s
+			// shell and a d shell beneath it (all with nonzero counts
+			// on entry; only Pd's second promotion empties its 5s, at
+			// which point the loop ends), so both indices always resolve.
 			sIdx := -1
 			dIdx := -1
 			for i := len(configShells) - 1; i >= 0; i-- {
@@ -205,9 +209,6 @@ func ElectronConfiguration(ctx context.Context, input CalculationInput) (Calcula
 				if sIdx != -1 && dIdx != -1 {
 					break
 				}
-			}
-			if sIdx == -1 || dIdx == -1 || configShells[sIdx].count == 0 {
-				break
 			}
 			configShells[sIdx].count--
 			configShells[dIdx].count++
