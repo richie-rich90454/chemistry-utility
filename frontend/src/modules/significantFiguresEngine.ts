@@ -56,14 +56,10 @@ export class SignificantFiguresEngine {
             // Remove leading zeros from integer part
             let strippedInteger = integerPart.replace(/^0+/, "");
 
-            let sigFigs = 0;
-
-            // Count significant digits in integer part (after leading zeros)
-            for (let i = 0; i < strippedInteger.length; i++) {
-                if (strippedInteger.charAt(i) !== "0" || sigFigs > 0) {
-                    sigFigs++;
-                }
-            }
+            // strippedInteger has no leading zeros, so every remaining
+            // digit is significant (the first is non-zero whenever the
+            // string is non-empty).
+            let sigFigs = strippedInteger.length;
 
             if (sigFigs > 0) {
                 // Integer part has significant digits, so all fractional digits are significant
@@ -93,35 +89,18 @@ export class SignificantFiguresEngine {
                 return 1;
             }
 
-            // Check for trailing zeros without decimal point (ambiguous)
+            // Check for trailing zeros without decimal point (ambiguous).
+            // The last digit is zero here, so a backward scan always finds
+            // the last non-zero digit strictly before the end.
             if (stripped.length > 1 && stripped.charAt(stripped.length - 1) === "0") {
                 // Has trailing zeros without decimal - ambiguous
                 // Return -1 to indicate ambiguity
-                let lastNonZero = -1;
-                for (let i = stripped.length - 1; i >= 0; i--) {
-                    if (stripped.charAt(i) !== "0") {
-                        lastNonZero = i;
-                        break;
-                    }
-                }
-                if (lastNonZero < stripped.length - 1) {
-                    return -1;
-                }
+                return -1;
             }
 
-            // No trailing zeros - count all digits
-            let count = 0;
-            let foundNonZero = false;
-            for (let i = 0; i < stripped.length; i++) {
-                let ch = stripped.charAt(i);
-                if (ch !== "0") {
-                    foundNonZero = true;
-                    count++;
-                } else if (foundNonZero) {
-                    count++;
-                }
-            }
-            return count;
+            // No trailing zeros and no leading zeros remain, so every
+            // remaining digit is significant.
+            return stripped.length;
         }
     }
 
