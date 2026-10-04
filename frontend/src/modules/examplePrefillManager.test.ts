@@ -393,6 +393,18 @@ describe("ExamplePrefillManager", () => {
             expect(input.value).toBe("2H2+O2->2H2O");
         });
 
+        it("ignores gas-laws details outside any sub-section", () => {
+            const { strong } = setupCard("gas-laws");
+            ExamplePrefillManager.getInstance().initialize();
+            expect(strong.getAttribute("role")).toBeNull();
+        });
+
+        it("ignores electrochemistry details outside any sub-section", () => {
+            const { strong } = setupCard("electrochemistry");
+            ExamplePrefillManager.getInstance().initialize();
+            expect(strong.getAttribute("role")).toBeNull();
+        });
+
         it("handles bond-type-predictor card directly", () => {
             const { strong } = setupCard("bond-type-predictor");
             const input = document.createElement("input");
