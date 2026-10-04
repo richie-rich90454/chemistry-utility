@@ -158,5 +158,61 @@ describe("structureSketch", () => {
             expect(sketchToMolarMassUrl(sketch)).toBe("/molar-mass?formula=H2O");
             expect(sketchToMolarMassUrl(createSketch())).toBe("/molar-mass");
         });
+
+        it("rejects reversed duplicate bonds", () => {
+            const sketch = createSketch();
+            const a = addSketchAtom(sketch, "C", 0, 0);
+            const b = addSketchAtom(sketch, "O", 10, 0);
+            connectSketchAtoms(sketch, a.id, b.id);
+            expect(() => connectSketchAtoms(sketch, b.id, a.id)).toThrow("already exists");
+        });
+
+        it("emits SMILES for reversed bond direction", () => {
+            const sketch = createSketch();
+            const a = addSketchAtom(sketch, "C", 0, 0);
+            const b = addSketchAtom(sketch, "O", 10, 0);
+            connectSketchAtoms(sketch, b.id, a.id);
+            expect(sketchToSmiles(sketch)).toBe("C-O");
+        });
+
+        it("connects distinct bonds and fragments unbonded neighbors", () => {
+            const sketch = createSketch();
+            const a = addSketchAtom(sketch, "C", 0, 0);
+            const b = addSketchAtom(sketch, "O", 10, 0);
+            const c = addSketchAtom(sketch, "H", 20, 0);
+            connectSketchAtoms(sketch, a.id, b.id);
+            expect(sketchToSmiles(sketch)).toBe("C-O.H");
+            connectSketchAtoms(sketch, b.id, c.id);
+            expect(sketchToSmiles(sketch)).toBe("C-O-H");
+        });
+
+        it("allows bonds sharing a single endpoint in either direction", () => {
+            const sketch = createSketch();
+            const a = addSketchAtom(sketch, "C", 0, 0);
+            const b = addSketchAtom(sketch, "O", 10, 0);
+            const c = addSketchAtom(sketch, "H", 20, 0);
+            const d = addSketchAtom(sketch, "N", 30, 0);
+            connectSketchAtoms(sketch, a.id, b.id);
+            connectSketchAtoms(sketch, c.id, a.id);
+            connectSketchAtoms(sketch, a.id, d.id);
+            expect(sketch.bonds.length).toBe(3);
+        });
+
+        it("orders hydrogen after carbon and omits it when absent", () => {
+            const water = createSketch();
+            addSketchAtom(water, "O", 0, 0);
+            addSketchAtom(water, "H", 10, 0);
+            addSketchAtom(water, "H", 20, 0);
+            expect(sketchToFormula(water)).toBe("H2O");
+            const oxygen = createSketch();
+            addSketchAtom(oxygen, "O", 0, 0);
+            addSketchAtom(oxygen, "O", 10, 0);
+            expect(sketchToFormula(oxygen)).toBe("O2");
+        });
+
+        it("falls back to the default base for empty strings", () => {
+            expect(buildMolarMassPrefillUrl("H2O", "")).toBe("/molar-mass?formula=H2O");
+            expect(buildMolarMassPrefillUrl("H2O", "/x")).toBe("/x?formula=H2O");
+        });
     });
 });
