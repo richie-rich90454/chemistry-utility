@@ -505,10 +505,9 @@ func EquationBalance(ctx context.Context, input CalculationInput) (CalculationRe
 		return CalculationResult{}, err
 	}
 
-	reactants, products, err := ParseEquation(equation)
-	if err != nil {
-		return CalculationResult{}, err
-	}
+	// Already parsed successfully inside BalanceEquation above, so this
+	// cannot fail; the error is intentionally ignored here.
+	reactants, products, _ := ParseEquation(equation)
 
 	return CalculationResult{
 		Value: 0,
