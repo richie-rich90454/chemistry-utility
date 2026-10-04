@@ -314,6 +314,18 @@ func TestTitrationCurve_ClampsAndCaps(t *testing.T) {
 	if err != nil {
 		t.Fatalf("weak extremes: %v", err)
 	}
+	// Strong-ish weak acid at high concentration: initial pH < 0 -> clamped.
+	got, err = TitrationCurve(ctx, CalculationInput{
+		"analyteConcentration": 10.0, "analyteVolume": 0.05,
+		"titrantConcentration": 0.1, "mode": "weak-acid-strong-base", "pKa": 0.5, "numPoints": 10.0,
+	})
+	if err != nil {
+		t.Fatalf("weak negative pH: %v", err)
+	}
+	curve = got.Metadata["curve"].([]map[string]float64)
+	if curve[0]["pH"] != 0 {
+		t.Errorf("expected clamped pH 0, got %v", curve[0]["pH"])
+	}
 }
 
 func merge(a, b CalculationInput) CalculationInput {
