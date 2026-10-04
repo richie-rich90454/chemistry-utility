@@ -71,6 +71,25 @@ describe("SignificantFiguresEngine", () => {
             expect(SignificantFiguresEngine.countSigFigs("0.000")).toBe(1);
             expect(SignificantFiguresEngine.countSigFigs("00.00")).toBe(1);
         });
+
+        it("should return 0 for empty input", () => {
+            expect(SignificantFiguresEngine.countSigFigs("")).toBe(0);
+            expect(SignificantFiguresEngine.countSigFigs("   ")).toBe(0);
+        });
+
+        it("should handle explicit positive signs", () => {
+            expect(SignificantFiguresEngine.countSigFigs("+12.5")).toBe(3);
+            expect(SignificantFiguresEngine.countSigFigs("+")).toBe(0);
+            expect(SignificantFiguresEngine.countSigFigs("-")).toBe(0);
+        });
+
+        it("should count trailing fractional zeros after a non-zero digit", () => {
+            expect(SignificantFiguresEngine.countSigFigs("0.20")).toBe(2);
+        });
+
+        it("should handle a bare exponent with no coefficient digits", () => {
+            expect(SignificantFiguresEngine.countSigFigs("e5")).toBe(1);
+        });
     });
 
     describe("roundToSigFigs", () => {
@@ -99,6 +118,16 @@ describe("SignificantFiguresEngine", () => {
 
         it("should handle very small numbers", () => {
             expect(SignificantFiguresEngine.roundToSigFigs(0.0004567, 2)).toBeCloseTo(0.00046, 4);
+        });
+
+        it("should return 0 for non-positive sig fig counts", () => {
+            expect(SignificantFiguresEngine.roundToSigFigs(3.14, 0)).toBe(0);
+            expect(SignificantFiguresEngine.roundToSigFigs(3.14, -2)).toBe(0);
+        });
+
+        it("should return NaN for non-finite values", () => {
+            expect(SignificantFiguresEngine.roundToSigFigs(Infinity, 3)).toBeNaN();
+            expect(SignificantFiguresEngine.roundToSigFigs(-Infinity, 2)).toBeNaN();
         });
     });
 
@@ -166,6 +195,10 @@ describe("SignificantFiguresEngine", () => {
             let result = SignificantFiguresEngine.formatResult(1.234, 3);
             expect(result).toBe("1.23");
         });
+
+        it("should return 0 for non-positive sig fig counts", () => {
+            expect(SignificantFiguresEngine.formatResult(3.14, 0)).toBe("0");
+        });
     });
 
     describe("countDecimalPlaces", () => {
@@ -181,6 +214,10 @@ describe("SignificantFiguresEngine", () => {
             expect(SignificantFiguresEngine.countDecimalPlaces("1.23e5")).toBe(0);
             expect(SignificantFiguresEngine.countDecimalPlaces("1.0E3")).toBe(0);
             expect(SignificantFiguresEngine.countDecimalPlaces("1.23e-2")).toBe(4);
+        });
+
+        it("should treat a malformed exponent as zero", () => {
+            expect(SignificantFiguresEngine.countDecimalPlaces("1.5eX")).toBe(1);
         });
     });
 });
