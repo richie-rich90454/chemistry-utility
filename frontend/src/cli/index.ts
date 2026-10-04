@@ -186,7 +186,7 @@ export function runCommand(command: string, rest: string[]): string {
     throw new Error("Unknown command: " + command);
 }
 
-function main(): void {
+export function main(): void {
     let args = process.argv.slice(2);
     if (args.length === 0) {
         printHelp();
