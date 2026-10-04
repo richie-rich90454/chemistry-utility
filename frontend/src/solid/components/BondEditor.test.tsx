@@ -1,6 +1,6 @@
 import { render, fireEvent, cleanup } from "@solidjs/testing-library";
 import { createSignal } from "solid-js";
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { BondEditor } from "./BondEditor";
 
 afterEach(() => {
