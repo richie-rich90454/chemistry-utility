@@ -117,29 +117,30 @@ export class ExamplePrefillManager {
 			return ExamplePrefillManager.examples[cardId];
 		}
 
-		// For gas-laws, determine which sub-calculator
+		// For gas-laws, determine which sub-calculator. Every key below is
+		// present in the static examples map, so no null fallback is needed.
 		if (cardId === "gas-laws") {
 			if (detail.closest("#van-der-waals")) {
-				return ExamplePrefillManager.examples["gas-laws-vdw"] || null;
+				return ExamplePrefillManager.examples["gas-laws-vdw"];
 			}
 			if (detail.closest("#combined-gas-law")) {
-				return ExamplePrefillManager.examples["gas-laws-combined"] || null;
+				return ExamplePrefillManager.examples["gas-laws-combined"];
 			}
 			if (detail.closest("#ideal-gas-law")) {
-				return ExamplePrefillManager.examples["gas-laws-ideal"] || null;
+				return ExamplePrefillManager.examples["gas-laws-ideal"];
 			}
 		}
 
 		// For electrochemistry, determine which sub-calculator
 		if (cardId === "electrochemistry") {
 			if (detail.closest("#electrolysis")) {
-				return ExamplePrefillManager.examples["electrochemistry-electrolysis"] || null;
+				return ExamplePrefillManager.examples["electrochemistry-electrolysis"];
 			}
 			if (detail.closest("#nernst-equation")) {
-				return ExamplePrefillManager.examples["electrochemistry-nernst"] || null;
+				return ExamplePrefillManager.examples["electrochemistry-nernst"];
 			}
 			if (detail.closest("#cell-potential")) {
-				return ExamplePrefillManager.examples["electrochemistry-cell"] || null;
+				return ExamplePrefillManager.examples["electrochemistry-cell"];
 			}
 		}
 
