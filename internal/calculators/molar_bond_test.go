@@ -26,6 +26,10 @@ func TestMolarMass_ExtraBranches(t *testing.T) {
 	if _, err := CalculateMolarMass(ctx, CalculationInput{"formula": "Cl-"}); err != nil {
 		t.Errorf("Cl- mass: %v", err)
 	}
+	// Multi-uppercase body with charge digits: sign stripped, digits kept.
+	if _, err := CalculateMolarMass(ctx, CalculationInput{"formula": "NaCl2+"}); err != nil {
+		t.Errorf("NaCl2+ mass: %v", err)
+	}
 	if _, err := CalculateMolarMass(ctx, CalculationInput{"formula": "SO4^2-"}); err != nil {
 		t.Errorf("SO4^2- mass: %v", err)
 	}
