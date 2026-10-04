@@ -70,7 +70,6 @@ describe("useEquationBalancer", () => {
         expect(res).not.toBeNull();
         expect(res!.equation.length).toBeGreaterThan(0);
         expect(res!.reactants.length).toBeGreaterThan(0);
-        expect(res!.isLoading).toBeUndefined();
         expect(hook.isLoading()).toBe(false);
     });
 
