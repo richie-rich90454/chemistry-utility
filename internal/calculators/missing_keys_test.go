@@ -93,6 +93,14 @@ func TestMissingKeys_AllCalculators(t *testing.T) {
 			t.Errorf("IntegratedRateLaw without %s: expected error", k)
 		}
 	}
+	irlZeroBase := CalculationInput{"order": 0.0, "k": 0.05, "initialConcentration": 1.0, "time": 1.0, "solveFor": "concentration"}
+	if _, err := IntegratedRateLaw(ctx, without(irlZeroBase, "time")); err == nil {
+		t.Error("IntegratedRateLaw order-0 without time: expected error")
+	}
+	irlZeroTBase := CalculationInput{"order": 0.0, "k": 0.05, "initialConcentration": 1.0, "concentration": 0.5, "solveFor": "time"}
+	if _, err := IntegratedRateLaw(ctx, without(irlZeroTBase, "concentration")); err == nil {
+		t.Error("IntegratedRateLaw order-0 time without concentration: expected error")
+	}
 	for _, order := range []float64{1.0, 2.0} {
 		noTime := CalculationInput{"order": order, "k": 0.05, "initialConcentration": 1.0, "solveFor": "concentration"}
 		if _, err := IntegratedRateLaw(ctx, noTime); err == nil {
@@ -129,6 +137,21 @@ func TestMissingKeys_AllCalculators(t *testing.T) {
 	}
 	if _, err := HeatCapacity(ctx, without(CalculationInput{"q": 1.0, "c": 1.0, "deltaT": 1.0, "solveFor": "m"}, "q")); err == nil {
 		t.Error("HeatCapacity m without q: expected error")
+	}
+	for _, tc := range []struct {
+		solveFor string
+		keys     []string
+		base     CalculationInput
+	}{
+		{"m", []string{"q", "c", "deltaT"}, CalculationInput{"q": 1.0, "c": 1.0, "deltaT": 1.0, "solveFor": "m"}},
+		{"c", []string{"q", "m", "deltaT"}, CalculationInput{"q": 1.0, "m": 1.0, "deltaT": 1.0, "solveFor": "c"}},
+		{"deltaT", []string{"q", "m", "c"}, CalculationInput{"q": 1.0, "m": 1.0, "c": 1.0, "solveFor": "deltaT"}},
+	} {
+		for _, k := range tc.keys {
+			if _, err := HeatCapacity(ctx, without(tc.base, k)); err == nil {
+				t.Errorf("HeatCapacity %s without %s: expected error", tc.solveFor, k)
+			}
+		}
 	}
 	if _, err := HeatCapacity(ctx, without(CalculationInput{"q": 1.0, "m": 1.0, "deltaT": 1.0, "solveFor": "c"}, "m")); err == nil {
 		t.Error("HeatCapacity c without m: expected error")
