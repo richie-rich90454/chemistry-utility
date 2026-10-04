@@ -151,6 +151,13 @@ func TestSolveHomogeneousEdgeCases(t *testing.T) {
 	} else if sol[0].N <= 0 || sol[1].N <= 0 {
 		t.Errorf("expected positive solution, got %+v", sol)
 	}
+	// x + y = 0: every trial solution leads with a negative coefficient,
+	// so all trials are rejected and the solver returns nil.
+	if sol := solveHomogeneous([][]Fraction{
+		{newFraction(1, 1), newFraction(1, 1)},
+	}); sol != nil {
+		t.Errorf("expected nil, got %+v", sol)
+	}
 }
 
 func TestParseFormulaChargeMagnitudes(t *testing.T) {
