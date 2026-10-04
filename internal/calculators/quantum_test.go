@@ -30,6 +30,21 @@ func TestQuantumNumbers_AllBranches(t *testing.T) {
 	if err != nil {
 		t.Fatalf("n=8: %v", err)
 	}
+	// Invalid n degrades the l/ml checks to standalone-integer validation.
+	got, err = QuantumNumbers(ctx, CalculationInput{"n": 0.0, "l": -1.0, "ml": 0.5, "ms": 0.5})
+	if err != nil {
+		t.Fatalf("bad n/l: %v", err)
+	}
+	if got.Metadata["valid"] != false {
+		t.Errorf("expected invalid, got %+v", got.Metadata)
+	}
+	got, err = QuantumNumbers(ctx, CalculationInput{"n": 0.0, "l": -1.0, "ml": 9.5, "ms": 0.5})
+	if err != nil {
+		t.Fatalf("bad n/l/ml: %v", err)
+	}
+	if got.Metadata["valid"] != false {
+		t.Errorf("expected invalid, got %+v", got.Metadata)
+	}
 	for _, bad := range []CalculationInput{
 		{"n": 1.5, "l": 0.0, "ml": 0.0, "ms": 0.5},
 		{"n": 2.0, "l": 2.0, "ml": 0.0, "ms": 0.5},
