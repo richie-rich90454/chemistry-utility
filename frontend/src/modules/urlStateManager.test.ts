@@ -144,11 +144,35 @@ describe("UrlStateManager", () => {
             const args = replaceStateSpy.mock.calls[0];
             expect(args[2]).toBe("/molar-mass");
         });
+
+        it("updateUrl clears a pending debounce timer", () => {
+            const manager = UrlStateManager.getInstance();
+            manager.updateUrl("molar-mass", { "formula-input": "H2O" });
+            manager.updateUrl("molar-mass", { "formula-input": "NaCl" });
+            expect(replaceStateSpy).toHaveBeenCalled();
+            const args = replaceStateSpy.mock.calls[replaceStateSpy.mock.calls.length - 1];
+            expect(args[2]).toContain("formula=NaCl");
+        });
+
+        it("updateUrlImmediate clears a pending debounce timer", () => {
+            const manager = UrlStateManager.getInstance();
+            manager.updateUrl("molar-mass", { "formula-input": "H2O" });
+            manager.updateUrlImmediate("molar-mass", { "formula-input": "NaCl" });
+            const args = replaceStateSpy.mock.calls[replaceStateSpy.mock.calls.length - 1];
+            expect(args[2]).toContain("formula=NaCl");
+        });
     });
 
     describe("clearState", () => {
         it("removes search params from the URL", () => {
             const manager = UrlStateManager.getInstance();
+            manager.clearState();
+            expect(replaceStateSpy).toHaveBeenCalled();
+        });
+
+        it("clearState clears a pending debounce timer", () => {
+            const manager = UrlStateManager.getInstance();
+            manager.updateUrl("molar-mass", { "formula-input": "H2O" });
             manager.clearState();
             expect(replaceStateSpy).toHaveBeenCalled();
         });
