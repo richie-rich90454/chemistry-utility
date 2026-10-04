@@ -409,6 +409,18 @@ describe("UnitConverter", () => {
             expect(celsiusValue).toBeDefined();
             expect(celsiusValue).toBeCloseTo(-272.15, 1);
         });
+
+        it("should convert 1 M to molarity units only", () => {
+            let results = UnitConverter.convertToAll(1, "M", "concentration");
+            let units: string[] = results.map((r) => r.unit).sort();
+            expect(units).toEqual(["mM", "µM"]);
+        });
+
+        it("should convert 1 ppm to mass-fraction units only", () => {
+            let results = UnitConverter.convertToAll(1, "ppm", "concentration");
+            let units: string[] = results.map((r) => r.unit).sort();
+            expect(units).toEqual(["%", "ppb", "ppt"]);
+        });
     });
 
     describe("performCalculation", () => {
@@ -504,6 +516,20 @@ describe("UnitConverter", () => {
                 converter.callPerformCalculation();
             }).toThrow("Please enter a valid numeric value");
             expect(valueInput.classList.contains("error")).toBe(true);
+        });
+
+        it("should throw without an error class when the value input is missing", () => {
+            valueInput.value = "not-a-number";
+            fromSelect.value = "atm";
+            toSelect.innerHTML = '<option value="Pa">Pa</option>';
+            toSelect.value = "Pa";
+            categorySelect.value = "pressure";
+
+            let converter = new TestableUnitConverter();
+            valueInput.remove();
+            expect((): void => {
+                converter.callPerformCalculation();
+            }).toThrow("Please enter a valid numeric value");
         });
 
         it("should support temperature category conversions via DOM", () => {
