@@ -230,12 +230,12 @@ export class AppNavigationStrategy implements NavigationStrategy {
 		container.innerHTML = html;
 
 		container.querySelectorAll("a").forEach(function (link: HTMLAnchorElement): void {
+			// Every anchor above is rendered with href="/<id>", so the
+			// attribute is always present and non-empty; no guard needed.
 			link.addEventListener("click", function (e: MouseEvent): void {
 				e.preventDefault();
-				let targetId = link.getAttribute("href")?.slice(1);
-				if (targetId) {
-					NavigationManager.getInstance().navigate(targetId);
-				}
+				let targetId = (link.getAttribute("href") as string).slice(1);
+				NavigationManager.getInstance().navigate(targetId);
 			});
 		});
 	}
