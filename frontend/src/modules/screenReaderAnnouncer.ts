@@ -25,10 +25,10 @@ export class ScreenReaderAnnouncer {
 	 *                 'assertive' interrupts immediately. Defaults to 'polite'.
 	 */
 	public announce(message: string, priority: "polite" | "assertive" = "polite"): void {
-		if (typeof document === "undefined") return;
-
-		let region = this.getOrCreateLiveRegion(priority);
-		if (!region) return;
+		// document always exists in the browser/jsdom runtimes this frontend
+		// targets, and getOrCreateLiveRegion always returns the live region
+		// (creating and appending it when missing), applying the priority.
+		let region: HTMLElement = this.getOrCreateLiveRegion(priority);
 
 		// Clear and re-set to force screen readers to re-announce
 		region.textContent = "";
@@ -39,7 +39,7 @@ export class ScreenReaderAnnouncer {
 	}
 
 	/** Gets or creates the hidden aria-live region in the DOM. */
-	private getOrCreateLiveRegion(priority: "polite" | "assertive"): HTMLElement | null {
+	private getOrCreateLiveRegion(priority: "polite" | "assertive"): HTMLElement {
 		if (this.liveRegion && this.liveRegion.parentNode) {
 			this.liveRegion.setAttribute("aria-live", priority);
 			return this.liveRegion;
