@@ -1,13 +1,9 @@
 // @vitest-environment jsdom
-import {describe, it, expect, beforeEach, afterEach} from "vitest";
+import {describe, it, expect, afterEach} from "vitest";
 import {createContainer, createInput, createSelect, createResultDiv} from "../test/helpers.js";
 import {
     calculateArrhenius,
     ArrheniusCalculator,
-    RateLawCalculator,
-    IntegratedRateLawCalculator,
-    ReactionOrderCalculator,
-    CollisionTheoryCalculator,
 } from "./kineticsCalculators.js";
 
     function arrheniusDom(solveFor: string, A: string, Ea: string, T: string, k: string): void {
