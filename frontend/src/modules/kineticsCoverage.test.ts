@@ -154,6 +154,8 @@ describe("kineticsCoverage: IntegratedRateLaw pure branches", () => {
         expect(pureIrl("concentration", "1", "1", "-0.05", "10", "").explanation).toContain("Error");
         expect(pureIrl("concentration", "1", "1", "0.05", "-10", "").explanation).toContain("Error");
         expect(pureIrl("concentration", "5", "1", "0.05", "10", "").explanation).toContain("Error");
+        expect(pureIrl("concentration", "1", "", "0.05", "10", "").explanation).toContain("Error");
+        expect(pureIrl("time", "5", "1", "0.05", "", "0.5").explanation).toContain("Error");
         expect(pureIrl("time", "0", "1", "0.05", "", "1.5").explanation).toContain("Error");
         expect(pureIrl("time", "1", "1", "0", "", "0.5").explanation).toContain("Error");
         expect(pureIrl("time", "1", "0", "0.05", "", "0").explanation).toContain("Error");
@@ -226,9 +228,11 @@ describe("kineticsCoverage: CollisionTheory pure branches", () => {
         expect(pureCollision("k", "50", "0", "1e11", "0.01", "").explanation).toContain("Error");
         expect(pureCollision("k", "50", "298", "0", "0.01", "").explanation).toContain("Error");
         expect(pureCollision("k", "50", "298", "1e11", "2", "").explanation).toContain("Error");
+        expect(pureCollision("Z", "", "298", "", "0.01", "1").explanation).toContain("Error");
         expect(pureCollision("Z", "50", "0", "", "0.01", "1").explanation).toContain("Error");
         expect(pureCollision("Z", "50", "298", "", "0", "1").explanation).toContain("Error");
         expect(pureCollision("Z", "50", "298", "", "0.01", "0").explanation).toContain("Error");
+        expect(pureCollision("p", "", "298", "1e11", "", "1").explanation).toContain("Error");
         expect(pureCollision("p", "50", "0", "1e11", "", "1").explanation).toContain("Error");
         expect(pureCollision("p", "50", "298", "0", "", "1").explanation).toContain("Error");
         expect(pureCollision("p", "50", "298", "1e11", "", "0").explanation).toContain("Error");
@@ -237,5 +241,71 @@ describe("kineticsCoverage: CollisionTheory pure branches", () => {
     it("warns on unphysical solved steric factors", () => {
         const r = pureCollision("p", "50", "298", "1e11", "", "1e11");
         expect(r.explanation).toContain("warning");
+    });
+});
+
+describe("kineticsCoverage: pure missing-key fallbacks", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        const result = document.createElement("div");
+        result.id = "arrhenius-result";
+        document.body.appendChild(result);
+        const r2 = document.createElement("div");
+        r2.id = "rate-law-result";
+        document.body.appendChild(r2);
+        const r3 = document.createElement("div");
+        r3.id = "integrated-rate-law-result";
+        document.body.appendChild(r3);
+        const r4 = document.createElement("div");
+        r4.id = "reaction-order-result";
+        document.body.appendChild(r4);
+        const r5 = document.createElement("div");
+        r5.id = "collision-theory-result";
+        document.body.appendChild(r5);
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("covers ?? fallbacks with empty input records", () => {
+        expect(new ArrheniusCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new RateLawCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new IntegratedRateLawCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new ReactionOrderCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new CollisionTheoryCalculator().calculatePure({}).explanation).toContain("Error");
+    });
+
+    it("covers A-constant pure path and non-unit orders", () => {
+        const aConst = pureRateLaw("0.1", "0.1", "0.001", "0.1", "0.2", "0.004");
+        expect(aConst.value).toContain("[B]^2");
+        const m2 = pureRateLaw("0.1", "0.2", "0.001", "0.2", "0.2", "0.004");
+        expect(m2.value).toContain("[A]^2");
+    });
+
+    it("covers IRL order validation and time branches", () => {
+        expect(pureIrl("concentration", "5", "1", "0.05", "10", "").explanation).toContain("Error");
+        expect(pureIrl("time", "1", "1", "0.05", "", "0.5").value).toContain("s");
+        expect(pureIrl("time", "0", "1", "0", "", "0.5").explanation).toContain("Error");
+        expect(pureIrl("concentration", "1", "1", "0.05", "0", "").value).toContain("M");
+        expect(pureIrl("concentration", "0", "1", "0.05", "100", "").value).toContain("M");
+    });
+
+    it("covers trailing-semicolon empty entries in pure", () => {
+        const r = pureOrder("0,1.0; 100,0.75; 200,0.5; 300,0.25;");
+        expect(r.value).toContain("0");
+    });
+
+    it("covers denominator-zero via extreme barriers", () => {
+        expect(pureCollision("k", "1000000", "1", "1e11", "0.01", "").value).toContain("0.000000");
+        expect(pureCollision("Z", "1000000", "1", "", "0.01", "1").explanation).toContain("Error");
+        expect(pureCollision("p", "1000000", "1", "1e11", "", "1").explanation).toContain("Error");
+    });
+
+    it("covers whitebox helpers directly", () => {
+        const calc = new IntegratedRateLawCalculator() as unknown as Record<string, (o: number, a: number, k: number, e: number) => Array<{ time: number; concentration: number }>>;
+        const series = calc["buildConcentrationTimeSeries"](0, 1, 0.05, 0);
+        expect(series.length).toBe(31);
+        const rc = new ReactionOrderCalculator() as unknown as Record<string, (pts: Array<{ t: number; c: number }>, fn: (p: { t: number; c: number }) => number) => number>;
+        expect(rc["calculateRSquared"]([{ t: 0, c: 1 }], (p) => p.c)).toBe(0);
     });
 });
