@@ -101,6 +101,76 @@ describe("calculateBufferSolution", () => {
         const text = getResultText("buffer-result");
         expect(text).toContain("Poor");
     });
+
+    it("should show error for invalid solve-for selection", () => {
+        createSelect("buffer-solve-for", "bogus", ["pH", "pKa", "ratio", "bogus"], "buffer-calc");
+        createInput("buffer-pKa", "4.75", "buffer-calc");
+        createInput("buffer-HA", "0.1", "buffer-calc");
+        createInput("buffer-Aminus", "0.2", "buffer-calc");
+        createInput("buffer-pH", "", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
+
+    it("should show error for non-positive [A-]", () => {
+        createSelect("buffer-solve-for", "pH", ["pH", "pKa", "ratio"], "buffer-calc");
+        createInput("buffer-pKa", "4.75", "buffer-calc");
+        createInput("buffer-HA", "0.1", "buffer-calc");
+        createInput("buffer-Aminus", "0", "buffer-calc");
+        createInput("buffer-pH", "", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
+
+    it("should show error when pH is missing for pKa", () => {
+        createSelect("buffer-solve-for", "pKa", ["pH", "pKa", "ratio"], "buffer-calc");
+        createInput("buffer-pKa", "", "buffer-calc");
+        createInput("buffer-HA", "0.1", "buffer-calc");
+        createInput("buffer-Aminus", "0.2", "buffer-calc");
+        createInput("buffer-pH", "", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
+
+    it("should show error when pKa is missing for ratio", () => {
+        createSelect("buffer-solve-for", "ratio", ["pH", "pKa", "ratio"], "buffer-calc");
+        createInput("buffer-pKa", "", "buffer-calc");
+        createInput("buffer-HA", "", "buffer-calc");
+        createInput("buffer-Aminus", "", "buffer-calc");
+        createInput("buffer-pH", "5.75", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
+
+    it("should show error when pH is missing for ratio", () => {
+        createSelect("buffer-solve-for", "ratio", ["pH", "pKa", "ratio"], "buffer-calc");
+        createInput("buffer-pKa", "4.75", "buffer-calc");
+        createInput("buffer-HA", "", "buffer-calc");
+        createInput("buffer-Aminus", "", "buffer-calc");
+        createInput("buffer-pH", "", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
 });
 
 describe("calculatePKaPKb", () => {
@@ -184,6 +254,16 @@ describe("calculatePKaPKb", () => {
         const text = getResultText("pka-pkb-result");
         expect(text).not.toContain("Kw = 0.0000");
         expect(text).toContain("Kw = 1.0000");
+    });
+
+    it("should show error for invalid input type", () => {
+        createSelect("pka-pkb-input-type", "bogus", ["Ka", "pKa", "Kb", "pKb", "bogus"], "pka-pkb-calc");
+        createInput("pka-pkb-input-value", "1", "pka-pkb-calc");
+
+        calculatePKaPKb();
+
+        const text = getResultText("pka-pkb-result");
+        expect(text).toContain("Error");
     });
 });
 
