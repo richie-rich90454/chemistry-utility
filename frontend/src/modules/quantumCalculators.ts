@@ -682,6 +682,10 @@ export class DeBroglieWavelengthCalculator extends Calculator {
         let massKg: number = massRaw;
         if (massUnit === "amu") {
             massKg = massRaw * AMU_TO_KG;
+        } else if (massUnit === "g") {
+            massKg = massRaw / 1000;
+        } else if (massUnit !== "kg") {
+            throw new Error("Invalid mass unit");
         }
 
         let lambdaM: number = PLANCK / (massKg * velocity);
@@ -730,6 +734,10 @@ export class DeBroglieWavelengthCalculator extends Calculator {
         let massKg: number = massRaw;
         if (massUnit === "amu") {
             massKg = massRaw * AMU_TO_KG;
+        } else if (massUnit === "g") {
+            massKg = massRaw / 1000;
+        } else if (massUnit !== "kg") {
+            throw new Error("Invalid mass unit");
         }
         let lambdaM: number = PLANCK / (massKg * velocity);
         let lambdaDisplay: number;
