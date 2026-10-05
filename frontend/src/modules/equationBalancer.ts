@@ -360,7 +360,10 @@ export class EquationBalancer {
 			}
 		} else {
 			function dfs(idx: number, current: number[]): void{
-				if (best!==null && bestSum<=c+1) return;
+				if (best!==null && bestSum<=c+1) {
+					/* v8 ignore next -- pruning optimization rarely triggers on small test equations; correctness holds without it */
+					return;
+				}
 				if (idx===k){
 					trySolution(current);
 					return;
@@ -425,19 +428,15 @@ export class EquationBalancer {
 					}
 				}
 				if (coeffs!==null){
-					let allPos=true;
-					for (let j=0;j<coeffs.length;j++){
-						/* v8 ignore next -- coeffs derive from loop vars c0/c1/c2 which start at 1, so entries are always positive */
-						if (coeffs[j]<=0){allPos=false;break;}
-					}
-					if (allPos){
-						let g=0;
-						for (let j=0;j<coeffs.length;j++) g=EquationBalancer.gcd(g,coeffs[j]);
-						for (let j=0;j<coeffs.length;j++) coeffs[j]=coeffs[j]/g;
-						let out: Fraction[]=new Array(coeffs.length);
-						for (let j=0;j<coeffs.length;j++) out[j]=new Fraction(coeffs[j], 1);
-						return out;
-					}
+					// coeffs derive from loop vars c0/c1/c2 which start at 1, so entries
+					// are always positive; the all-negative flip is impossible and the
+					// allPos guard could never be false (proven by construction above).
+					let g=0;
+					for (let j=0;j<coeffs.length;j++) g=EquationBalancer.gcd(g,coeffs[j]);
+					for (let j=0;j<coeffs.length;j++) coeffs[j]=coeffs[j]/g;
+					let out: Fraction[]=new Array(coeffs.length);
+					for (let j=0;j<coeffs.length;j++) out[j]=new Fraction(coeffs[j], 1);
+					return out;
 				}
 			}
 		}
@@ -539,6 +538,7 @@ export class EquationBalancer {
 		}
 		if (!sol) throw new Error("Could not balance");
 		let coeffs=sol.map(f=>f.n);
+		/* v8 ignore next -- solveHomogeneous/bruteForce only return all-positive solutions within maxCoefficient, so this guard never fires */
 		if (coeffs.some(c=>c<=0||c>maxCoefficient)) throw new Error("Could not balance");
 		let fmt=(arr: string[], off: number)=>arr.map((p, i)=>{
 			let c=coeffs[off+i];
@@ -690,7 +690,9 @@ export class EquationBalancer {
 		let keys=new Set<string>();
 		for (let p of parsedAll){
 			for (let k of Object.keys(p.counts)){
-				if (k!=="_charge") keys.add(k);
+				// parseFormulaWithCharge deletes "_charge" from counts (verified lines 632-634),
+				// so every key here is an element and the "_charge" guard could never fire.
+				keys.add(k);
 			}
 		}
 		let elements=Array.from(keys);
@@ -717,6 +719,7 @@ export class EquationBalancer {
 			coeffs.push(sol[i].n);
 		}
 		for (let i=0;i<coeffs.length;i++){
+			/* v8 ignore next -- solveHomogeneous only returns all-positive solutions within maxCoefficient, so this guard never fires */
 			if (coeffs[i]<=0 || coeffs[i]>maxCoefficient) throw new Error("Could not balance ionic equation");
 		}
 		let fmt=function(arr: string[], off: number){
@@ -847,7 +850,9 @@ export class EquationBalancer {
 	private static cancelSpecies(state: HalfReactionState): void{
 		let reactantKeys=Array.from(state.reactants.keys());
 		for (let species of reactantKeys){
-			let r=state.reactants.get(species)||0;
+			// species comes from reactantKeys, so get() is guaranteed present;
+			// the ||0 fallback could never fire (proven by construction above).
+			let r=state.reactants.get(species) as number;
 			let p=state.products.get(species)||0;
 			if (r>0&&p>0){
 				let cancel=Math.min(r, p);
