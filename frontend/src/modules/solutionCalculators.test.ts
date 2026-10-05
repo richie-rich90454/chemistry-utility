@@ -193,6 +193,17 @@ describe("calculateMassPercent", () => {
 		expect(text).toContain("Error");
 		expect(text).toContain("negative");
 	});
+
+	it("should show error for invalid unit", () => {
+		createSelect("concentration-unit", "bogus", ["percent", "ppm", "ppb", "bogus"], "mass-percent-calc");
+		createInput("mass-solute", "10", "mass-percent-calc");
+		createInput("mass-solution", "100", "mass-percent-calc");
+
+		calculateMassPercent();
+
+		const text = getResultText("mass-percent-result");
+		expect(text).toContain("Error");
+	});
 });
 
 describe("calculateMixing", () => {
@@ -272,6 +283,18 @@ describe("calculateMixing", () => {
 		createInput("mix-V1", "-100", "solution-mixing-calc");
 		createInput("mix-C2", "1", "solution-mixing-calc");
 		createInput("mix-V2", "100", "solution-mixing-calc");
+
+		calculateMixing();
+
+		const text = getResultText("mixing-result");
+		expect(text).toContain("Error");
+	});
+
+	it("should show error for zero second volume", () => {
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "100", "solution-mixing-calc");
+		createInput("mix-C2", "1", "solution-mixing-calc");
+		createInput("mix-V2", "0", "solution-mixing-calc");
 
 		calculateMixing();
 
