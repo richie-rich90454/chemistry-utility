@@ -589,9 +589,8 @@ export class ColligativePropertiesCalculator extends Calculator {
         let el: HTMLElement | null = document.getElementById("collig-solvent-molar-mass");
         if (el instanceof HTMLInputElement && el.value.trim() !== "") {
             let v: number = parseFloat(el.value);
-            if (!isNaN(v) && v > 0) {
-                return v / 1000;
-            }
+            if (isNaN(v) || v <= 0) throw new Error("Solvent molar mass must be positive");
+            return v / 1000;
         }
         return 0.018015;
     }
@@ -787,9 +786,9 @@ export class TitrationCurveCalculator extends Calculator {
             let totalAcid = acidConc * acidVol;
             let addedBase = baseConc * Vb;
             let totalVolume = acidVol + Vb;
-            if (totalVolume === 0) {
-                pH = -Math.log10(acidConc);
-            } else if (Vb === 0) {
+            // acidVol > 0 is validated above and Vb >= 0 by loop construction,
+            // so totalVolume > 0 always; the totalVolume === 0 fallback could never fire.
+            if (Vb === 0) {
                 if (acidType === "strong") {
                     pH = -Math.log10(acidConc);
                 } else {
@@ -878,9 +877,9 @@ export class TitrationCurveCalculator extends Calculator {
             let totalAcid = acidConc * acidVol;
             let addedBase = baseConc * Vb;
             let totalVolume = acidVol + Vb;
-            if (totalVolume === 0) {
-                pH = -Math.log10(acidConc);
-            } else if (Vb === 0) {
+            // acidVol > 0 is validated above and Vb >= 0 by loop construction,
+            // so totalVolume > 0 always; the totalVolume === 0 fallback could never fire.
+            if (Vb === 0) {
                 if (acidType === "strong") {
                     pH = -Math.log10(acidConc);
                 } else {
@@ -967,6 +966,9 @@ function saltGcd(a: number, b: number): number {
         a = b;
         b = t;
     }
+    // Callers validate charges as non-zero integers, so a > 0 here; the a === 0
+    // fallback guards gcd(0, 0) and could never fire (proven by validation above).
+    /* v8 ignore next -- defensive div-by-zero guard, unreachable via validated inputs */
     return a === 0 ? 1 : a;
 }
 export class DebyeHuckelCalculator extends Calculator {
