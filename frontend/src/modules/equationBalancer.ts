@@ -225,7 +225,6 @@ export class EquationBalancer {
 					if (e.message.toLowerCase().indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
 					throw new Error("Invalid format");
 				} else {
-					/* v8 ignore next -- fast-balance split never throws UNBALANCEABLE/future codes, only PARSE/UNKNOWN (verified in bundle) */
 					throw new Error("Invalid format");
 				}
 			}
@@ -514,7 +513,6 @@ export class EquationBalancer {
 						throw new Error("Could not balance");
 					}
 				} else {
-					/* v8 ignore next -- unknown future fast-balance error codes never occur (only three codes constructed) */
 					throw new Error("Could not balance");
 				}
 			}
@@ -681,7 +679,6 @@ export class EquationBalancer {
 						throw new Error("Could not balance ionic equation");
 					}
 				} else {
-					/* v8 ignore next -- unknown future fast-balance error codes never occur */
 					throw new Error("Could not balance ionic equation");
 				}
 			}
