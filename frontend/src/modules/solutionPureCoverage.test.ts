@@ -13,6 +13,33 @@ import {
     CommonIonEffectCalculator,
 } from "./solutionCalculators.js";
 
+describe("solutionPureCoverage: missing-key fallbacks", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        for (const id of ["dilution-result", "mass-percent-result", "mixing-result", "buffer-result", "pka-pkb-result", "ksp-result", "colligative-result", "titration-result", "debye-huckel-result", "common-ion-result"]) {
+            const el = document.createElement("div");
+            el.id = id;
+            document.body.appendChild(el);
+        }
+    });
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    it("covers ?? fallbacks with empty input records", () => {
+        expect(new DilutionCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new MassPercentCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new MixingCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new BufferSolutionCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new PKaPKbCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new KspCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new ColligativePropertiesCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new TitrationCurveCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new DebyeHuckelCalculator().calculatePure({}).explanation).toContain("Error");
+        expect(new CommonIonEffectCalculator().calculatePure({}).explanation).toContain("Error");
+    });
+});
+
 function pureDilution(solveFor: string, M1: string, V1: string, M2: string, V2: string) {
     return new DilutionCalculator().calculatePure({
         "dilution-solve-for": solveFor,
@@ -122,6 +149,8 @@ describe("solutionPureCoverage: Mixing pure branches", () => {
         expect(pureMixing("", "1", "0", "1").explanation).toContain("Error");
         expect(pureMixing("2", "1", "-1", "1").explanation).toContain("Error");
         expect(pureMixing("2", "0", "0", "1").explanation).toContain("Error");
+        expect(pureMixing("0", "1", "1", "1").explanation).toContain("Error");
+        expect(pureMixing("2", "1", "1", "0").explanation).toContain("Error");
     });
 });
 
@@ -162,6 +191,9 @@ describe("solutionPureCoverage: Buffer pure branches", () => {
         expect(pureBuffer("pKa", "", "0.1", "0.2", "").explanation).toContain("Error");
         expect(pureBuffer("pKa", "5.06", "", "0.2", "").explanation).toContain("Error");
         expect(pureBuffer("pKa", "5.06", "0.1", "0", "").explanation).toContain("Error");
+        expect(pureBuffer("pKa", "", "", "0.2", "5.06").explanation).toContain("Error");
+        expect(pureBuffer("pKa", "", "0", "0.2", "5.06").explanation).toContain("Error");
+        expect(pureBuffer("pKa", "", "0.1", "0", "5.06").explanation).toContain("Error");
         expect(pureBuffer("ratio", "", "0.1", "0.2", "5.06").explanation).toContain("Error");
         expect(pureBuffer("ratio", "4.76", "0.1", "0.2", "").explanation).toContain("Error");
     });
@@ -274,6 +306,20 @@ describe("solutionPureCoverage: Colligative pure branches", () => {
         expect(custom.explanation).toContain("310");
     });
 
+    it("computes without optional Kb, Kf, Psolvent", () => {
+        const base = colligBase();
+        base["collig-Kb"] = "";
+        base["collig-Kf"] = "";
+        base["collig-solvent-bp"] = "";
+        base["collig-solvent-fp"] = "";
+        base["collig-Psolvent"] = "";
+        const r = pureCollig(base);
+        expect(r.explanation).toContain("Molality");
+        expect(r.explanation).not.toContain("Delta Tb");
+        expect(r.explanation).not.toContain("Delta Tf");
+        expect(r.explanation).not.toContain("Delta P");
+    });
+
     it("rejects bad inputs", () => {
         const bad = colligBase();
         bad["collig-solute-mass"] = "";
@@ -333,6 +379,21 @@ describe("solutionPureCoverage: Titration pure branches", () => {
         const weak = pureTitration("weak", titrationBase());
         expect(weak.explanation).toContain("Half-Equivalence Point");
         expect(weak.metadata).toHaveProperty("dataPointCount", 51);
+    });
+
+    it("clamps extreme pH to [0, 14]", () => {
+        const acidic = titrationBase();
+        acidic["titration-acid-conc"] = "10";
+        expect(pureTitration("strong", acidic).value).toContain("Equivalence Point");
+        const basic = titrationBase();
+        basic["titration-base-conc"] = "10";
+        expect(pureTitration("strong", basic).value).toContain("Equivalence Point");
+    });
+
+    it("covers missing Ka key fallback", () => {
+        const vals = titrationBase();
+        delete vals["titration-Ka"];
+        expect(pureTitration("weak", vals).explanation).toContain("Error");
     });
 
     it("rejects bad inputs", () => {
