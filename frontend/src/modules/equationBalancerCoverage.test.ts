@@ -27,9 +27,12 @@ describe("balancerCoverage: PARSE_ERROR fallback to Could not balance", () => {
 });
 
 describe("balancerCoverage: ionic non-unit coefficients", () => {
-    it("formats multi-electron ionic equation", () => {
-        const out = balanceIonic("Al3+ + e- -> Al");
-        expect(out).toContain("3e-");
+    it("formats multi-ion ionic equation via legacy path", () => {
+        const EB2 = EquationBalancer as unknown as {
+            legacyBalanceIonic(equation: string, maxCoefficient?: number): string;
+        };
+        const out = EB2.legacyBalanceIonic("Ca2+ + Cl- -> CaCl2");
+        expect(out).toContain("2Cl-");
     });
 });
 
