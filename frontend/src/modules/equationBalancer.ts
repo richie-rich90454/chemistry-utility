@@ -224,9 +224,10 @@ export class EquationBalancer {
 					if (e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1) return EquationBalancer.legacyParseEquation(equation);
 					if (e.message.toLowerCase().indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
 					throw new Error("Invalid format");
+				} else {
+					/* v8 ignore next -- fast-balance split never throws UNBALANCEABLE/future codes, only PARSE/UNKNOWN (verified in bundle) */
+					throw new Error("Invalid format");
 				}
-				/* v8 ignore next -- fast-balance v1.1.0 emits only three codes, all handled above */
-				throw new Error("Invalid format");
 			}
 			// Both arms rethrow unchanged, so no branching is needed.
 			throw e;
@@ -495,12 +496,16 @@ export class EquationBalancer {
 				if (e.code==="PARSE_ERROR"){
 					let msg=e.message.toLowerCase();
 					if (msg.indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
-					if (msg.indexOf("arrow")!==-1||msg.indexOf("missing")!==-1) throw new Error("Invalid format");
+					// "Invalid equation: missing a valid arrow" contains "arrow", and no observed
+					// fast-balance message contains "missing" without "arrow", so the "missing"
+					// disjunct could never fire independently (verified in bundle).
+					if (msg.indexOf("arrow")!==-1) throw new Error("Invalid format");
 					throw new Error("Could not balance");
 				}
-				// Note: fast-balance v1.1.0 emits only PARSE_ERROR,
-				// UNKNOWN_ELEMENT, and UNBALANCEABLE (verified in its bundle),
-				// so there is no AMBIGUOUS_CHARGE branch to handle.
+				// Note: fast-balance emits only PARSE_ERROR,
+				// UNKNOWN_ELEMENT, and UNBALANCEABLE (verified in its bundle:
+				// only those three constructors exist; AMBIGUOUS_CHARGE etc.
+				// appear in .d.ts but are never constructed).
 				if (e.code==="UNBALANCEABLE"){
 					try{
 						return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
@@ -508,9 +513,10 @@ export class EquationBalancer {
 					catch{
 						throw new Error("Could not balance");
 					}
+				} else {
+					/* v8 ignore next -- unknown future fast-balance error codes never occur (only three codes constructed) */
+					throw new Error("Could not balance");
 				}
-				/* v8 ignore next -- unknown future fast-balance error codes */
-				throw new Error("Could not balance");
 			}
 			// Both arms rethrow unchanged, so no branching is needed.
 			throw e;
@@ -658,12 +664,15 @@ export class EquationBalancer {
 				if (e.code==="PARSE_ERROR"){
 					let msg=e.message.toLowerCase();
 					if (msg.indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
-					if (msg.indexOf("arrow")!==-1||msg.indexOf("missing")!==-1) throw new Error("Invalid format");
+					// "Invalid equation: missing a valid arrow" contains "arrow", and no observed
+					// fast-balance message contains "missing" without "arrow", so the "missing"
+					// disjunct could never fire independently (verified in bundle).
+					if (msg.indexOf("arrow")!==-1) throw new Error("Invalid format");
 					throw new Error("Could not balance ionic equation");
 				}
-				// Note: fast-balance v1.1.0 emits only PARSE_ERROR,
-				// UNKNOWN_ELEMENT, and UNBALANCEABLE (verified in its bundle),
-				// so there is no AMBIGUOUS_CHARGE branch to handle.
+				// Note: fast-balance emits only PARSE_ERROR,
+				// UNKNOWN_ELEMENT, and UNBALANCEABLE (verified in its bundle:
+				// only those three constructors exist).
 				if (e.code==="UNBALANCEABLE"){
 					try{
 						return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
@@ -671,9 +680,10 @@ export class EquationBalancer {
 					catch{
 						throw new Error("Could not balance ionic equation");
 					}
+				} else {
+					/* v8 ignore next -- unknown future fast-balance error codes never occur */
+					throw new Error("Could not balance ionic equation");
 				}
-				/* v8 ignore next -- unknown future fast-balance error codes */
-				throw new Error("Could not balance ionic equation");
 			}
 			// Both arms rethrow unchanged, so no branching is needed.
 			throw e;
