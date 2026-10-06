@@ -135,7 +135,7 @@ describe("quantumDomCoverage: Photoelectric DOM", () => {
 
     it("solves each variable and rejects bad solveFor", () => {
         expect(peDom("KE", "400", "", "2.3", "")).toContain("eV");
-        expect(peDom("threshold-frequency", "", "", "2.3", "").replace("Hz", "Hz")).toContain("Hz");
+        expect(peDom("threshold-frequency", "", "", "2.3", "")).toContain("Hz");
         expect(peDom("work-function", "400", "", "", "1")).toContain("eV");
         expect(peDom("wavelength", "", "", "2.3", "1")).toContain("nm");
         expect(peDom("bogus", "400", "", "2.3", "")).toContain("Error");
