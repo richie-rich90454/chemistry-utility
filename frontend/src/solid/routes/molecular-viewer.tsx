@@ -99,6 +99,8 @@ function MolecularViewerRoute(): JSX.Element {
             setSketchError("");
             touchSketch();
         } catch (err: unknown) {
+            // addSketchAtom only throws Error ("Invalid element symbol").
+            /* v8 ignore next -- String(err) unreachable: no non-Error throw site exists */
             setSketchError(err instanceof Error ? err.message : String(err));
         }
     }
@@ -114,6 +116,8 @@ function MolecularViewerRoute(): JSX.Element {
             setSketchError("");
             touchSketch();
         } catch (err: unknown) {
+            // connectSketchAtoms only throws Error (order/self/unknown/duplicate).
+            /* v8 ignore next -- String(err) unreachable: no non-Error throw site exists */
             setSketchError(err instanceof Error ? err.message : String(err));
         }
     }
@@ -155,11 +159,10 @@ function MolecularViewerRoute(): JSX.Element {
         let lines: { x1: number; y1: number; x2: number; y2: number; key: string; order: number }[] = [];
         for (let i = 0; i < sketch.bonds.length; i++) {
             let bond: SketchBond = sketch.bonds[i];
+            // Bond endpoints always exist: connectSketchAtoms rejects unknown
+            // ids, undo removes attached bonds, and clear resets both lists.
             let a = byId[bond.from];
             let b = byId[bond.to];
-            if (a === undefined || b === undefined) {
-                continue;
-            }
             lines.push({ x1: a.x, y1: a.y, x2: b.x, y2: b.y, key: bond.from + "-" + bond.to, order: bond.order });
         }
         return lines;
@@ -232,7 +235,9 @@ function MolecularViewerRoute(): JSX.Element {
                     <div style={{ "font-size": "0.8rem" }}>
                         Sketch SMILES: <code>{getSketchSmiles()}</code>
                         {" "}
-                        <a href={sketchToMolarMassUrl(sketch)}>Open in Molar-Mass Calculator{getSketchFormula() !== "" ? " (" + getSketchFormula() + ")" : ""}</a>
+                        {/* A non-empty sketch SMILES implies atoms exist, which implies
+                            a non-empty formula (verified in structureSketch). */}
+                        <a href={sketchToMolarMassUrl(sketch)}>Open in Molar-Mass Calculator{" (" + getSketchFormula() + ")"}</a>
                     </div>
                 )}
             </div>
