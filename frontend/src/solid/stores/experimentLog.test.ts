@@ -160,4 +160,120 @@ describe("useExperimentLog", function (): void {
         await secondRefresh;
         expect(loadSpy).toHaveBeenCalledTimes(1);
     });
+    it("all actions are no-ops while loading", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        let resolveFirst: () => void = function (): void {return;};
+        let firstCall = new Promise<void>(function (resolve: () => void): void {resolveFirst = resolve;});
+        let loadSpy = vi.spyOn(manager, "loadLogs").mockImplementation(function (): Promise<ExperimentLog[]> {
+            return firstCall.then(function (): ExperimentLog[] {return [];});
+        });
+        let createSpy = vi.spyOn(manager, "createLog");
+        let addSpy = vi.spyOn(manager, "addStep");
+        let annotateSpy = vi.spyOn(manager, "annotateStep");
+        let viewSpy = vi.spyOn(manager, "viewTimeline");
+        let deleteSpy = vi.spyOn(manager, "deleteLog");
+        let store = useExperimentLog();
+        let firstRefresh = store.refresh();
+        await store.createLog("x", "ws-1");
+        await store.addStep("log-1", {"title": "t", "data": "d"});
+        await store.annotateStep("s1", "note");
+        await store.viewTimeline("log-1");
+        await store.deleteLog("log-1");
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(createSpy).not.toHaveBeenCalled();
+        expect(addSpy).not.toHaveBeenCalled();
+        expect(annotateSpy).not.toHaveBeenCalled();
+        expect(viewSpy).not.toHaveBeenCalled();
+        expect(deleteSpy).not.toHaveBeenCalled();
+        resolveFirst();
+        await firstRefresh;
+    });
+    it("refresh sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "loadLogs").mockRejectedValue("boom");
+        let store = useExperimentLog();
+        await store.refresh();
+        expect(store.error()).toBe("Failed to load experiment logs: Unknown error");
+    });
+    it("createLog sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "createLog").mockRejectedValue(42);
+        let store = useExperimentLog();
+        await store.createLog("x", "ws-1");
+        expect(store.error()).toBe("Failed to create experiment log: Unknown error");
+    });
+    it("addStep sets error when manager throws", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "addStep").mockRejectedValue(new Error("add failed"));
+        let store = useExperimentLog();
+        await store.addStep("log-1", {"title": "t", "data": "d"});
+        expect(store.error()).toBe("Failed to add step: add failed");
+    });
+    it("addStep sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "addStep").mockRejectedValue("bad");
+        let store = useExperimentLog();
+        await store.addStep("log-1", {"title": "t", "data": "d"});
+        expect(store.error()).toBe("Failed to add step: Unknown error");
+    });
+    it("annotateStep does not update currentSteps when no log is active", async function (): Promise<void> {
+        seedLogs([makeLog("log-1", "Log One", "ws-1")]);
+        seedSteps("log-1", [makeStep("s1", "log-1", "Step One", "data")]);
+        let store = useExperimentLog();
+        await store.refresh();
+        expect(store.currentSteps().length).toBe(0);
+        await store.annotateStep("s1", "note without active timeline");
+        expect(store.error()).toBe("");
+        expect(store.currentSteps().length).toBe(0);
+    });
+    it("annotateStep sets error when manager throws", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "annotateStep").mockRejectedValue(new Error("annotate failed"));
+        let store = useExperimentLog();
+        await store.annotateStep("s1", "note");
+        expect(store.error()).toBe("Failed to annotate step: annotate failed");
+    });
+    it("annotateStep sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "annotateStep").mockRejectedValue("bad");
+        let store = useExperimentLog();
+        await store.annotateStep("s1", "note");
+        expect(store.error()).toBe("Failed to annotate step: Unknown error");
+    });
+    it("viewTimeline sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "viewTimeline").mockImplementation(function (): ExperimentStep[] {
+            throw "bad";
+        });
+        let store = useExperimentLog();
+        await store.viewTimeline("log-1");
+        expect(store.error()).toBe("Failed to view timeline: Unknown error");
+    });
+    it("deleteLog sets error when manager throws", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "deleteLog").mockImplementation(function (): void {
+            throw new Error("delete failed");
+        });
+        let store = useExperimentLog();
+        await store.deleteLog("log-1");
+        expect(store.error()).toBe("Failed to delete experiment log: delete failed");
+    });
+    it("deleteLog sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = ExperimentLogManager.getInstance();
+        vi.spyOn(manager, "deleteLog").mockImplementation(function (): void {
+            throw "bad";
+        });
+        let store = useExperimentLog();
+        await store.deleteLog("log-1");
+        expect(store.error()).toBe("Failed to delete experiment log: Unknown error");
+    });
+    it("deleteLog keeps current when deleting a non-active log", async function (): Promise<void> {
+        seedLogs([makeLog("log-1", "One", "ws-1"), makeLog("log-2", "Two", "ws-1")]);
+        let store = useExperimentLog();
+        await store.refresh();
+        await store.viewTimeline("log-1");
+        await store.deleteLog("log-2");
+        expect(store.logs().length).toBe(1);
+        expect(store.currentLogId()).toBe("log-1");
+    });
 });
