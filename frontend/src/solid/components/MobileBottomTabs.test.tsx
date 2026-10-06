@@ -1,9 +1,10 @@
-import {render, fireEvent} from "@solidjs/testing-library";
+import {render, fireEvent, cleanup, waitFor} from "@solidjs/testing-library";
 import {Router, Route} from "@solidjs/router";
 import type {JSX} from "solid-js";
 import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 import {MobileBottomTabs} from "./MobileBottomTabs";
 import {useNavSheet, reset as resetNavSheet} from "../stores/navSheet";
+import {NavigationManager} from "../../modules/navigationManager.js";
 import {RuntimeDetector} from "../../modules/runtimeDetector.js";
 function Host(): JSX.Element {
     return <MobileBottomTabs />;
@@ -20,8 +21,13 @@ function renderHost() {
 describe("MobileBottomTabs", function (): void {
     beforeEach(function (): void {
         resetNavSheet();
+        NavigationManager.resetInstance();
+        window.history.replaceState({}, "", "/");
     });
     afterEach(function (): void {
+        cleanup();
+        NavigationManager.resetInstance();
+        window.history.replaceState({}, "", "/");
         vi.restoreAllMocks();
     });
     it("renders the top banner with a navigation landmark", function (): void {
@@ -50,5 +56,34 @@ describe("MobileBottomTabs", function (): void {
         let result = renderHost();
         expect(result.queryByText("Dashboard")).toBeNull();
         expect(result.getByText("Chemistry Utility")).toBeTruthy();
+    });
+    it("updates the title when the path changes via popstate", async function (): Promise<void> {
+        let result = renderHost();
+        expect(result.getByText("Dashboard")).toBeTruthy();
+        window.history.replaceState({}, "", "/molar-mass");
+        window.dispatchEvent(new Event("popstate"));
+        await waitFor(function (): void {
+            expect(result.getByText("Molar Mass")).toBeTruthy();
+        });
+    });
+    it("falls back to the app title for unknown paths", function (): void {
+        window.history.replaceState({}, "", "/no-such-calculator");
+        let result = renderHost();
+        expect(result.getByText("Chemistry Utility")).toBeTruthy();
+    });
+    it("updates the title when navigation notifies a calculator id", async function (): Promise<void> {
+        let result = renderHost();
+        NavigationManager.getInstance().setActiveViewId("molar-mass");
+        await waitFor(function (): void {
+            expect(result.getByText("Molar Mass")).toBeTruthy();
+        });
+    });
+    it("clears the title when navigation notifies an unknown id", async function (): Promise<void> {
+        let result = renderHost();
+        expect(result.getByText("Dashboard")).toBeTruthy();
+        NavigationManager.getInstance().setActiveViewId("mystery-xyz");
+        await waitFor(function (): void {
+            expect(result.queryByText("Dashboard")).toBeNull();
+        });
     });
 });
