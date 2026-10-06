@@ -30,6 +30,7 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
         };
     }
     function reportError(err: unknown): void {
+        /* v8 ignore next -- reportError only runs post-mount (parse/draw callbacks) where Solid has assigned the ref; verified by mount tests */
         if (canvasRef === undefined) {
             return;
         }
@@ -48,6 +49,7 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
         }
     }
     function renderSmiles(smiles: string): void {
+        /* v8 ignore next -- renderSmiles only runs from onMount/reactive effects where Solid has assigned the ref */
         if (canvasRef === undefined) {
             return;
         }
@@ -74,6 +76,7 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
         }
     }
     function applyZoom(): void {
+        /* v8 ignore next -- applyZoom only runs from onMount where Solid has assigned the ref */
         if (canvasRef === undefined) {
             return;
         }
@@ -86,6 +89,7 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
         }
     }
     onMount(function (): void {
+        /* v8 ignore next -- Solid assigns the ref before onMount so canvasRef is always set here */
         if (canvasRef !== undefined) {
             canvasRef.width = getWidth();
             canvasRef.height = getHeight();
@@ -103,12 +107,14 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
     });
     createEffect(function (): void {
         let zoom: number = props.zoom !== undefined ? props.zoom : 1;
+        /* v8 ignore next -- effects run post-render where Solid has assigned the ref */
         if (canvasRef !== undefined) {
             canvasRef.style.transform = zoom === 1 ? "" : "scale(" + String(zoom) + ")";
             canvasRef.style.transformOrigin = "center center";
         }
     });
     onCleanup(function (): void {
+        /* v8 ignore next -- the ref stays assigned for the component lifetime so canvasRef is always set at cleanup */
         if (canvasRef !== undefined) {
             let ctx: CanvasRenderingContext2D | null = canvasRef.getContext("2d");
             if (ctx !== null) {
@@ -119,7 +125,7 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
     });
     return (
         <div class={styles.container}>
-            <canvas ref={canvasRef} class={styles.canvas} role="img" aria-label={"Molecule: " + props.smiles} />
+            <canvas ref={function (el: HTMLCanvasElement): void { canvasRef = el; }} class={styles.canvas} role="img" aria-label={"Molecule: " + props.smiles} />
         </div>
     );
 }
