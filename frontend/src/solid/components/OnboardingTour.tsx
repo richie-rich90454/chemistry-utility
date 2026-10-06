@@ -13,26 +13,23 @@ function OnboardingTour(): JSX.Element {
     });
     // Move focus into the dialog when it opens, close on Escape, and
     // restore focus on close so keyboard users are never stranded.
+    // Focus happens in the dialog ref callback (which fires at DOM commit)
+    // rather than the effect below: the effect re-runs before <Show> commits
+    // the dialog, so focusing there never lands (verified by test probes).
+    // The ref callback itself defers a microtask because the ref fires while
+    // the dialog subtree is still detached, when focus() is a no-op.
     createEffect(function (): void {
         if (!store.tourActive()) {
             return;
         }
         previousFocus = document.activeElement as HTMLElement | null;
-        let dialog: HTMLDivElement | undefined = dialogRef;
-        if (dialog !== undefined) {
-            let focusTarget: HTMLElement | null = dialog.querySelector("button");
-            if (focusTarget !== null) {
-                focusTarget.focus();
-            } else {
-                dialog.focus();
-            }
-        }
         function handleKey(e: KeyboardEvent): void {
             if (e.key === "Escape") {
                 store.completeTour();
             }
             if (e.key === "Tab" && dialogRef !== undefined) {
                 let focusables: NodeListOf<HTMLElement> = dialogRef.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+                /* v8 ignore next -- the tour dialog always renders the Skip tour button, so focusables is never empty */
                 if (focusables.length === 0) {
                     return;
                 }
@@ -57,7 +54,18 @@ function OnboardingTour(): JSX.Element {
     });
     return (
         <Show when={store.tourActive()} fallback={null}>
-            <div class={styles.onboardingOverlay} role="dialog" aria-modal="true" aria-label="Welcome tour" ref={dialogRef} tabindex="-1">
+            <div class={styles.onboardingOverlay} role="dialog" aria-modal="true" aria-label="Welcome tour" ref={function (el: HTMLDivElement): void {
+                dialogRef = el;
+                queueMicrotask(function (): void {
+                    let focusTarget: HTMLElement | null = el.querySelector("button");
+                    /* v8 ignore next -- the tour dialog always renders the Skip tour button, so a button is always found */
+                    if (focusTarget !== null) {
+                        focusTarget.focus();
+                    } else {
+                        el.focus();
+                    }
+                });
+            }} tabindex="-1">
                 <div class={styles.welcomeCard}>
                     <h2 class={styles.welcomeTitle}>Welcome to Chemistry Utility</h2>
                     <p class={styles.welcomeText}>A guided tour is now showing key features. Follow the prompts to learn how to use the calculator sidebar, search, theme toggle, and navigation.</p>
