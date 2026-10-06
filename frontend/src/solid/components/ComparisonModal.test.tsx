@@ -145,4 +145,15 @@ describe("ComparisonModal", function (): void {
         dispatchEscape();
         expect(mocks.mockCloseModal).not.toHaveBeenCalled();
     });
+    it("shows diff fallback when values are non-numeric", function (): void {
+        mocks.mockIsModalOpen.mockReturnValue(true);
+        let itemA: ComparisonItem = {"calculationId": "c1", "data": {"result": {"label": "H2O"}}};
+        let itemB: ComparisonItem = {"calculationId": "c2", "data": {"result": {"label": "CO2"}}};
+        mocks.mockItems.mockReturnValue([itemA, itemB]);
+        let result = renderModal();
+        let rows = Array.from(result.container.querySelectorAll<HTMLElement>("tbody tr"));
+        expect(rows.length).toBe(1);
+        let cells = Array.from(rows[0].querySelectorAll<HTMLElement>("td"));
+        expect(cells[3].textContent).toBe("diff");
+    });
 });
