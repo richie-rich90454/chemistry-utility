@@ -2,6 +2,10 @@
   "name": "chemistry-utility-frontend",
   "version": "3.0.0",
   "type": "module",
+  "overrides": {
+    "seroval": "^1.6.3",
+    "seroval-plugins": "^1.6.3"
+  },
   "scripts": {
     "dev": "vite",
     "dev:app": "vite --mode app",
