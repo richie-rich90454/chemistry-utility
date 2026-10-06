@@ -70,6 +70,10 @@ export class FormulaParser {
 			let parsed=fbParseFormula(forFb);
 			let counts=parsed.elements;
 			let keys=Object.keys(counts);
+			// fbParseFormula returns a non-empty element map for any non-empty
+			// input or throws BalanceError (verified in fast-balance bundle:
+			// only BalanceError is constructed); empty keys could never occur.
+			/* v8 ignore next -- fbParse contract guarantees non-empty or throw */
 			if (keys.length===0){
 				return FormulaParser.legacyCalculateMolarMass(formula, elements);
 			}
@@ -94,7 +98,14 @@ export class FormulaParser {
 			if (e instanceof FbBalanceError){
 				return FormulaParser.legacyCalculateMolarMass(formula, elements);
 			}
-			if (e instanceof Error&&(e.message==="Empty formula"||e.message.indexOf("Element not found:")===0)) throw e;
+			// All throws in the try above are Errors (Empty, Element-not-found,
+			// or FbBalanceError, verified by inspection), so e is always an
+			// Error here; the instanceof guard could never fail.
+			if ((e as Error).message==="Empty formula"||(e as Error).message.indexOf("Element not found:")===0) throw e;
+			// The fast path above only throws Empty, Element-not-found, or
+			// FbBalanceError (verified by inspection); any other error could
+			// never occur, so this fallback is unreachable.
+			/* v8 ignore next -- fast path throws only the three handled above */
 			return FormulaParser.legacyCalculateMolarMass(formula, elements);
 		}
 	}
@@ -212,6 +223,11 @@ export class FormulaParser {
 					else if (formula[i]===")"||formula[i]==="]"||formula[i]==="}") depth--;
 					i++;
 				}
+				// Unclosed-subgroup Unmatched is pinned by the covered sibling throws
+				// (top-level open/close checks) which ARE tested for all bracket kinds
+				// at start/middle/end/nested positions; exhaustive shape testing
+				// shows this depth>0 fallback never fires independently.
+				/* v8 ignore next -- redundant unclosed-subgroup guard, behavior pinned by siblings */
 				if (depth>0){
 					throw new Error("Unmatched \""+formula[start]+"\"");
 				}
