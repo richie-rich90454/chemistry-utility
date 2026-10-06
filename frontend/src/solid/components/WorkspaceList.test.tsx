@@ -206,4 +206,20 @@ describe("WorkspaceList", function (): void {
         expect(item.getAttribute("tabindex")).toBe("0");
         expect(item.getAttribute("data-workspace-id")).toBe("ws-1");
     });
+    it("does not call selectWorkspace when clicked item has no workspace id", function (): void {
+        mocks.mockWorkspaces.mockReturnValue([makeWorkspace("ws-1", "Lab A", 2)]);
+        let result = renderWorkspaceList();
+        let item = result.getByText("Lab A").closest("li") as HTMLElement;
+        item.removeAttribute("data-workspace-id");
+        fireEvent.click(item);
+        expect(mocks.mockSelectWorkspace).not.toHaveBeenCalled();
+    });
+    it("does not call selectWorkspace when keydown item has no workspace id", function (): void {
+        mocks.mockWorkspaces.mockReturnValue([makeWorkspace("ws-1", "Lab A", 2)]);
+        let result = renderWorkspaceList();
+        let item = result.getByText("Lab A").closest("li") as HTMLElement;
+        item.removeAttribute("data-workspace-id");
+        fireEvent.keyDown(item, {"key": "Enter"});
+        expect(mocks.mockSelectWorkspace).not.toHaveBeenCalled();
+    });
 });
