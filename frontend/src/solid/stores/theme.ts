@@ -14,7 +14,8 @@ function useTheme(): ThemeStore {
     };
     // Subscribing outside a reactive owner would leak (onCleanup no-ops
     // there), so only subscribe when an owner exists.
-    if (getOwner() !== undefined) {
+    // Note: getOwner() returns null (not undefined) outside a root.
+    if (getOwner()) {
         manager.subscribe(listener);
         onCleanup(function (): void {
             manager.unsubscribe(listener);
