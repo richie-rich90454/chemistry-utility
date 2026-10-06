@@ -188,6 +188,25 @@ describe("Dashboard", function (): void {
         expect(result.getByText("H2O")).toBeTruthy();
         expect(result.getByText("2026-07-15")).toBeTruthy();
     });
+    it("renders two-digit month and day without padding", function (): void {
+        let calc = makeCalc({"CreatedAt": "2026-12-25T10:00:00.000Z"});
+        mocks.mockRecent.mockReturnValue([calc]);
+        let result = renderDashboard();
+        expect(result.getByText("2026-12-25")).toBeTruthy();
+    });
+    it("pads single-digit month and day with a leading zero", function (): void {
+        let calc = makeCalc({"CreatedAt": "2026-07-05T10:00:00.000Z"});
+        mocks.mockRecent.mockReturnValue([calc]);
+        let result = renderDashboard();
+        expect(result.getByText("2026-07-05")).toBeTruthy();
+    });
+    it("renders an empty date for an invalid CreatedAt value", function (): void {
+        let calc = makeCalc({"CreatedAt": "not-a-date"});
+        mocks.mockRecent.mockReturnValue([calc]);
+        let result = renderDashboard();
+        expect(result.getByText("molar-mass")).toBeTruthy();
+        expect(result.queryByText("not-a-date")).toBeNull();
+    });
     it("renders empty favorites state when no favorites exist", function (): void {
         let result = renderDashboard();
         expect(result.getByText("No favorite calculations yet. Star a calculation to pin it here.")).toBeTruthy();
