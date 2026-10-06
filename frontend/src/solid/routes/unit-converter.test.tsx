@@ -211,4 +211,14 @@ describe("UnitConverter", function (): void {
             expect(result.container.textContent).toMatch(/1 m = 100/);
         });
     });
+    it("does not convert on non-Enter key", async function (): Promise<void> {
+        let result = render(function () { return <UnitConverter />; });
+        let valueInput = result.getByLabelText("Value to convert") as HTMLInputElement;
+        valueInput.value = "1";
+        fireEvent.input(valueInput);
+        fireEvent.keyDown(valueInput, {key: "a"});
+        await waitFor(function (): void {
+            expect(result.container.textContent).not.toMatch(/1 m = 100/);
+        });
+    });
 });
