@@ -230,4 +230,110 @@ describe("BatchCalc", function (): void {
         expect(options[0].value).toBe("molar-mass");
         expect(options[1].value).toBe("dilution");
     });
+    it("passes the selected calculator type to processCsvText", async function (): Promise<void> {
+        let csvResult: {"csvString": string; "totalRows": number; "successCount": number; "errorCount": number} = {
+            "csvString": "input,result\n1,2",
+            "totalRows": 1,
+            "successCount": 1,
+            "errorCount": 0
+        };
+        mocks.mockProcessCsvText.mockResolvedValue(csvResult);
+        let result = render(function () { return <BatchCalc />; });
+        let typeSelect = result.getByLabelText("Select calculator type for batch processing") as HTMLSelectElement;
+        typeSelect.value = "solution-mixing";
+        fireEvent.change(typeSelect);
+        expect(typeSelect.value).toBe("solution-mixing");
+        let fileInput = result.getByLabelText("Choose CSV file") as HTMLInputElement;
+        setFiles(fileInput, [makeFile("input\n1\n", "input.csv")]);
+        fireEvent.change(fileInput);
+        fireEvent.click(result.getByText("Process"));
+        await waitFor(function (): void {
+            expect(mocks.mockProcessCsvText).toHaveBeenCalled();
+        });
+        let callArgs: unknown[] = mocks.mockProcessCsvText.mock.calls[0];
+        expect(callArgs[1]).toBe("solution-mixing");
+    });
+    it("keeps Process disabled when the file selection is empty", function (): void {
+        let result = render(function () { return <BatchCalc />; });
+        let fileInput = result.getByLabelText("Choose CSV file") as HTMLInputElement;
+        fireEvent.change(fileInput);
+        let processButton = result.getByText("Process") as HTMLButtonElement;
+        expect(processButton.disabled).toBe(true);
+    });
+    it("clears the selected file when the file input has no files", function (): void {
+        let result = render(function () { return <BatchCalc />; });
+        let fileInput = result.getByLabelText("Choose CSV file") as HTMLInputElement;
+        setFiles(fileInput, [makeFile("formula\nH2O\n", "input.csv")]);
+        fireEvent.change(fileInput);
+        expect((result.getByText("Process") as HTMLButtonElement).disabled).toBe(false);
+        Object.defineProperty(fileInput, "files", {
+            "configurable": true,
+            "value": null
+        });
+        fireEvent.change(fileInput);
+        expect((result.getByText("Process") as HTMLButtonElement).disabled).toBe(true);
+    });
+    it("displays a non-Error processing failure message", async function (): Promise<void> {
+        mocks.mockProcessCsvText.mockRejectedValue("plain string failure");
+        let result = render(function () { return <BatchCalc />; });
+        let fileInput = result.getByLabelText("Choose CSV file") as HTMLInputElement;
+        setFiles(fileInput, [makeFile("name\nH2O\n", "wrong.csv")]);
+        fireEvent.change(fileInput);
+        fireEvent.click(result.getByText("Process"));
+        await waitFor(function (): void {
+            expect(result.getByText(/plain string failure/)).toBeTruthy();
+        });
+    });
+    it("renders no preview when the result CSV has no rows", async function (): Promise<void> {
+        let csvResult: {"csvString": string; "totalRows": number; "successCount": number; "errorCount": number} = {
+            "csvString": "",
+            "totalRows": 0,
+            "successCount": 0,
+            "errorCount": 0
+        };
+        mocks.mockProcessCsvText.mockResolvedValue(csvResult);
+        mocks.mockParseCsv.mockReturnValueOnce([]);
+        let result = render(function () { return <BatchCalc />; });
+        let fileInput = result.getByLabelText("Choose CSV file") as HTMLInputElement;
+        setFiles(fileInput, [makeFile("formula\nH2O\n", "input.csv")]);
+        fireEvent.change(fileInput);
+        fireEvent.click(result.getByText("Process"));
+        await waitFor(function (): void {
+            expect(result.getByText(/Processed 0 rows/)).toBeTruthy();
+        });
+        expect(result.queryByText("Results Preview (first 10 rows)")).toBeNull();
+        expect(result.getByText("Download Results")).toBeTruthy();
+    });
+    it("ignores a stale Download click after results are cleared", async function (): Promise<void> {
+        let csvResult: {"csvString": string; "totalRows": number; "successCount": number; "errorCount": number} = {
+            "csvString": "formula,molar_mass,unit,status\nH2O,18.015,g/mol,ok",
+            "totalRows": 1,
+            "successCount": 1,
+            "errorCount": 0
+        };
+        mocks.mockProcessCsvText.mockResolvedValue(csvResult);
+        let result = render(function () { return <BatchCalc />; });
+        let fileInput = result.getByLabelText("Choose CSV file") as HTMLInputElement;
+        setFiles(fileInput, [makeFile("formula\nH2O\n", "input.csv")]);
+        fireEvent.change(fileInput);
+        fireEvent.click(result.getByText("Process"));
+        await waitFor(function (): void {
+            expect(result.getByText("Download Results")).toBeTruthy();
+        });
+        let downloadButton = result.getByText("Download Results");
+        fireEvent.click(result.getByText("Clear"));
+        expect(result.queryByText("Download Results")).toBeNull();
+        fireEvent.click(downloadButton);
+        expect(mocks.mockDownloadResults).not.toHaveBeenCalled();
+    });
+    it("clears state even when the file input is missing from the DOM", function (): void {
+        let result = render(function () { return <BatchCalc />; });
+        let fileInput = result.getByLabelText("Choose CSV file") as HTMLInputElement;
+        setFiles(fileInput, [makeFile("formula\nH2O\n", "input.csv")]);
+        fireEvent.change(fileInput);
+        let getByIdSpy = vi.spyOn(document, "getElementById").mockReturnValue(null);
+        fireEvent.click(result.getByText("Clear"));
+        getByIdSpy.mockRestore();
+        expect((result.getByText("Process") as HTMLButtonElement).disabled).toBe(true);
+    });
 });
