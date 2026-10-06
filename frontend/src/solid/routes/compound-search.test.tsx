@@ -1,5 +1,5 @@
 import {render, fireEvent, cleanup, waitFor} from "@solidjs/testing-library";
-import {Router, Route} from "@solidjs/router";
+import {Router, Route, useLocation} from "@solidjs/router";
 import type {JSX} from "solid-js";
 import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 const mocks = vi.hoisted(function () {
@@ -37,11 +37,22 @@ vi.mock("../../modules/compoundSearchUI.js", function () {
     };
 });
 import {CompoundSearch} from "./compound-search";
+function PathLabel(): JSX.Element {
+    let location = useLocation();
+    return <div data-testid="path-label">{location.pathname}</div>;
+}
 function renderWithRouter(): ReturnType<typeof render> {
     return render(function (): JSX.Element {
         return (
             <Router>
-                <Route path="*" component={CompoundSearch} />
+                <Route path="*" component={function (): JSX.Element {
+                    return (
+                        <>
+                            <PathLabel />
+                            <CompoundSearch />
+                        </>
+                    );
+                }} />
             </Router>
         );
     });
@@ -249,6 +260,116 @@ describe("CompoundSearch", function (): void {
         fireEvent.click(result.getByText("Search Compounds"));
         await waitFor(function (): void {
             expect(mocks.mockSearchCompounds).toHaveBeenCalledWith("H2O", "formula");
+        });
+    });
+    it("triggers search when Enter is pressed in the query input", async function (): Promise<void> {
+        mocks.mockSearchCompounds.mockResolvedValue([]);
+        let result = renderWithRouter();
+        let input = result.getByLabelText("Compound search query") as HTMLInputElement;
+        input.value = "water";
+        fireEvent.input(input);
+        fireEvent.keyDown(input, {"key": "Enter"});
+        await waitFor(function (): void {
+            expect(mocks.mockSearchCompounds).toHaveBeenCalledWith("water", "name");
+        });
+    });
+    it("does not search when a non-Enter key is pressed", function (): void {
+        mocks.mockSearchCompounds.mockResolvedValue([]);
+        let result = renderWithRouter();
+        let input = result.getByLabelText("Compound search query") as HTMLInputElement;
+        input.value = "water";
+        fireEvent.input(input);
+        fireEvent.keyDown(input, {"key": "a"});
+        expect(mocks.mockSearchCompounds).not.toHaveBeenCalled();
+    });
+    it("displays a non-Error search failure message", async function (): Promise<void> {
+        mocks.mockSearchCompounds.mockRejectedValue("timeout");
+        let result = renderWithRouter();
+        let input = result.getByLabelText("Compound search query") as HTMLInputElement;
+        input.value = "water";
+        fireEvent.input(input);
+        fireEvent.click(result.getByText("Search Compounds"));
+        await waitFor(function (): void {
+            expect(result.getByText(/Search failed: timeout/)).toBeTruthy();
+        });
+    });
+    it("displays a non-Error detail failure message", async function (): Promise<void> {
+        let compound = makeCompound();
+        mocks.mockSearchCompounds.mockResolvedValue([compound]);
+        mocks.mockFetchCompoundDetail.mockRejectedValue("gone");
+        let result = renderWithRouter();
+        let input = result.getByLabelText("Compound search query") as HTMLInputElement;
+        input.value = "water";
+        fireEvent.input(input);
+        fireEvent.click(result.getByText("Search Compounds"));
+        await waitFor(function (): void {
+            expect(result.getByText("View Details")).toBeTruthy();
+        });
+        fireEvent.click(result.getByText("View Details"));
+        await waitFor(function (): void {
+            expect(result.getByText(/Failed to load compound: gone/)).toBeTruthy();
+        });
+    });
+    it("renders detail without a properties section when properties are missing", async function (): Promise<void> {
+        let compound = makeCompound();
+        mocks.mockSearchCompounds.mockResolvedValue([compound]);
+        let detail: {"id": string; "name": string; "formula": string; "molarMass": number; "casNumber": string; "smiles": string; "inchi": string; "properties": Record<string, string>; "source": string} = {
+            "id": "c1",
+            "name": "Water",
+            "formula": "H2O",
+            "molarMass": 18.015,
+            "casNumber": "7732-18-5",
+            "smiles": "O",
+            "inchi": "InChI=1S/H2O/h1H2",
+            "properties": undefined as unknown as Record<string, string>,
+            "source": ""
+        };
+        mocks.mockFetchCompoundDetail.mockResolvedValue(detail);
+        let result = renderWithRouter();
+        let input = result.getByLabelText("Compound search query") as HTMLInputElement;
+        input.value = "water";
+        fireEvent.input(input);
+        fireEvent.click(result.getByText("Search Compounds"));
+        await waitFor(function (): void {
+            expect(result.getByText("View Details")).toBeTruthy();
+        });
+        fireEvent.click(result.getByText("View Details"));
+        await waitFor(function (): void {
+            expect(result.getByText("InChI:")).toBeTruthy();
+        });
+        expect(result.queryByText("Properties")).toBeNull();
+        expect(result.queryByText("Source:")).toBeNull();
+    });
+    it("navigates to /molar-mass when its button is clicked", async function (): Promise<void> {
+        let compound = makeCompound();
+        mocks.mockSearchCompounds.mockResolvedValue([compound]);
+        let result = renderWithRouter();
+        let input = result.getByLabelText("Compound search query") as HTMLInputElement;
+        input.value = "water";
+        fireEvent.input(input);
+        fireEvent.click(result.getByText("Search Compounds"));
+        await waitFor(function (): void {
+            expect(result.getByText("Open in Molar Mass Calculator")).toBeTruthy();
+        });
+        fireEvent.click(result.getByText("Open in Molar Mass Calculator"));
+        await waitFor(function (): void {
+            expect(result.getByTestId("path-label")).toHaveTextContent("/molar-mass");
+        });
+    });
+    it("navigates to /stoichiometry when its button is clicked", async function (): Promise<void> {
+        let compound = makeCompound();
+        mocks.mockSearchCompounds.mockResolvedValue([compound]);
+        let result = renderWithRouter();
+        let input = result.getByLabelText("Compound search query") as HTMLInputElement;
+        input.value = "water";
+        fireEvent.input(input);
+        fireEvent.click(result.getByText("Search Compounds"));
+        await waitFor(function (): void {
+            expect(result.getByText("Open in Stoichiometry Calculator")).toBeTruthy();
+        });
+        fireEvent.click(result.getByText("Open in Stoichiometry Calculator"));
+        await waitFor(function (): void {
+            expect(result.getByTestId("path-label")).toHaveTextContent("/stoichiometry");
         });
     });
 });
