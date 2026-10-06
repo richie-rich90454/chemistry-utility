@@ -118,4 +118,51 @@ describe("ExportImportButtons", function (): void {
         fireEvent.change(fileInput);
         expect(mocks.mockImportData).not.toHaveBeenCalled();
     });
+    it("does not call importData when files is null", function (): void {
+        let result = renderButtons();
+        let fileInput = result.container.querySelector('input[type="file"]') as HTMLInputElement;
+        Object.defineProperty(fileInput, "files", {
+            "value": null,
+            "configurable": true,
+            "writable": false
+        });
+        fireEvent.change(fileInput);
+        expect(mocks.mockImportData).not.toHaveBeenCalled();
+    });
+    it("logs an error when the file cannot be read", async function (): Promise<void> {
+        let errSpy = vi.spyOn(window.console, "error").mockImplementation(function (): void { return; });
+        let result = renderButtons();
+        let fileInput = result.container.querySelector('input[type="file"]') as HTMLInputElement;
+        let file = new File(["{}"], "backup.chemutil", {"type": "application/json"});
+        vi.spyOn(file, "text").mockImplementation(function (): Promise<string> {
+            return Promise.reject(new Error("read fail"));
+        });
+        Object.defineProperty(fileInput, "files", {
+            "value": [file],
+            "configurable": true,
+            "writable": false
+        });
+        fireEvent.change(fileInput);
+        await vi.waitFor(function (): void {
+            expect(errSpy).toHaveBeenCalledWith("Failed to read import file: read fail");
+        });
+    });
+    it("logs Unknown error when the rejection is not an Error", async function (): Promise<void> {
+        let errSpy = vi.spyOn(window.console, "error").mockImplementation(function (): void { return; });
+        let result = renderButtons();
+        let fileInput = result.container.querySelector('input[type="file"]') as HTMLInputElement;
+        let file = new File(["{}"], "backup.chemutil", {"type": "application/json"});
+        vi.spyOn(file, "text").mockImplementation(function (): Promise<string> {
+            return Promise.reject("boom");
+        });
+        Object.defineProperty(fileInput, "files", {
+            "value": [file],
+            "configurable": true,
+            "writable": false
+        });
+        fireEvent.change(fileInput);
+        await vi.waitFor(function (): void {
+            expect(errSpy).toHaveBeenCalledWith("Failed to read import file: Unknown error");
+        });
+    });
 });
