@@ -90,3 +90,48 @@ describe("ChartCanvas lifecycle", function (): void {
         expect(renderLineChartSpy).toHaveBeenCalledWith("effect-test", newData, options);
     });
 });
+describe("ChartCanvas chart types", function (): void {
+    let renderLineChartSpy: ReturnType<typeof vi.spyOn>;
+    let renderBarChartSpy: ReturnType<typeof vi.spyOn>;
+    let renderScatterChartSpy: ReturnType<typeof vi.spyOn>;
+    beforeEach(function (): void {
+        ChartRenderer.resetInstance();
+        let instance = ChartRenderer.getInstance();
+        let proto = Object.getPrototypeOf(instance);
+        renderLineChartSpy = vi.spyOn(proto, "renderLineChart").mockImplementation(function (): void { return; });
+        renderBarChartSpy = vi.spyOn(proto, "renderBarChart").mockImplementation(function (): void { return; });
+        renderScatterChartSpy = vi.spyOn(proto, "renderScatterChart").mockImplementation(function (): void { return; });
+    });
+    afterEach(function (): void {
+        cleanup();
+        ChartRenderer.resetInstance();
+        vi.restoreAllMocks();
+    });
+    it("calls renderBarChart on mount for bar type", function (): void {
+        let data = createSampleData();
+        let options = createSampleOptions();
+        render(function () {
+            return <ChartCanvas type="bar" data={data} options={options} canvasId="bar-mount" />;
+        });
+        expect(renderBarChartSpy).toHaveBeenCalledWith("bar-mount", data, options);
+    });
+    it("calls renderScatterChart on mount for scatter type", function (): void {
+        let data = createSampleData();
+        let options = createSampleOptions();
+        render(function () {
+            return <ChartCanvas type="scatter" data={data} options={options} canvasId="scatter-mount" />;
+        });
+        expect(renderScatterChartSpy).toHaveBeenCalledWith("scatter-mount", data, options);
+    });
+    it("generates a default canvas id when canvasId is not provided", function (): void {
+        let result = render(function () {
+            return <ChartCanvas type="line" data={createSampleData()} options={createSampleOptions()} />;
+        });
+        let canvas = result.container.querySelector("canvas") as HTMLCanvasElement;
+        expect(canvas.getAttribute("id")).toMatch(/^chart-/);
+        expect(renderLineChartSpy).toHaveBeenCalledTimes(1);
+        let usedId: string = renderLineChartSpy.mock.calls[0][0] as string;
+        expect(usedId).toMatch(/^chart-/);
+        expect(usedId).toBe(canvas.getAttribute("id"));
+    });
+});
