@@ -142,4 +142,122 @@ describe("useWorkspace", function (): void {
         await secondRefresh;
         expect(loadSpy).toHaveBeenCalledTimes(1);
     });
+    it("all actions are no-ops while loading", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        let resolveFirst: () => void = function (): void {return;};
+        let firstCall = new Promise<void>(function (resolve: () => void): void {resolveFirst = resolve;});
+        let loadSpy = vi.spyOn(manager, "loadWorkspaces").mockImplementation(function (): Promise<Workspace[]> {
+            return firstCall.then(function (): Workspace[] {return [];});
+        });
+        let createSpy = vi.spyOn(manager, "createWorkspace");
+        let selectSpy = vi.spyOn(manager, "selectWorkspace");
+        let updateSpy = vi.spyOn(manager, "updateWorkspace");
+        let deleteSpy = vi.spyOn(manager, "deleteWorkspace");
+        let addSpy = vi.spyOn(manager, "addMember");
+        let removeSpy = vi.spyOn(manager, "removeMember");
+        let store = useWorkspace();
+        let firstRefresh = store.refresh();
+        await store.createWorkspace("x", "y");
+        await store.selectWorkspace("x");
+        await store.updateWorkspace("x", "y", "z");
+        await store.deleteWorkspace("x");
+        await store.addMember("x", "u", "member");
+        await store.removeMember("x", "u");
+        expect(loadSpy).toHaveBeenCalledTimes(1);
+        expect(createSpy).not.toHaveBeenCalled();
+        expect(selectSpy).not.toHaveBeenCalled();
+        expect(updateSpy).not.toHaveBeenCalled();
+        expect(deleteSpy).not.toHaveBeenCalled();
+        expect(addSpy).not.toHaveBeenCalled();
+        expect(removeSpy).not.toHaveBeenCalled();
+        resolveFirst();
+        await firstRefresh;
+    });
+    it("refresh sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "loadWorkspaces").mockRejectedValue("boom");
+        let store = useWorkspace();
+        await store.refresh();
+        expect(store.error()).toBe("Failed to load workspaces: Unknown error");
+    });
+    it("createWorkspace sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "createWorkspace").mockRejectedValue(42);
+        let store = useWorkspace();
+        await store.createWorkspace("x", "y");
+        expect(store.error()).toBe("Failed to create workspace: Unknown error");
+    });
+    it("selectWorkspace sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "selectWorkspace").mockRejectedValue("nope");
+        let store = useWorkspace();
+        await store.selectWorkspace("x");
+        expect(store.error()).toBe("Failed to select workspace: Unknown error");
+    });
+    it("updateWorkspace sets error when manager throws", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "updateWorkspace").mockRejectedValue(new Error("update failed"));
+        let store = useWorkspace();
+        await store.updateWorkspace("x", "y", "z");
+        expect(store.error()).toBe("Failed to update workspace: update failed");
+    });
+    it("updateWorkspace sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "updateWorkspace").mockRejectedValue("bad");
+        let store = useWorkspace();
+        await store.updateWorkspace("x", "y", "z");
+        expect(store.error()).toBe("Failed to update workspace: Unknown error");
+    });
+    it("deleteWorkspace sets error when manager throws", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "deleteWorkspace").mockRejectedValue(new Error("delete failed"));
+        let store = useWorkspace();
+        await store.deleteWorkspace("x");
+        expect(store.error()).toBe("Failed to delete workspace: delete failed");
+    });
+    it("deleteWorkspace sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "deleteWorkspace").mockRejectedValue("bad");
+        let store = useWorkspace();
+        await store.deleteWorkspace("x");
+        expect(store.error()).toBe("Failed to delete workspace: Unknown error");
+    });
+    it("deleteWorkspace keeps current when deleting a non-active workspace", async function (): Promise<void> {
+        seedWorkspaces([makeWorkspace("ws-1", "A", 1), makeWorkspace("ws-2", "B", 1)]);
+        let store = useWorkspace();
+        await store.refresh();
+        await store.selectWorkspace("ws-1");
+        await store.deleteWorkspace("ws-2");
+        expect(store.workspaces().length).toBe(1);
+        expect(store.currentWorkspace() !== null).toBe(true);
+        expect(store.currentWorkspace()!.id).toBe("ws-1");
+    });
+    it("addMember sets error when manager throws", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "addMember").mockRejectedValue(new Error("add failed"));
+        let store = useWorkspace();
+        await store.addMember("ws-1", "u", "member");
+        expect(store.error()).toBe("Failed to add member: add failed");
+    });
+    it("addMember sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "addMember").mockRejectedValue("bad");
+        let store = useWorkspace();
+        await store.addMember("ws-1", "u", "member");
+        expect(store.error()).toBe("Failed to add member: Unknown error");
+    });
+    it("removeMember sets error when manager throws", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "removeMember").mockRejectedValue(new Error("remove failed"));
+        let store = useWorkspace();
+        await store.removeMember("ws-1", "u");
+        expect(store.error()).toBe("Failed to remove member: remove failed");
+    });
+    it("removeMember sets Unknown error when non-Error is thrown", async function (): Promise<void> {
+        let manager = WorkspaceManager.getInstance();
+        vi.spyOn(manager, "removeMember").mockRejectedValue("bad");
+        let store = useWorkspace();
+        await store.removeMember("ws-1", "u");
+        expect(store.error()).toBe("Failed to remove member: Unknown error");
+    });
 });
