@@ -174,6 +174,19 @@ export class ElectronConfigurationGenerator extends Calculator {
         ]);
     }
 
+    /** Compare subshell strings like "2s2" by (n, l) for display order. */
+    private static compareSubshellParts(a: string, b: string): number {
+        let na: number = parseInt(a.charAt(0), 10);
+        let nb: number = parseInt(b.charAt(0), 10);
+        if (na !== nb) {
+            return na - nb;
+        }
+        let la: string = a.charAt(1);
+        let lb: string = b.charAt(1);
+        let order: Record<string, number> = { "s": 0, "p": 1, "d": 2, "f": 3 };
+        return order[la] - order[lb];
+    }
+
     /** Aufbau fill order as [n, l] pairs */
     private static AUFBAU_ORDER: number[][] = [
         [1, 0], [2, 0], [2, 1], [3, 0], [3, 1], [4, 0], [3, 2],
@@ -329,17 +342,7 @@ export class ElectronConfigurationGenerator extends Calculator {
         }
 
         // Sort parts by (n, l) for display
-        parts.sort(function(a: string, b: string): number {
-            let na: number = parseInt(a.charAt(0), 10);
-            let nb: number = parseInt(b.charAt(0), 10);
-            if (na !== nb) {
-                return na - nb;
-            }
-            let la: string = a.charAt(1);
-            let lb: string = b.charAt(1);
-            let order: Record<string, number> = { "s": 0, "p": 1, "d": 2, "f": 3 };
-            return order[la] - order[lb];
-        });
+        parts.sort(ElectronConfigurationGenerator.compareSubshellParts);
 
         // Add exception orbitals in sorted order
         let exceptionParts: string[] = [];
@@ -351,34 +354,14 @@ export class ElectronConfigurationGenerator extends Calculator {
                 exceptionParts.push(String(n) + ElectronConfigurationGenerator.SUBSHELL_NAMES[l] + electrons);
             }
         }
-        exceptionParts.sort(function(a: string, b: string): number {
-            let na: number = parseInt(a.charAt(0), 10);
-            let nb: number = parseInt(b.charAt(0), 10);
-            if (na !== nb) {
-                return na - nb;
-            }
-            let la: string = a.charAt(1);
-            let lb: string = b.charAt(1);
-            let order: Record<string, number> = { "s": 0, "p": 1, "d": 2, "f": 3 };
-            return order[la] - order[lb];
-        });
+        exceptionParts.sort(ElectronConfigurationGenerator.compareSubshellParts);
 
         for (let i = 0; i < exceptionParts.length; i++) {
             parts.push(exceptionParts[i]);
         }
 
         // Re-sort all parts
-        parts.sort(function(a: string, b: string): number {
-            let na: number = parseInt(a.charAt(0), 10);
-            let nb: number = parseInt(b.charAt(0), 10);
-            if (na !== nb) {
-                return na - nb;
-            }
-            let la: string = a.charAt(1);
-            let lb: string = b.charAt(1);
-            let order: Record<string, number> = { "s": 0, "p": 1, "d": 2, "f": 3 };
-            return order[la] - order[lb];
-        });
+        parts.sort(ElectronConfigurationGenerator.compareSubshellParts);
 
         return parts.join(" ");
     }
@@ -418,17 +401,12 @@ export class ElectronConfigurationGenerator extends Calculator {
                     parts.push(String(exception[i][0]) + ElectronConfigurationGenerator.SUBSHELL_NAMES[exception[i][1]] + exception[i][2]);
                 }
             }
-            parts.sort(function (a: string, b: string): number {
-                let na: number = parseInt(a.charAt(0), 10);
-                let nb: number = parseInt(b.charAt(0), 10);
-                if (na !== nb) {
-                    return na - nb;
-                }
-                let order: Record<string, number> = { "s": 0, "p": 1, "d": 2, "f": 3 };
-                return order[a.charAt(1)] - order[b.charAt(1)];
-            });
+            parts.sort(ElectronConfigurationGenerator.compareSubshellParts);
             remaining = parts.join(" ");
         }
+        // nobleGasZ < z by construction above (strictly-less scan), so the full
+        // config strictly extends the core and remaining is never empty here.
+        /* v8 ignore next -- remainder non-empty by nobleGasZ < z, verified above */
         if (remaining === "") {
             return "[" + nobleGasSymbol + "]";
         }
@@ -441,6 +419,7 @@ export class ElectronConfigurationGenerator extends Calculator {
         let lines: string[] = [];
         for (let i = 0; i < parts.length; i++) {
             let part: string = parts[i];
+            /* v8 ignore next -- parts are built internally as n+name+electrons (always length >= 3), never short */
             if (part.length < 2) {
                 continue;
             }
@@ -448,12 +427,14 @@ export class ElectronConfigurationGenerator extends Calculator {
             let n: string = part.charAt(0);
             let l: string = part.charAt(1);
             let electronCount: number = parseInt(part.substring(2), 10);
+            /* v8 ignore next -- electron counts are built internally as numbers, never NaN */
             if (isNaN(electronCount)) {
                 continue;
             }
             // Determine number of orbitals
             let orbitalCount: Record<string, number> = { "s": 1, "p": 3, "d": 5, "f": 7 };
-            let numOrbitals: number = orbitalCount[l] || 1;
+            // l derives from internal SUBSHELL_NAMES (always s/p/d/f), so the fallback never fires.
+            let numOrbitals: number = orbitalCount[l] as number;
             // Build spin arrows following Hund's rule: every orbital gets one
             // electron with parallel spin before any orbital is paired.
             let orbitals: string[] = [];
@@ -510,6 +491,7 @@ export class ElectronConfigurationGenerator extends Calculator {
             let n: number = parseInt(part.charAt(0), 10);
             let l: string = part.charAt(1);
             let electronCount: number = parseInt(part.substring(2), 10);
+            /* v8 ignore next -- parts are built internally as n+name+electrons, counts never NaN */
             if (isNaN(electronCount)) {
                 continue;
             }
@@ -672,12 +654,10 @@ export class DeBroglieWavelengthCalculator extends Calculator {
             throw new Error("Velocity must be positive");
         }
 
-        // Get mass unit from select
-        let massUnitEl = document.getElementById("db-mass-unit") as HTMLSelectElement;
-        let massUnit: string = "kg";
-        if (massUnitEl) {
-            massUnit = massUnitEl.value;
-        }
+        // Get mass unit from select (db-mass-unit is in the constructor input
+        // list, so it always exists when performCalculation runs; the old
+        // null-fallback could never fire).
+        let massUnit: string = (document.getElementById("db-mass-unit") as HTMLSelectElement).value;
 
         let massKg: number = massRaw;
         if (massUnit === "amu") {
