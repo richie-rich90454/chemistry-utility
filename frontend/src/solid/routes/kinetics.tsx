@@ -159,16 +159,7 @@ function Kinetics(): JSX.Element {
     }
     function handleIntegratedRateLawCalculate(inputs: Record<string, string>): void {
         let res = integratedRateLawCalculator.calculatePure(inputs);
-        let value: string = res.value;
-        let explanation: string = res.explanation !== undefined ? res.explanation : "";
-        if (value === "" || explanation.indexOf("Error") !== -1) {
-            setIntegratedRateLawError(explanation !== "" ? explanation : "Calculation failed");
-            setIntegratedRateLawResult("");
-            setIntegratedRateLawChartData(null);
-            return;
-        }
-        setIntegratedRateLawError("");
-        setIntegratedRateLawResult(explanation !== "" ? explanation : value);
+        resolveResult(res, setIntegratedRateLawResult, setIntegratedRateLawError);
         if (Array.isArray(res.chartData)) {
             setIntegratedRateLawChartData(buildConcentrationChartData(res.chartData as ConcentrationTimePoint[]));
         }
