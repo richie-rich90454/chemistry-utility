@@ -53,6 +53,77 @@ function DesktopOnlyNotice(): JSX.Element {
         </main>
     );
 }
+const HASH_REDIRECTS: Array<[string, string]> = [
+    ["#mass-calc", "/molar-mass"],
+    ["#element-lookup", "/element-lookup"],
+    ["#periodic-table", "/periodic-table"],
+    ["#ptable-view", "/periodic-table"],
+    ["#balancing", "/equation-balancer"],
+    ["#equation-balancer", "/equation-balancer"],
+    ["#unit-converter", "/unit-converter"],
+    ["#dilution-calc", "/dilution"],
+    ["#mass-percent-calc", "/mass-percent"],
+    ["#solution-mixing-calc", "/solution-mixing"],
+    ["#buffer-calc", "/buffer"],
+    ["#pka-pkb-calc", "/pka-pkb"],
+    ["#ksp-calc", "/ksp"],
+    ["#colligative-calc", "/colligative"],
+    ["#titration-calc", "/titration"],
+    ["#debye-huckel-calc", "/debye-huckel"],
+    ["#common-ion-calc", "/common-ion"],
+    ["#nuclear-chemistry", "/nuclear"],
+    ["#half-life-calc", "/nuclear"],
+    ["#gas-laws", "/gas-laws"],
+    ["#ideal-gas-law", "/gas-laws"],
+    ["#combined-gas-law", "/gas-laws"],
+    ["#van-der-waals", "/gas-laws"],
+    ["#electrochemistry", "/electrochemistry"],
+    ["#cell-potential", "/electrochemistry"],
+    ["#nernst-equation", "/electrochemistry"],
+    ["#electrolysis", "/electrochemistry"],
+    ["#thermodynamics", "/thermodynamics"],
+    ["#gibbs-free-energy", "/thermodynamics"],
+    ["#hess-law", "/thermodynamics"],
+    ["#entropy-change", "/thermodynamics"],
+    ["#heat-capacity", "/thermodynamics"],
+    ["#bond-enthalpy", "/thermodynamics"],
+    ["#born-haber", "/thermodynamics"],
+    ["#kinetics", "/kinetics"],
+    ["#arrhenius-calc", "/kinetics"],
+    ["#rate-law-calc", "/kinetics"],
+    ["#integrated-rate-law-calc", "/kinetics"],
+    ["#reaction-order-calc", "/kinetics"],
+    ["#collision-theory-calc", "/kinetics"],
+    ["#quantum-atomic", "/quantum-atomic"],
+    ["#quantum-numbers", "/quantum-atomic"],
+    ["#electron-configuration", "/quantum-atomic"],
+    ["#rydberg-calc", "/quantum-atomic"],
+    ["#debroglie-calc", "/quantum-atomic"],
+    ["#photoelectric-calc", "/quantum-atomic"],
+    ["#heisenberg-calc", "/quantum-atomic"],
+    ["#stoichiometry", "/stoichiometry"],
+    ["#bond-type-predictor", "/bond-type"],
+    ["#molecular-viewer", "/molecular-viewer"],
+    ["#compound-search", "/compound-search"],
+    ["#batch-calc", "/batch-calc"],
+    ["#dashboard-view", "/dashboard"],
+    ["#dashboard", "/dashboard"],
+    ["#home", "/dashboard"],
+];
+function hashToPath(hash: string): string | null {
+    for (let i = 0; i < HASH_REDIRECTS.length; i++) {
+        if (HASH_REDIRECTS[i][0] === hash) {
+            return HASH_REDIRECTS[i][1];
+        }
+    }
+    return null;
+}
+function applyHashRedirect(): void {
+    let path: string | null = hashToPath(window.location.hash);
+    if (path !== null) {
+        window.location.replace(path);
+    }
+}
 function AppShell(props: {children?: JSX.Element}): JSX.Element {
     let [collapsed, setCollapsed] = createSignal(false);
     return (
@@ -80,171 +151,7 @@ function App(): JSX.Element {
         return isDesktop();
     });
     onMount(function (): void {
-        if (window.location.hash === "#mass-calc") {
-            window.location.replace("/molar-mass");
-        }
-        if (window.location.hash === "#element-lookup") {
-            window.location.replace("/element-lookup");
-        }
-        if (window.location.hash === "#periodic-table") {
-            window.location.replace("/periodic-table");
-        }
-        if (window.location.hash === "#ptable-view") {
-            window.location.replace("/periodic-table");
-        }
-        if (window.location.hash === "#balancing") {
-            window.location.replace("/equation-balancer");
-        }
-        if (window.location.hash === "#equation-balancer") {
-            window.location.replace("/equation-balancer");
-        }
-        if (window.location.hash === "#unit-converter") {
-            window.location.replace("/unit-converter");
-        }
-        if (window.location.hash === "#dilution-calc") {
-            window.location.replace("/dilution");
-        }
-        if (window.location.hash === "#mass-percent-calc") {
-            window.location.replace("/mass-percent");
-        }
-        if (window.location.hash === "#solution-mixing-calc") {
-            window.location.replace("/solution-mixing");
-        }
-        if (window.location.hash === "#buffer-calc") {
-            window.location.replace("/buffer");
-        }
-        if (window.location.hash === "#pka-pkb-calc") {
-            window.location.replace("/pka-pkb");
-        }
-        if (window.location.hash === "#ksp-calc") {
-            window.location.replace("/ksp");
-        }
-        if (window.location.hash === "#colligative-calc") {
-            window.location.replace("/colligative");
-        }
-        if (window.location.hash === "#titration-calc") {
-            window.location.replace("/titration");
-        }
-        if (window.location.hash === "#debye-huckel-calc") {
-            window.location.replace("/debye-huckel");
-        }
-        if (window.location.hash === "#common-ion-calc") {
-            window.location.replace("/common-ion");
-        }
-        if (window.location.hash === "#nuclear-chemistry") {
-            window.location.replace("/nuclear");
-        }
-        if (window.location.hash === "#half-life-calc") {
-            window.location.replace("/nuclear");
-        }
-        if (window.location.hash === "#gas-laws") {
-            window.location.replace("/gas-laws");
-        }
-        if (window.location.hash === "#ideal-gas-law") {
-            window.location.replace("/gas-laws");
-        }
-        if (window.location.hash === "#combined-gas-law") {
-            window.location.replace("/gas-laws");
-        }
-        if (window.location.hash === "#van-der-waals") {
-            window.location.replace("/gas-laws");
-        }
-        if (window.location.hash === "#electrochemistry") {
-            window.location.replace("/electrochemistry");
-        }
-        if (window.location.hash === "#cell-potential") {
-            window.location.replace("/electrochemistry");
-        }
-        if (window.location.hash === "#nernst-equation") {
-            window.location.replace("/electrochemistry");
-        }
-        if (window.location.hash === "#electrolysis") {
-            window.location.replace("/electrochemistry");
-        }
-        if (window.location.hash === "#thermodynamics") {
-            window.location.replace("/thermodynamics");
-        }
-        if (window.location.hash === "#gibbs-free-energy") {
-            window.location.replace("/thermodynamics");
-        }
-        if (window.location.hash === "#hess-law") {
-            window.location.replace("/thermodynamics");
-        }
-        if (window.location.hash === "#entropy-change") {
-            window.location.replace("/thermodynamics");
-        }
-        if (window.location.hash === "#heat-capacity") {
-            window.location.replace("/thermodynamics");
-        }
-        if (window.location.hash === "#bond-enthalpy") {
-            window.location.replace("/thermodynamics");
-        }
-        if (window.location.hash === "#born-haber") {
-            window.location.replace("/thermodynamics");
-        }
-        if (window.location.hash === "#kinetics") {
-            window.location.replace("/kinetics");
-        }
-        if (window.location.hash === "#arrhenius-calc") {
-            window.location.replace("/kinetics");
-        }
-        if (window.location.hash === "#rate-law-calc") {
-            window.location.replace("/kinetics");
-        }
-        if (window.location.hash === "#integrated-rate-law-calc") {
-            window.location.replace("/kinetics");
-        }
-        if (window.location.hash === "#reaction-order-calc") {
-            window.location.replace("/kinetics");
-        }
-        if (window.location.hash === "#collision-theory-calc") {
-            window.location.replace("/kinetics");
-        }
-        if (window.location.hash === "#quantum-atomic") {
-            window.location.replace("/quantum-atomic");
-        }
-        if (window.location.hash === "#quantum-numbers") {
-            window.location.replace("/quantum-atomic");
-        }
-        if (window.location.hash === "#electron-configuration") {
-            window.location.replace("/quantum-atomic");
-        }
-        if (window.location.hash === "#rydberg-calc") {
-            window.location.replace("/quantum-atomic");
-        }
-        if (window.location.hash === "#debroglie-calc") {
-            window.location.replace("/quantum-atomic");
-        }
-        if (window.location.hash === "#photoelectric-calc") {
-            window.location.replace("/quantum-atomic");
-        }
-        if (window.location.hash === "#heisenberg-calc") {
-            window.location.replace("/quantum-atomic");
-        }
-        if (window.location.hash === "#stoichiometry") {
-            window.location.replace("/stoichiometry");
-        }
-        if (window.location.hash === "#bond-type-predictor") {
-            window.location.replace("/bond-type");
-        }
-        if (window.location.hash === "#molecular-viewer") {
-            window.location.replace("/molecular-viewer");
-        }
-        if (window.location.hash === "#compound-search") {
-            window.location.replace("/compound-search");
-        }
-        if (window.location.hash === "#batch-calc") {
-            window.location.replace("/batch-calc");
-        }
-        if (window.location.hash === "#dashboard-view") {
-            window.location.replace("/dashboard");
-        }
-        if (window.location.hash === "#dashboard") {
-            window.location.replace("/dashboard");
-        }
-        if (window.location.hash === "#home") {
-            window.location.replace("/dashboard");
-        }
+        applyHashRedirect();
     });
     return (
         <Router>
@@ -283,4 +190,4 @@ function App(): JSX.Element {
         </Router>
     );
 }
-export {App};
+export {App, hashToPath};
