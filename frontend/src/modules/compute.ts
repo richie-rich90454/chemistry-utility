@@ -22,20 +22,19 @@ export function computeDilution(input: DilutionInput, solveFor: DilutionSolveFor
     if (solveFor !== "M2" && M2 <= 0) throw new Error("Final molarity must be positive");
     if (solveFor !== "V1" && V1 <= 0) throw new Error("Initial volume must be positive");
     if (solveFor !== "V2" && V2 <= 0) throw new Error("Final volume must be positive");
+    // The per-branch positivity checks below would duplicate the general
+    // guards above (which already skip only the solved-for variable), so they
+    // could never fire independently and are omitted.
     if (solveFor === "M1") {
-        if (V1 <= 0) throw new Error("Initial volume must be positive");
         return (M2 * V2) / V1;
     }
     if (solveFor === "V1") {
-        if (M1 <= 0) throw new Error("Initial molarity must be positive");
         return (M2 * V2) / M1;
     }
     if (solveFor === "M2") {
-        if (V2 <= 0) throw new Error("Final volume must be positive");
         return (M1 * V1) / V2;
     }
     if (solveFor === "V2") {
-        if (M2 <= 0) throw new Error("Final molarity must be positive");
         return (M1 * V1) / M2;
     }
     throw new Error("Invalid solveFor: " + solveFor);
