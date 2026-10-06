@@ -1,4 +1,4 @@
-import {render} from "@solidjs/testing-library";
+import {render, fireEvent, cleanup} from "@solidjs/testing-library";
 import {Router, Route} from "@solidjs/router";
 import type {JSX} from "solid-js";
 import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
@@ -22,6 +22,7 @@ describe("MobileNavSheet", function (): void {
         resetNavSheet();
     });
     afterEach(function (): void {
+        cleanup();
         vi.restoreAllMocks();
     });
     it("does not render the sheet when closed", function (): void {
@@ -76,5 +77,15 @@ describe("MobileNavSheet", function (): void {
         expect(result.queryByText("Dashboard")).toBeNull();
         expect(result.getByText("Molar Mass")).toBeTruthy();
         expect(result.getByText("Compound Search")).toBeTruthy();
+    });
+    it("closes the sheet when the backdrop is clicked", function (): void {
+        let sheet = useNavSheet();
+        let result = renderHost();
+        sheet.open();
+        expect(result.getByRole("dialog", {name: "Navigation menu"})).toBeTruthy();
+        let dialog = result.getByRole("dialog", {name: "Navigation menu"});
+        let backdrop = dialog.previousElementSibling as HTMLElement;
+        fireEvent.click(backdrop);
+        expect(sheet.isOpen()).toBe(false);
     });
 });
