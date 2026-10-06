@@ -131,6 +131,28 @@ describe("Electrochemistry route", function (): void {
         expect(e1.value).toBe("");
         expect(result.container.textContent).not.toMatch(/1\.100/);
     });
+    it("clears the nernst result when its Clear button is clicked", async function (): Promise<void> {
+        let result = render(function () { return <Electrochemistry />; });
+        let standard = result.getByLabelText("Standard cell potential") as HTMLInputElement;
+        standard.value = "1.10";
+        fireEvent.input(standard);
+        let temperature = result.getByLabelText("Temperature") as HTMLInputElement;
+        temperature.value = "298";
+        fireEvent.input(temperature);
+        let electrons = result.getByLabelText("Number of electrons") as HTMLInputElement;
+        electrons.value = "2";
+        fireEvent.input(electrons);
+        let quotient = result.getByLabelText("Reaction quotient") as HTMLInputElement;
+        quotient.value = "0.01";
+        fireEvent.input(quotient);
+        fireEvent.click(result.getByText("Calculate E"));
+        let text = await result.findByText(/E = E_standard/);
+        expect(text).toBeTruthy();
+        let clearButtons = result.getAllByText("Clear");
+        fireEvent.click(clearButtons[1]);
+        expect(standard.value).toBe("");
+        expect(result.queryByText(/E = E_standard/)).toBeNull();
+    });
     it("clears the electrolysis result when its Clear button is clicked", async function (): Promise<void> {
         let result = render(function () { return <Electrochemistry />; });
         let current = result.getByLabelText("Current") as HTMLInputElement;
