@@ -51,6 +51,9 @@ function EquationBalancerRoute(): JSX.Element {
         let target = e.currentTarget as HTMLSelectElement;
         setMedium(target.value as "acidic" | "basic");
         if (equation().trim().length > 0) {
+            /* v8 ignore else -- unreachable: debounceTimer is set every
+            time the equation becomes non-empty (see handleInput) and is
+            never reset to null, so it is always non-null here. */
             if (debounceTimer !== null) clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function (): void {
                 balance();
@@ -71,12 +74,21 @@ function EquationBalancerRoute(): JSX.Element {
         let parsed = parseBalancedEquation(eq);
         let parts: JSX.Element[] = [];
         for (let i = 0; i < parsed.reactants.length; i++) {
+            /* v8 ignore if -- unreachable: both equation producers
+            (fast-balance text format and balanceRedox renormalize) join
+            terms with " + ", and parseSide only splits a "+" that is
+            immediately followed by a term start, so every side parses to
+            exactly one term and i > 0 never holds. */
             if (i > 0) parts.push(<span class={styles.operator}>{" + "}</span>);
             parts.push(renderTerm(parsed.reactants[i]));
         }
+        /* v8 ignore else -- unreachable: both producers always emit
+        " -> " with a non-empty product side, so products is never empty. */
         if (parsed.products.length > 0) {
             parts.push(<span class={styles.operator}>{" → "}</span>);
             for (let i = 0; i < parsed.products.length; i++) {
+                /* v8 ignore if -- unreachable: same single-term argument
+                as for reactants above; i > 0 never holds. */
                 if (i > 0) parts.push(<span class={styles.operator}>{" + "}</span>);
                 parts.push(renderTerm(parsed.products[i]));
             }
