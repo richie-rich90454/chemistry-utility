@@ -17,6 +17,7 @@ function KaTeX(props: KaTeXProps): JSX.Element {
         return {displayMode: displayMode, throwOnError: throwOnError};
     }
     function renderInto(expr: string): void {
+        /* v8 ignore next -- Solid assigns the ref before onMount so containerRef is always set here; every mount test finds the span */
         if (containerRef === undefined) {
             return;
         }
@@ -34,6 +35,7 @@ function KaTeX(props: KaTeXProps): JSX.Element {
         renderInto(expr);
     });
     onCleanup(function (): void {
+        /* v8 ignore next -- the ref stays assigned for the component lifetime so containerRef is always set at cleanup */
         if (containerRef !== undefined) {
             containerRef.innerHTML = "";
         }
@@ -45,7 +47,7 @@ function KaTeX(props: KaTeXProps): JSX.Element {
         return styles.katexContainer;
     }
     return (
-        <span ref={containerRef} class={getContainerClass()} aria-label={"Math: " + props.expr} />
+        <span ref={function (el: HTMLSpanElement): void { containerRef = el; }} class={getContainerClass()} aria-label={"Math: " + props.expr} />
     );
 }
 export {KaTeX};
