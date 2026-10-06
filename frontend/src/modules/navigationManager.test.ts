@@ -603,5 +603,127 @@ describe("NavigationManager", () => {
             expect(callsA.length).toBe(1);
             expect(callsB[callsB.length - 1]).toBe("equation-balancer");
         });
+
+        it("ignores a duplicate subscription", () => {
+            const calls: Array<string | null> = [];
+            const listener = (id: string | null): void => {
+                calls.push(id);
+            };
+            manager.subscribe(listener);
+            manager.subscribe(listener);
+            manager.setActiveViewId("molar-mass");
+            expect(calls).toEqual([null, "molar-mass"]);
+        });
+    });
+
+    describe("history navigation without an active view", () => {
+        it("goBack skips pushing when no view is active", () => {
+            manager.setActiveViewId("a");
+            manager.navigate("b");
+            manager.setActiveViewId(null);
+            expect(manager.goBack()).toBe("a");
+            expect(manager.getForwardHistory()).toEqual([]);
+        });
+
+        it("goForward skips pushing when no view is active", () => {
+            const strategy = new MockStrategy();
+            manager.setStrategy(strategy);
+            manager.setActiveViewId("a");
+            manager.navigate("b");
+            manager.setActiveViewId("b");
+            manager.navigateBack();
+            manager.setActiveViewId(null);
+            expect(manager.goForward()).toBe("b");
+            expect(strategy.navigateCalls).toContain("b");
+        });
+    });
+
+    describe("favorites UI", () => {        it("renderFavorites does nothing without a container", () => {
+            manager.toggleFavorite("molar-mass");
+            expect(document.querySelector(".nav-favorites")).toBeNull();
+        });
+
+        it("renderFavorites clears the container with no favorites", () => {
+            const container = document.createElement("div");
+            container.className = "nav-favorites";
+            container.innerHTML = "stale";
+            document.body.appendChild(container);
+            manager.renderFavorites();
+            expect(container.innerHTML).toBe("");
+        });
+
+        it("renderFavorites skips unknown favorite ids", () => {
+            const container = document.createElement("div");
+            container.className = "nav-favorites";
+            document.body.appendChild(container);
+            manager.toggleFavorite("ghost-id");
+            expect(container.querySelectorAll("a").length).toBe(0);
+            expect(manager.isFavorite("ghost-id")).toBe(true);
+        });
+
+        it("renderFavorites links navigate on click", () => {
+            const strategy = new MockStrategy();
+            manager.setStrategy(strategy);
+            manager.setActiveViewId("other");
+            const container = document.createElement("div");
+            container.className = "nav-favorites";
+            document.body.appendChild(container);
+            manager.toggleFavorite("molar-mass");
+            const link = container.querySelector("a") as HTMLAnchorElement;
+            expect(link).not.toBeNull();
+            link.click();
+            expect(strategy.navigateCalls).toContain("molar-mass");
+        });
+
+        it("renderFavorites star click removes the favorite", () => {
+            const strategy = new MockStrategy();
+            manager.setStrategy(strategy);
+            const container = document.createElement("div");
+            container.className = "nav-favorites";
+            document.body.appendChild(container);
+            manager.toggleFavorite("molar-mass");
+            expect(manager.isFavorite("molar-mass")).toBe(true);
+            const star = container.querySelector(".fav-star") as HTMLElement;
+            star.click();
+            expect(manager.isFavorite("molar-mass")).toBe(false);
+        });
+
+        it("updateFavoriteStars skips icons without an id", () => {
+            const icon = document.createElement("span");
+            icon.className = "fav-star-icon";
+            document.body.appendChild(icon);
+            expect(() => manager.updateFavoriteStars()).not.toThrow();
+            expect(icon.classList.contains("is-favorite")).toBe(false);
+        });
+
+        it("addFavoriteStarsToSidebar decorates links and toggles on click", () => {
+            const nav = document.createElement("nav");
+            nav.className = "sidebar-nav";
+            nav.innerHTML = '<a href="/molar-mass">Molar</a><a>No href</a>';
+            document.body.appendChild(nav);
+            manager.addFavoriteStarsToSidebar();
+            const star = nav.querySelector(".fav-star-icon") as HTMLElement;
+            expect(star).not.toBeNull();
+            expect(star.getAttribute("data-fav")).toBe("molar-mass");
+            star.click();
+            expect(manager.isFavorite("molar-mass")).toBe(true);
+            manager.addFavoriteStarsToSidebar();
+            expect(nav.querySelectorAll(".fav-star-icon").length).toBe(1);
+        });
+
+        it("sidebar stars toggle on Enter and Space but ignore other keys", () => {
+            const nav = document.createElement("nav");
+            nav.className = "sidebar-nav";
+            nav.innerHTML = '<a href="/molar-mass">Molar</a>';
+            document.body.appendChild(nav);
+            manager.addFavoriteStarsToSidebar();
+            const star = nav.querySelector(".fav-star-icon") as HTMLElement;
+            star.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+            expect(manager.isFavorite("molar-mass")).toBe(false);
+            star.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+            expect(manager.isFavorite("molar-mass")).toBe(true);
+            star.dispatchEvent(new KeyboardEvent("keydown", { key: " ", bubbles: true }));
+            expect(manager.isFavorite("molar-mass")).toBe(false);
+        });
     });
 });
