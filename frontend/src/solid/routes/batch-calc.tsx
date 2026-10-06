@@ -78,6 +78,11 @@ function BatchCalc(): JSX.Element {
     }
     async function handleProcess(): Promise<void> {
         let f: File | null = file();
+        /* v8 ignore next -- unreachable guard: the Process button is the
+        only caller and is disabled whenever file() is null, and clicking
+        a disabled button never reaches its handler (verified with a
+        scratch test on this stack: a synthetic click on the disabled
+        Predict button left its handler uncalled). Kept as defense in depth. */
         if (f === null) {
             setError("Please choose a CSV file.");
             return;
@@ -107,6 +112,12 @@ function BatchCalc(): JSX.Element {
     }
     function handleDownload(): void {
         let res: BatchResult | null = result();
+        /* v8 ignore next -- unreachable guard: the Download button only
+        renders when result() !== null and the handler re-reads the signal
+        synchronously during dispatch, so res cannot be null here; a click
+        dispatched on the unmounted button never reaches the handler
+        (pinned by the stale-click test asserting downloadResults is not
+        called). Kept as defense in depth. */
         if (res === null) {
             return;
         }
