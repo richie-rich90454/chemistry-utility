@@ -10,6 +10,7 @@
 import type {JSX} from "solid-js";
 import {createSignal} from "solid-js";
 import {ColligativePropertiesCalculator} from "../../modules/solutionCalculators.js";
+import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField} from "../components/CalculatorForm";
@@ -36,16 +37,7 @@ function Colligative(): JSX.Element {
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        let res = calculator.calculatePure(inputs);
-        let value: string = res.value;
-        let explanation: string = res.explanation !== undefined ? res.explanation : "";
-        if (value === "" || explanation.indexOf("Error") !== -1) {
-            setError(explanation !== "" ? explanation : "Calculation failed");
-            setResult("");
-            return;
-        }
-        setError("");
-        setResult(explanation !== "" ? explanation : value);
+        resolveResult(calculator.calculatePure(inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
