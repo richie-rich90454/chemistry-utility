@@ -51,4 +51,39 @@ describe("useNavigation", function (): void {
             expect(store.favorites()).toContain("mass-calc");
         });
     });
+
+    it("syncs currentRoute through listener on manager navigation events", function (): void {
+        let manager = NavigationManager.getInstance();
+        createRoot(function (): void {
+            let store = useNavigation();
+            manager.setActiveViewId("balancing");
+            expect(store.currentRoute()).toBe("balancing");
+            manager.setActiveViewId(null);
+            expect(store.currentRoute()).toBe("");
+        });
+    });
+
+    it("does not subscribe outside a reactive owner (no leak)", function (): void {
+        let manager = NavigationManager.getInstance();
+        manager.setActiveViewId("mass-calc");
+        let store = useNavigation();
+        expect(store.currentRoute()).toBe("mass-calc");
+        manager.setActiveViewId("balancing");
+        expect(store.currentRoute()).toBe("mass-calc");
+    });
+
+    it("unsubscribes on cleanup so later navigations do not update", function (): void {
+        let manager = NavigationManager.getInstance();
+        let spy = vi.spyOn(manager, "unsubscribe");
+        let captured: ReturnType<typeof useNavigation> | null = null;
+        createRoot(function (dispose: () => void): void {
+            captured = useNavigation();
+            dispose();
+        });
+        expect(spy).toHaveBeenCalled();
+        expect(captured !== null).toBe(true);
+        let before: string = captured!.currentRoute();
+        manager.setActiveViewId("balancing");
+        expect(captured!.currentRoute()).toBe(before);
+    });
 });
