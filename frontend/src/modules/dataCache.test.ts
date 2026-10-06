@@ -102,4 +102,71 @@ describe("DataCache", () => {
         expect(await cache.has("integration")).toBe(true);
         expect(await cache.get("integration")).toBe("value");
     });
+
+    describe("remove", () => {
+        it("deletes a stored value", async () => {
+            const cache = DataCache.getInstance();
+            await cache.set("temp", "value");
+            await cache.remove("temp");
+            expect(await cache.has("temp")).toBe(false);
+        });
+
+        it("does not throw when localStorage.removeItem throws", async () => {
+            const spy = vi.spyOn(Storage.prototype, "removeItem").mockImplementation(() => {
+                throw new Error("unavailable");
+            });
+            await expect(DataCache.getInstance().remove("k")).resolves.toBeUndefined();
+            spy.mockRestore();
+        });
+    });
+
+    describe("getPtable", () => {
+        it("returns null when no ptable entry is cached", async () => {
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+        });
+
+        it("returns the parsed array when the shape is valid", async () => {
+            const elements = [{ symbol: "H", atomicNumber: 1 }, { symbol: "He", atomicNumber: 2 }];
+            localStorage.setItem("chem-cache-ptable", JSON.stringify(elements));
+            expect(await DataCache.getInstance().getPtable()).toEqual(elements);
+        });
+
+        it("returns null and clears corrupt JSON", async () => {
+            localStorage.setItem("chem-cache-ptable", "{not-json");
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+            expect(localStorage.getItem("chem-cache-ptable")).toBeNull();
+        });
+
+        it("returns null and clears a non-array payload", async () => {
+            localStorage.setItem("chem-cache-ptable", JSON.stringify({ elements: [] }));
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+            expect(localStorage.getItem("chem-cache-ptable")).toBeNull();
+        });
+
+        it("returns null and clears entries with a bad element shape", async () => {
+            localStorage.setItem("chem-cache-ptable", JSON.stringify([{ symbol: "H" }, { symbol: 1, atomicNumber: "x" }]));
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+            expect(localStorage.getItem("chem-cache-ptable")).toBeNull();
+        });
+
+        it("returns null and clears non-object entries", async () => {
+            localStorage.setItem("chem-cache-ptable", JSON.stringify([42]));
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+            expect(localStorage.getItem("chem-cache-ptable")).toBeNull();
+        });
+
+        it("returns null and clears null entries", async () => {
+            localStorage.setItem("chem-cache-ptable", JSON.stringify([null]));
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+            expect(localStorage.getItem("chem-cache-ptable")).toBeNull();
+        });
+
+        it("returns null when localStorage.getItem throws", async () => {
+            const spy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+                throw new Error("unavailable");
+            });
+            expect(await DataCache.getInstance().getPtable()).toBeNull();
+            spy.mockRestore();
+        });
+    });
 });

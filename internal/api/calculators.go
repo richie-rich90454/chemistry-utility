@@ -1,7 +1,11 @@
 package api
 
 import (
+	"context"
 	"net/http"
+	"time"
+
+	"chemistry-utility/internal/calculators"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,11 +40,35 @@ func (a *API) runCalculator(c *gin.Context) {
 		input = map[string]interface{}{}
 	}
 
-	result, err := calcFn(c.Request.Context(), input)
-	if err != nil {
-		WriteValidation(c, "calculation error: "+err.Error())
+	// Bound calculator execution: calculators generally ignore
+	// cancellation, so run in a goroutine and select on a ~10s timeout. A
+	// hung calculator reports 503 instead of holding the request (and its
+	// rate-limit slot) open indefinitely.
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+	type outcome struct {
+		result calculators.CalculationResult
+		err    error
+	}
+	ch := make(chan outcome, 1)
+	go func() {
+		res, err := calcFn(ctx, input)
+		ch <- outcome{res, err}
+	}()
+	select {
+	case <-ctx.Done():
+		if c.Request.Context().Err() != nil {
+			// Client went away; nothing to write back to.
+			return
+		}
+		WriteProblem(c, http.StatusServiceUnavailable, "Service Unavailable", "calculation timed out; please retry with smaller inputs")
+		return
+	case o := <-ch:
+		if o.err != nil {
+			WriteValidation(c, "calculation error: "+o.err.Error())
+			return
+		}
+		c.JSON(200, o.result)
 		return
 	}
-
-	c.JSON(200, result)
 }

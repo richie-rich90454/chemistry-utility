@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
-	"log"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
+
+	"log/slog"
 
 	"chemistry-utility/internal/api"
 	"chemistry-utility/internal/db"
@@ -30,7 +32,7 @@ func NewApp() *App {
 	// does not exist in a packaged desktop binary.
 	data, err := assets.ReadFile("frontend/dist/ptable.json")
 	if err != nil {
-		log.Printf("warning: failed to read embedded ptable.json: %v", err)
+		slog.Warn("failed to read embedded ptable.json", "error", err)
 	}
 	return &App{
 		ptableSvc: &PTableService{svc: ptable.NewFromBytes(data)},
@@ -49,7 +51,7 @@ func (a *App) shutdown(ctx context.Context) {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		if err := a.apiServer.Shutdown(shutdownCtx); err != nil {
-			log.Printf("warning: api server shutdown: %v", err)
+			slog.Warn("api server shutdown", "error", err)
 		}
 	}
 	if a.db != nil {
@@ -85,29 +87,47 @@ func (a *App) startAPIServer() {
 	}
 	database, err := db.New(cfg)
 	if err != nil {
-		log.Printf("warning: failed to open database: %v", err)
+		slog.Warn("failed to open database", "error", err)
 		return
 	}
 	a.db = database
 
+	// Scope loopback CORS to the exact origins the Wails webview sends.
+	// go.mod pins wails v2.14.0, whose asset-server start URLs are
+	// "wails://wails/" on darwin/linux and "http://wails.localhost/" on
+	// Windows (WebView2 cannot serve the custom scheme there); Wails'
+	// own origin validator likewise allows scheme://host of the start
+	// URL, so the webview Origin header is exactly one of the two below.
+	// A "*" here would let any local page read the desktop API. Extra
+	// origins (e.g. the vite dev server under `wails dev`) can be added
+	// via DESKTOP_CORS_EXTRA_ORIGINS (comma-separated); the default is
+	// locked down.
+	origins := []string{"wails://wails", "http://wails.localhost"}
+	if extra := os.Getenv("DESKTOP_CORS_EXTRA_ORIGINS"); extra != "" {
+		for _, o := range strings.Split(extra, ",") {
+			if o = strings.TrimSpace(o); o != "" {
+				origins = append(origins, o)
+			}
+		}
+	}
 	apiInstance := api.New(database, driver, api.Config{
 		RateLimitPerMinute: 100,
-		CORSAllowedOrigins: []string{"*"},
+		CORSAllowedOrigins: origins,
 	})
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
-		log.Printf("warning: failed to listen for api server: %v", err)
+		slog.Warn("failed to listen for api server", "error", err)
 		return
 	}
 	a.apiURL = "http://" + ln.Addr().String()
 	a.apiServer = &http.Server{Handler: apiInstance.Router()}
 	go func() {
 		if err := a.apiServer.Serve(ln); err != nil && err != http.ErrServerClosed {
-			log.Printf("api server error: %v", err)
+			slog.Warn("api server error", "error", err)
 		}
 	}()
-	log.Printf("desktop API listening on %s", a.apiURL)
+	slog.Info("desktop API listening", "url", a.apiURL)
 }
 
 func defaultDBPath() string {
@@ -117,7 +137,7 @@ func defaultDBPath() string {
 	}
 	dir := filepath.Join(base, "chemistry-utility")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
-		log.Printf("warning: could not create app data dir %s: %v", dir, err)
+		slog.Warn("could not create app data dir", "dir", dir, "error", err)
 	}
 	return filepath.Join(dir, "chemistry.db")
 }

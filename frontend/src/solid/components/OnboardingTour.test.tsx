@@ -1,4 +1,4 @@
-import {render, fireEvent, cleanup} from "@solidjs/testing-library";
+import {render, fireEvent, cleanup, waitFor} from "@solidjs/testing-library";
 import type {JSX} from "solid-js";
 import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 import {OnboardingManager} from "../../modules/onboardingManager.js";
@@ -87,6 +87,130 @@ describe("OnboardingTour", function (): void {
         let startButton = result.getByRole("button", {name: "Start tour"});
         fireEvent.click(startButton);
         expect(startTourSpy).toHaveBeenCalled();
+        expect(result.getByRole("dialog")).toBeTruthy();
+    });
+
+    it("moves focus to the dialog button when the tour opens", async function (): Promise<void> {
+        isFirstRunSpy.mockReturnValue(true);
+        let result = render(function () { return <OnboardingTour />; });
+        await waitFor(function (): void {
+            expect(document.activeElement).toBe(result.getByRole("button", {name: "Skip tour"}));
+        });
+    });
+
+    it("completes the tour when Escape is pressed", async function (): Promise<void> {
+        isFirstRunSpy.mockReturnValue(true);
+        let result = render(function () { return <OnboardingTour />; });
+        await waitFor(function (): void {
+            expect(result.getByRole("dialog")).toBeTruthy();
+        });
+        document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        await waitFor(function (): void {
+            expect(completeTourSpy).toHaveBeenCalled();
+        });
+        expect(result.queryByRole("dialog")).toBeNull();
+    });
+
+    it("ignores keys that are neither Escape nor Tab", async function (): Promise<void> {
+        completeTourSpy.mockClear();
+        isFirstRunSpy.mockReturnValue(true);
+        let result = render(function () { return <OnboardingTour />; });
+        await waitFor(function (): void {
+            expect(result.getByRole("dialog")).toBeTruthy();
+        });
+        document.dispatchEvent(new KeyboardEvent("keydown", {key: "a", bubbles: true}));
+        expect(completeTourSpy).not.toHaveBeenCalled();
+        expect(result.getByRole("dialog")).toBeTruthy();
+    });
+
+    it("wraps focus to the first element on Tab from the last", async function (): Promise<void> {
+        isFirstRunSpy.mockReturnValue(true);
+        let result = render(function () { return <OnboardingTour />; });
+        let skip = await waitFor(function (): HTMLElement {
+            let active = document.activeElement as HTMLElement;
+            expect(active).toBe(result.getByRole("button", {name: "Skip tour"}));
+            return active;
+        });
+        void skip;
+        let tabEvent = new KeyboardEvent("keydown", {key: "Tab", bubbles: true, cancelable: true});
+        document.dispatchEvent(tabEvent);
+        expect(tabEvent.defaultPrevented).toBe(true);
+        expect(document.activeElement).toBe(result.getByRole("button", {name: "Skip tour"}));
+        expect(result.getByRole("dialog")).toBeTruthy();
+    });
+
+    it("wraps focus to the last element on Shift+Tab from the first", async function (): Promise<void> {
+        isFirstRunSpy.mockReturnValue(true);
+        let result = render(function () { return <OnboardingTour />; });
+        await waitFor(function (): void {
+            expect(document.activeElement).toBe(result.getByRole("button", {name: "Skip tour"}));
+        });
+        let shiftTabEvent = new KeyboardEvent("keydown", {key: "Tab", shiftKey: true, bubbles: true, cancelable: true});
+        document.dispatchEvent(shiftTabEvent);
+        expect(shiftTabEvent.defaultPrevented).toBe(true);
+        expect(document.activeElement).toBe(result.getByRole("button", {name: "Skip tour"}));
+        expect(result.getByRole("dialog")).toBeTruthy();
+    });
+
+    it("restores previous focus when the tour closes", async function (): Promise<void> {
+        isFirstRunSpy.mockReturnValue(false);
+        let result = render(function () { return <ManualStartHost />; });
+        let startButton = result.getByRole("button", {name: "Start tour"}) as HTMLElement;
+        startButton.focus();
+        fireEvent.click(startButton);
+        await waitFor(function (): void {
+            expect(result.getByRole("dialog")).toBeTruthy();
+        });
+        fireEvent.click(result.getByRole("button", {name: "Skip tour"}));
+        await waitFor(function (): void {
+            expect(result.queryByRole("dialog")).toBeNull();
+        });
+        expect(document.activeElement).toBe(startButton);
+    });
+
+    it("does not wrap focus on Tab when focus is not on the last element", async function (): Promise<void> {
+        isFirstRunSpy.mockReturnValue(true);
+        let result = render(function () { return <OnboardingTour />; });
+        await waitFor(function (): void {
+            expect(result.getByRole("dialog")).toBeTruthy();
+        });
+        let dialog = result.getByRole("dialog") as HTMLElement;
+        dialog.focus();
+        expect(document.activeElement).toBe(dialog);
+        let tabEvent = new KeyboardEvent("keydown", {key: "Tab", bubbles: true, cancelable: true});
+        document.dispatchEvent(tabEvent);
+        expect(tabEvent.defaultPrevented).toBe(false);
+        expect(result.getByRole("dialog")).toBeTruthy();
+    });
+
+    it("skips focus restore when the previous element is gone", async function (): Promise<void> {
+        isFirstRunSpy.mockReturnValue(false);
+        let result = render(function () { return <ManualStartHost />; });
+        let startButton = result.getByRole("button", {name: "Start tour"}) as HTMLElement;
+        startButton.focus();
+        fireEvent.click(startButton);
+        await waitFor(function (): void {
+            expect(result.getByRole("dialog")).toBeTruthy();
+        });
+        startButton.remove();
+        fireEvent.click(result.getByRole("button", {name: "Skip tour"}));
+        await waitFor(function (): void {
+            expect(result.queryByRole("dialog")).toBeNull();
+        });
+    });
+
+    it("does not wrap focus on Shift+Tab when focus is not on the first element", async function (): Promise<void> {
+        isFirstRunSpy.mockReturnValue(true);
+        let result = render(function () { return <OnboardingTour />; });
+        await waitFor(function (): void {
+            expect(result.getByRole("dialog")).toBeTruthy();
+        });
+        let dialog = result.getByRole("dialog") as HTMLElement;
+        dialog.focus();
+        expect(document.activeElement).toBe(dialog);
+        let shiftTabEvent = new KeyboardEvent("keydown", {key: "Tab", shiftKey: true, bubbles: true, cancelable: true});
+        document.dispatchEvent(shiftTabEvent);
+        expect(shiftTabEvent.defaultPrevented).toBe(false);
         expect(result.getByRole("dialog")).toBeTruthy();
     });
 });

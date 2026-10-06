@@ -3,7 +3,6 @@ package main
 import (
 	"compress/gzip"
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,6 +11,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"log/slog"
 
 	"chemistry-utility/internal/api"
 
@@ -180,6 +181,9 @@ func buildRouter(distDir string, rateLimitPerMinute int) *gin.Engine {
 }
 
 func main() {
+	// Structured JSON logs to stderr. Only operational fields (port,
+	// paths, errors) are logged — never DSNs, credentials, or bodies.
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, nil)))
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "6005"
@@ -204,19 +208,21 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 	go func() {
-		log.Printf("Starting server on :%s (no database)", port)
+		slog.Info("starting server", "addr", ":"+port, "database", "none")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("Server failed:", err)
+			slog.Error("server failed", "error", err)
+			os.Exit(1)
 		}
 	}()
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Println("Shutting down server...")
+	slog.Info("shutting down server")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown:", err)
+		slog.Error("server forced to shutdown", "error", err)
+		os.Exit(1)
 	}
-	log.Println("Server exited")
+	slog.Info("server exited")
 }

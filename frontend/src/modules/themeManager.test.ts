@@ -271,4 +271,127 @@ describe("ThemeManager", () => {
         expect(() => tm.setTheme("dark")).not.toThrow();
     });
 
+    it("init falls back to light when matchMedia throws and storage is invalid", () => {
+        matchMediaSpy.mockImplementation(() => {
+            throw new Error("no matchMedia");
+        });
+        localStorage.setItem("theme", "neon");
+        const tm = ThemeManager.getInstance();
+        tm.init();
+        expect(tm.getTheme()).toBe("light");
+    });
+
+    it("init tolerates localStorage failures", () => {
+        const getSpy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+            throw new Error("denied");
+        });
+        const tm = ThemeManager.getInstance();
+        tm.init();
+        expect(tm.getTheme()).toBe("light");
+        getSpy.mockRestore();
+    });
+
+    it("toggle disables auto-dark mode first", () => {
+        const tm = ThemeManager.getInstance();
+        tm.setAutoDarkMode(true);
+        tm.toggle();
+        expect(tm.isAutoDarkModeEnabled()).toBe(false);
+        tm.setAutoDarkMode(false);
+    });
+
+    it("auto-dark switches to light during the day", () => {
+        vi.spyOn(Date.prototype, "getHours").mockReturnValue(10);
+        const tm = ThemeManager.getInstance();
+        tm.setTheme("dark");
+        tm.setAutoDarkMode(true);
+        expect(tm.getTheme()).toBe("light");
+        tm.setAutoDarkMode(false);
+    });
+
+    it("auto-dark keeps a matching theme at night", () => {
+        vi.spyOn(Date.prototype, "getHours").mockReturnValue(22);
+        const tm = ThemeManager.getInstance();
+        tm.setTheme("dark");
+        tm.setAutoDarkMode(true);
+        expect(tm.getTheme()).toBe("dark");
+        tm.setAutoDarkMode(false);
+    });
+
+    it("auto-dark timer tick re-evaluates the theme", () => {
+        vi.spyOn(Date.prototype, "getHours").mockReturnValue(22);
+        let timerCallback: () => void = () => {};
+        setIntervalSpy.mockImplementation((cb: TimerHandler) => {
+            timerCallback = cb as () => void;
+            return 1 as unknown as ReturnType<typeof setInterval>;
+        });
+        const tm = ThemeManager.getInstance();
+        tm.setTheme("light");
+        tm.setAutoDarkMode(true);
+        expect(tm.getTheme()).toBe("dark");
+        tm.setTheme("light");
+        timerCallback();
+        expect(tm.getTheme()).toBe("dark");
+        tm.setAutoDarkMode(false);
+    });
+
+    it("system theme changes apply when no stored theme exists", () => {
+        const tm = ThemeManager.getInstance();
+        tm.init();
+        const mq = matchMediaSpy.mock.results[0].value as unknown as {
+            addEventListener: ReturnType<typeof vi.fn>;
+        };
+        const handler = mq.addEventListener.mock.calls[0][1] as (e: { matches: boolean }) => void;
+        localStorage.removeItem("theme");
+        handler({ matches: true });
+        expect(tm.getTheme()).toBe("dark");
+        handler({ matches: false });
+        expect(tm.getTheme()).toBe("light");
+    });
+
+    it("system theme changes are ignored with a stored theme", () => {
+        const tm = ThemeManager.getInstance();
+        tm.init();
+        const mq = matchMediaSpy.mock.results[0].value as unknown as {
+            addEventListener: ReturnType<typeof vi.fn>;
+        };
+        const handler = mq.addEventListener.mock.calls[0][1] as (e: { matches: boolean }) => void;
+        localStorage.setItem("theme", "light");
+        tm.setTheme("light");
+        handler({ matches: true });
+        expect(tm.getTheme()).toBe("light");
+    });
+
+    it("system theme handler tolerates storage failures", () => {
+        const tm = ThemeManager.getInstance();
+        tm.init();
+        const mq = matchMediaSpy.mock.results[0].value as unknown as {
+            addEventListener: ReturnType<typeof vi.fn>;
+        };
+        const handler = mq.addEventListener.mock.calls[0][1] as (e: { matches: boolean }) => void;
+        const getSpy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+            throw new Error("denied");
+        });
+        tm.setTheme("light");
+        handler({ matches: true });
+        expect(tm.getTheme()).toBe("dark");
+        getSpy.mockRestore();
+    });
+
+    it("falls back to addListener for system changes", () => {
+        const addListener = vi.fn();
+        matchMediaSpy.mockReturnValue({
+            matches: false,
+            addListener,
+        } as unknown as MediaQueryList);
+        const tm = ThemeManager.getInstance();
+        tm.init();
+        expect(addListener).toHaveBeenCalledTimes(1);
+    });
+
+    it("skips system-change listening without registration methods", () => {
+        matchMediaSpy.mockReturnValue({ matches: false } as unknown as MediaQueryList);
+        const tm = ThemeManager.getInstance();
+        expect(() => tm.init()).not.toThrow();
+    });
+
 });

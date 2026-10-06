@@ -462,10 +462,8 @@ func TitrationCurve(ctx context.Context, input CalculationInput) (CalculationRes
 		for i := 0; i <= numPoints; i++ {
 			vb := equivalenceVolume * float64(i) / float64(numPoints) * 2
 			var pH float64
+			// totalVol is always positive: va > 0 is validated and vb >= 0.
 			totalVol := va + vb
-			if totalVol == 0 {
-				continue
-			}
 			molesH := ca*va - ct*vb
 			if molesH > 0 {
 				pH = -math.Log10(molesH / totalVol)
@@ -492,10 +490,8 @@ func TitrationCurve(ctx context.Context, input CalculationInput) (CalculationRes
 		for i := 0; i <= numPoints; i++ {
 			vb := equivalenceVolume * float64(i) / float64(numPoints) * 2
 			var pH float64
+			// totalVol is always positive: va > 0 is validated and vb >= 0.
 			totalVol := va + vb
-			if totalVol == 0 {
-				continue
-			}
 			fraction := ct * vb / (ca * va)
 			if fraction <= 0.001 {
 				pH = 0.5 * (pKa - math.Log10(ca))
@@ -508,11 +504,11 @@ func TitrationCurve(ctx context.Context, input CalculationInput) (CalculationRes
 				pOH := -math.Log10(excessOH)
 				pH = 14 - pOH
 			} else {
+				// In this window fraction is strictly inside (0.001, 0.999),
+				// so both amounts are positive: molesA = fraction*ca*va and
+				// molesHA = (1-fraction)*ca*va.
 				molesHA := ca*va - ct*vb
 				molesA := ct * vb
-				if molesHA <= 0 || molesA <= 0 {
-					continue
-				}
 				pH = pKa + math.Log10(molesA/molesHA)
 			}
 			if pH < 0 {

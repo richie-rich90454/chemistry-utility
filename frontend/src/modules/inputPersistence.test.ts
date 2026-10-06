@@ -78,6 +78,19 @@ describe("InputPersistence", function (): void {
             let result: Record<string, string> | null = InputPersistence.getInstance().restore("corrupt");
             expect(result).toBeNull();
         });
+        it("returns null for null, array and scalar payloads", function (): void {
+            localStorage.setItem("calc-inputs-n", "null");
+            expect(InputPersistence.getInstance().restore("n")).toBeNull();
+            localStorage.setItem("calc-inputs-a", "[1, 2]");
+            expect(InputPersistence.getInstance().restore("a")).toBeNull();
+            localStorage.setItem("calc-inputs-s", "\"just a string\"");
+            expect(InputPersistence.getInstance().restore("s")).toBeNull();
+        });
+        it("coerces number and boolean values and drops other types", function (): void {
+            localStorage.setItem("calc-inputs-mixed", JSON.stringify({"a": 1, "b": true, "c": "x", "d": null}));
+            let result: Record<string, string> | null = InputPersistence.getInstance().restore("mixed");
+            expect(result).toEqual({"a": "1", "b": "true", "c": "x"});
+        });
     });
     describe("clear", function (): void {
         it("removes the saved data from localStorage", function (): void {

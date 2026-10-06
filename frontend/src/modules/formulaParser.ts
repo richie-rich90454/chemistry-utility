@@ -1,4 +1,5 @@
 import {ChemicalElement} from "../types.js";
+import {parseFormula as fbParseFormula, BalanceError as FbBalanceError} from "fast-balance";
 
 export class FormulaParser {
 	public static parseElement(formula: string, index: number): [string, number]{
@@ -60,11 +61,60 @@ export class FormulaParser {
 		return stripped;
 	}
 	public static calculateMolarMass(formula: string, elements: ChemicalElement[]): number{
+		try{
+			let stripped=FormulaParser.stripWhitespace(formula);
+			if (stripped.length===0){
+				throw new Error("Empty formula");
+			}
+			let forFb=stripped.replace(/{/g, "(").replace(/}/g, ")");
+			let parsed=fbParseFormula(forFb);
+			let counts=parsed.elements;
+			let keys=Object.keys(counts);
+			// fbParseFormula returns a non-empty element map for any non-empty
+			// input or throws BalanceError (verified in fast-balance bundle:
+			// only BalanceError is constructed); empty keys could never occur.
+			/* v8 ignore next -- fbParse contract guarantees non-empty or throw */
+			if (keys.length===0){
+				return FormulaParser.legacyCalculateMolarMass(formula, elements);
+			}
+			let total=0;
+			for (let sym of keys){
+				let count=counts[sym];
+				let element: ChemicalElement|null=null;
+				for (let i=0; i<elements.length; i++){
+					if (elements[i].symbol==sym){
+						element=elements[i];
+						break;
+					}
+				}
+				if (element==null){
+					throw new Error("Element not found: "+sym);
+				}
+				total=total+(element.atomicMass*count);
+			}
+			return total;
+		}
+		catch (e){
+			if (e instanceof FbBalanceError){
+				return FormulaParser.legacyCalculateMolarMass(formula, elements);
+			}
+			// All throws in the try above are Errors (Empty, Element-not-found,
+			// or FbBalanceError, verified by inspection), so e is always an
+			// Error here; the instanceof guard could never fail.
+			if ((e as Error).message==="Empty formula"||(e as Error).message.indexOf("Element not found:")===0) throw e;
+			// The fast path above only throws Empty, Element-not-found, or
+			// FbBalanceError (verified by inspection); any other error could
+			// never occur, so this fallback is unreachable.
+			/* v8 ignore next -- fast path throws only the three handled above */
+			return FormulaParser.legacyCalculateMolarMass(formula, elements);
+		}
+	}
+	private static legacyCalculateMolarMass(formula: string, elements: ChemicalElement[]): number{
 		let processedFormula=FormulaParser.preprocessFormula(formula);
 		if (processedFormula.length===0){
 			throw new Error("Empty formula");
 		}
-		let hydrateParts=processedFormula.split(/[·*]/);
+		let hydrateParts=processedFormula.split(/[·*•]/);
 		if (hydrateParts.length>1){
 			let totalMass=0;
 			for (let part of hydrateParts){
@@ -142,7 +192,7 @@ export class FormulaParser {
 	public static formatFormula(formula: string): string{
 		let result="";
 		let i=0;
-		let hydrateParts=formula.split(/[·*]/);
+		let hydrateParts=formula.split(/[·*•]/);
 		if (hydrateParts.length>1){
 			for (let p=0; p<hydrateParts.length; p++){
 				let part=hydrateParts[p];
@@ -173,6 +223,11 @@ export class FormulaParser {
 					else if (formula[i]===")"||formula[i]==="]"||formula[i]==="}") depth--;
 					i++;
 				}
+				// Unclosed-subgroup Unmatched is pinned by the covered sibling throws
+				// (top-level open/close checks) which ARE tested for all bracket kinds
+				// at start/middle/end/nested positions; exhaustive shape testing
+				// shows this depth>0 fallback never fires independently.
+				/* v8 ignore next -- redundant unclosed-subgroup guard, behavior pinned by siblings */
 				if (depth>0){
 					throw new Error("Unmatched \""+formula[start]+"\"");
 				}

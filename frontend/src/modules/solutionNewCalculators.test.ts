@@ -101,6 +101,76 @@ describe("calculateBufferSolution", () => {
         const text = getResultText("buffer-result");
         expect(text).toContain("Poor");
     });
+
+    it("should show error for invalid solve-for selection", () => {
+        createSelect("buffer-solve-for", "bogus", ["pH", "pKa", "ratio", "bogus"], "buffer-calc");
+        createInput("buffer-pKa", "4.75", "buffer-calc");
+        createInput("buffer-HA", "0.1", "buffer-calc");
+        createInput("buffer-Aminus", "0.2", "buffer-calc");
+        createInput("buffer-pH", "", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
+
+    it("should show error for non-positive [A-]", () => {
+        createSelect("buffer-solve-for", "pH", ["pH", "pKa", "ratio"], "buffer-calc");
+        createInput("buffer-pKa", "4.75", "buffer-calc");
+        createInput("buffer-HA", "0.1", "buffer-calc");
+        createInput("buffer-Aminus", "0", "buffer-calc");
+        createInput("buffer-pH", "", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
+
+    it("should show error when pH is missing for pKa", () => {
+        createSelect("buffer-solve-for", "pKa", ["pH", "pKa", "ratio"], "buffer-calc");
+        createInput("buffer-pKa", "", "buffer-calc");
+        createInput("buffer-HA", "0.1", "buffer-calc");
+        createInput("buffer-Aminus", "0.2", "buffer-calc");
+        createInput("buffer-pH", "", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
+
+    it("should show error when pKa is missing for ratio", () => {
+        createSelect("buffer-solve-for", "ratio", ["pH", "pKa", "ratio"], "buffer-calc");
+        createInput("buffer-pKa", "", "buffer-calc");
+        createInput("buffer-HA", "", "buffer-calc");
+        createInput("buffer-Aminus", "", "buffer-calc");
+        createInput("buffer-pH", "5.75", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
+
+    it("should show error when pH is missing for ratio", () => {
+        createSelect("buffer-solve-for", "ratio", ["pH", "pKa", "ratio"], "buffer-calc");
+        createInput("buffer-pKa", "4.75", "buffer-calc");
+        createInput("buffer-HA", "", "buffer-calc");
+        createInput("buffer-Aminus", "", "buffer-calc");
+        createInput("buffer-pH", "", "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+
+        calculateBufferSolution();
+
+        const text = getResultText("buffer-result");
+        expect(text).toContain("Error");
+    });
 });
 
 describe("calculatePKaPKb", () => {
@@ -184,6 +254,16 @@ describe("calculatePKaPKb", () => {
         const text = getResultText("pka-pkb-result");
         expect(text).not.toContain("Kw = 0.0000");
         expect(text).toContain("Kw = 1.0000");
+    });
+
+    it("should show error for invalid input type", () => {
+        createSelect("pka-pkb-input-type", "bogus", ["Ka", "pKa", "Kb", "pKb", "bogus"], "pka-pkb-calc");
+        createInput("pka-pkb-input-value", "1", "pka-pkb-calc");
+
+        calculatePKaPKb();
+
+        const text = getResultText("pka-pkb-result");
+        expect(text).toContain("Error");
     });
 });
 
@@ -336,6 +416,26 @@ describe("calculateColligativeProperties", () => {
         expect(text).toContain("Vapor Pressure");
     });
 
+    it("should honor explicit density and temperature inputs", () => {
+        createInput("collig-solute-mass", "10", "colligative-calc");
+        createInput("collig-molar-mass", "58.44", "colligative-calc");
+        createInput("collig-solvent-mass", "100", "colligative-calc");
+        createInput("collig-vanthoff", "2", "colligative-calc");
+        createInput("collig-Kb", "", "colligative-calc");
+        createInput("collig-Kf", "", "colligative-calc");
+        createInput("collig-solvent-bp", "", "colligative-calc");
+        createInput("collig-solvent-fp", "", "colligative-calc");
+        createInput("collig-Psolvent", "", "colligative-calc");
+        createInput("collig-density", "1.2", "colligative-calc");
+        createInput("collig-temp", "310", "colligative-calc");
+
+        calculateColligativeProperties();
+
+        const text = getResultText("colligative-result");
+        expect(text).toContain("1.2");
+        expect(text).toContain("310");
+    });
+
     it("should show error for zero solute mass", () => {
         createInput("collig-solute-mass", "0", "colligative-calc");
         createInput("collig-molar-mass", "58.44", "colligative-calc");
@@ -475,9 +575,23 @@ describe("calculateDebyeHuckel", () => {
         calculateDebyeHuckel();
 
         const text = getResultText("debye-huckel-result");
-        expect(text).toContain("0.002500");
+        // MX2 salt at c=0.001: I = 0.5*c*(1*4 + 2*1) = 3c = 0.003.
+        expect(text).toContain("0.003000");
+        expect(text).toContain("M1X2");
     });
 
+    it("should reject non-integer ion charges", () => {
+        createInput("dh-zplus", "1.5", "debye-huckel-calc");
+        createInput("dh-zminus", "1", "debye-huckel-calc");
+        createInput("dh-concentration", "0.01", "debye-huckel-calc");
+        createInput("dh-ion-size", "9", "debye-huckel-calc");
+
+        calculateDebyeHuckel();
+
+        const text = getResultText("debye-huckel-result");
+        expect(text).toContain("Error");
+        expect(text).toContain("integers");
+    });
     it("should show error for zero ion charge", () => {
         createInput("dh-zplus", "0", "debye-huckel-calc");
         createInput("dh-zminus", "1", "debye-huckel-calc");
@@ -562,6 +676,17 @@ describe("calculateCommonIonEffect", () => {
         expect(text).toContain("0.050000");
     });
 
+    it("should warn when the s << C approximation breaks down", () => {
+        createSelect("common-ion-salt-type", "AB", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+        createInput("common-ion-Ksp", "0.0001", "common-ion-calc");
+        createInput("common-ion-concentration", "0.001", "common-ion-calc");
+
+        calculateCommonIonEffect();
+
+        const text = getResultText("common-ion-result");
+        expect(text).toContain("Warning");
+    });
+
     it("should show error for zero Ksp", () => {
         createSelect("common-ion-salt-type", "AB", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
         createInput("common-ion-Ksp", "0", "common-ion-calc");
@@ -629,5 +754,194 @@ describe("calculateCommonIonEffect", () => {
 
         const text = getResultText("common-ion-result");
         expect(text).toContain("Error");
+    });
+});
+
+describe("solutionGapCoverage: buffer DOM validation", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        createContainer("buffer-calc");
+        createResultDiv("buffer-result", "buffer-calc");
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    function bufferDom(solveFor: string, pKa: string, HA: string, Aminus: string, pH: string): string {
+        document.body.innerHTML = "";
+        createContainer("buffer-calc");
+        createResultDiv("buffer-result", "buffer-calc");
+        createSelect("buffer-solve-for", solveFor, ["pH", "pKa", "ratio", "bogus"], "buffer-calc");
+        createInput("buffer-pKa", pKa, "buffer-calc");
+        createInput("buffer-HA", HA, "buffer-calc");
+        createInput("buffer-Aminus", Aminus, "buffer-calc");
+        createInput("buffer-pH", pH, "buffer-calc");
+        createInput("buffer-ratio", "", "buffer-calc");
+        calculateBufferSolution();
+        return getResultText("buffer-result");
+    }
+
+    it("rejects HA/Aminus problems in pH branch", () => {
+        expect(bufferDom("pH", "4.75", "", "0.2", "")).toContain("Error");
+        expect(bufferDom("pH", "4.75", "0", "0.2", "")).toContain("Error");
+    });
+
+    it("rejects HA/Aminus problems in pKa branch", () => {
+        expect(bufferDom("pKa", "", "0.1", "", "5.06")).toContain("Error");
+        expect(bufferDom("pKa", "", "0", "0.2", "5.06")).toContain("Error");
+        expect(bufferDom("pKa", "", "0.1", "0", "5.06")).toContain("Error");
+    });
+});
+
+describe("solutionGapCoverage: Ksp DOM salt types", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        createContainer("ksp-calc");
+        createResultDiv("ksp-result", "ksp-calc");
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    function kspDom(salt: string, solveFor: string, ksp: string, s: string): string {
+        document.body.innerHTML = "";
+        createContainer("ksp-calc");
+        createResultDiv("ksp-result", "ksp-calc");
+        createSelect("ksp-solve-for", solveFor, ["Ksp", "solubility", "bogus"], "ksp-calc");
+        createSelect("ksp-salt-type", salt, ["AB", "AB2", "A2B", "AB3", "A3B", "bogus"], "ksp-calc");
+        createInput("ksp-value", ksp, "ksp-calc");
+        createInput("ksp-molar-solubility", s, "ksp-calc");
+        calculateKsp();
+        return getResultText("ksp-result");
+    }
+
+    it("covers AB3 and A3B in both directions", () => {
+        expect(kspDom("AB3", "Ksp", "", "0.01")).toContain("Ksp");
+        expect(kspDom("AB3", "solubility", "1e-10", "")).toContain("Molar Solubility");
+        expect(kspDom("A3B", "Ksp", "", "0.01")).toContain("Ksp");
+        expect(kspDom("A3B", "solubility", "1e-10", "")).toContain("Molar Solubility");
+    });
+
+    it("rejects bogus salt and solveFor", () => {
+        expect(kspDom("bogus", "Ksp", "", "0.01")).toContain("Error");
+        expect(kspDom("AB", "bogus", "1e-10", "0.01")).toContain("Error");
+    });
+});
+
+describe("solutionGapCoverage: colligative DOM validation", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        createContainer("colligative-calc");
+        createResultDiv("colligative-result", "colligative-calc");
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    function colligDom(extra: Record<string, string>): string {
+        document.body.innerHTML = "";
+        createContainer("colligative-calc");
+        createResultDiv("colligative-result", "colligative-calc");
+        const base: Record<string, string> = {
+            "collig-solute-mass": "10",
+            "collig-molar-mass": "58.44",
+            "collig-solvent-mass": "100",
+            "collig-vanthoff": "2",
+            "collig-Kb": "0.512",
+            "collig-Kf": "1.86",
+            "collig-solvent-bp": "100",
+            "collig-solvent-fp": "0",
+            "collig-Psolvent": "",
+        };
+        Object.assign(base, extra);
+        for (const k of Object.keys(base)) createInput(k, base[k], "colligative-calc");
+        calculateColligativeProperties();
+        return getResultText("colligative-result");
+    }
+
+    it("honors custom solvent molar mass", () => {
+        document.body.innerHTML = "";
+        createContainer("colligative-calc");
+        createResultDiv("colligative-result", "colligative-calc");
+        createInput("collig-solute-mass", "10", "colligative-calc");
+        createInput("collig-molar-mass", "58.44", "colligative-calc");
+        createInput("collig-solvent-mass", "100", "colligative-calc");
+        createInput("collig-vanthoff", "2", "colligative-calc");
+        createInput("collig-Kb", "0.512", "colligative-calc");
+        createInput("collig-Kf", "1.86", "colligative-calc");
+        createInput("collig-solvent-bp", "100", "colligative-calc");
+        createInput("collig-solvent-fp", "0", "colligative-calc");
+        createInput("collig-Psolvent", "", "colligative-calc");
+        createInput("collig-solvent-molar-mass", "46.07", "colligative-calc");
+        calculateColligativeProperties();
+        expect(getResultText("colligative-result")).toContain("Molality");
+        document.body.innerHTML = "";
+        createContainer("colligative-calc");
+        createResultDiv("colligative-result", "colligative-calc");
+        createInput("collig-solute-mass", "10", "colligative-calc");
+        createInput("collig-molar-mass", "58.44", "colligative-calc");
+        createInput("collig-solvent-mass", "100", "colligative-calc");
+        createInput("collig-vanthoff", "2", "colligative-calc");
+        createInput("collig-Kb", "0.512", "colligative-calc");
+        createInput("collig-Kf", "1.86", "colligative-calc");
+        createInput("collig-solvent-bp", "100", "colligative-calc");
+        createInput("collig-solvent-fp", "0", "colligative-calc");
+        createInput("collig-Psolvent", "", "colligative-calc");
+        createInput("collig-solvent-molar-mass", "0", "colligative-calc");
+        calculateColligativeProperties();
+        expect(getResultText("colligative-result")).toContain("Error");
+    });
+
+    it("rejects bad masses, density, temp", () => {
+        expect(colligDom({"collig-molar-mass": "0"})).toContain("Error");
+        expect(colligDom({"collig-solvent-mass": "0"})).toContain("Error");
+        expect(colligDom({"collig-density": "0"})).toContain("Error");
+        expect(colligDom({"collig-temp": "0"})).toContain("Error");
+    });
+});
+
+describe("solutionGapCoverage: titration DOM validation", () => {
+    beforeEach(() => {
+        document.body.innerHTML = "";
+        createContainer("titration-calc");
+        createResultDiv("titration-result", "titration-calc");
+    });
+
+    afterEach(() => {
+        document.body.innerHTML = "";
+    });
+
+    function titrationDom(acidType: string, acidConc: string, acidVol: string, baseConc: string, maxVol: string, Ka: string, withChart = false): string {
+        document.body.innerHTML = "";
+        createContainer("titration-calc");
+        createResultDiv("titration-result", "titration-calc");
+        createSelect("titration-acid-type", acidType, ["strong", "weak"], "titration-calc");
+        createInput("titration-acid-conc", acidConc, "titration-calc");
+        createInput("titration-acid-vol", acidVol, "titration-calc");
+        createInput("titration-base-conc", baseConc, "titration-calc");
+        createInput("titration-max-vol", maxVol, "titration-calc");
+        createInput("titration-Ka", Ka, "titration-calc");
+        if (withChart) {
+            const canvas = document.createElement("canvas");
+            canvas.id = "titration-chart";
+            document.body.appendChild(canvas);
+        }
+        calculateTitrationCurve();
+        return getResultText("titration-result");
+    }
+
+    it("rejects bad volumes and concentrations", () => {
+        expect(titrationDom("strong", "0.1", "0", "0.1", "50", "")).toContain("Error");
+        expect(titrationDom("strong", "0.1", "25", "0", "50", "")).toContain("Error");
+        expect(titrationDom("strong", "0.1", "25", "0.1", "0", "")).toContain("Error");
+    });
+
+    it("clamps extreme pH and renders chart", () => {
+        expect(titrationDom("strong", "10", "25", "0.1", "50", "")).toContain("Equivalence Point");
+        expect(titrationDom("strong", "0.1", "25", "10", "50", "")).toContain("Equivalence Point");
+        expect(titrationDom("strong", "0.1", "25", "0.1", "50", "", true)).toContain("Equivalence Point");
     });
 });

@@ -179,4 +179,67 @@ describe("PeriodicTable", function (): void {
         });
         expect(result.container.textContent).toMatch(/Network error/);
     });
+    it("loads elements from cache without fetching when valid JSON is cached", async function (): Promise<void> {
+        localStorage.setItem("chem-cache-ptable", JSON.stringify(TEST_ELEMENTS));
+        let result = render(function () { return <PeriodicTable />; });
+        await waitFor(function (): void {
+            expect(result.queryByText(/Loading elements/)).toBeNull();
+        });
+        expect(result.getByRole("grid")).toBeTruthy();
+        expect(result.getByLabelText("Hydrogen, atomic number 1")).toBeTruthy();
+        expect(fetchSpy).not.toHaveBeenCalled();
+    });
+    it("falls through to fetch when cached JSON is corrupt", async function (): Promise<void> {
+        localStorage.setItem("chem-cache-ptable", "not valid json{{{");
+        let result = render(function () { return <PeriodicTable />; });
+        await waitFor(function (): void {
+            expect(result.queryByText(/Loading elements/)).toBeNull();
+        });
+        expect(fetchSpy).toHaveBeenCalled();
+        expect(result.getByLabelText("Hydrogen, atomic number 1")).toBeTruthy();
+    });
+    it("shows an error when the ptable response is not ok", async function (): Promise<void> {
+        fetchSpy.mockRestore();
+        fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({ok: false, status: 500} as Response);
+        let result = render(function () { return <PeriodicTable />; });
+        await waitFor(function (): void {
+            expect(result.container.textContent).toMatch(/Error loading elements/);
+        });
+        expect(result.container.textContent).toMatch(/HTTP error! status: 500/);
+    });
+    it("shows a string rejection reason when fetch rejects with a non-Error", async function (): Promise<void> {
+        fetchSpy.mockRestore();
+        fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue("cable-cut");
+        let result = render(function () { return <PeriodicTable />; });
+        await waitFor(function (): void {
+            expect(result.container.textContent).toMatch(/Error loading elements/);
+        });
+        expect(result.container.textContent).toMatch(/cable-cut/);
+    });
+    it("positions lanthanides/actinides, falls back for unknown types and missing groups", async function (): Promise<void> {
+        let exotic: ChemicalElement[] = [
+            {atomicNumber: 57, symbol: "La", name: "Lanthanum", atomicMass: 138.91, type: "lanthanide", period: 6, group: null, electronegativity: 1.1, electronAffinity: 48, atomicRadius: 195, ionizationEnergy: 538, valenceElectrons: 2, totalElectrons: 57},
+            {atomicNumber: 89, symbol: "Ac", name: "Actinium", atomicMass: 227.03, type: "actinide", period: 7, group: null, electronegativity: 1.1, electronAffinity: 0, atomicRadius: 195, ionizationEnergy: 499, valenceElectrons: 2, totalElectrons: 89},
+            {atomicNumber: 119, symbol: "Xx", name: "Mysterium", atomicMass: 300, type: "mystery", period: 8, group: 19, electronegativity: null, electronAffinity: null, atomicRadius: null, ionizationEnergy: null, valenceElectrons: 1, totalElectrons: 119}
+        ];
+        fetchSpy.mockRestore();
+        fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+            ok: true,
+            json: function () { return Promise.resolve(exotic); },
+        } as Response);
+        let result = render(function () { return <PeriodicTable />; });
+        await waitFor(function (): void {
+            expect(result.queryByText(/Loading elements/)).toBeNull();
+        });
+        let lanthanumButton = result.getByLabelText("Lanthanum, atomic number 57") as HTMLButtonElement;
+        expect(lanthanumButton.style.gridRow).toBe("9");
+        let actiniumButton = result.getByLabelText("Actinium, atomic number 89") as HTMLButtonElement;
+        expect(actiniumButton.style.gridRow).toBe("10");
+        let mysteryButton = result.getByLabelText("Mysterium, atomic number 119") as HTMLButtonElement;
+        expect(mysteryButton.classList.contains(styles.catUnknown)).toBe(true);
+        fireEvent.click(lanthanumButton);
+        let detailPanel = await result.findByRole("dialog");
+        expect(detailPanel).toBeTruthy();
+        expect(result.container.textContent).toMatch(/n\/a/);
+    });
 });

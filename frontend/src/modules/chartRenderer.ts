@@ -1,12 +1,5 @@
-import { Chart, registerables } from "chart.js";
-import zoomPlugin from "chartjs-plugin-zoom";
+import { Chart } from "../solid/third-party/registerChartPlugins.js";
 import { ThemeManager, Theme } from "./themeManager.js";
-
-let _i: number;
-for (_i = 0; _i < registerables.length; _i++) {
-    Chart.register(registerables[_i]);
-}
-Chart.register(zoomPlugin);
 
 export interface ChartDataset {
     label: string;

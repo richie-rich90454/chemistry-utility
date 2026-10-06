@@ -16,6 +16,30 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 	}
 
 	/**
+	 * Resolves the volume unit for the ideal gas law. Reads the optional
+	 * "ideal-volume-unit" select (values "L" or "m³"); when the select is
+	 * absent (legacy DOM) it defaults to the R-consistent unit — litres for
+	 * atm-L, cubic metres for SI — so SI results are never 1000x off.
+	 */
+	private static resolveVolumeUnit(raw: string | undefined | null, units: string): string {
+		let volUnit: string = raw ? raw : (units === "SI" ? "m³" : "L");
+		if (volUnit !== "L" && volUnit !== "m³") {
+			throw new Error('Volume unit must be "L" or "m³"');
+		}
+		return volUnit;
+	}
+
+	/** Converts a user-entered volume to litres. */
+	private static toLitres(V: number, volUnit: string): number {
+		return volUnit === "m³" ? V * 1000 : V;
+	}
+
+	/** Converts a user-entered volume to cubic metres. */
+	private static toCubicMetres(V: number, volUnit: string): number {
+		return volUnit === "L" ? V / 1000 : V;
+	}
+
+	/**
 	 * Pre-fills temperature with 298.15 K and pressure with 1 atm
 	 * when the ideal gas law calculator view is first shown.
 	 */
@@ -37,6 +61,8 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 		const unitsSelect = document.getElementById("ideal-R-units") as HTMLSelectElement;
 		const units = unitsSelect.value;
 		const R = units === "atm-L" ? 0.08206 : 8.314;
+		const volUnitEl = document.getElementById("ideal-volume-unit") as HTMLSelectElement | null;
+		const volUnit = IdealGasLawCalculator.resolveVolumeUnit(volUnitEl ? volUnitEl.value : undefined, units);
 		const P = this.getInput("ideal-P").getValue();
 		const V = this.getInput("ideal-V").getValue();
 		const n = this.getInput("ideal-n").getValue();
@@ -44,23 +70,27 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 		let result: number, formula: string;
 		if (solveFor === "P") {
 			InputValidator.validateValues([V, n, T], ["ideal-V", "ideal-n", "ideal-T"]);
-			if (V === 0) throw new Error("Volume cannot be zero");
-			result = (n * R * T) / V;
+			const Vcalc = units === "atm-L" ? IdealGasLawCalculator.toLitres(V, volUnit) : IdealGasLawCalculator.toCubicMetres(V, volUnit);
+			if (Vcalc === 0) throw new Error("Volume cannot be zero");
+			result = (n * R * T) / Vcalc;
 			formula = "P=(nRT)/V";
 		} else if (solveFor === "V") {
 			InputValidator.validateValues([P, n, T], ["ideal-P", "ideal-n", "ideal-T"]);
 			if (P === 0) throw new Error("Pressure cannot be zero");
-			result = (n * R * T) / P;
+			const Vcalc = (n * R * T) / P;
+			result = units === "atm-L" ? (volUnit === "m³" ? Vcalc / 1000 : Vcalc) : (volUnit === "L" ? Vcalc * 1000 : Vcalc);
 			formula = "V=(nRT)/P";
 		} else if (solveFor === "n") {
 			InputValidator.validateValues([P, V, T], ["ideal-P", "ideal-V", "ideal-T"]);
 			if (T === 0) throw new Error("Temperature cannot be zero");
-			result = (P * V) / (R * T);
+			const Vcalc = units === "atm-L" ? IdealGasLawCalculator.toLitres(V, volUnit) : IdealGasLawCalculator.toCubicMetres(V, volUnit);
+			result = (P * Vcalc) / (R * T);
 			formula = "n=(PV)/(RT)";
 		} else if (solveFor === "T") {
 			InputValidator.validateValues([P, V, n], ["ideal-P", "ideal-V", "ideal-n"]);
 			if (n === 0) throw new Error("Moles cannot be zero");
-			result = (P * V) / (n * R);
+			const Vcalc = units === "atm-L" ? IdealGasLawCalculator.toLitres(V, volUnit) : IdealGasLawCalculator.toCubicMetres(V, volUnit);
+			result = (P * Vcalc) / (n * R);
 			formula = "T=(PV)/(nR)";
 		} else {
 			throw new Error("Invalid solveFor");
@@ -69,7 +99,7 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 		if (solveFor === "P") {
 			unit = units === "atm-L" ? "atm" : "Pa";
 		} else if (solveFor === "V") {
-			unit = units === "atm-L" ? "L" : "m³";
+			unit = volUnit;
 		} else if (solveFor === "n") {
 			unit = "mol";
 		} else {
@@ -82,6 +112,7 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 		const solveFor = this.getSolveFor(inputs);
 		const units = inputs["ideal-R-units"] ?? "";
 		const R = units === "atm-L" ? 0.08206 : 8.314;
+		const volUnit = IdealGasLawCalculator.resolveVolumeUnit(inputs["ideal-volume-unit"], units);
 		const P = parseFloat(inputs["ideal-P"] ?? "");
 		const V = parseFloat(inputs["ideal-V"] ?? "");
 		const n = parseFloat(inputs["ideal-n"] ?? "");
@@ -91,29 +122,33 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 			if (isNaN(V) || isNaN(n) || isNaN(T)) {
 				throw new Error("Missing or invalid inputs for ideal-V, ideal-n, ideal-T");
 			}
-			if (V === 0) throw new Error("Volume cannot be zero");
-			result = (n * R * T) / V;
+			const Vcalc = units === "atm-L" ? IdealGasLawCalculator.toLitres(V, volUnit) : IdealGasLawCalculator.toCubicMetres(V, volUnit);
+			if (Vcalc === 0) throw new Error("Volume cannot be zero");
+			result = (n * R * T) / Vcalc;
 			formula = "P=(nRT)/V";
 		} else if (solveFor === "V") {
 			if (isNaN(P) || isNaN(n) || isNaN(T)) {
 				throw new Error("Missing or invalid inputs for ideal-P, ideal-n, ideal-T");
 			}
 			if (P === 0) throw new Error("Pressure cannot be zero");
-			result = (n * R * T) / P;
+			const Vcalc = (n * R * T) / P;
+			result = units === "atm-L" ? (volUnit === "m³" ? Vcalc / 1000 : Vcalc) : (volUnit === "L" ? Vcalc * 1000 : Vcalc);
 			formula = "V=(nRT)/P";
 		} else if (solveFor === "n") {
 			if (isNaN(P) || isNaN(V) || isNaN(T)) {
 				throw new Error("Missing or invalid inputs for ideal-P, ideal-V, ideal-T");
 			}
 			if (T === 0) throw new Error("Temperature cannot be zero");
-			result = (P * V) / (R * T);
+			const Vcalc = units === "atm-L" ? IdealGasLawCalculator.toLitres(V, volUnit) : IdealGasLawCalculator.toCubicMetres(V, volUnit);
+			result = (P * Vcalc) / (R * T);
 			formula = "n=(PV)/(RT)";
 		} else if (solveFor === "T") {
 			if (isNaN(P) || isNaN(V) || isNaN(n)) {
 				throw new Error("Missing or invalid inputs for ideal-P, ideal-V, ideal-n");
 			}
 			if (n === 0) throw new Error("Moles cannot be zero");
-			result = (P * V) / (n * R);
+			const Vcalc = units === "atm-L" ? IdealGasLawCalculator.toLitres(V, volUnit) : IdealGasLawCalculator.toCubicMetres(V, volUnit);
+			result = (P * Vcalc) / (n * R);
 			formula = "T=(PV)/(nR)";
 		} else {
 			throw new Error("Invalid solveFor");
@@ -122,14 +157,14 @@ export class IdealGasLawCalculator extends SolveForCalculator {
 		if (solveFor === "P") {
 			unit = units === "atm-L" ? "atm" : "Pa";
 		} else if (solveFor === "V") {
-			unit = units === "atm-L" ? "L" : "m³";
+			unit = volUnit;
 		} else if (solveFor === "n") {
 			unit = "mol";
 		} else {
 			unit = "K";
 		}
 		const formatted = this.numberFormatter.format(result, 4);
-		return { value: formatted + " " + unit, explanation: formula + " = " + formatted + " " + unit };
+		return { value: formatted + " " + unit, explanation: formula + " = " + formatted + " " + unit, metadata: { volumeUnit: volUnit, units: units } };
 	}
 }
 
@@ -184,15 +219,15 @@ export class CombinedGasLawCalculator extends SolveForCalculator {
 		} else {
 			throw new Error("Invalid solveFor");
 		}
-		let unit: string;
+		let unit: string = "";
 		if (solveFor.includes("P")) {
 			unit = "pressure units";
 		} else if (solveFor.includes("V")) {
 			unit = "volume units";
-		} else if (solveFor.includes("T")) {
-			unit = "K";
 		} else {
-			unit = "";
+			// solveFor is validated above to one of P1/V1/T1/P2/V2/T2, so
+			// reaching here means it contains "T".
+			unit = "K";
 		}
 		this.resultDisplay.showFormula(formula, result, unit);
 	}
@@ -251,15 +286,15 @@ export class CombinedGasLawCalculator extends SolveForCalculator {
 		} else {
 			throw new Error("Invalid solveFor");
 		}
-		let unit: string;
+		let unit: string = "";
 		if (solveFor.includes("P")) {
 			unit = "pressure units";
 		} else if (solveFor.includes("V")) {
 			unit = "volume units";
-		} else if (solveFor.includes("T")) {
-			unit = "K";
 		} else {
-			unit = "";
+			// solveFor is validated above to one of P1/V1/T1/P2/V2/T2, so
+			// reaching here means it contains "T".
+			unit = "K";
 		}
 		const formatted = this.numberFormatter.format(result, 4);
 		return { value: formatted + " " + unit, explanation: formula + " = " + formatted + " " + unit };
@@ -282,10 +317,13 @@ export class VanDerWaalsCalculator extends Calculator {
 		const b = this.getInput("vdw-b").getValue();
 		InputValidator.validateValues([V, n, T, a, b], ["vdw-V", "vdw-n", "vdw-T", "vdw-a", "vdw-b"]);
 		if (V <= 0) throw new Error("Volume must be positive");
+		if (n <= 0) throw new Error("Moles must be positive");
+		if (T <= 0) throw new Error("Temperature must be positive (Kelvin)");
+		if (a < 0 || b < 0) throw new Error("Van der Waals constants a and b cannot be negative");
 		if (V - n * b <= 0) throw new Error("Volume is too small for the given amount of gas (V must be greater than n*b)");
 		const R = 0.08206;
 		const P = (n * R * T) / (V - n * b) - a * Math.pow(n / V, 2);
-		this.resultDisplay.showResult("<p>P=" + this.numberFormatter.format(P, 4) + " atm</p>");
+		this.resultDisplay.showResult("<p>P=" + this.numberFormatter.format(P, 4) + " atm (R = 0.08206 L·atm/(mol·K))</p>");
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
@@ -298,11 +336,14 @@ export class VanDerWaalsCalculator extends Calculator {
 			throw new Error("Missing or invalid inputs for vdw-V, vdw-n, vdw-T, vdw-a, vdw-b");
 		}
 		if (V <= 0) throw new Error("Volume must be positive");
+		if (n <= 0) throw new Error("Moles must be positive");
+		if (T <= 0) throw new Error("Temperature must be positive (Kelvin)");
+		if (a < 0 || b < 0) throw new Error("Van der Waals constants a and b cannot be negative");
 		if (V - n * b <= 0) throw new Error("Volume is too small for the given amount of gas (V must be greater than n*b)");
 		const R = 0.08206;
 		const P = (n * R * T) / (V - n * b) - a * Math.pow(n / V, 2);
 		const formatted = this.numberFormatter.format(P, 4);
-		return { value: "P=" + formatted + " atm", explanation: "P=(nRT)/(V-nb) - a(n/V)² = " + formatted + " atm" };
+		return { value: "P=" + formatted + " atm", explanation: "P=(nRT)/(V-nb) - a(n/V)² = " + formatted + " atm (R = 0.08206 L·atm/(mol·K))" };
 	}
 }
 
@@ -326,6 +367,7 @@ export class HalfLifeCalculator extends SolveForCalculator {
 			InputValidator.validateValues([N0, t, t_half], ["initial-quantity", "time-input", "half-life-input"]);
 			if (t_half <= 0) throw new Error("Half-life must be positive");
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
+			if (t < 0) throw new Error("Time cannot be negative");
 			result = N0 * Math.pow(0.5, t / t_half);
 			this.resultDisplay.showResult("<p>Remaining: " + this.numberFormatter.format(result, 4) + " (after " + t + " units)</p>");
 		} else if (solveFor === "time") {
@@ -333,12 +375,15 @@ export class HalfLifeCalculator extends SolveForCalculator {
 			if (t_half <= 0) throw new Error("Half-life must be positive");
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
 			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
+			if (Nt >= N0) throw new Error("Remaining quantity must be less than initial quantity (decay only decreases quantity)");
 			result = (Math.log(Nt / N0) / Math.log(0.5)) * t_half;
 			this.resultDisplay.showResult("<p>Time needed: " + this.numberFormatter.format(result, 4) + " units</p>");
 		} else if (solveFor === "half-life") {
 			InputValidator.validateValues([N0, t, Nt], ["initial-quantity", "time-input", "remaining-quantity"]);
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
 			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
+			if (Nt >= N0) throw new Error("Remaining quantity must be less than initial quantity");
+			if (t <= 0) throw new Error("Time must be positive");
 			result = t / (Math.log(Nt / N0) / Math.log(0.5));
 			this.resultDisplay.showResult("<p>Half-life: " + this.numberFormatter.format(result, 4) + " units</p>");
 		} else {
@@ -359,6 +404,7 @@ export class HalfLifeCalculator extends SolveForCalculator {
 			}
 			if (t_half <= 0) throw new Error("Half-life must be positive");
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
+			if (t < 0) throw new Error("Time cannot be negative");
 			result = N0 * Math.pow(0.5, t / t_half);
 			const formatted = this.numberFormatter.format(result, 4);
 			return { value: "Remaining: " + formatted + " (after " + t + " units)", explanation: "Nt = N0 × (0.5)^(t/t_half) = " + formatted };
@@ -369,6 +415,7 @@ export class HalfLifeCalculator extends SolveForCalculator {
 			if (t_half <= 0) throw new Error("Half-life must be positive");
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
 			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
+			if (Nt >= N0) throw new Error("Remaining quantity must be less than initial quantity (decay only decreases quantity)");
 			result = (Math.log(Nt / N0) / Math.log(0.5)) * t_half;
 			const formatted = this.numberFormatter.format(result, 4);
 			return { value: "Time needed: " + formatted + " units", explanation: "t = (ln(Nt/N0) / ln(0.5)) × t_half = " + formatted + " units" };
@@ -378,6 +425,8 @@ export class HalfLifeCalculator extends SolveForCalculator {
 			}
 			if (N0 <= 0) throw new Error("Initial quantity must be positive");
 			if (Nt <= 0) throw new Error("Remaining quantity must be positive");
+			if (Nt >= N0) throw new Error("Remaining quantity must be less than initial quantity");
+			if (t <= 0) throw new Error("Time must be positive");
 			result = t / (Math.log(Nt / N0) / Math.log(0.5));
 			const formatted = this.numberFormatter.format(result, 4);
 			return { value: "Half-life: " + formatted + " units", explanation: "t_half = t / (ln(Nt/N0) / ln(0.5)) = " + formatted + " units" };

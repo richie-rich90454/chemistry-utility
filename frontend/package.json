@@ -1,7 +1,11 @@
 {
   "name": "chemistry-utility-frontend",
-  "version": "4.0.0",
+  "version": "3.0.0",
   "type": "module",
+  "overrides": {
+    "seroval": "^1.6.3",
+    "seroval-plugins": "^1.6.3"
+  },
   "scripts": {
     "dev": "vite",
     "dev:app": "vite --mode app",
@@ -32,7 +36,7 @@
     "@solidjs/router": "^1.0.0",
     "chart.js": "^4.5.1",
     "chartjs-plugin-zoom": "^2.2.0",
-    "fast-balance": "^1.0.7",
+    "fast-balance": "^1.1.0",
     "gsap": "^3.15.0",
     "katex": "^0.19.0",
     "smiles-drawer": "^2.4.1",

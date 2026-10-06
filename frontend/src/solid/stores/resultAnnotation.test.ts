@@ -77,6 +77,14 @@ describe("useResultAnnotation", function (): void {
         expect(store.currentNote()).toBe("");
         expect(store.currentFavorite()).toBe(false);
     });
+    it("removeAnnotation on unstarred id clears signals without toggling star", function (): void {
+        let store = useResultAnnotation();
+        store.removeAnnotation("never-starred-id");
+        expect(store.currentNote()).toBe("");
+        expect(store.currentFavorite()).toBe(false);
+        let manager = ResultAnnotationManager.getInstance();
+        expect(manager.isStarred("never-starred-id")).toBe(false);
+    });
     it("shares state across multiple useResultAnnotation calls (singleton)", function (): void {
         let storeA = useResultAnnotation();
         let storeB = useResultAnnotation();

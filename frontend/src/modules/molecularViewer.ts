@@ -1,4 +1,5 @@
 import SmilesDrawer from "smiles-drawer";
+import { SketchState, sketchToSmiles } from "./structureSketch.js";
 
 /**
  * A single molecule preset entry used to populate the dropdown in the
@@ -196,6 +197,25 @@ class MolecularViewer {
     }
 
     /**
+     * Converts a hand-drawn structure sketch to SMILES (see
+     * structureSketch.ts) and renders it onto the canvas identified by
+     * `canvasId`. Returns the emitted SMILES string. Throws when the
+     * sketch is empty, when it produces invalid SMILES, or when the
+     * canvas is missing (via {@link render}).
+     */
+    public renderSketch(sketch: SketchState, canvasId: string): string {
+        let smiles: string = sketchToSmiles(sketch);
+        if (smiles.trim().length === 0) {
+            throw new Error("Sketch is empty");
+        }
+        if (validateSmiles(smiles) === false) {
+            throw new Error("Sketch produced invalid SMILES: " + smiles);
+        }
+        this.render(smiles, canvasId);
+        return smiles;
+    }
+
+    /**
      * Creates a fresh canvas inside `containerId` and renders `smiles`
      * onto it. Useful when a container does not already own a canvas
      * (e.g. compound search result rows). The created canvas is given the
@@ -208,8 +228,11 @@ class MolecularViewer {
         }
         let canvasId: string = containerId + "-canvas";
         let existing: HTMLElement | null = document.getElementById(canvasId);
-        if (existing !== null && existing.parentNode !== null) {
-            existing.parentNode.removeChild(existing);
+        // An element returned by getElementById is always attached, so a
+        // detached-node guard would never fire; remove() is a safe no-op
+        // for detached nodes in any case.
+        if (existing !== null) {
+            existing.remove();
         }
         let canvas: HTMLCanvasElement = document.createElement("canvas");
         canvas.id = canvasId;
@@ -296,10 +319,9 @@ class MolecularViewer {
     }
 
     private applyTransform(canvasId: string): void {
-        let state: CanvasViewState | undefined = this.states.get(canvasId);
-        if (state === undefined) {
-            return;
-        }
+        // Callers (applyZoom, resetView) return early when no state exists,
+        // so the state lookup below always succeeds.
+        let state: CanvasViewState = this.states.get(canvasId) as CanvasViewState;
         let canvas: HTMLCanvasElement | null = document.getElementById(canvasId) as HTMLCanvasElement | null;
         if (canvas === null) {
             return;
@@ -348,6 +370,9 @@ class MolecularViewer {
         canvas.addEventListener("mousemove", function (e: MouseEvent): void {
             let state: CanvasViewState | undefined = self.states.get(canvasId);
             if (state === undefined) {
+                // State was cleared after the listeners were attached;
+                // handleHover no-ops without state, preserving prior behavior.
+                self.handleHover(canvasId, e);
                 return;
             }
             if (state.isDragging) {

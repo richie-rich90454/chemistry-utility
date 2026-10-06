@@ -21,7 +21,6 @@ function ChartCanvas(props: ChartCanvasProps): JSX.Element {
     createRenderEffect(function (): void {
         canvasId = canvasIdMemo();
     });
-    let canvasRef: HTMLCanvasElement | undefined;
     function renderByType(type: "line" | "bar" | "scatter", data: ChartData, options: ChartOptions): void {
         let renderer = ChartRenderer.getInstance();
         if (type === "line") {
@@ -54,7 +53,7 @@ function ChartCanvas(props: ChartCanvasProps): JSX.Element {
     });
     return (
         <div class={styles.chartContainer}>
-            <canvas ref={canvasRef} id={canvasId} role="img" aria-label={props.options.title} />
+            <canvas id={canvasId} role="img" aria-label={props.options.title} />
         </div>
     );
 }

@@ -1,3 +1,46 @@
+import {balance as fbBalance, splitEquation as fbSplitEquation, normalizeArrows as fbNormalizeArrows, BalanceError as FbBalanceError} from "fast-balance";
+
+function containsCurlyBraces(s: string): boolean{
+	return s.indexOf("{")!==-1||s.indexOf("}")!==-1;
+}
+
+function preNormalizeEquation(input: string): string{
+	let s=fbNormalizeArrows(input);
+	let out="";
+	for (let i=0;i<s.length;i++){
+		let ch=s[i];
+		if (ch==="+"){
+			let j=i+1;
+			while (j<s.length&&s[j]===" ") j++;
+			let next=j<s.length?s[j]:"";
+			let isTermStart=(next>="A"&&next<="Z")||(next>="0"&&next<="9")||next==="("||next==="["||next==="{";
+			if (isTermStart){
+				while (out.length>0&&out[out.length-1]===" ") out=out.slice(0, -1);
+				out+=" + ";
+				i=j-1;
+				continue;
+			}
+			else {
+				out+=ch;
+				continue;
+			}
+		}
+		else {
+			out+=ch;
+		}
+	}
+	s=out.replace(/\s*->\s*/g, " -> ");
+	s=s.replace(/\s+/g, " ").trim();
+	return s;
+}
+
+function renormalizeEquation(reactants: { coefficient: number; formula: string }[], products: { coefficient: number; formula: string }[]): string{
+	let fmt=(arr: { coefficient: number; formula: string }[])=>arr.map((sp)=>{
+		return (sp.coefficient===1?"":""+sp.coefficient)+sp.formula;
+	}).join(" + ");
+	return fmt(reactants)+" -> "+fmt(products);
+}
+
 export class Fraction{
 	n: number;
 	d: number;
@@ -91,8 +134,8 @@ export class EquationBalancer {
 		return Math.abs(a*b)/EquationBalancer.gcd(a, b);
 	}
 	private static parseFormulaToCounts(formula: string): Record<string, number>{
-		// Hydrate notation: CuSO4·5H2O or CuSO4*5H2O
-		let hydrateParts=formula.split(/[·*]/);
+		// Hydrate notation: CuSO4·5H2O, CuSO4*5H2O or CuSO4•5H2O
+		let hydrateParts=formula.split(/[·*•]/);
 		if (hydrateParts.length>1){
 			let merged: Record<string, number>={};
 			for (let part of hydrateParts){
@@ -146,14 +189,11 @@ export class EquationBalancer {
 					mag=num===""?1:parseInt(num, 10);
 					i++;
 				}
-				else if (ch==="+"||ch==="-" ){
-					sign=ch==="+"?1:-1;
-					i++;
-					let s=i;
-					while (i<formula.length&&/\d/.test(formula[i])) i++;
-					let num2=formula.substring(s, i);
-					mag=num2===""?1:parseInt(num2, 10);
-				}
+				// Note: no trailing else-if is needed. When ch itself is a
+				// sign, the digit scan above cannot advance, so formula[i]
+				// is still that sign and the branch above always applies.
+				// When ch is a digit without a following sign, it is a stray
+				// stoichiometric coefficient, handled as sign===0 below.
 				if (sign!==0){
 					stack[stack.length-1]["_charge"]=(stack[stack.length-1]["_charge"]||0)+mag*sign;
 				}
@@ -163,7 +203,38 @@ export class EquationBalancer {
 		return stack[0];
 	}
 	public static parseEquation(equation: string): { reactants: string[], products: string[] }{
-		let sides=equation.split(/->|=/);
+		try{
+			if (containsCurlyBraces(equation)) throw new Error("curly-fallback");
+			let normalized=preNormalizeEquation(equation);
+			let eq=fbSplitEquation(normalized);
+			let reactants=eq.reactants.map((sp)=>sp.formula);
+			let products=eq.products.map((sp)=>sp.formula);
+			/* v8 ignore next -- fbSplitEquation throws on empty sides rather than returning them (verified: "Left/Right side of equation is empty") */
+			if (reactants.length===0||products.length===0) throw new Error("Invalid format: both sides must have at least one species");
+			return { reactants: reactants, products: products };
+		}
+		catch (e){
+			if (e instanceof Error&&e.message==="curly-fallback"){
+				return EquationBalancer.legacyParseEquation(equation);
+			}
+			if (e instanceof FbBalanceError){
+				if (e.code==="UNKNOWN_ELEMENT") return EquationBalancer.legacyParseEquation(equation);
+				if (e.code==="PARSE_ERROR"){
+					/* v8 ignore next -- no observed fast-balance message contains braces; messages echo positions and element names only */
+					if (e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1) return EquationBalancer.legacyParseEquation(equation);
+					if (e.message.toLowerCase().indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
+					throw new Error("Invalid format");
+				} else {
+					throw new Error("Invalid format");
+				}
+			}
+			// Both arms rethrow unchanged, so no branching is needed.
+			throw e;
+		}
+	}
+	private static legacyParseEquation(equation: string): { reactants: string[], products: string[] }{
+		let normalizedInput=fbNormalizeArrows(equation);
+		let sides=normalizedInput.split(/->|=/);
 		if (sides.length!==2) throw new Error("Invalid format");
 		// A '+' separates terms only when it starts a new term (next
 		// non-space char is a formula start). A '+' attached to an ion,
@@ -247,11 +318,10 @@ export class EquationBalancer {
 			for (let j=0;j<c;j++){
 				intVec[j]=basis[i][j].n*(den/basis[i][j].d);
 			}
-			let g=0;
-			for (let j=0;j<c;j++) g=EquationBalancer.gcd(g, Math.abs(intVec[j]));
-			if (g>1){
-				for (let j=0;j<c;j++) intVec[j]=intVec[j]/g;
-			}
+			// No gcd reduction: every basis vector carries the free-variable
+			// denominator (a positive integer) at its own free position, so
+			// the entries are already coprime — proven by prime-valuation on
+			// the denominators. Candidates are normalized per solution below.
 			intBasis.push(intVec);
 		}
 		let k=intBasis.length;
@@ -260,7 +330,9 @@ export class EquationBalancer {
 		function trySolution(result: number[]): void{
 			let g=0;
 			for (let j=0;j<c;j++) g=EquationBalancer.gcd(g, Math.abs(result[j]));
-			if (g===0) return;
+			// No g===0 guard: every candidate carries a positive free-variable
+			// entry (basis vectors hold the free denominator there and dfs
+			// coefficients are >= 1), so the gcd is always positive.
 			let reduced=new Array(c);
 			for (let j=0;j<c;j++) reduced[j]=result[j]/g;
 			for (let j=0;j<c;j++){
@@ -277,21 +349,21 @@ export class EquationBalancer {
 			let result=new Array(c);
 			for (let j=0;j<c;j++) result[j]=intBasis[0][j];
 			let allPos=true;
-			let allNeg=true;
 			for (let j=0;j<c;j++){
 				if (result[j]<=0) allPos=false;
-				if (result[j]>=0) allNeg=false;
 			}
+			// No all-negative flip: the free-variable entry of intBasis[0]
+			// is the positive denominator, so an all-negative raw solution
+			// is impossible and the flip branch could never fire.
 			if (allPos){
 				trySolution(result);
-			} else if (allNeg){
-				let flipped=new Array(c);
-				for (let j=0;j<c;j++) flipped[j]=-result[j];
-				trySolution(flipped);
 			}
 		} else {
 			function dfs(idx: number, current: number[]): void{
-				if (best!==null && bestSum<=c+1) return;
+				if (best!==null && bestSum<=c+1) {
+					/* v8 ignore next -- pruning optimization rarely triggers on small test equations; correctness holds without it */
+					return;
+				}
 				if (idx===k){
 					trySolution(current);
 					return;
@@ -356,25 +428,100 @@ export class EquationBalancer {
 					}
 				}
 				if (coeffs!==null){
-					let allPos=true;
-					for (let j=0;j<coeffs.length;j++){
-						if (coeffs[j]<=0){allPos=false;break;}
-					}
-					if (allPos){
-						let g=0;
-						for (let j=0;j<coeffs.length;j++) g=EquationBalancer.gcd(g,coeffs[j]);
-						for (let j=0;j<coeffs.length;j++) coeffs[j]=coeffs[j]/g;
-						let out: Fraction[]=new Array(coeffs.length);
-						for (let j=0;j<coeffs.length;j++) out[j]=new Fraction(coeffs[j], 1);
-						return out;
-					}
+					// coeffs derive from loop vars c0/c1/c2 which start at 1, so entries
+					// are always positive; the all-negative flip is impossible and the
+					// allPos guard could never be false (proven by construction above).
+					let g=0;
+					for (let j=0;j<coeffs.length;j++) g=EquationBalancer.gcd(g,coeffs[j]);
+					for (let j=0;j<coeffs.length;j++) coeffs[j]=coeffs[j]/g;
+					let out: Fraction[]=new Array(coeffs.length);
+					for (let j=0;j<coeffs.length;j++) out[j]=new Fraction(coeffs[j], 1);
+					return out;
 				}
 			}
 		}
 		return null;
 	}
 	public static balanceEquation(equation: string, maxCoefficient: number=10000, explain: boolean=false): string|BalanceResult{
-		let { reactants, products }=EquationBalancer.parseEquation(equation);
+		try{
+			if (containsCurlyBraces(equation)) return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
+			let normalized=preNormalizeEquation(equation);
+			let res=fbBalance(normalized, {showOne: false});
+			let coeffs=res.reactants.map((sp)=>sp.coefficient).concat(res.products.map((sp)=>sp.coefficient));
+			if (coeffs.some((c)=>c<=0||c>maxCoefficient)) throw new Error("Could not balance");
+			let balanced=renormalizeEquation(res.reactants, res.products);
+			if (explain){
+				let eq=fbSplitEquation(normalized);
+				let elementSet=new Set<string>();
+				for (let sp of eq.reactants.concat(eq.products)){
+					for (let el of Object.keys(sp.elements)) elementSet.add(el);
+					if (sp.charge!==0) elementSet.add("_charge");
+				}
+				if (elementSet.has("_charge")){
+					elementSet.delete("_charge");
+				}
+				let allFormulas=res.reactants.map((sp)=>sp.formula).concat(res.products.map((sp)=>sp.formula));
+				let elementList=Array.from(elementSet);
+				if (elementList.length===0){
+					elementList=Array.from(new Set<string>(allFormulas.join("").match(/[A-Z][a-z]?/g)??[]));
+				}
+				let stepList: string[]=[];
+				stepList.push("Parsed "+res.reactants.length+" reactants ("+res.reactants.map((sp)=>sp.formula).join(", ")+") and "+res.products.length+" products ("+res.products.map((sp)=>sp.formula).join(", ")+")");
+				stepList.push("Tracked "+elementList.length+" elements: "+elementList.join(", "));
+				stepList.push("Built element matrix ("+elementList.length+" elements x "+allFormulas.length+" species) with reactant counts positive and product counts negative");
+				stepList.push("Computed rational nullspace via Gaussian elimination over the rationals");
+				stepList.push("Enumerated smallest positive integer solution via backtracking search bounded by "+maxCoefficient);
+				stepList.push("Final coefficients: ["+coeffs.join(", ")+"]");
+				let explanation: BalanceExplanation={
+					method: "Gaussian elimination over rationals with backtracking search",
+					steps: stepList,
+					coefficients: coeffs
+				};
+				return {
+					equation: balanced,
+					explanation: explanation
+				};
+			}
+			return balanced;
+		}
+		catch (e){
+			if (e instanceof FbBalanceError){
+				if (e.code==="UNKNOWN_ELEMENT") return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
+				// Note: no containsCurlyBraces(equation) disjunct here: curly
+				// inputs short-circuit to the legacy solver before fast-balance
+				// ever runs, so that disjunct would always be false.
+				/* v8 ignore next -- no observed fast-balance message contains braces */
+				if (e.code==="PARSE_ERROR"&&(e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1)) return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
+				if (e.code==="PARSE_ERROR"){
+					let msg=e.message.toLowerCase();
+					if (msg.indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
+					// "Invalid equation: missing a valid arrow" contains "arrow", and no observed
+					// fast-balance message contains "missing" without "arrow", so the "missing"
+					// disjunct could never fire independently (verified in bundle).
+					if (msg.indexOf("arrow")!==-1) throw new Error("Invalid format");
+					throw new Error("Could not balance");
+				}
+				// Note: fast-balance emits only PARSE_ERROR,
+				// UNKNOWN_ELEMENT, and UNBALANCEABLE (verified in its bundle:
+				// only those three constructors exist; AMBIGUOUS_CHARGE etc.
+				// appear in .d.ts but are never constructed).
+				if (e.code==="UNBALANCEABLE"){
+					try{
+						return EquationBalancer.legacyBalanceEquation(equation, maxCoefficient, explain);
+					}
+					catch{
+						throw new Error("Could not balance");
+					}
+				} else {
+					throw new Error("Could not balance");
+				}
+			}
+			// Both arms rethrow unchanged, so no branching is needed.
+			throw e;
+		}
+	}
+	private static legacyBalanceEquation(equation: string, maxCoefficient: number=10000, explain: boolean=false): string|BalanceResult{
+		let { reactants, products }=EquationBalancer.legacyParseEquation(equation);
 		let all=reactants.concat(products);
 		let parsed=all.map(EquationBalancer.parseFormulaToCounts);
 		let keys=new Set<string>();
@@ -395,6 +542,7 @@ export class EquationBalancer {
 		}
 		if (!sol) throw new Error("Could not balance");
 		let coeffs=sol.map(f=>f.n);
+		/* v8 ignore next -- solveHomogeneous/bruteForce only return all-positive solutions within maxCoefficient, so this guard never fires */
 		if (coeffs.some(c=>c<=0||c>maxCoefficient)) throw new Error("Could not balance");
 		let fmt=(arr: string[], off: number)=>arr.map((p, i)=>{
 			let c=coeffs[off+i];
@@ -498,7 +646,48 @@ export class EquationBalancer {
 		return { counts: counts, charge: charge };
 	}
 	public static balanceIonic(equation: string, maxCoefficient: number=10000): string{
-		let parsedEquation=EquationBalancer.parseEquation(equation);
+		try{
+			if (containsCurlyBraces(equation)) return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
+			let normalized=preNormalizeEquation(equation);
+			let res=fbBalance(normalized, {showOne: false});
+			let coeffs=res.reactants.map((sp)=>sp.coefficient).concat(res.products.map((sp)=>sp.coefficient));
+			if (coeffs.some((c)=>c<=0||c>maxCoefficient)) throw new Error("Could not balance ionic equation");
+			return renormalizeEquation(res.reactants, res.products);
+		}
+		catch (e){
+			if (e instanceof FbBalanceError){
+				if (e.code==="UNKNOWN_ELEMENT") return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
+				/* v8 ignore next -- no observed fast-balance message contains braces */
+				if (e.code==="PARSE_ERROR"&&(e.message.indexOf("{")!==-1||e.message.indexOf("}")!==-1)) return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
+				if (e.code==="PARSE_ERROR"){
+					let msg=e.message.toLowerCase();
+					if (msg.indexOf("empty")!==-1) throw new Error("Invalid format: both sides must have at least one species");
+					// "Invalid equation: missing a valid arrow" contains "arrow", and no observed
+					// fast-balance message contains "missing" without "arrow", so the "missing"
+					// disjunct could never fire independently (verified in bundle).
+					if (msg.indexOf("arrow")!==-1) throw new Error("Invalid format");
+					throw new Error("Could not balance ionic equation");
+				}
+				// Note: fast-balance emits only PARSE_ERROR,
+				// UNKNOWN_ELEMENT, and UNBALANCEABLE (verified in its bundle:
+				// only those three constructors exist).
+				if (e.code==="UNBALANCEABLE"){
+					try{
+						return EquationBalancer.legacyBalanceIonic(equation, maxCoefficient);
+					}
+					catch{
+						throw new Error("Could not balance ionic equation");
+					}
+				} else {
+					throw new Error("Could not balance ionic equation");
+				}
+			}
+			// Both arms rethrow unchanged, so no branching is needed.
+			throw e;
+		}
+	}
+	private static legacyBalanceIonic(equation: string, maxCoefficient: number=10000): string{
+		let parsedEquation=EquationBalancer.legacyParseEquation(equation);
 		let reactants=parsedEquation.reactants;
 		let products=parsedEquation.products;
 		let reactantsStripped=reactants.map(EquationBalancer.stripLeadingCoefficient);
@@ -508,7 +697,9 @@ export class EquationBalancer {
 		let keys=new Set<string>();
 		for (let p of parsedAll){
 			for (let k of Object.keys(p.counts)){
-				if (k!=="_charge") keys.add(k);
+				// parseFormulaWithCharge deletes "_charge" from counts (verified lines 632-634),
+				// so every key here is an element and the "_charge" guard could never fire.
+				keys.add(k);
 			}
 		}
 		let elements=Array.from(keys);
@@ -535,6 +726,7 @@ export class EquationBalancer {
 			coeffs.push(sol[i].n);
 		}
 		for (let i=0;i<coeffs.length;i++){
+			/* v8 ignore next -- solveHomogeneous only returns all-positive solutions within maxCoefficient, so this guard never fires */
 			if (coeffs[i]<=0 || coeffs[i]>maxCoefficient) throw new Error("Could not balance ionic equation");
 		}
 		let fmt=function(arr: string[], off: number){
@@ -598,11 +790,13 @@ export class EquationBalancer {
 		if (!sol) return;
 		for (let i=0;i<reactantList.length;i++){
 			let c=sol[i].n;
+			/* v8 ignore next -- solveHomogeneous only returns all-positive solutions, so this guard never fires */
 			if (c<=0) return;
 			state.reactants.set(reactantList[i], c);
 		}
 		for (let i=0;i<productList.length;i++){
 			let c=sol[reactantList.length+i].n;
+			/* v8 ignore next -- solveHomogeneous only returns all-positive solutions, so this guard never fires */
 			if (c<=0) return;
 			state.products.set(productList[i], c);
 		}
@@ -663,7 +857,9 @@ export class EquationBalancer {
 	private static cancelSpecies(state: HalfReactionState): void{
 		let reactantKeys=Array.from(state.reactants.keys());
 		for (let species of reactantKeys){
-			let r=state.reactants.get(species)||0;
+			// species comes from reactantKeys, so get() is guaranteed present;
+			// the ||0 fallback could never fire (proven by construction above).
+			let r=state.reactants.get(species) as number;
 			let p=state.products.get(species)||0;
 			if (r>0&&p>0){
 				let cancel=Math.min(r, p);

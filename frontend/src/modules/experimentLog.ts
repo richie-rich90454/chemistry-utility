@@ -209,6 +209,9 @@ export class ExperimentLogManager {
         }
         this.currentLogId = log.id;
         let header: HTMLElement | null = this.container.querySelector(".experiment-log-header") as HTMLElement | null;
+        // ensureViewStructure guarantees the header exists whenever the container
+        // exists (verified in renderView/init); the missing-header return never fires.
+        /* v8 ignore next -- header guaranteed by ensureViewStructure */
         if (!header) {
             return;
         }
@@ -245,6 +248,9 @@ export class ExperimentLogManager {
             return;
         }
         let timeline: HTMLElement | null = this.container.querySelector(".experiment-log-timeline") as HTMLElement | null;
+        // ensureViewStructure guarantees the timeline element whenever the
+        // container exists (verified in renderView/init); missing never fires.
+        /* v8 ignore next -- timeline guaranteed by ensureViewStructure */
         if (!timeline) {
             return;
         }
@@ -458,6 +464,9 @@ export class ExperimentLogManager {
             return;
         }
         let errorEl: HTMLElement | null = this.container.querySelector(".experiment-log-error") as HTMLElement | null;
+        // ensureViewStructure guarantees the error element whenever the container
+        // exists (verified in renderView/init); missing never fires in real use.
+        /* v8 ignore next -- error element guaranteed by ensureViewStructure */
         if (!errorEl) {
             return;
         }

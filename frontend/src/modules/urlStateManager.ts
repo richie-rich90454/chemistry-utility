@@ -15,36 +15,96 @@ export class UrlStateManager {
 	/**
 	 * Maps calculator view IDs to their input field definitions.
 	 * Each entry maps a DOM element ID to a short URL param name.
+	 * Keys match the current navigation view IDs; every stateless
+	 * calculator view is covered so share links round-trip fully.
+	 * Unknown URL params are ignored on restore (see restoreState).
 	 */
 	private static readonly CALCULATOR_PARAMS: Record<string, Record<string, string>> = {
 		"element-lookup": {
 			"element-input": "q"
 		},
-		"mass-calc": {
+		"molar-mass": {
 			"formula-input": "formula"
 		},
-		"balancing": {
+		"equation-balancer": {
 			"equation-input": "equation"
 		},
-		"dilution-calc": {
+		"unit-converter": {
+			"unit-converter-value": "v",
+			"unit-converter-from-unit": "from",
+			"unit-converter-to-unit": "to",
+			"unit-converter-category": "cat"
+		},
+		"dilution": {
 			"dilution-solve-for": "solve",
 			"dilution-M1": "M1",
 			"dilution-V1": "V1",
 			"dilution-M2": "M2",
 			"dilution-V2": "V2"
 		},
-		"mass-percent-calc": {
+		"mass-percent": {
 			"mass-solute": "solute",
 			"mass-solution": "solution",
 			"concentration-unit": "unit"
 		},
-		"solution-mixing-calc": {
+		"solution-mixing": {
 			"mix-C1": "C1",
 			"mix-V1": "V1",
 			"mix-C2": "C2",
 			"mix-V2": "V2"
 		},
-		"nuclear-chemistry": {
+		"buffer": {
+			"buffer-solve-for": "solve",
+			"buffer-pKa": "pKa",
+			"buffer-HA": "HA",
+			"buffer-Aminus": "A",
+			"buffer-pH": "pH",
+			"buffer-ratio": "ratio"
+		},
+		"pka-pkb": {
+			"pka-pkb-input-value": "v",
+			"pka-pkb-input-type": "type"
+		},
+		"ksp": {
+			"ksp-solve-for": "solve",
+			"ksp-value": "ksp",
+			"ksp-molar-solubility": "s",
+			"ksp-salt-type": "salt"
+		},
+		"colligative": {
+			"collig-solute-mass": "msolute",
+			"collig-molar-mass": "mm",
+			"collig-solvent-mass": "msolvent",
+			"collig-vanthoff": "i",
+			"collig-Kb": "Kb",
+			"collig-Kf": "Kf",
+			"collig-solvent-bp": "bp",
+			"collig-solvent-fp": "fp",
+			"collig-Psolvent": "P",
+			"collig-solvent-molar-mass": "mmsolv",
+			"collig-density": "rho",
+			"collig-temp": "T"
+		},
+		"titration": {
+			"titration-acid-conc": "ca",
+			"titration-acid-vol": "va",
+			"titration-base-conc": "ct",
+			"titration-max-vol": "max",
+			"titration-Ka": "Ka",
+			"titration-acid-type": "type"
+		},
+		"debye-huckel": {
+			"dh-zplus": "zp",
+			"dh-zminus": "zn",
+			"dh-concentration": "c",
+			"dh-ion-size": "a"
+		},
+		"common-ion": {
+			"common-ion-Ksp": "Ksp",
+			"common-ion-concentration": "C",
+			"common-ion-salt-type": "salt"
+		},
+		"nuclear": {
 			"half-life-solve-for": "solve",
 			"initial-quantity": "q0",
 			"time-input": "t",
@@ -85,15 +145,80 @@ export class UrlStateManager {
 			"electrolysis-z": "ez",
 			"electrolysis-M": "eM"
 		},
+		"thermodynamics": {
+			"gibbs-deltaH": "dH",
+			"gibbs-deltaS": "dS",
+			"gibbs-T": "T",
+			"hess-steps": "steps",
+			"entropy-products": "Sp",
+			"entropy-reactants": "Sr",
+			"heat-cap-mass": "m",
+			"heat-cap-specific-heat": "c",
+			"heat-cap-initial-temp": "Ti",
+			"heat-cap-final-temp": "Tf",
+			"heat-cap-heat": "q",
+			"bond-enthalpy-broken": "broken",
+			"bond-enthalpy-formed": "formed",
+			"born-haber-dHf": "dHf",
+			"born-haber-dHsub": "dHsub",
+			"born-haber-IE": "IE",
+			"born-haber-dHdiss": "dHdiss",
+			"born-haber-EA": "EA"
+		},
+		"kinetics": {
+			"arrhenius-A": "A",
+			"arrhenius-Ea": "Ea",
+			"arrhenius-T": "T",
+			"arrhenius-k": "k",
+			"ratelaw-A1": "A1",
+			"ratelaw-B1": "B1",
+			"ratelaw-rate1": "r1",
+			"ratelaw-A2": "A2",
+			"ratelaw-B2": "B2",
+			"ratelaw-rate2": "r2",
+			"irl-order": "order",
+			"irl-A0": "A0",
+			"irl-k": "k",
+			"irl-t": "t",
+			"irl-A": "A",
+			"reaction-order-data": "data",
+			"collision-Ea": "Ea",
+			"collision-T": "T",
+			"collision-Z": "Z",
+			"collision-p": "p",
+			"collision-k": "k"
+		},
+		"quantum-atomic": {
+			"qn-n": "n",
+			"qn-l": "l",
+			"qn-ml": "ml",
+			"qn-ms": "ms",
+			"ec-atomic-number": "Z",
+			"rydberg-n1": "n1",
+			"rydberg-n2": "n2",
+			"db-mass": "m",
+			"db-velocity": "v",
+			"db-mass-unit": "munit",
+			"pe-wavelength": "lambda",
+			"pe-frequency": "freq",
+			"pe-work-function": "phi",
+			"pe-ke": "ke",
+			"heis-delta-x": "dx",
+			"heis-delta-p": "dp",
+			"heis-mass": "m"
+		},
 		"stoichiometry": {
 			"stoich-equation-input": "equation",
 			"calculation-type": "type"
 		},
-		"bond-type-predictor": {
+		"bond-type": {
 			"element1-input": "e1",
 			"element2-input": "e2"
 		}
 	};
+
+	/** Maximum length of a single restored URL value (defense against giant URLs). */
+	private static readonly MAX_VALUE_LENGTH = 500;
 
 	private constructor() {}
 
@@ -131,6 +256,7 @@ export class UrlStateManager {
 	/**
 	 * Reads URL search params and returns input values for the given calculator.
 	 * Returns null if no params exist for this calculator.
+	 * Unknown params are ignored; over-long values are dropped.
 	 */
 	public restoreState(calculatorId: string): Record<string, string> | null {
 		let paramMapping = UrlStateManager.CALCULATOR_PARAMS[calculatorId];
@@ -151,7 +277,7 @@ export class UrlStateManager {
 		for (let i = 0; i < paramNames.length; i++) {
 			let paramName = paramNames[i];
 			let value = searchParams.get(paramName);
-			if (value !== null) {
+			if (value !== null && value.length <= UrlStateManager.MAX_VALUE_LENGTH) {
 				result[reverseMapping[paramName]] = value;
 				hasAny = true;
 			}

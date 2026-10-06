@@ -223,13 +223,7 @@ export class DashboardManager {
             }
             calculatorTypes[calc.CalculatorType] = true;
         }
-        let calculatorsUsed: number = 0;
-        let keys: string[] = Object.keys(calculatorTypes);
-        for (i = 0; i < keys.length; i++) {
-            if (calculatorTypes.hasOwnProperty(keys[i])) {
-                calculatorsUsed++;
-            }
-        }
+        let calculatorsUsed: number = Object.keys(calculatorTypes).length;
         return {
             "totalCalculations": totalCalculations,
             "favoriteCount": favoriteCount,
@@ -340,15 +334,12 @@ export class DashboardManager {
                 counts[6 - dayDiff] = counts[6 - dayDiff] + 1;
             }
         }
-        let chartCanvas: HTMLCanvasElement | null = container.querySelector("canvas#dashboard-activity-chart") as HTMLCanvasElement | null;
-        if (!chartCanvas) {
-            let chartWrap: HTMLElement = document.createElement("div");
-            chartWrap.className = "chart-container";
-            chartCanvas = document.createElement("canvas");
-            chartCanvas.id = "dashboard-activity-chart";
-            chartWrap.appendChild(chartCanvas);
-            container.appendChild(chartWrap);
-        }
+        let chartWrap: HTMLElement = document.createElement("div");
+        chartWrap.className = "chart-container";
+        let chartCanvas: HTMLCanvasElement = document.createElement("canvas");
+        chartCanvas.id = "dashboard-activity-chart";
+        chartWrap.appendChild(chartCanvas);
+        container.appendChild(chartWrap);
         let dataPoints: ActivityPoint[] = [];
         for (i = 0; i < labels.length; i++) {
             dataPoints.push({ "day": labels[i], "count": counts[i] });

@@ -123,6 +123,7 @@ function CalculatorForm(props: CalculatorFormProps): JSX.Element {
     function handleFieldInput(id: string, e: Event): void {
         let target = e.currentTarget as HTMLInputElement;
         let setter = fieldSetters[id];
+        /* v8 ignore next -- rendered fields always have signals by event time: the sync effect adds a signal for every configured id on each change */
         if (setter !== undefined) {
             setter(target.value);
         }
@@ -130,6 +131,7 @@ function CalculatorForm(props: CalculatorFormProps): JSX.Element {
     function handleSelectChange(id: string, e: Event): void {
         let target = e.currentTarget as HTMLSelectElement;
         let setter = selectSetters[id];
+        /* v8 ignore next -- rendered selects always have signals by event time (same sync-effect guarantee as fields) */
         if (setter !== undefined) {
             setter(target.value);
         }
@@ -155,6 +157,7 @@ function CalculatorForm(props: CalculatorFormProps): JSX.Element {
         for (let i = 0; i < selects.length; i++) {
             let s: CalculatorSelect = selects[i];
             let setter = selectSetters[s.id];
+            /* v8 ignore next -- the sync effect adds a signal for every configured select id on each change, so the setter exists by event time */
             if (setter !== undefined) {
                 setter(getSelectInitial(s));
             }

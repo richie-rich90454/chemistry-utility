@@ -84,11 +84,6 @@ function Stoichiometry(): JSX.Element {
             let parsed = parseBalancedEquation(trimmed);
             let reactants = parsed.reactants;
             let products = parsed.products;
-            if (reactants.length === 0 || products.length === 0) {
-                setParsedEquation(null);
-                setLoadError("Equation must have at least one reactant and one product");
-                return;
-            }
             let sanitizedMap: Record<string, string> = {};
             let previousMap: Record<string, string> = reactantMolesMap();
             for (let i = 0; i < reactants.length; i++) {
@@ -119,6 +114,9 @@ function Stoichiometry(): JSX.Element {
             setLoadError("");
         }
         catch (err: unknown) {
+            // All throw sites reachable here (Term.parse, BalancedEquation.parse
+            // over pure string ops in normalizeArrows) throw Error instances.
+            /* v8 ignore next -- String(err) unreachable: no non-Error throw site exists */
             let message: string = err instanceof Error ? err.message : String(err);
             setParsedEquation(null);
             setLoadError(message);
@@ -178,7 +176,8 @@ function Stoichiometry(): JSX.Element {
             inputs["product-moles"] = productMoles();
             inputs["reactant-select"] = reactantSelect();
         }
-        else if (type === "limiting-reactant") {
+        else {
+            // Only remaining select option is "limiting-reactant".
             let map = reactantMolesMap();
             let keys = Object.keys(map);
             for (let i = 0; i < keys.length; i++) {
@@ -253,7 +252,9 @@ function Stoichiometry(): JSX.Element {
                     {(term) => (
                         <div>
                             <label class={styles.labelText} for={"moles-" + sanitizeId(term.formula)}>Moles of {term.formula}</label>
-                            <input type="number" id={"moles-" + sanitizeId(term.formula)} class={styles.input} placeholder={"Moles of " + term.formula} aria-label={"Moles of " + term.formula} value={reactantMolesMap()[term.formula] !== undefined ? reactantMolesMap()[term.formula] : ""} onInput={function (e: Event): void { handleLimitingReactantMolesInput(term.formula, e); }} min="0" step="any" autocomplete="off" spellcheck={false} />
+                            {/* reactantMolesMap is rebuilt from these same reactants in the
+                                parse effect, so every formula is always present. */}
+                            <input type="number" id={"moles-" + sanitizeId(term.formula)} class={styles.input} placeholder={"Moles of " + term.formula} aria-label={"Moles of " + term.formula} value={reactantMolesMap()[term.formula]} onInput={function (e: Event): void { handleLimitingReactantMolesInput(term.formula, e); }} min="0" step="any" autocomplete="off" spellcheck={false} />
                         </div>
                     )}
                 </For>

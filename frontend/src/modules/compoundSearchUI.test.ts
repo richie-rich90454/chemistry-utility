@@ -36,6 +36,7 @@ vi.mock("./navigationManager.js", function () {
 
 import { CompoundSearchUI, CompoundResult, CompoundDetail, buildFormulaSegments, searchCompounds, fetchCompoundDetail } from "./compoundSearchUI.js";
 import { ApiError } from "./apiClient.js";
+import { RuntimeDetector } from "./runtimeDetector.js";
 
 function setupSection(): HTMLElement {
     let section: HTMLElement = document.createElement("div");
@@ -602,6 +603,84 @@ describe("CompoundSearchUI", function () {
             } catch (e) {
                 expect((e as Error).message).toBe("not found");
             }
+        });
+    });
+    describe("web-mode lookup path", function () {
+        beforeEach(function () {
+            vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
+        });
+
+        function makeLookupPayload(): Record<string, unknown> {
+            let compound: Record<string, unknown> = makeCompound() as unknown as Record<string, unknown>;
+            compound["ID"] = "pubchem:962";
+            compound["inchi"] = "InChI=1S/H2O/h1H2";
+            compound["properties"] = {"boiling point": "100 C"};
+            compound["source"] = "pubchem";
+            return compound;
+        }
+
+        it("should call the stateless lookup path on web", async function () {
+            mockGet.mockResolvedValue({"compounds": [makeLookupPayload()], "query": "water"});
+            let results = await searchCompounds("water", "name");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/lookup?q=water&type=name");
+            expect(results.length).toBe(1);
+        });
+
+        it("should return an empty array when the lookup finds nothing", async function () {
+            mockGet.mockResolvedValue({"compounds": [], "query": "zzz-not-a-compound"});
+            let results = await searchCompounds("zzz-not-a-compound", "name");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/lookup?q=zzz-not-a-compound&type=name");
+            expect(results.length).toBe(0);
+        });
+
+        it("should propagate a 429 from the lookup", async function () {
+            mockGet.mockRejectedValue(new ApiError(429, "about:blank", "rate limit exceeded"));
+            try {
+                await searchCompounds("water", "name");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                expect((e as unknown as ApiError).detail).toBe("rate limit exceeded");
+            }
+        });
+
+        it("should display the 429 detail in the UI on web", async function () {
+            setupSection();
+            let ui: CompoundSearchUI = CompoundSearchUI.getInstance();
+            ui.init();
+            mockGet.mockRejectedValue(new ApiError(429, "about:blank", "rate limit exceeded"));
+            await ui.search("water", "name");
+            expect(mockGet).toHaveBeenCalledWith("/api/v1/compounds/lookup?q=water&type=name");
+            let errorEl: HTMLElement | null = document.querySelector(".compound-search-error");
+            expect(errorEl).not.toBeNull();
+            if (errorEl) {
+                expect(errorEl.style.display).toBe("block");
+                expect(errorEl.textContent).toContain("rate limit exceeded");
+            }
+        });
+
+        it("should serve detail from the lookup cache without HTTP on web", async function () {
+            mockGet.mockResolvedValue({"compounds": [makeLookupPayload()], "query": "water"});
+            await searchCompounds("water", "name");
+            mockGet.mockClear();
+            let detail: CompoundDetail = await fetchCompoundDetail("c1");
+            expect(mockGet).not.toHaveBeenCalled();
+            expect(detail.name).toBe("Water");
+            expect(detail.inchi).toBe("InChI=1S/H2O/h1H2");
+            expect(detail.properties["boiling point"]).toBe("100 C");
+            expect(detail.source).toBe("pubchem");
+        });
+
+        it("should throw for uncached detail on web instead of hitting the DB path", async function () {
+            mockGet.mockResolvedValue({"compounds": [], "query": "zzz"});
+            await searchCompounds("zzz", "name");
+            mockGet.mockClear();
+            try {
+                await fetchCompoundDetail("pubchem:962");
+                expect.fail("Should have thrown");
+            } catch (e) {
+                expect((e as Error).message).toContain("recent lookup results");
+            }
+            expect(mockGet).not.toHaveBeenCalled();
         });
     });
 });

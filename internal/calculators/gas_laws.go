@@ -491,19 +491,6 @@ func VanDerWaals(ctx context.Context, input CalculationInput) (CalculationResult
 	}, nil
 }
 
-// getStringWithDefault extracts a string or returns a default.
-func getStringWithDefault(input CalculationInput, key string, defaultVal string) string {
-	v, ok := input[key]
-	if !ok {
-		return defaultVal
-	}
-	s, ok := v.(string)
-	if !ok {
-		return defaultVal
-	}
-	return s
-}
-
 // requirePositiveTemp rejects non-positive absolute temperatures (Kelvin).
 func requirePositiveTemp(name string, T float64) error {
 	if T <= 0 {

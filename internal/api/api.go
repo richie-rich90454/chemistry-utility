@@ -84,12 +84,21 @@ func (a *API) Router() *gin.Engine {
 
 	v1 := r.Group("/api/v1")
 
+	// Liveness probe for uptime checks and container HEALTHCHECKs.
+	// Unversioned path, intentionally outside the rate-limited group.
+	r.GET("/api/healthz", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
 	// Public rate-limited routes
 	public := v1.Group("")
 	public.Use(a.RateLimitMiddleware(a.cfg.RateLimitPerMinute))
 	{
 		public.GET("/calculators", a.listCalculators)
 		public.POST("/calculators/:type", a.runCalculator)
+		// Stateless PubChem proxy: no database required, so it stays up on
+		// the anonymous web build while the DB-backed routes below 501 there.
+		public.GET("/compounds/lookup", a.lookupCompounds)
 		public.GET("/compounds", a.searchCompounds)
 		public.GET("/compounds/:id", a.getCompound)
 
@@ -141,6 +150,9 @@ func (a *API) RateLimitMiddleware(rpm int) gin.HandlerFunc {
 		}
 		if entry.count >= rpm {
 			mu.Unlock()
+			// Tell clients when the window resets so they can back off
+			// instead of retry-spinning.
+			c.Header("Retry-After", "60")
 			c.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{
 				"error": "rate limit exceeded",
 			})

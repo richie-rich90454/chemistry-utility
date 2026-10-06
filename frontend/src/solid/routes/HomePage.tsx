@@ -4,12 +4,12 @@ import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {GroupedCalculators, groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
-import {RuntimeDetector} from "../../modules/runtimeDetector.js";
+import {isDesktop, visibleCalculators} from "../lib/desktopOnly";
 import styles from "./HomePage.module.css";
 function HomePage(): JSX.Element {
     let calculators = createMemo(function (): CalculatorInfo[] {
         let nav = NavigationManager.getInstance();
-        return nav.getCalculators();
+        return visibleCalculators(nav.getCalculators());
     });
     let groups = createMemo(function (): GroupedCalculators[] {
         return groupByCategory(calculators());
@@ -23,7 +23,7 @@ function HomePage(): JSX.Element {
                 </div>
                 <div class={styles.intro}>
                     <h2 class={styles.introTitle}>Getting Started</h2>
-                    <p class={styles.introText}>Use the Molar Mass calculator for any formula, the Equation Balancer to balance reactions, the Periodic Table for element data, or the Compound Database Search to look up substances by name, formula, CAS, or SMILES.<Show when={!RuntimeDetector.getInstance().isWebMode}> The Batch Calculator can process many inputs at once from a CSV file.</Show></p>
+                    <p class={styles.introText}>Use the Molar Mass calculator for any formula, the Equation Balancer to balance reactions, the Periodic Table for element data, or the Compound Database Search to look up substances by name, formula, CAS, or SMILES.<Show when={isDesktop()}> The Batch Calculator can process many inputs at once from a CSV file.</Show></p>
                 </div>
                 <For each={groups()}>
                     {(group) => (

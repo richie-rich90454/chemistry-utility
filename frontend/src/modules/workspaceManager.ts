@@ -524,9 +524,7 @@ export class WorkspaceManager {
         if (!this.detailContainer) {
             return;
         }
-        let container: HTMLElement | null = this.detailContainer
-            ? (this.detailContainer.querySelector(".workspace-shared-calculations") as HTMLElement | null)
-            : null;
+        let container: HTMLElement | null = this.detailContainer.querySelector(".workspace-shared-calculations") as HTMLElement | null;
         if (!container) {
             return;
         }

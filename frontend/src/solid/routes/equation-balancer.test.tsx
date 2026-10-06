@@ -106,4 +106,29 @@ describe("EquationBalancer", function (): void {
         expect(input.value).toBe("");
         expect(result.container.textContent).not.toMatch(/2H2O/);
     });
+    it("switches redox medium without balancing when the equation is empty", function (): void {
+        let result = render(function () { return <EquationBalancerRoute />; });
+        let medium = result.getByLabelText("Redox medium") as HTMLSelectElement;
+        medium.value = "basic";
+        fireEvent.change(medium);
+        expect(medium.value).toBe("basic");
+        expect(result.container.textContent).not.toMatch(/Balanced Equation/);
+    });
+    it("rebalances with the new medium when the medium changes with input present", async function (): Promise<void> {
+        let result = render(function () { return <EquationBalancerRoute />; });
+        vi.useFakeTimers();
+        let input = result.getByLabelText("Chemical equation") as HTMLInputElement;
+        input.value = "H2 + O2 = H2O";
+        fireEvent.input(input);
+        let medium = result.getByLabelText("Redox medium") as HTMLSelectElement;
+        medium.value = "basic";
+        fireEvent.change(medium);
+        expect(medium.value).toBe("basic");
+        await vi.advanceTimersByTimeAsync(400);
+        vi.useRealTimers();
+        await waitFor(function (): void {
+            expect(result.container.textContent).toMatch(/2H2O/);
+        });
+        expect(result.container.textContent).toMatch(/Balanced Equation/);
+    });
 });

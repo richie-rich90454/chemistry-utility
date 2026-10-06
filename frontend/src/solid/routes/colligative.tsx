@@ -10,6 +10,7 @@
 import type {JSX} from "solid-js";
 import {createSignal} from "solid-js";
 import {ColligativePropertiesCalculator} from "../../modules/solutionCalculators.js";
+import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField} from "../components/CalculatorForm";
@@ -23,6 +24,8 @@ let requiredFields: CalculatorField[] = [
 ];
 let optionalFields: CalculatorField[] = [
     {"id": "collig-solvent-molar-mass", "label": "Solvent molar mass", "placeholder": "Solvent molar mass g/mol (default: water 18.015)", "ariaLabel": "Solvent molar mass"},
+    {"id": "collig-density", "label": "Solution density", "placeholder": "Solution density g/mL (default: 1)", "ariaLabel": "Solution density"},
+    {"id": "collig-temp", "label": "Temperature", "placeholder": "Temperature K for osmotic pressure (default: 298.15)", "ariaLabel": "Temperature for osmotic pressure"},
     {"id": "collig-Kb", "label": "Kb", "placeholder": "Kb (C kg/mol)", "ariaLabel": "Boiling point constant"},
     {"id": "collig-Kf", "label": "Kf", "placeholder": "Kf (C kg/mol)", "ariaLabel": "Freezing point constant"},
     {"id": "collig-solvent-bp", "label": "Solvent bp", "placeholder": "Solvent boiling point (C)", "ariaLabel": "Solvent boiling point"},
@@ -34,16 +37,7 @@ function Colligative(): JSX.Element {
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        let res = calculator.calculatePure(inputs);
-        let value: string = res.value;
-        let explanation: string = res.explanation !== undefined ? res.explanation : "";
-        if (value === "" || explanation.indexOf("Error") !== -1) {
-            setError(explanation !== "" ? explanation : "Calculation failed");
-            setResult("");
-            return;
-        }
-        setError("");
-        setResult(explanation !== "" ? explanation : value);
+        resolveResult(calculator.calculatePure(inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");

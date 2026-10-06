@@ -98,6 +98,41 @@ describe("DataPortabilityManager", () => {
             let archive = DataPortabilityManager.getInstance().export();
             expect(archive.plugins).toEqual(pluginState);
         });
+
+        it("defaults corrupt storage payloads to empty collections", () => {
+            localStorage.setItem("calc-history", JSON.stringify({ not: "an array" }));
+            localStorage.setItem("calc-inputs-arr", "[1, 2]");
+            localStorage.setItem("calc-inputs-nil", "null");
+            localStorage.setItem("calc-inputs-num", "5");
+            localStorage.setItem("chemutil_experiment_logs", JSON.stringify({ not: "an array" }));
+            localStorage.setItem("chem-utility-plugin-states", JSON.stringify([1, 2]));
+            let archive = DataPortabilityManager.getInstance().export();
+            expect(archive.history).toEqual([]);
+            expect(archive.inputs).toEqual({});
+            expect(archive.logs).toEqual([]);
+            expect(archive.plugins).toEqual({});
+        });
+
+        it("tolerates storage races while reading inputs", () => {
+            localStorage.setItem("calc-inputs-a", JSON.stringify({ a: "1" }));
+            localStorage.setItem("calc-inputs-b", JSON.stringify({ b: "2" }));
+            const realGetItem: Storage["getItem"] = Storage.prototype.getItem;
+            let keySpy = vi.spyOn(Storage.prototype, "key");
+            keySpy.mockReturnValueOnce(null);
+            let getSpy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(function (
+                this: Storage,
+                key: string,
+            ): string | null {
+                if (key.indexOf("calc-inputs-") === 0) {
+                    return null;
+                }
+                return realGetItem.call(this, key);
+            });
+            let archive = DataPortabilityManager.getInstance().export();
+            expect(archive.inputs).toEqual({});
+            keySpy.mockRestore();
+            getSpy.mockRestore();
+        });
     });
 
     describe("import", () => {
@@ -166,6 +201,26 @@ describe("DataPortabilityManager", () => {
             expect(stored).not.toBeNull();
             let parsed = JSON.parse(stored as string);
             expect(parsed["ideal-P"]).toBe("2");
+        });
+
+        it("skips inherited properties when writing inputs", () => {
+            let inputs: Record<string, Record<string, string>> = Object.assign(
+                Object.create({ "proto-calc": { x: "1" } }),
+                { "own-calc": { y: "2" } },
+            );
+            let archive = {
+                version: 1,
+                exportedAt: "2024-01-01T00:00:00.000Z",
+                history: [],
+                theme: "light",
+                autoDarkMode: false,
+                inputs: inputs,
+                logs: [],
+                plugins: {}
+            };
+            DataPortabilityManager.getInstance().import(archive);
+            expect(localStorage.getItem("calc-inputs-own-calc")).not.toBeNull();
+            expect(localStorage.getItem("calc-inputs-proto-calc")).toBeNull();
         });
 
         it("writes experiment logs to localStorage", () => {

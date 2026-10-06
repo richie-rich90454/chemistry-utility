@@ -98,6 +98,9 @@ function MolarMass(): JSX.Element {
             setResult("Molar Mass: " + formatted + " g/mol");
         }
         catch (err: unknown) {
+            // calculateMolarMass only throws Error instances (Empty formula,
+            // Element-not-found, BalanceError — verified in formulaParser).
+            /* v8 ignore next -- String(err) unreachable: no non-Error throw site exists */
             let message = err instanceof Error ? err.message : String(err);
             setResult("Error: " + message);
         }

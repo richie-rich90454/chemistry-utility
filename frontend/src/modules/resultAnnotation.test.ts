@@ -158,6 +158,34 @@ describe("ResultAnnotationManager", function () {
             expect(starBtn.getAttribute("aria-pressed")).toBe("false");
             starBtn.dispatchEvent(new Event("click"));
             expect(starBtn.getAttribute("aria-pressed")).toBe("true");
+            starBtn.dispatchEvent(new Event("click"));
+            expect(starBtn.getAttribute("aria-pressed")).toBe("false");
+        });
+
+        it("should rebuild a missing star icon on click", function () {
+            let manager: ResultAnnotationManager = ResultAnnotationManager.getInstance();
+            let result: HTMLElement = document.createElement("div");
+            document.body.appendChild(result);
+            manager.addAnnotationUI(result, "calc-noicon");
+            let starBtn: HTMLButtonElement = result.querySelector(".annotation-star-button") as HTMLButtonElement;
+            starBtn.querySelector("svg")!.remove();
+            starBtn.dispatchEvent(new Event("click"));
+            expect(starBtn.getAttribute("aria-pressed")).toBe("true");
+            expect(starBtn.querySelector("svg")).not.toBeNull();
+        });
+
+        it("should fall back to defaults for corrupt or scalar storage", function () {
+            let manager: ResultAnnotationManager = ResultAnnotationManager.getInstance();
+            localStorage.setItem("chemutil_annotations", "{bad json");
+            expect(manager.loadAnnotation("calc-1")).toBe("");
+            localStorage.setItem("chemutil_annotations", "5");
+            expect(manager.loadAnnotation("calc-1")).toBe("");
+            localStorage.setItem("chemutil_annotations", "null");
+            expect(manager.loadAnnotation("calc-1")).toBe("");
+            localStorage.setItem("chemutil_starred", "{bad json");
+            expect(manager.isStarred("calc-1")).toBe(false);
+            localStorage.setItem("chemutil_starred", "5");
+            expect(manager.isStarred("calc-1")).toBe(false);
         });
     });
 
@@ -177,6 +205,16 @@ describe("ResultAnnotationManager", function () {
             document.body.appendChild(r3);
             manager.init();
             expect(manager.getTrackedCount()).toBe(2);
+        });
+
+        it("should skip result elements with an empty calculation id", function () {
+            let manager: ResultAnnotationManager = ResultAnnotationManager.getInstance();
+            let r1: HTMLElement = document.createElement("div");
+            r1.className = "result";
+            r1.setAttribute("data-calculation-id", "");
+            document.body.appendChild(r1);
+            manager.init();
+            expect(manager.getTrackedCount()).toBe(0);
         });
 
         it("should be idempotent", function () {

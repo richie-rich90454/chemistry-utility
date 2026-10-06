@@ -247,10 +247,10 @@ class NavigationManager {
 			return;
 		}
 		let category = this.getBreadcrumbCategory(targetId);
+		// A resolved calculator always has a mapped category (every
+		// CALCULATORS entry appears in BREADCRUMB_CATEGORIES).
 		let html = '<li><a href="/">Home</a></li>';
-		if (category) {
-			html += '<li><span aria-hidden="true">/</span></li><li>' + category + '</li>';
-		}
+		html += '<li><span aria-hidden="true">/</span></li><li>' + category + '</li>';
 		html += '<li><span aria-hidden="true">/</span></li><li aria-current="page">' + calc.name + '</li>';
 		breadcrumbList.innerHTML = html;
 	}
@@ -302,12 +302,11 @@ class NavigationManager {
 		container.innerHTML = html;
 
 		container.querySelectorAll("a").forEach(function (link: HTMLAnchorElement): void {
+			// Every anchor above is rendered with href="/<id>".
 			link.addEventListener("click", function (e: MouseEvent): void {
 				e.preventDefault();
-				let targetId = link.getAttribute("href")?.slice(1);
-				if (targetId) {
-					self.navigate(targetId);
-				}
+				let targetId = (link.getAttribute("href") as string).slice(1);
+				self.navigate(targetId);
 			});
 		});
 
@@ -315,10 +314,8 @@ class NavigationManager {
 			star.addEventListener("click", function (e: MouseEvent): void {
 				e.preventDefault();
 				e.stopPropagation();
-				let favId = star.getAttribute("data-fav");
-				if (favId) {
-					self.toggleFavorite(favId);
-				}
+				// Every star above is rendered with a data-fav attribute.
+				self.toggleFavorite(star.getAttribute("data-fav") as string);
 			});
 		});
 	}

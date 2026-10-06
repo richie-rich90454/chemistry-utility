@@ -2,6 +2,7 @@ import { Calculator } from "./calculator.js";
 import type { CalculatorResult } from "./calculator.js";
 import { NumberFormatter } from "./i18n/numberFormatter.js";
 import { HtmlSanitizer } from "./htmlSanitizer.js";
+import { normalizeArrows } from "fast-balance";
 
 /**
  * Represents a single term in a chemical equation (e.g., "2H2O").
@@ -55,7 +56,8 @@ export class BalancedEquation {
     }
 
     public static parse(equation: string): BalancedEquation {
-        let cleanedEquation = equation.replace(/\s+/g, "");
+        let normalizedEquation = normalizeArrows(equation);
+        let cleanedEquation = normalizedEquation.replace(/\s+/g, "");
         let parts = cleanedEquation.split(/->|=/);
         if (parts.length != 2) {
             throw new Error("Invalid equation format: missing \"->\"");
@@ -266,7 +268,9 @@ export class StoichiometryCalculator extends Calculator {
                 }
             }
             let molesProduct = minRatio * product.getCoefficient();
-            this.resultDisplay.showResult("<p>Limiting reactant: " + HtmlSanitizer.escape(limitingReactant ?? "") + "</p><p>Moles of " + HtmlSanitizer.escape(productFormula) + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
+            // reactants is never empty here (BalancedEquation.parse throws
+            // on empty terms), so the loop above always assigns a reactant.
+            this.resultDisplay.showResult("<p>Limiting reactant: " + HtmlSanitizer.escape(limitingReactant as string) + "</p><p>Moles of " + HtmlSanitizer.escape(productFormula) + ": " + this.numberFormatter.format(molesProduct, 2) + "</p>");
         }
         else {
             throw new Error("Invalid calculation type");

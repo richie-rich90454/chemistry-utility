@@ -129,5 +129,23 @@ describe("ScrollNavigationStrategy", function (): void {
             expect(link2.classList.contains("active")).toBe(true);
             scrollSpy.mockRestore();
         });
+        it("handles plain and missing hrefs", function (): void {
+            let nav: HTMLElement = document.createElement("nav");
+            nav.className = "sidebar-nav";
+            let plain: HTMLAnchorElement = document.createElement("a");
+            plain.setAttribute("href", "section1");
+            let missing: HTMLAnchorElement = document.createElement("a");
+            nav.appendChild(plain);
+            nav.appendChild(missing);
+            document.body.appendChild(nav);
+            let scrollSpy = vi.spyOn(window, "scrollTo").mockImplementation(function (): void {});
+            let target: HTMLElement = document.createElement("div");
+            target.id = "section1";
+            document.body.appendChild(target);
+            strategy.navigate("section1");
+            expect(plain.classList.contains("active")).toBe(true);
+            expect(missing.classList.contains("active")).toBe(false);
+            scrollSpy.mockRestore();
+        });
     });
 });

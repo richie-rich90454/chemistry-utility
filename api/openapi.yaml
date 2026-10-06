@@ -11,6 +11,18 @@ info:
 
     ## Errors
     All error responses use RFC 7807 Problem Details (`application/problem+json`).
+
+    ## Anonymous web build
+    The anonymous web build ships without a database: DB-backed endpoints
+    (compound search, compound detail, plugins) return `501 Not Implemented`
+    there. `GET /compounds/lookup` is the stateless exception — it proxies
+    PubChem PUG-REST per request, retains nothing, and stays available.
+
+    ## Validation (400)
+    Malformed requests return `400` with an RFC 7807 body. Common cases:
+    missing required query or body fields, unknown calculator types or
+    compound search types, invalid UUID path parameters, and out-of-range
+    paging values.
   contact:
     name: Chemistry Utility
     url: https://chemistry-utility.dev
@@ -31,7 +43,29 @@ tags:
     description: Plugin management
   - name: Docs
     description: Interactive API documentation
+  - name: Ops
+    description: Service operations
 paths:
+  /healthz:
+    get:
+      tags: [Ops]
+      summary: Liveness probe
+      description: |
+        Returns `{"status": "ok"}` when the server is running. Unversioned
+        and outside the rate-limited group; suitable for uptime checks and
+        container `HEALTHCHECK` instructions.
+      responses:
+        '200':
+          description: Server is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                required: [status]
   /calculators:
     get:
       tags: [Calculators]
@@ -141,6 +175,67 @@ paths:
           $ref: '#/components/responses/ValidationError'
         '404':
           $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/RateLimitError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /compounds/lookup:
+    get:
+      tags: [Compounds]
+      summary: Stateless compound lookup via PubChem
+      description: |
+        Searches PubChem PUG-REST by name, formula, CAS number, or SMILES and
+        returns compounds in the same envelope as `GET /compounds`.
+
+        Anonymity property: this endpoint is fully stateless. It performs no
+        database reads or writes and retains nothing — results are fetched
+        upstream per request and never stored. It is the only compound
+        endpoint available on the anonymous web build (no database); the
+        DB-backed `GET /compounds` and `GET /compounds/{id}` return `501`
+        there. Lookup compound IDs have the form `pubchem:<CID>` and cannot
+        be used with `GET /compounds/{id}`, which expects UUIDs.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string
+          schema:
+            type: string
+            minLength: 1
+        - name: type
+          in: query
+          required: false
+          description: Search field (defaults to name)
+          schema:
+            type: string
+            enum: [name, formula, cas, smiles]
+            default: name
+        - name: limit
+          in: query
+          required: false
+          description: Maximum results (1-10, defaults to 10)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 10
+      responses:
+        '200':
+          description: Lookup results (same envelope as compound search)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  compounds:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Compound'
+                  query:
+                    type: string
+                required: [compounds, query]
+        '400':
+          $ref: '#/components/responses/ValidationError'
         '429':
           $ref: '#/components/responses/RateLimitError'
         '500':
@@ -305,7 +400,13 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
     RateLimitError:
-      description: Rate limit exceeded (RFC 7807).
+      description: Rate limit exceeded (RFC 7807). Responses carry a `Retry-After` header (seconds until the window resets).
+      headers:
+        Retry-After:
+          description: Seconds until the rate-limit window resets.
+          schema:
+            type: integer
+            example: 60
       content:
         application/problem+json:
           schema:

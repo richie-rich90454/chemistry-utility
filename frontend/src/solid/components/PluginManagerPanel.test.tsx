@@ -170,4 +170,37 @@ describe("PluginManagerPanel", function (): void {
         let toggle = result.container.querySelector('input[type="checkbox"]') as HTMLInputElement;
         expect(toggle.checked).toBe(false);
     });
+    it("closes the modal when Escape is pressed while open", function (): void {
+        mocks.mockPlugins.mockReturnValue([makeEntry("alpha", true)]);
+        let result = renderPanel();
+        fireEvent.click(result.getByRole("button", {"name": "Plugins"}));
+        expect(result.getByRole("dialog")).toBeTruthy();
+        window.dispatchEvent(new KeyboardEvent("keydown", {"key": "Escape", "bubbles": true}));
+        expect(result.queryByRole("dialog")).toBeNull();
+    });
+    it("does not close the modal when a non-Escape key is pressed", function (): void {
+        mocks.mockPlugins.mockReturnValue([makeEntry("alpha", true)]);
+        let result = renderPanel();
+        fireEvent.click(result.getByRole("button", {"name": "Plugins"}));
+        window.dispatchEvent(new KeyboardEvent("keydown", {"key": "Enter", "bubbles": true}));
+        expect(result.getByRole("dialog")).toBeTruthy();
+    });
+    it("does not call togglePlugin when the checkbox has no plugin id", function (): void {
+        mocks.mockPlugins.mockReturnValue([makeEntry("alpha", true)]);
+        let result = renderPanel();
+        fireEvent.click(result.getByRole("button", {"name": "Plugins"}));
+        let toggle = result.container.querySelector('input[type="checkbox"]') as HTMLInputElement;
+        toggle.removeAttribute("data-plugin-id");
+        fireEvent.change(toggle);
+        expect(mocks.mockTogglePlugin).not.toHaveBeenCalled();
+    });
+    it("does not call uninstallPlugin when the button has no plugin id", function (): void {
+        mocks.mockPlugins.mockReturnValue([makeEntry("alpha", true)]);
+        let result = renderPanel();
+        fireEvent.click(result.getByRole("button", {"name": "Plugins"}));
+        let uninstallButton = result.getByRole("button", {"name": "Uninstall"});
+        uninstallButton.removeAttribute("data-plugin-id");
+        fireEvent.click(uninstallButton);
+        expect(mocks.mockUninstallPlugin).not.toHaveBeenCalled();
+    });
 });

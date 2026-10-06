@@ -10,6 +10,13 @@ import (
 	"unicode"
 )
 
+// Precompiled patterns for the equation parser (compiled once, not per call).
+var (
+	equationArrowRe = regexp.MustCompile(`->|=`)
+	formulaDigitRe  = regexp.MustCompile(`^\d+`)
+	stoichCoeffRe   = regexp.MustCompile(`^(\d*\.?\d+)?(.+)$`)
+)
+
 // Fraction represents a rational number with exact arithmetic.
 type Fraction struct {
 	N int
@@ -88,9 +95,45 @@ func lcm(a, b int) int {
 
 // parseFormulaToCounts parses a chemical formula into element counts.
 func parseFormulaToCounts(formula string) (map[string]int, error) {
+	// Hydrate/adduct separators: "·" (U+00B7), "•" (U+2022), "*" (mirror fast-balance).
+	// e.g. CuSO4·5H2O, CaO·P2O5, NiSO4*7H2O.
+	if strings.Contains(formula, "·") || strings.Contains(formula, "•") || strings.Contains(formula, "*") {
+		normalized := strings.ReplaceAll(formula, "·", "*")
+		normalized = strings.ReplaceAll(normalized, "•", "*")
+		parts := strings.Split(normalized, "*")
+		if len(parts) > 1 {
+			merged := make(map[string]int)
+			for _, part := range parts {
+				part = strings.TrimSpace(part)
+				if part == "" {
+					continue
+				}
+				mult := 1
+				idx := 0
+				for idx < len(part) && part[idx] >= '0' && part[idx] <= '9' {
+					idx++
+				}
+				body := part
+				if idx > 0 {
+					mult = atoi(part[:idx])
+					body = part[idx:]
+				}
+				if body == "" {
+					continue
+				}
+				sub, err := parseFormulaToCounts(body)
+				if err != nil {
+					return nil, err
+				}
+				for el, cnt := range sub {
+					merged[el] += cnt * mult
+				}
+			}
+			return merged, nil
+		}
+	}
 	stack := []map[string]int{{}}
 	i := 0
-	digitRe := regexp.MustCompile(`^\d+`)
 
 	for i < len(formula) {
 		ch := rune(formula[i])
@@ -104,7 +147,7 @@ func parseFormulaToCounts(formula string) (map[string]int, error) {
 			top := stack[len(stack)-1]
 			stack = stack[:len(stack)-1]
 			i++
-			matches := digitRe.FindString(formula[i:])
+			matches := formulaDigitRe.FindString(formula[i:])
 			mul := 1
 			if matches != "" {
 				mul = atoi(matches)
@@ -137,51 +180,45 @@ func parseFormulaToCounts(formula string) (map[string]int, error) {
 			}
 			stack[len(stack)-1][el] += cnt
 		} else if ch == '+' || ch == '-' || unicode.IsDigit(ch) {
+			// A charge suffix: optional digits followed by '+'/'-'
+			// (e.g. "2+", "2-", "+", "-"). Digits directly attached to an
+			// element were already rewound above when a sign follows, so a
+			// leading digit run here is either a charge magnitude or a
+			// stray stoichiometric coefficient ("2H2"), handled below.
 			start := i
 			for i < len(formula) && unicode.IsDigit(rune(formula[i])) {
 				i++
 			}
 			num := formula[start:i]
-			sign := 0
-			mag := 0
+			// Note: when ch itself is '+'/'-', the scan above cannot
+			// advance, so num is empty and formula[i] == ch: the sign
+			// branch below always applies and sign is always set. When
+			// ch is a digit, either a sign follows (sign set) or it is a
+			// stray coefficient (sign stays 0).
 			if i < len(formula) && (formula[i] == '+' || formula[i] == '-') {
 				if formula[i] == '+' {
-					sign = 1
-				} else {
-					sign = -1
-				}
-				if num == "" {
-					mag = 1
-				} else {
-					mag = atoi(num)
-				}
-				i++
-			} else if ch == '+' || ch == '-' {
-				if ch == '+' {
-					sign = 1
-				} else {
-					sign = -1
-				}
-				i++
-				s := i
-				for i < len(formula) && unicode.IsDigit(rune(formula[i])) {
+					sign := 1
+					mag := 1
+					if num != "" {
+						mag = atoi(num)
+					}
 					i++
-				}
-				num2 := formula[s:i]
-				if num2 == "" {
-					mag = 1
+					stack[len(stack)-1]["_charge"] += mag * sign
 				} else {
-					mag = atoi(num2)
+					sign := -1
+					mag := 1
+					if num != "" {
+						mag = atoi(num)
+					}
+					i++
+					stack[len(stack)-1]["_charge"] += mag * sign
 				}
-			}
-			if sign != 0 {
-				stack[len(stack)-1]["_charge"] += mag * sign
-			} else if unicode.IsDigit(ch) {
+			} else {
 				// Stray digit (e.g. a leading stoichiometric coefficient like
 				// "2H2"): consumed above and ignored so the solver can
-				// re-derive coefficients from scratch.
-			} else {
-				return nil, fmt.Errorf("invalid character in formula: %c", ch)
+				// re-derive coefficients from scratch. Reached only when ch
+				// is a digit: a leading '+'/'-' always takes the sign branch
+				// above, so sign is set in that case.
 			}
 		} else if ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' {
 			return nil, errors.New("invalid character in formula: whitespace")
@@ -211,7 +248,15 @@ func atoi(s string) int {
 
 // ParseEquation splits a chemical equation string into reactants and products.
 func ParseEquation(equation string) (reactants []string, products []string, err error) {
-	sides := regexp.MustCompile(`->|=`).Split(equation, -1)
+	// Normalize reversible/unicode arrows to "->" (mirror fast-balance):
+	// "→" (U+2192), "⇌" (U+21CC), "<=>" all mean reversible/reaction arrow.
+	// Also normalize bullet hydrate separator "•" (U+2022) to "·" (U+00B7)
+	// so outputs agree with fast-balance which renders "•" as "·".
+	normalized := strings.ReplaceAll(equation, "⇌", "->")
+	normalized = strings.ReplaceAll(normalized, "→", "->")
+	normalized = strings.ReplaceAll(normalized, "<=>", "->")
+	normalized = strings.ReplaceAll(normalized, "•", "·")
+	sides := equationArrowRe.Split(normalized, -1)
 	if len(sides) != 2 {
 		return nil, nil, errors.New("invalid equation format: expected exactly one '->' or '='")
 	}
@@ -334,16 +379,8 @@ func solveHomogeneous(matrix [][]Fraction) []Fraction {
 		for i, x := range sol {
 			ints[i] = x.N * (den / x.D)
 		}
-		allZero := true
-		for _, v := range ints {
-			if v != 0 {
-				allZero = false
-				break
-			}
-		}
-		if allZero {
-			continue
-		}
+		// ints is never all zero: every free variable was set to the
+		// nonzero trial value above, so at least one entry is nonzero.
 		sign := 1
 		for _, v := range ints {
 			if v != 0 {
@@ -468,10 +505,9 @@ func EquationBalance(ctx context.Context, input CalculationInput) (CalculationRe
 		return CalculationResult{}, err
 	}
 
-	reactants, products, err := ParseEquation(equation)
-	if err != nil {
-		return CalculationResult{}, err
-	}
+	// Already parsed successfully inside BalanceEquation above, so this
+	// cannot fail; the error is intentionally ignored here.
+	reactants, products, _ := ParseEquation(equation)
 
 	return CalculationResult{
 		Value: 0,

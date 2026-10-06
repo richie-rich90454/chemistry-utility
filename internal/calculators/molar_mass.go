@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strings"
 	"unicode"
 )
 
@@ -84,6 +85,93 @@ type elementCounts map[string]float64
 
 // parseFormulaWithCounts parses a chemical formula and returns element counts.
 func parseFormulaWithCounts(formula string) (elementCounts, error) {
+	// Strip all whitespace (mirror frontend which ignores spaces).
+	formula = strings.ReplaceAll(formula, " ", "")
+	formula = strings.ReplaceAll(formula, "\t", "")
+	formula = strings.ReplaceAll(formula, "\n", "")
+	formula = strings.ReplaceAll(formula, "\r", "")
+	// Strip caret charge suffix (e.g. "SO4^2-" -> "SO4"); charges do not affect mass.
+	if idx := strings.Index(formula, "^"); idx != -1 {
+		formula = formula[:idx]
+	}
+	// Strip trailing ionic charge without caret (e.g. "Fe2+" -> "Fe", "Cl-" -> "Cl").
+	// Only when the formula ends with '+' or '-'.
+	if len(formula) > 0 && (formula[len(formula)-1] == '+' || formula[len(formula)-1] == '-') {
+		j := len(formula) - 1
+		i := j - 1
+		for i >= 0 && formula[i] >= '0' && formula[i] <= '9' {
+			i--
+		}
+		// If digits precede the sign and they are preceded by a letter or
+		// closing bracket, they are the charge magnitude (e.g. Fe2+).
+		// Otherwise a trailing digit is a subscript and only the sign is stripped.
+		// For mass purposes both give the same neutral body after stripping.
+		if i >= 0 && ((formula[i] >= 'A' && formula[i] <= 'Z') || (formula[i] >= 'a' && formula[i] <= 'z') || formula[i] == ')' || formula[i] == ']' || formula[i] == '}') {
+			// Charge digits directly follow an element/bracket (e.g. "Fe2+"):
+			// strip digits+sign, keep the body before digits.
+			// Find start of trailing digits.
+			k := j - 1
+			for k >= 0 && formula[k] >= '0' && formula[k] <= '9' {
+				k--
+			}
+			// Only strip digits if they are not a subscript of a multi-element
+			// formula tail? For mass, "Fe2+" (Fe:1) vs "Fe2" (Fe:2) differ.
+			// Detect single-element bodies (one uppercase) to strip digits as charge.
+			upperCount := 0
+			for p := 0; p <= k; p++ {
+				if formula[p] >= 'A' && formula[p] <= 'Z' {
+					upperCount++
+				}
+			}
+			if upperCount <= 1 {
+				formula = formula[:k+1]
+			} else {
+				formula = formula[:j]
+			}
+		} else {
+			formula = formula[:j]
+		}
+	}
+	// Hydrate/adduct separators: "·" (U+00B7), "•" (U+2022), "*" (mirror fast-balance).
+	// e.g. CuSO4·5H2O, CaO·P2O5.
+	if strings.Contains(formula, "·") || strings.Contains(formula, "•") || strings.Contains(formula, "*") {
+		normalized := strings.ReplaceAll(formula, "·", "*")
+		normalized = strings.ReplaceAll(normalized, "•", "*")
+		parts := strings.Split(normalized, "*")
+		if len(parts) > 1 {
+			merged := make(elementCounts)
+			for _, part := range parts {
+				if part == "" {
+					continue
+				}
+				mult := 1
+				idx := 0
+				for idx < len(part) && part[idx] >= '0' && part[idx] <= '9' {
+					idx++
+				}
+				body := part
+				if idx > 0 {
+					n := 0
+					for _, ch := range part[:idx] {
+						n = n*10 + int(ch-'0')
+					}
+					mult = n
+					body = part[idx:]
+				}
+				if body == "" {
+					continue
+				}
+				sub, err := parseFormulaWithCounts(body)
+				if err != nil {
+					return nil, err
+				}
+				for el, cnt := range sub {
+					merged[el] += cnt * float64(mult)
+				}
+			}
+			return merged, nil
+		}
+	}
 	counts := make(elementCounts)
 	stack := []elementCounts{make(elementCounts)}
 	i := 0
@@ -109,10 +197,10 @@ func parseFormulaWithCounts(formula string) (elementCounts, error) {
 				stack[len(stack)-1][el] += cnt * float64(mul)
 			}
 		} else if unicode.IsUpper(ch) {
-			symbol, newIndex, err := parseElement(formula, i)
-			if err != nil {
-				return nil, err
-			}
+			// parseElement cannot fail here: ch is the byte at i and is
+			// an uppercase ASCII letter, so neither of its error branches
+			// (out-of-range index, non-uppercase start) can trigger.
+			symbol, newIndex, _ := parseElement(formula, i)
 			i = newIndex
 			count, newIndex, err := parseNumber(formula, i)
 			if err != nil {

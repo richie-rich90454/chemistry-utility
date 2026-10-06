@@ -12,6 +12,7 @@
 import type {JSX} from "solid-js";
 import {createSignal, Show} from "solid-js";
 import {TitrationCurveCalculator} from "../../modules/solutionCalculators.js";
+import {resolveResult} from "../../modules/resultResolver.js";
 import type {ChartData, ChartOptions, TitrationPoint} from "../../modules/chartRenderer.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
@@ -66,16 +67,7 @@ function Titration(): JSX.Element {
     let [chartData, setChartData] = createSignal<ChartData | null>(null);
     function handleCalculate(inputs: Record<string, string>): void {
         let res = calculator.calculatePure(inputs);
-        let value: string = res.value;
-        let explanation: string = res.explanation !== undefined ? res.explanation : "";
-        if (value === "" || explanation.indexOf("Error") !== -1) {
-            setError(explanation !== "" ? explanation : "Calculation failed");
-            setResult("");
-            setChartData(null);
-            return;
-        }
-        setError("");
-        setResult(explanation !== "" ? explanation : value);
+        resolveResult(res, setResult, setError);
         if (Array.isArray(res.chartData)) {
             setChartData(buildChartData(res.chartData as TitrationPoint[]));
         } else {

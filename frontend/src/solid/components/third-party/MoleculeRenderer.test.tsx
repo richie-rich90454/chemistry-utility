@@ -256,4 +256,43 @@ describe("MoleculeRenderer error handling", function (): void {
         let canvas: HTMLElement | null = result.container.querySelector("canvas");
         expect(canvas).not.toBeNull();
     });
+    it("reports Unknown error when parse fails with a non-Error value", function (): void {
+        mocks.mockParse.mockImplementation(function (_smiles: string, _success: (g: unknown) => void, error?: (e: Error) => void): void {
+            if (error !== undefined) { error("boom" as unknown as Error); }
+        });
+        expect(function (): void {
+            render(function (): JSX.Element { return <MoleculeRenderer smiles="BAD" />; });
+        }).not.toThrow();
+        expect(mocks.mockDraw).not.toHaveBeenCalled();
+    });
+    it("reports the error when drawer.draw throws", function (): void {
+        mocks.mockDraw.mockImplementationOnce(function (): void {
+            throw new Error("draw boom");
+        });
+        expect(function (): void {
+            render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" />; });
+        }).not.toThrow();
+    });
+    it("does not throw when the canvas context is unavailable during error reporting", function (): void {
+        let getContextMock = HTMLCanvasElement.prototype.getContext as unknown as {mockImplementationOnce: (fn: () => CanvasRenderingContext2D | null) => void};
+        getContextMock.mockImplementationOnce(function (): CanvasRenderingContext2D | null {
+            return null;
+        });
+        mocks.mockParse.mockImplementation(function (_smiles: string, _success: (g: unknown) => void, error?: (e: Error) => void): void {
+            if (error !== undefined) { error(new Error("Invalid SMILES")); }
+        });
+        expect(function (): void {
+            render(function (): JSX.Element { return <MoleculeRenderer smiles="BAD" />; });
+        }).not.toThrow();
+    });
+    it("does not throw on unmount when the canvas context is unavailable", function (): void {
+        let getContextMock = HTMLCanvasElement.prototype.getContext as unknown as {mockImplementationOnce: (fn: () => CanvasRenderingContext2D | null) => void};
+        render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" />; });
+        getContextMock.mockImplementationOnce(function (): CanvasRenderingContext2D | null {
+            return null;
+        });
+        expect(function (): void {
+            cleanup();
+        }).not.toThrow();
+    });
 });

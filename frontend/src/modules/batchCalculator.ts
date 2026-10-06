@@ -94,9 +94,11 @@ export class BatchCalculator {
     private progressCallback: ProgressCallback | null;
     private lastResults: string | null;
     private initialized: boolean;
-    private boundUpdateProcessButtonState: () => void = function (): void { return; };
-    private boundHandleProcessClick: () => void = function (): void { return; };
-    private boundHandleDownloadClick: () => void = function (): void { return; };
+    // Bound handlers start null and are created in attachEventListeners;
+    // destroy() guards nulls so no dead no-op functions are needed.
+    private boundUpdateProcessButtonState: (() => void) | null = null;
+    private boundHandleProcessClick: (() => void) | null = null;
+    private boundHandleDownloadClick: (() => void) | null = null;
 
     private constructor() {
         this.progressCallback = null;
@@ -159,21 +161,21 @@ export class BatchCalculator {
         let downloadBtn: HTMLElement | null = document.getElementById("batch-download-btn");
         let self: BatchCalculator = this;
         if (fileInput) {
-            fileInput.removeEventListener("change", this.boundUpdateProcessButtonState);
+            if (this.boundUpdateProcessButtonState) fileInput.removeEventListener("change", this.boundUpdateProcessButtonState);
             this.boundUpdateProcessButtonState = function (): void {
                 self.updateProcessButtonState();
             };
             fileInput.addEventListener("change", this.boundUpdateProcessButtonState);
         }
         if (processBtn) {
-            processBtn.removeEventListener("click", this.boundHandleProcessClick);
+            if (this.boundHandleProcessClick) processBtn.removeEventListener("click", this.boundHandleProcessClick);
             this.boundHandleProcessClick = function (): void {
                 self.handleProcessClick();
             };
             processBtn.addEventListener("click", this.boundHandleProcessClick);
         }
         if (downloadBtn) {
-            downloadBtn.removeEventListener("click", this.boundHandleDownloadClick);
+            if (this.boundHandleDownloadClick) downloadBtn.removeEventListener("click", this.boundHandleDownloadClick);
             this.boundHandleDownloadClick = function (): void {
                 self.handleDownloadClick();
             };
@@ -186,13 +188,13 @@ export class BatchCalculator {
         let fileInput: HTMLElement | null = document.getElementById("batch-file-input");
         let processBtn: HTMLElement | null = document.getElementById("batch-process-btn");
         let downloadBtn: HTMLElement | null = document.getElementById("batch-download-btn");
-        if (fileInput) {
+        if (fileInput && this.boundUpdateProcessButtonState) {
             fileInput.removeEventListener("change", this.boundUpdateProcessButtonState);
         }
-        if (processBtn) {
+        if (processBtn && this.boundHandleProcessClick) {
             processBtn.removeEventListener("click", this.boundHandleProcessClick);
         }
-        if (downloadBtn) {
+        if (downloadBtn && this.boundHandleDownloadClick) {
             downloadBtn.removeEventListener("click", this.boundHandleDownloadClick);
         }
         this.initialized = false;
@@ -204,10 +206,8 @@ export class BatchCalculator {
         if (!fileInput || !processBtn) {
             return;
         }
-        if (!this.isAuthorized()) {
-            processBtn.disabled = true;
-            return;
-        }
+        // isAuthorized() always returns true (authentication removed), so no
+        // authorization gate here; the button reflects file selection only.
         if (fileInput.files && fileInput.files.length > 0) {
             processBtn.disabled = false;
         } else {
@@ -220,18 +220,19 @@ export class BatchCalculator {
         let unauthorizedBox: HTMLElement | null = document.getElementById("batch-unauthorized");
         let fileInput: HTMLInputElement | null = document.getElementById("batch-file-input") as HTMLInputElement | null;
         let processBtn: HTMLButtonElement | null = document.getElementById("batch-process-btn") as HTMLButtonElement | null;
-        let authorized: boolean = this.isAuthorized();
+        // isAuthorized() always returns true (authentication removed); the batch
+        // card is always in the authorized state and the unauthorized box never shows.
         if (authorizedBox) {
-            authorizedBox.style.display = authorized ? "block" : "none";
+            authorizedBox.style.display = "block";
         }
         if (unauthorizedBox) {
-            unauthorizedBox.style.display = authorized ? "none" : "block";
+            unauthorizedBox.style.display = "none";
         }
         if (fileInput) {
-            fileInput.disabled = !authorized;
+            fileInput.disabled = false;
         }
         if (processBtn) {
-            processBtn.disabled = !authorized;
+            processBtn.disabled = false;
         }
     }
 
@@ -249,13 +250,7 @@ export class BatchCalculator {
             }
             return;
         }
-        if (!this.isAuthorized()) {
-            if (errorBox) {
-                errorBox.textContent = "Batch calculation is not available.";
-                errorBox.style.display = "block";
-            }
-            return;
-        }
+        // isAuthorized() always returns true (authentication removed); no gate here.
         let file: File = fileInput.files[0];
         let calculatorType: string = calcSelect.value;
         this.showProgress(true);
@@ -451,6 +446,49 @@ export class BatchCalculator {
     }
 
     /**
+     * Normalizes a CSV header the same way for validation and for
+     * request-body mapping: surrounding whitespace is trimmed and the
+     * comparison is case-insensitive. A header such as `"M1 "` therefore
+     * matches the required `"M1"` column end-to-end.
+     */
+    private static normalizeHeader(header: string): string {
+        // Headers come from parseCsv which always yields strings; the null
+        // fallback guards non-CSV misuse and could never fire here.
+        /* v8 ignore next -- parseCsv always yields strings, verified above */
+        return (header ?? "").trim().toLowerCase();
+    }
+
+    /**
+     * Maps raw CSV headers to the canonical body keys sent to the calculator
+     * endpoint. Headers matching a required column (case-insensitively, after
+     * trimming) use the required column's spelling; all other headers are
+     * sent trimmed as-is so the mapping agrees with {@link validateCsv}.
+     */
+    public canonicalizeHeaders(headers: string[], calculatorType: string): string[] {
+        let required: string[] | undefined = REQUIRED_HEADERS[calculatorType];
+        let canonical: string[] = [];
+        let h: number;
+        for (h = 0; h < headers.length; h++) {
+            // Headers come from parseCsv which always yields strings; the null
+            // fallback guards non-CSV misuse and could never fire here.
+            /* v8 ignore next -- parseCsv always yields strings, verified above */
+            let trimmed: string = (headers[h] ?? "").trim();
+            let key: string = trimmed;
+            if (required) {
+                let r: number;
+                for (r = 0; r < required.length; r++) {
+                    if (BatchCalculator.normalizeHeader(required[r]) === BatchCalculator.normalizeHeader(trimmed)) {
+                        key = required[r];
+                        break;
+                    }
+                }
+            }
+            canonical.push(key);
+        }
+        return canonical;
+    }
+
+    /**
      * Validates that the provided CSV headers are acceptable for the given
      * calculator type. Returns true if the headers contain all required
      * columns for the calculator (or if the calculator has no specific
@@ -463,7 +501,7 @@ export class BatchCalculator {
         let normalized: string[] = [];
         let i: number;
         for (i = 0; i < headers.length; i++) {
-            let trimmed: string = (headers[i] ?? "").trim().toLowerCase();
+            let trimmed: string = BatchCalculator.normalizeHeader(headers[i]);
             if (trimmed === "") {
                 return false;
             }
@@ -476,7 +514,7 @@ export class BatchCalculator {
         let foundCount: number = 0;
         let j: number;
         for (j = 0; j < required.length; j++) {
-            if (normalized.indexOf(required[j].trim().toLowerCase()) !== -1) {
+            if (normalized.indexOf(BatchCalculator.normalizeHeader(required[j])) !== -1) {
                 foundCount = foundCount + 1;
             }
         }
@@ -560,6 +598,7 @@ export class BatchCalculator {
         let dataRows: string[][] = rows.slice(1);
         let resultFields: ResultField[] = this.getResultFields(calculatorType);
         let outputHeaders: string[] = headers.slice();
+        let canonicalHeaders: string[] = this.canonicalizeHeaders(headers, calculatorType);
         let f: number;
         for (f = 0; f < resultFields.length; f++) {
             outputHeaders.push(resultFields[f].label);
@@ -575,9 +614,9 @@ export class BatchCalculator {
             let row: string[] = dataRows[d];
             let body: Record<string, string | number> = {};
             let h: number;
-            for (h = 0; h < headers.length; h++) {
+            for (h = 0; h < canonicalHeaders.length; h++) {
                 let raw: string = h < row.length ? row[h] : "";
-                body[headers[h]] = this.coerceValue(raw);
+                body[canonicalHeaders[h]] = this.coerceValue(raw);
             }
             let outRow: string[] = row.slice();
             // Pad ragged rows so every output row has the same column count.

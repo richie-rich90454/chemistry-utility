@@ -74,6 +74,40 @@ describe("useDataPortability", function (): void {
         expect(store.error()).toContain("Import failed:");
         expect(store.status()).toBe("");
     });
+    it("exportData sets Unknown error when non-Error is thrown", function (): void {
+        let manager = DataPortabilityManager.getInstance();
+        vi.spyOn(manager, "exportToFile").mockImplementation(function (): void {
+            throw "string failure";
+        });
+        let store = useDataPortability();
+        store.exportData();
+        expect(store.error()).toBe("Export failed: Unknown error");
+        expect(store.status()).toBe("");
+    });
+    it("importData sets Unknown error when JSON.parse throws non-Error", function (): void {
+        let spy = vi.spyOn(JSON, "parse").mockImplementation(function (): never {
+            throw "not an error object";
+        });
+        let store = useDataPortability();
+        try {
+            store.importData("anything");
+        }
+        finally {
+            spy.mockRestore();
+        }
+        expect(store.error()).toBe("Import failed: Invalid JSON: Unknown error");
+        expect(store.status()).toBe("");
+    });
+    it("importData sets Unknown error when manager.import throws non-Error", function (): void {
+        let manager = DataPortabilityManager.getInstance();
+        vi.spyOn(manager, "import").mockImplementation(function (): void {
+            throw 42;
+        });
+        let store = useDataPortability();
+        store.importData(JSON.stringify({version: 1}));
+        expect(store.error()).toBe("Import failed: Unknown error");
+        expect(store.status()).toBe("");
+    });
     it("shares state across multiple useDataPortability calls (singleton)", function (): void {
         let storeA = useDataPortability();
         let storeB = useDataPortability();

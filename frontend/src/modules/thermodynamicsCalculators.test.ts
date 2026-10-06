@@ -338,6 +338,28 @@ describe("thermodynamicsCalculators", () => {
             expect(html).toContain("Invalid count");
         });
 
+        it("should reject non-positive-integer bond counts", () => {
+            const cases = ["C-H:0", "C-H:-2", "C-H:1.5"];
+            for (const broken of cases) {
+                setOrCreateInput("bond-enthalpy-broken", broken, "bond-enthalpy", "text");
+                setOrCreateInput("bond-enthalpy-formed", "C-H", "bond-enthalpy", "text");
+                calculateBondEnthalpy();
+                const html = getResultHTML("bond-enthalpy-result");
+                expect(html).toContain("Error");
+                expect(html).toContain("positive integer");
+            }
+        });
+
+        it("should accept an explicit positive-integer bond count", () => {
+            // Bonds broken: 2 x C-H (826) → ΔH = 826 - 413 = 413
+            setOrCreateInput("bond-enthalpy-broken", "C-H:2", "bond-enthalpy", "text");
+            setOrCreateInput("bond-enthalpy-formed", "C-H", "bond-enthalpy", "text");
+            calculateBondEnthalpy();
+            const html = getResultHTML("bond-enthalpy-result");
+            expect(html).not.toContain("Error");
+            expect(html).toContain("413.0000");
+        });
+
         it("should handle bond entry without explicit count (defaults to 1)", () => {
             // C-H without count defaults to 1, so broken = 413, formed = 413
             setOrCreateInput("bond-enthalpy-broken", "C-H", "bond-enthalpy", "text");
@@ -381,6 +403,17 @@ describe("thermodynamicsCalculators", () => {
             calculateBornHaberCycle();
             const html = getResultHTML("born-haber-result");
             expect(html).toContain("Error");
+        });
+
+        it("should document the EA sign convention in the result", () => {
+            setOrCreateInput("born-haber-dHf", "-411", "born-haber");
+            setOrCreateInput("born-haber-dHsub", "108", "born-haber");
+            setOrCreateInput("born-haber-IE", "496", "born-haber");
+            setOrCreateInput("born-haber-dHdiss", "244", "born-haber");
+            setOrCreateInput("born-haber-EA", "-349", "born-haber");
+            calculateBornHaberCycle();
+            const html = getResultHTML("born-haber-result");
+            expect(html).toContain("EA sign convention");
         });
     });
 });

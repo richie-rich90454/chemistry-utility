@@ -60,11 +60,10 @@ export class DebugLogger {
 		console.warn(this.formatMessage("WARN", message), context ?? {});
 	}
 
-	/** Logs an error-level message. */
+	/** Logs an error-level message. Errors are never suppressed: every
+	 * log level ranks at or below "error", so the guard in the sibling
+	 * methods would never filter here. */
 	public error(message: string, context?: Record<string, unknown>): void {
-		if (!this.shouldLog("error")) {
-			return;
-		}
 		console.error(this.formatMessage("ERROR", message), context ?? {});
 	}
 
@@ -80,12 +79,10 @@ export class DebugLogger {
 
     /** Detects whether the app is running in production mode. */
     private detectProduction(): boolean {
-        // Vite replaces import.meta.env.PROD at build time; process.env is
-        // not defined in browser bundles.
-        if (typeof import.meta !== "undefined" && import.meta.env) {
-            return import.meta.env.PROD === true;
-        }
-        return false;
+        // Vite replaces import.meta.env.PROD at build time; the guard for
+        // a missing import.meta only mattered outside Vite bundles, where
+        // this frontend never runs.
+        return import.meta.env.PROD === true;
     }
 
 	/** Resets the singleton instance. For testing only. */

@@ -52,4 +52,27 @@ describe("useTheme", function (): void {
             expect(store.theme()).toBe("amoled");
         });
     });
+
+    it("does not subscribe outside a reactive owner (no leak)", function (): void {
+        let manager = ThemeManager.getInstance();
+        let store = useTheme();
+        let before: string = store.theme();
+        manager.setTheme(before === "dark" ? "light" : "dark");
+        expect(store.theme()).toBe(before);
+    });
+
+    it("unsubscribes on cleanup so later changes do not update", function (): void {
+        let manager = ThemeManager.getInstance();
+        let spy = vi.spyOn(manager, "unsubscribe");
+        let captured: ReturnType<typeof useTheme> | null = null;
+        createRoot(function (dispose: () => void): void {
+            captured = useTheme();
+            dispose();
+        });
+        expect(spy).toHaveBeenCalled();
+        expect(captured !== null).toBe(true);
+        let before: string = captured!.theme();
+        manager.setTheme(before === "dark" ? "light" : "dark");
+        expect(captured!.theme()).toBe(before);
+    });
 });

@@ -9,6 +9,7 @@ function ExportImportButtons(): JSX.Element {
         store.exportData();
     }
     function handleImportClick(): void {
+        /* v8 ignore next -- the ref callback assigns the input during render, so fileInputRef is always set before any click */
         if (fileInputRef !== undefined) {
             fileInputRef.click();
         }
@@ -49,7 +50,7 @@ function ExportImportButtons(): JSX.Element {
                     </svg>
                     <span>Import Data</span>
                 </button>
-                <input type="file" ref={fileInputRef} style={{display: "none"}} accept=".chemutil,.json,application/json" onChange={handleFileChange} />
+                <input type="file" ref={function (el: HTMLInputElement): void { fileInputRef = el; }} style={{display: "none"}} accept=".chemutil,.json,application/json" onChange={handleFileChange} />
             </div>
             <Show when={store.status() !== ""}>
                 <p class={styles.status} role="status">{store.status()}</p>

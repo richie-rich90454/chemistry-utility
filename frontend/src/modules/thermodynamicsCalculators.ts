@@ -478,6 +478,9 @@ export class BondEnthalpyCalculator extends Calculator {
                 if (isNaN(count)) {
                     throw new Error("Invalid count for bond " + bondType + " in " + label + " bonds");
                 }
+                if (!isFinite(count) || count !== Math.floor(count) || count <= 0) {
+                    throw new Error("Bond count must be a positive integer for bond " + bondType + " in " + label + " bonds");
+                }
             } else {
                 bondType = entry;
                 count = 1;
@@ -497,6 +500,10 @@ export class BondEnthalpyCalculator extends Calculator {
  * ΔHf = ΔHsub + IE + ΔHdiss/2 + EA + U
  * Solves for lattice energy U.
  * Inputs: ΔHf, ΔHsub, IE, ΔHdiss, EA.
+ * EA sign convention: electron affinity is entered as the energy released
+ * on electron attachment, i.e. negative for exothermic attachment
+ * (e.g. Cl(g) + e- → Cl-(g), EA = -349 kJ/mol). With that convention
+ * U = ΔHf - ΔHsub - IE - ΔHdiss/2 - EA.
  * Output: lattice energy U (kJ/mol).
  */
 export class BornHaberCycleCalculator extends Calculator {
@@ -519,10 +526,12 @@ export class BornHaberCycleCalculator extends Calculator {
             "born-haber-IE", "born-haber-dHdiss",
             "born-haber-EA"
         ]);
-        // U = ΔHf - ΔHsub - IE - ΔHdiss/2 - EA
+        // U = ΔHf - ΔHsub - IE - ΔHdiss/2 - EA, where EA is the energy
+        // released on electron attachment (negative for exothermic ions).
         const U = dHf - dHsub - IE - (dHdiss / 2) - EA;
         this.resultDisplay.showResult(
             "<p>U = \u0394H<sub>f</sub> - \u0394H<sub>sub</sub> - IE - \u0394H<sub>diss</sub>/2 - EA</p>" +
+            "<p>EA sign convention: energy released on electron attachment (negative when exothermic, e.g. Cl: -349 kJ/mol)</p>" +
             "<p>Lattice Energy U = " + this.numberFormatter.format(U, 4) + " kJ/mol</p>"
         );
     }
@@ -539,7 +548,7 @@ export class BornHaberCycleCalculator extends Calculator {
         const U = dHf - dHsub - IE - (dHdiss / 2) - EA;
         return {
             value: "Lattice Energy U = " + this.numberFormatter.format(U, 4) + " kJ/mol",
-            explanation: "U = dHf - dHsub - IE - dHdiss/2 - EA = " + this.numberFormatter.format(dHf, 4) + " - " + this.numberFormatter.format(dHsub, 4) + " - " + this.numberFormatter.format(IE, 4) + " - " + this.numberFormatter.format(dHdiss / 2, 4) + " - " + this.numberFormatter.format(EA, 4) + " = " + this.numberFormatter.format(U, 4) + " kJ/mol",
+            explanation: "U = dHf - dHsub - IE - dHdiss/2 - EA = " + this.numberFormatter.format(dHf, 4) + " - " + this.numberFormatter.format(dHsub, 4) + " - " + this.numberFormatter.format(IE, 4) + " - " + this.numberFormatter.format(dHdiss / 2, 4) + " - " + this.numberFormatter.format(EA, 4) + " = " + this.numberFormatter.format(U, 4) + " kJ/mol (EA sign convention: energy released on electron attachment, negative when exothermic)",
             metadata: {
                 U: U,
                 dHf: dHf,

@@ -164,6 +164,25 @@ export class UnitConverter extends Calculator {
         return cat.units[unit].name;
     }
 
+    /**
+     * Molarity (M) and mass fractions (ppm/ppb/ppt/%) share one linear
+     * scale in the table above, but converting between the two families
+     * is NOT linear: it needs the solute molar mass and the solution
+     * density. These helpers keep within-family conversions working while
+     * refusing cross-family ones with an explicit message instead of a
+     * silently wrong number (which would assume water-like density).
+     */
+    private static concentrationGroup(unit: string): "molar" | "mass" {
+        // Every validated concentration unit belongs to a family below;
+        // anything else cannot reach here (convert/convertToAll validate
+        // units first) and is treated as mass-family so cross-family
+        // conversion still refuses rather than silently converting.
+        if (unit === "µM" || unit === "mM" || unit === "M") {
+            return "molar";
+        }
+        return "mass";
+    }
+
     public static convert(value: number, fromUnit: string, toUnit: string, category: string): ConversionResult {
         let cat = CATEGORIES[category];
         if (!cat) {
@@ -174,6 +193,14 @@ export class UnitConverter extends Calculator {
         }
         if (!cat.units[toUnit]) {
             throw new Error("Unknown unit: " + toUnit);
+        }
+        if (category === "concentration") {
+            let fromGroup = UnitConverter.concentrationGroup(fromUnit);
+            let toGroup = UnitConverter.concentrationGroup(toUnit);
+            // Groups are never null for validated units (see above).
+            if (fromGroup !== toGroup) {
+                throw new Error("Cannot convert " + fromUnit + " to " + toUnit + ": molarity/mass-fraction conversion requires the solute molar mass and solution density");
+            }
         }
         if (category === "temperature" && cat.temperatureConversions) {
             let baseValue = cat.temperatureConversions[fromUnit].toBase(value);
@@ -203,9 +230,18 @@ export class UnitConverter extends Calculator {
         }
         let results: ConversionResult[] = [];
         let unitKeys = Object.keys(cat.units);
+        // For concentration, only list same-family targets: cross-family
+        // pairs throw in convert(), and "convert to all" must not error out.
+        let fromGroup: "molar" | "mass" | null = null;
+        if (category === "concentration") {
+            fromGroup = UnitConverter.concentrationGroup(fromUnit);
+        }
         for (let i = 0; i < unitKeys.length; i++) {
             let toUnit = unitKeys[i];
             if (toUnit === fromUnit) {
+                continue;
+            }
+            if (fromGroup !== null && UnitConverter.concentrationGroup(toUnit) !== fromGroup) {
                 continue;
             }
             results.push(UnitConverter.convert(value, fromUnit, toUnit, category));

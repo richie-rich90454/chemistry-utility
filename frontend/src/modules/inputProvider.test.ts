@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { DomInputProvider } from "./inputProvider.js";
+import { DomInputProvider, PureInputProvider } from "./inputProvider.js";
 
 describe("DomInputProvider", () => {
     let provider: DomInputProvider;
@@ -170,5 +170,26 @@ describe("DomInputProvider", () => {
 
         // parseFloat parses leading numeric portion.
         expect(provider.getValue("partial-input")).toBe(12);
+    });
+});
+
+describe("PureInputProvider", () => {
+    it("parses values from the record", () => {
+        const provider = new PureInputProvider({ a: "2.5", b: "abc" });
+        expect(provider.getValue("a")).toBe(2.5);
+        expect(provider.getValue("b")).toBeNaN();
+        expect(provider.getValue("missing")).toBeNaN();
+    });
+
+    it("returns string values with empty fallback", () => {
+        const provider = new PureInputProvider({ a: "hello" });
+        expect(provider.getStringValue("a")).toBe("hello");
+        expect(provider.getStringValue("missing")).toBe("");
+    });
+
+    it("always returns null for elements", () => {
+        const provider = new PureInputProvider({ a: "1" });
+        expect(provider.getElement("a")).toBeNull();
+        expect(provider.getElement("missing")).toBeNull();
     });
 });

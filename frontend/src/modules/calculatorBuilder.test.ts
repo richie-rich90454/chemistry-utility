@@ -95,6 +95,7 @@ describe("CalculatorBuilder", () => {
         expect(builder.addSolveFor("solve-id")).toBe(builder);
         expect(builder.setResultDisplay("result")).toBe(builder);
         expect(builder.setCalculation(() => {})).toBe(builder);
+        expect(builder.setCalculationPure((inputs) => ({ value: inputs["a"] ?? "" }))).toBe(builder);
     });
 
     it("setInputProvider returns the builder instance for chaining", () => {
@@ -217,5 +218,38 @@ describe("BuiltCalculator", () => {
         calc.calculate();
         calc.calculate();
         expect(called).toBe(2);
+    });
+
+    it("delegates calculatePure to the pure function when set", () => {
+        const resultEl = document.createElement("div");
+        resultEl.id = "result";
+        document.body.appendChild(resultEl);
+
+        const provider = createMockInputProvider();
+        const builder = new CalculatorBuilder()
+            .setResultDisplay("result")
+            .setInputProvider(provider)
+            .setCalculation(() => {})
+            .setCalculationPure((inputs) => ({ value: "pure:" + (inputs["a"] ?? "") }));
+
+        const calc = builder.build();
+        expect(calc.calculatePure({ a: "7" })).toEqual({ value: "pure:7" });
+    });
+
+    it("calculatePure surfaces the default error when no pure function is set", () => {
+        const resultEl = document.createElement("div");
+        resultEl.id = "result";
+        document.body.appendChild(resultEl);
+
+        const provider = createMockInputProvider();
+        const builder = new CalculatorBuilder()
+            .setResultDisplay("result")
+            .setInputProvider(provider)
+            .setCalculation(() => {});
+
+        const calc = builder.build();
+        const result = calc.calculatePure({ a: "7" });
+        expect(result.value).toBe("");
+        expect(result.explanation).toContain("Error");
     });
 });

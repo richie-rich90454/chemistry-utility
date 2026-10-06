@@ -120,4 +120,76 @@ describe("BondType", function (): void {
         expect(input2.value).toBe("");
         expect(result.container.textContent).not.toMatch(/isMetal1/);
     });
+    it("loads elements from cache without fetching", async function (): Promise<void> {
+        localStorage.setItem("chem-cache-ptable", JSON.stringify(mockElements));
+        let result = render(function () { return <BondType />; });
+        await waitFor(function (): void {
+            expect(result.queryByText(/Loading elements/)).toBeNull();
+        });
+        expect(fetchSpy).not.toHaveBeenCalled();
+        let input1 = result.getByLabelText("First element symbol") as HTMLInputElement;
+        input1.value = "Na";
+        fireEvent.input(input1);
+        let input2 = result.getByLabelText("Second element symbol") as HTMLInputElement;
+        input2.value = "Cl";
+        fireEvent.input(input2);
+        fireEvent.click(result.getByText("Predict Bond Type"));
+        await waitFor(function (): void {
+            expect(result.container.textContent).toMatch(/Ionic/);
+        });
+    });
+    it("falls back to fetch when the cache is corrupt", async function (): Promise<void> {
+        localStorage.setItem("chem-cache-ptable", "%%not-json%%");
+        let result = render(function () { return <BondType />; });
+        await waitFor(function (): void {
+            expect(result.queryByText(/Loading elements/)).toBeNull();
+        });
+        expect(fetchSpy).toHaveBeenCalled();
+        let input1 = result.getByLabelText("First element symbol") as HTMLInputElement;
+        input1.value = "H";
+        fireEvent.input(input1);
+        let input2 = result.getByLabelText("Second element symbol") as HTMLInputElement;
+        input2.value = "O";
+        fireEvent.input(input2);
+        fireEvent.click(result.getByText("Predict Bond Type"));
+        await waitFor(function (): void {
+            expect(result.container.textContent).toMatch(/Polar Covalent/);
+        });
+    });
+    it("shows a load error when the fetch response is not ok", async function (): Promise<void> {
+        fetchSpy.mockResolvedValueOnce({
+            ok: false,
+            status: 500,
+            json: function () { return Promise.resolve([]); },
+        } as Response);
+        let result = render(function () { return <BondType />; });
+        let errorText = await result.findByText(/Error loading elements: HTTP error! status: 500/);
+        expect(errorText).toBeTruthy();
+    });
+    it("shows a load error when the fetch fails", async function (): Promise<void> {
+        fetchSpy.mockRejectedValueOnce(new Error("network down"));
+        let result = render(function () { return <BondType />; });
+        let errorText = await result.findByText(/Error loading elements: network down/);
+        expect(errorText).toBeTruthy();
+    });
+    it("shows a load error message for non-Error fetch failures", async function (): Promise<void> {
+        fetchSpy.mockRejectedValueOnce("string failure");
+        let result = render(function () { return <BondType />; });
+        let errorText = await result.findByText(/Error loading elements: string failure/);
+        expect(errorText).toBeTruthy();
+    });
+    it("shows an error when predicting after elements fail to load", async function (): Promise<void> {
+        fetchSpy.mockRejectedValueOnce(new Error("network down"));
+        let result = render(function () { return <BondType />; });
+        await result.findByText(/Error loading elements: network down/);
+        let input1 = result.getByLabelText("First element symbol") as HTMLInputElement;
+        input1.value = "Na";
+        fireEvent.input(input1);
+        let input2 = result.getByLabelText("Second element symbol") as HTMLInputElement;
+        input2.value = "Cl";
+        fireEvent.input(input2);
+        fireEvent.click(result.getByText("Predict Bond Type"));
+        let errorText = await result.findByText("Elements data not loaded yet");
+        expect(errorText).toBeTruthy();
+    });
 });

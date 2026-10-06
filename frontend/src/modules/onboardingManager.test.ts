@@ -155,6 +155,19 @@ describe("OnboardingManager", () => {
             dismissBtn.click();
             expect(document.querySelector(".onboarding-tooltip")).toBeNull();
         });
+
+        it("flips the tour tooltip above the target near the viewport bottom", () => {
+            const sidebar = document.createElement("div");
+            sidebar.dataset.tour = "sidebar";
+            sidebar.getBoundingClientRect = vi.fn().mockReturnValue({
+                bottom: 700, left: 50, top: 680, right: 100, width: 50, height: 20, x: 50, y: 680, toJSON: () => ({})
+            });
+            document.body.appendChild(sidebar);
+            OnboardingManager.getInstance().startTour();
+            const tooltip = document.querySelector(".onboarding-step-tooltip") as HTMLElement;
+            expect(tooltip.style.top).toBe("508px");
+            expect(tooltip.style.left).toBe("50px");
+        });
     });
 
     describe("startTour", () => {

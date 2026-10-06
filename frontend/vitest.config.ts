@@ -11,7 +11,7 @@ export default defineConfig({
         coverage: {
             provider: "v8",
             reporter: ["text", "html", "lcov"],
-            include: ["src/modules/**/*.ts"],
+            include: ["src/**/*.ts", "src/**/*.tsx"],
             exclude: [
                 "**/*.test.ts",
                 "**/*.d.ts",
@@ -32,10 +32,10 @@ export default defineConfig({
                 "src/modules/plugins/crystalStructurePlugin.ts",
             ],
             thresholds: {
-                lines: 82,
-                branches: 68,
-                functions: 85,
-                statements: 80,
+                lines: 100,
+                branches: 100,
+                functions: 100,
+                statements: 100,
             },
         },
     },

@@ -58,6 +58,19 @@ func getString(input CalculationInput, key string) (string, error) {
 	return s, nil
 }
 
+// getStringWithDefault extracts a string or returns a default value.
+func getStringWithDefault(input CalculationInput, key string, defaultVal string) string {
+	v, ok := input[key]
+	if !ok {
+		return defaultVal
+	}
+	s, ok := v.(string)
+	if !ok {
+		return defaultVal
+	}
+	return s
+}
+
 // getFloatWithDefault extracts a float64 or returns a default value.
 func getFloatWithDefault(input CalculationInput, key string, defaultVal float64) float64 {
 	v, ok := input[key]
@@ -114,15 +127,21 @@ func toFloat64(v interface{}) (float64, bool) {
 
 // toFloat64Slice converts a JSON-decoded value into a []float64, handling both
 // []float64 (from direct Go calls) and []interface{} (from JSON decoding).
+// Non-finite elements are rejected so NaN/Inf cannot flow into sums.
 func toFloat64Slice(v interface{}) ([]float64, bool) {
 	switch s := v.(type) {
 	case []float64:
+		for _, f := range s {
+			if math.IsNaN(f) || math.IsInf(f, 0) {
+				return nil, false
+			}
+		}
 		return s, true
 	case []interface{}:
 		out := make([]float64, len(s))
 		for i, e := range s {
 			f, ok := toFloat64(e)
-			if !ok {
+			if !ok || math.IsNaN(f) || math.IsInf(f, 0) {
 				return nil, false
 			}
 			out[i] = f

@@ -3,6 +3,8 @@
  * localStorage. Designed for caching periodic table data and other
  * static payloads that rarely change.
  */
+import type { ChemicalElement } from "../types.js";
+
 export class DataCache {
 	private static instance: DataCache;
 	private static readonly PREFIX = "chem-cache-";
@@ -51,6 +53,61 @@ export class DataCache {
 		} catch {
 			return false;
 		}
+	}
+
+	/**
+	 * Removes a key from the cache. Silently fails when unavailable.
+	 */
+	public async remove(key: string): Promise<void> {
+		try {
+			localStorage.removeItem(DataCache.PREFIX + key);
+		} catch {
+			// Storage unavailable — ignore
+		}
+	}
+
+	/**
+	 * Reads the cached periodic-table payload ("ptable" key) and
+	 * shape-validates it like the other localStorage-backed stores: the JSON
+	 * must parse to an array whose elements each carry at least a string
+	 * `symbol` and a numeric `atomicNumber`. Returns null when the entry is
+	 * missing, corrupt, or wrongly shaped; corrupt entries are removed so
+	 * the next read falls through to a fresh fetch.
+	 */
+	public async getPtable(): Promise<ChemicalElement[] | null> {
+		let raw: string | null;
+		try {
+			raw = localStorage.getItem(DataCache.PREFIX + "ptable");
+		} catch {
+			return null;
+		}
+		if (raw === null) {
+			return null;
+		}
+		let parsed: unknown;
+		try {
+			parsed = JSON.parse(raw);
+		} catch {
+			await this.remove("ptable");
+			return null;
+		}
+		if (!Array.isArray(parsed)) {
+			await this.remove("ptable");
+			return null;
+		}
+		for (let i = 0; i < parsed.length; i++) {
+			let el: unknown = parsed[i];
+			if (typeof el !== "object" || el === null) {
+				await this.remove("ptable");
+				return null;
+			}
+			let rec: Record<string, unknown> = el as Record<string, unknown>;
+			if (typeof rec.symbol !== "string" || typeof rec.atomicNumber !== "number") {
+				await this.remove("ptable");
+				return null;
+			}
+		}
+		return parsed as ChemicalElement[];
 	}
 
 	/** Resets the singleton instance. For testing only. */

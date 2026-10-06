@@ -112,6 +112,42 @@ Common status codes returned by the API:
 | 500 | Internal Server Error | Unexpected server failure (generic detail; full error logged server-side only). |
 | 501 | Not Implemented | Database-backed feature requested from the anonymous web build. |
 
+### Validation (400) cases
+
+All cases below return RFC 7807 Problem Details (`application/problem+json`,
+`type: https://chemistry-utility.dev/errors/400`) with a `detail` string.
+Behavioral notes (body cap, clamping) apply to every request.
+
+- **Request body.** `POST /calculators/{type}` accepts at most 1 MiB
+  (`http.MaxBytesReader`); larger or malformed JSON returns 400
+  `invalid JSON body: ...`. A JSON `null` body is treated as `{}` and
+  then validated per calculator. Unknown `{type}` is 404, not 400.
+- **Missing vs. invalid inputs.** Every calculator reports
+  `calculation error: missing required input: <key>` when a required key
+  is absent (e.g. `formula` for `molar-mass`, `equation` for
+  `equation-balance`/`stoichiometry`, `solveFor` for `dilution`/`ideal-gas`,
+  `concentrations`/`orders` for `rate-law`, `deltaHValues` for `hess-law`,
+  `SProducts`/`SReactants` for `entropy`). Wrong types and out-of-range
+  enums report `calculation error: invalid <key>: <value>` — e.g.
+  `invalid solveFor`, `invalid mode`, `invalid unit`/`invalid units`.
+- **Formula and equation syntax.** `molar-mass` rejects unknown elements
+  (`Element not found: <symbol>`), illegal characters
+  (`Invalid character: <ch>`), and unbalanced brackets (`Unmatched ...` /
+  `Empty formula`). `equation-balance` rejects inputs without exactly one
+  `->`/`=` separator (`invalid equation format: expected exactly one
+  '->' or '='`), illegal formula characters, and unsolvable systems
+  (`Could not balance` / `Could not balance ionic equation`); redox mode
+  additionally requires the `||` half-reaction separator.
+- **Compounds.** `GET /compounds` without `q` returns 400
+  `missing search query parameter 'q'`. `limit`/`offset` never 400:
+  out-of-range `limit` is clamped to 20, negative `offset` to 0.
+  `GET /compounds/{id}` with a non-UUID returns 400 `invalid compound id`;
+  a well-formed but unknown UUID returns 404 `compound not found`.
+- **Plugins.** `POST /plugins` returns 400 with the binding error when
+  `name`, `version`, or `author` is missing. Enable/disable/delete with a
+  non-UUID returns 400 `invalid plugin id`; store errors (including unknown
+  ids) surface as 500 via `WriteError`, never 400.
+
 ---
 
 ## Pagination

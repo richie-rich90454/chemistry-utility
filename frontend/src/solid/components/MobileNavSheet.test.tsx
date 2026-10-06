@@ -1,9 +1,10 @@
-import {render} from "@solidjs/testing-library";
+import {render, fireEvent, cleanup} from "@solidjs/testing-library";
 import {Router, Route} from "@solidjs/router";
 import type {JSX} from "solid-js";
-import {describe, it, expect, beforeEach} from "vitest";
+import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 import {MobileNavSheet} from "./MobileNavSheet";
 import {useNavSheet, reset as resetNavSheet} from "../stores/navSheet";
+import {RuntimeDetector} from "../../modules/runtimeDetector.js";
 function Host(): JSX.Element {
     return <MobileNavSheet />;
 }
@@ -19,6 +20,10 @@ function renderHost() {
 describe("MobileNavSheet", function (): void {
     beforeEach(function (): void {
         resetNavSheet();
+    });
+    afterEach(function (): void {
+        cleanup();
+        vi.restoreAllMocks();
     });
     it("does not render the sheet when closed", function (): void {
         let result = renderHost();
@@ -54,5 +59,33 @@ describe("MobileNavSheet", function (): void {
         sheet.open();
         expect(result.getByText("General")).toBeTruthy();
         expect(result.getByText("Solutions")).toBeTruthy();
+    });
+    it("shows desktop-only entries on desktop", function (): void {
+        let sheet = useNavSheet();
+        let result = renderHost();
+        sheet.open();
+        expect(result.getByText("Batch Calculator")).toBeTruthy();
+        expect(result.getByText("Dashboard")).toBeTruthy();
+        expect(result.getByText("Compound Search")).toBeTruthy();
+    });
+    it("hides desktop-only entries in web mode", function (): void {
+        vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
+        let sheet = useNavSheet();
+        let result = renderHost();
+        sheet.open();
+        expect(result.queryByText("Batch Calculator")).toBeNull();
+        expect(result.queryByText("Dashboard")).toBeNull();
+        expect(result.getByText("Molar Mass")).toBeTruthy();
+        expect(result.getByText("Compound Search")).toBeTruthy();
+    });
+    it("closes the sheet when the backdrop is clicked", function (): void {
+        let sheet = useNavSheet();
+        let result = renderHost();
+        sheet.open();
+        expect(result.getByRole("dialog", {name: "Navigation menu"})).toBeTruthy();
+        let dialog = result.getByRole("dialog", {name: "Navigation menu"});
+        let backdrop = dialog.previousElementSibling as HTMLElement;
+        fireEvent.click(backdrop);
+        expect(sheet.isOpen()).toBe(false);
     });
 });

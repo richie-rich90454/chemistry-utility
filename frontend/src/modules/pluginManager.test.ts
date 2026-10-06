@@ -843,3 +843,116 @@ describe("CrystalStructureCalculator calculations", function (): void {
         expect(text).not.toContain("processed by CrystalStructurePlugin");
     });
 });
+describe("PluginManager coverage gaps", function (): void {
+    it("getPlugin returns the plugin or undefined", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        let plugin: MockPlugin = new MockPlugin("found");
+        pm.registerPlugin(plugin);
+        expect(pm.getPlugin("found")).toBe(plugin);
+        expect(pm.getPlugin("missing")).toBeUndefined();
+    });
+    it("unregisterPlugin works without an onDisable hook", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.registerPlugin(new MinimalPlugin("bare"));
+        expect(function (): void {
+            pm.unregisterPlugin("bare");
+        }).not.toThrow();
+        expect(pm.getPlugin("bare")).toBeUndefined();
+    });
+    it("enablePlugin works without an onEnable hook", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.registerPlugin(new MinimalPlugin("bare"));
+        pm.disablePlugin("bare");
+        pm.enablePlugin("bare");
+        expect(pm.isPluginEnabled("bare")).toBe(true);
+    });
+    it("disablePlugin works without an onDisable hook", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.registerPlugin(new MinimalPlugin("bare"));
+        pm.disablePlugin("bare");
+        expect(pm.isPluginEnabled("bare")).toBe(false);
+    });
+    it("beforeCalculation keeps original inputs when a plugin returns nothing", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        let plugin: MockPlugin = new MockPlugin("quiet");
+        plugin.beforeModifier = function (): Record<string, unknown> {
+            return undefined as unknown as Record<string, unknown>;
+        };
+        pm.registerPlugin(plugin);
+        let payload = pm.executeHook("beforeCalculation", { calculatorId: "c", inputs: { a: "1" } }) as {
+            inputs: Record<string, unknown>;
+        };
+        expect(payload.inputs).toEqual({ a: "1" });
+    });
+    it("afterCalculation skips plugins without the hook", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.registerPlugin(new MinimalPlugin("bare"));
+        let payload = pm.executeHook("afterCalculation", { calculatorId: "c", result: "r" }) as {
+            result: unknown;
+        };
+        expect(payload.result).toBe("r");
+    });
+    it("onNavigate skips plugins without the hook", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.registerPlugin(new MinimalPlugin("bare"));
+        let payload = pm.executeHook("onNavigate", { view: "gas-laws" }) as { view: string };
+        expect(payload.view).toBe("gas-laws");
+    });
+    it("init with empty storage leaves plugins enabled", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.loadFromStorage();
+        pm.registerPlugin(new MockPlugin("a"));
+        pm.init();
+        expect(pm.isPluginEnabled("a")).toBe(true);
+    });
+    it("loadFromStorage tolerates storage failures", function (): void {
+        let getSpy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(function (): string {
+            throw new Error("denied");
+        });
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.registerPlugin(new MockPlugin("a"));
+        expect(function (): void {
+            pm.loadFromStorage();
+        }).not.toThrow();
+        getSpy.mockRestore();
+    });
+    it("loadFromStorage ignores unknown plugin ids", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.registerPlugin(new MockPlugin("a"));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ghost: false }));
+        pm.loadFromStorage();
+        expect(pm.isPluginEnabled("a")).toBe(true);
+    });
+    it("loadFromStorage applies stored states without hooks", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        pm.registerPlugin(new MinimalPlugin("off"));
+        pm.registerPlugin(new MinimalPlugin("on"));
+        pm.disablePlugin("on");
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ off: false, on: true }));
+        pm.loadFromStorage();
+        expect(pm.isPluginEnabled("off")).toBe(false);
+        expect(pm.isPluginEnabled("on")).toBe(true);
+    });
+    it("registerPlugin rejects null plugins and missing manifests", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        expect(function (): void {
+            pm.registerPlugin(null as unknown as Plugin);
+        }).toThrow("cannot be null");
+        expect(function (): void {
+            pm.registerPlugin({ install: function (): void {}, uninstall: function (): void {} } as unknown as Plugin);
+        }).toThrow("manifest is required");
+    });
+    it("registerPlugin rejects bad description, permissions and hooks fields", function (): void {
+        let pm: PluginManager = PluginManager.getInstance();
+        let base: Plugin = new MinimalPlugin("bad");
+        expect(function (): void {
+            pm.registerPlugin({ ...base, manifest: { ...base.manifest, description: 42 as unknown as string } });
+        }).toThrow("description");
+        expect(function (): void {
+            pm.registerPlugin({ ...base, manifest: { ...base.manifest, permissions: "x" as unknown as string[] } });
+        }).toThrow("permissions");
+        expect(function (): void {
+            pm.registerPlugin({ ...base, manifest: { ...base.manifest, lifecycleHooks: "x" as unknown as string[] } });
+        }).toThrow("lifecycleHooks");
+    });
+});
