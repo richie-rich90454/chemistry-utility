@@ -105,6 +105,53 @@ describe("Stoichiometry", function (): void {
             expect(result.getByLabelText("Moles of product")).toBeTruthy();
         });
     });
+    it("calculates reactant moles from product moles in reactant-from-product mode", async function (): Promise<void> {
+        let result = render(function () { return <Stoichiometry />; });
+        let input = result.getByLabelText("Balanced chemical equation") as HTMLInputElement;
+        input.value = "2H2 + O2 -> 2H2O";
+        fireEvent.input(input);
+        let calcType = result.getByLabelText("Select stoichiometry calculation type") as HTMLSelectElement;
+        calcType.value = "reactant-from-product";
+        fireEvent.change(calcType);
+        await waitFor(function (): void {
+            expect(result.getByLabelText("Moles of product")).toBeTruthy();
+        });
+        let productSelect = result.getByLabelText("Select product") as HTMLSelectElement;
+        productSelect.value = "H2O";
+        fireEvent.change(productSelect);
+        let reactantSelect = result.getByLabelText("Select reactant") as HTMLSelectElement;
+        reactantSelect.value = "O2";
+        fireEvent.change(reactantSelect);
+        let molesInput = result.getByLabelText("Moles of product") as HTMLInputElement;
+        molesInput.value = "2";
+        fireEvent.input(molesInput);
+        fireEvent.click(result.getByText("Calculate"));
+        await waitFor(function (): void {
+            expect(result.container.textContent).toMatch(/molesReactant/);
+        });
+        expect(result.container.textContent).toMatch(/\(2 \/ 2\) \* 1 = 1\.00/);
+    });
+    it("preserves entered limiting-reactant moles when the equation is edited to new formulas", async function (): Promise<void> {
+        let result = render(function () { return <Stoichiometry />; });
+        let input = result.getByLabelText("Balanced chemical equation") as HTMLInputElement;
+        input.value = "2H2 + O2 -> 2H2O";
+        fireEvent.input(input);
+        let calcType = result.getByLabelText("Select stoichiometry calculation type") as HTMLSelectElement;
+        calcType.value = "limiting-reactant";
+        fireEvent.change(calcType);
+        await waitFor(function (): void {
+            expect(result.getByLabelText("Moles of H2")).toBeTruthy();
+        });
+        let h2Input = result.getByLabelText("Moles of H2") as HTMLInputElement;
+        h2Input.value = "4";
+        fireEvent.input(h2Input);
+        input.value = "2N2 + O2 -> 2N2O";
+        fireEvent.input(input);
+        await waitFor(function (): void {
+            expect(result.getByLabelText("Moles of N2")).toBeTruthy();
+        });
+        expect(result.getByLabelText("Moles of O2")).toBeTruthy();
+    });
     it("clears inputs and result when Clear is clicked", async function (): Promise<void> {
         let result = render(function () { return <Stoichiometry />; });
         let input = result.getByLabelText("Balanced chemical equation") as HTMLInputElement;
