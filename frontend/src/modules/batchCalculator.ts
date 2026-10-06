@@ -94,9 +94,11 @@ export class BatchCalculator {
     private progressCallback: ProgressCallback | null;
     private lastResults: string | null;
     private initialized: boolean;
-    private boundUpdateProcessButtonState: () => void = function (): void { return; };
-    private boundHandleProcessClick: () => void = function (): void { return; };
-    private boundHandleDownloadClick: () => void = function (): void { return; };
+    // Bound handlers start null and are created in attachEventListeners;
+    // destroy() guards nulls so no dead no-op functions are needed.
+    private boundUpdateProcessButtonState: (() => void) | null = null;
+    private boundHandleProcessClick: (() => void) | null = null;
+    private boundHandleDownloadClick: (() => void) | null = null;
 
     private constructor() {
         this.progressCallback = null;
@@ -159,21 +161,21 @@ export class BatchCalculator {
         let downloadBtn: HTMLElement | null = document.getElementById("batch-download-btn");
         let self: BatchCalculator = this;
         if (fileInput) {
-            fileInput.removeEventListener("change", this.boundUpdateProcessButtonState);
+            if (this.boundUpdateProcessButtonState) fileInput.removeEventListener("change", this.boundUpdateProcessButtonState);
             this.boundUpdateProcessButtonState = function (): void {
                 self.updateProcessButtonState();
             };
             fileInput.addEventListener("change", this.boundUpdateProcessButtonState);
         }
         if (processBtn) {
-            processBtn.removeEventListener("click", this.boundHandleProcessClick);
+            if (this.boundHandleProcessClick) processBtn.removeEventListener("click", this.boundHandleProcessClick);
             this.boundHandleProcessClick = function (): void {
                 self.handleProcessClick();
             };
             processBtn.addEventListener("click", this.boundHandleProcessClick);
         }
         if (downloadBtn) {
-            downloadBtn.removeEventListener("click", this.boundHandleDownloadClick);
+            if (this.boundHandleDownloadClick) downloadBtn.removeEventListener("click", this.boundHandleDownloadClick);
             this.boundHandleDownloadClick = function (): void {
                 self.handleDownloadClick();
             };
@@ -186,13 +188,13 @@ export class BatchCalculator {
         let fileInput: HTMLElement | null = document.getElementById("batch-file-input");
         let processBtn: HTMLElement | null = document.getElementById("batch-process-btn");
         let downloadBtn: HTMLElement | null = document.getElementById("batch-download-btn");
-        if (fileInput) {
+        if (fileInput && this.boundUpdateProcessButtonState) {
             fileInput.removeEventListener("change", this.boundUpdateProcessButtonState);
         }
-        if (processBtn) {
+        if (processBtn && this.boundHandleProcessClick) {
             processBtn.removeEventListener("click", this.boundHandleProcessClick);
         }
-        if (downloadBtn) {
+        if (downloadBtn && this.boundHandleDownloadClick) {
             downloadBtn.removeEventListener("click", this.boundHandleDownloadClick);
         }
         this.initialized = false;
@@ -204,10 +206,8 @@ export class BatchCalculator {
         if (!fileInput || !processBtn) {
             return;
         }
-        if (!this.isAuthorized()) {
-            processBtn.disabled = true;
-            return;
-        }
+        // isAuthorized() always returns true (authentication removed), so no
+        // authorization gate here; the button reflects file selection only.
         if (fileInput.files && fileInput.files.length > 0) {
             processBtn.disabled = false;
         } else {
@@ -220,18 +220,19 @@ export class BatchCalculator {
         let unauthorizedBox: HTMLElement | null = document.getElementById("batch-unauthorized");
         let fileInput: HTMLInputElement | null = document.getElementById("batch-file-input") as HTMLInputElement | null;
         let processBtn: HTMLButtonElement | null = document.getElementById("batch-process-btn") as HTMLButtonElement | null;
-        let authorized: boolean = this.isAuthorized();
+        // isAuthorized() always returns true (authentication removed); the batch
+        // card is always in the authorized state and the unauthorized box never shows.
         if (authorizedBox) {
-            authorizedBox.style.display = authorized ? "block" : "none";
+            authorizedBox.style.display = "block";
         }
         if (unauthorizedBox) {
-            unauthorizedBox.style.display = authorized ? "none" : "block";
+            unauthorizedBox.style.display = "none";
         }
         if (fileInput) {
-            fileInput.disabled = !authorized;
+            fileInput.disabled = false;
         }
         if (processBtn) {
-            processBtn.disabled = !authorized;
+            processBtn.disabled = false;
         }
     }
 
@@ -249,13 +250,7 @@ export class BatchCalculator {
             }
             return;
         }
-        if (!this.isAuthorized()) {
-            if (errorBox) {
-                errorBox.textContent = "Batch calculation is not available.";
-                errorBox.style.display = "block";
-            }
-            return;
-        }
+        // isAuthorized() always returns true (authentication removed); no gate here.
         let file: File = fileInput.files[0];
         let calculatorType: string = calcSelect.value;
         this.showProgress(true);
@@ -457,6 +452,9 @@ export class BatchCalculator {
      * matches the required `"M1"` column end-to-end.
      */
     private static normalizeHeader(header: string): string {
+        // Headers come from parseCsv which always yields strings; the null
+        // fallback guards non-CSV misuse and could never fire here.
+        /* v8 ignore next -- parseCsv always yields strings, verified above */
         return (header ?? "").trim().toLowerCase();
     }
 
@@ -471,6 +469,9 @@ export class BatchCalculator {
         let canonical: string[] = [];
         let h: number;
         for (h = 0; h < headers.length; h++) {
+            // Headers come from parseCsv which always yields strings; the null
+            // fallback guards non-CSV misuse and could never fire here.
+            /* v8 ignore next -- parseCsv always yields strings, verified above */
             let trimmed: string = (headers[h] ?? "").trim();
             let key: string = trimmed;
             if (required) {
