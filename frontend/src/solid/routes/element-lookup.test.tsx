@@ -134,4 +134,42 @@ describe("ElementLookup", function (): void {
             expect(result.queryByText(/Loading elements/)).toBeNull();
         });
     });
+    it("shows n/a for the group of an element with a null group", async function (): Promise<void> {
+        localStorage.setItem("chem-cache-ptable", JSON.stringify([{
+            "atomicNumber": 999,
+            "symbol": "Qq",
+            "name": "Quuxium",
+            "atomicMass": 999,
+            "type": "unknown",
+            "period": 8,
+            "group": null,
+            "electronegativity": null,
+            "electronAffinity": null,
+            "atomicRadius": null,
+            "ionizationEnergy": null,
+            "valenceElectrons": 0,
+            "totalElectrons": 999
+        }]));
+        let result = render(function () { return <ElementLookup />; });
+        await waitFor(function (): void {
+            expect(result.queryByText(/Loading elements/)).toBeNull();
+        });
+        expect(fetchSpy).not.toHaveBeenCalled();
+        let input = result.getByLabelText("Element symbol, name, or atomic number") as HTMLInputElement;
+        input.value = "Qq";
+        vi.useFakeTimers();
+        fireEvent.input(input);
+        await vi.advanceTimersByTimeAsync(350);
+        vi.useRealTimers();
+        await waitFor(function (): void {
+            expect(result.container.textContent).toMatch(/Name: Quuxium/);
+        });
+        expect(result.container.textContent).toMatch(/Group: n\/a/);
+    });
+    it("shows a load error when element data fails to load", async function (): Promise<void> {
+        fetchSpy.mockRejectedValueOnce(new Error("offline"));
+        let result = render(function () { return <ElementLookup />; });
+        let errorText = await result.findByText(/Error loading elements: offline/);
+        expect(errorText).toBeTruthy();
+    });
 });
