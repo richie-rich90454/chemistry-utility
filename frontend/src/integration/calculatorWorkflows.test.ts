@@ -12,7 +12,7 @@ import {
     calculateElectrolysis,
 } from "../modules/electrochemistryCalculators.js";
 import { predictBondType } from "../modules/bondPredictor.js";
-import { calculateStoichiometry, getCalculationType } from "../modules/stoichiometryCalculator.js";
+import { calculateStoichiometry, getCalculationType } from "../modules/dom/stoichiometryDom.js";
 import { mockElements } from "../test/elementsData.js";
 
 function createContainer(id: string): HTMLDivElement {
