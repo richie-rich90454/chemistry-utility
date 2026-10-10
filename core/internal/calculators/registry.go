@@ -2,27 +2,36 @@ package calculators
 
 import "sort"
 
-// Registry holds all registered calculator functions.
+// calcFunc is the signature every calculator implements: a plain input
+// record in, a shared-contract result out, an error for invalid input.
+type calcFunc func(inputs map[string]string) (CalcResult, error)
+
+// Registry maps calculator identifiers to their implementations.
+//
+// The registry is the binding surface for the desktop app: the frontend
+// passes a calculator id and an input record, and gets back a CalcResult in
+// the shared contract. Implementations are the ported calculators in
+// shared_*.go, which mirror frontend/src/modules/calculators/ exactly.
 type Registry struct {
-	calculators map[string]CalculatorFunc
+	calculators map[string]calcFunc
 }
 
-// NewRegistry creates a new registry and registers all built-in calculators.
+// NewRegistry creates a registry and registers every ported calculator.
 func NewRegistry() *Registry {
 	r := &Registry{
-		calculators: make(map[string]CalculatorFunc),
+		calculators: make(map[string]calcFunc),
 	}
 	r.registerAll()
 	return r
 }
 
-// Get looks up a calculator by type. Returns the function and true if found.
-func (r *Registry) Get(calculatorType string) (CalculatorFunc, bool) {
+// Get looks up a calculator by id. Returns the function and true if found.
+func (r *Registry) Get(calculatorType string) (calcFunc, bool) {
 	f, ok := r.calculators[calculatorType]
 	return f, ok
 }
 
-// List returns a sorted list of all available calculator types.
+// List returns a sorted list of available calculator ids.
 func (r *Registry) List() []string {
 	types := make([]string, 0, len(r.calculators))
 	for t := range r.calculators {
@@ -32,37 +41,8 @@ func (r *Registry) List() []string {
 	return types
 }
 
-// registerAll registers all built-in calculator functions.
 func (r *Registry) registerAll() {
-	r.calculators["molar-mass"] = CalculateMolarMass
-	r.calculators["equation-balance"] = EquationBalance
-	r.calculators["stoichiometry"] = Stoichiometry
-	r.calculators["dilution"] = Dilution
-	r.calculators["mass-percent"] = MassPercent
-	r.calculators["solution-mixing"] = SolutionMixing
-	r.calculators["ideal-gas"] = IdealGasLaw
-	r.calculators["combined-gas"] = CombinedGasLaw
-	r.calculators["van-der-waals"] = VanDerWaals
-	r.calculators["half-life"] = HalfLife
-	r.calculators["cell-potential"] = CellPotential
-	r.calculators["nernst"] = Nernst
-	r.calculators["electrolysis"] = Electrolysis
-	r.calculators["bond-type"] = BondType
-	r.calculators["gibbs-free-energy"] = GibbsFreeEnergy
-	r.calculators["hess-law"] = HessLaw
-	r.calculators["entropy"] = Entropy
-	r.calculators["heat-capacity"] = HeatCapacity
-	r.calculators["arrhenius"] = Arrhenius
-	r.calculators["rate-law"] = RateLaw
-	r.calculators["integrated-rate-law"] = IntegratedRateLaw
-	r.calculators["buffer-solution"] = BufferSolution
-	r.calculators["pka-pkb"] = PKaPKb
-	r.calculators["ksp"] = Ksp
-	r.calculators["colligative-properties"] = ColligativeProperties
-	r.calculators["titration-curve"] = TitrationCurve
-	r.calculators["quantum-numbers"] = QuantumNumbers
-	r.calculators["electron-configuration"] = ElectronConfiguration
-	r.calculators["debroglie-wavelength"] = DeBroglieWavelength
-	r.calculators["photoelectric-effect"] = PhotoelectricEffect
-	r.calculators["heisenberg-uncertainty"] = HeisenbergUncertainty
+	r.calculators["dilution"] = dilution
+	r.calculators["mass-percent"] = massPercent
+	r.calculators["solution-mixing"] = solutionMixing
 }
