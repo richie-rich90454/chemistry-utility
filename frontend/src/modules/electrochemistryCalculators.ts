@@ -15,7 +15,7 @@ export class CellPotentialCalculator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return cellPotential(parseFloat(inputs["E1"] ?? ""), parseFloat(inputs["E2"] ?? ""));
+		return cellPotential(inputs);
 	}
 }
 
@@ -29,12 +29,7 @@ export class NernstCalculator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return nernst(
-			parseFloat(inputs["E-standard"] ?? ""),
-			parseFloat(inputs["temperature"] ?? ""),
-			parseFloat(inputs["n-electrons"] ?? ""),
-			parseFloat(inputs["Q-reaction"] ?? "")
-		);
+		return nernst(inputs);
 	}
 }
 
@@ -48,14 +43,7 @@ export class ElectrolysisCalculator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return electrolysis(
-			inputs["electrolysis-solve-for"] ?? "",
-			parseFloat(inputs["electrolysis-m"] ?? ""),
-			parseFloat(inputs["electrolysis-I"] ?? ""),
-			parseFloat(inputs["electrolysis-t"] ?? ""),
-			parseFloat(inputs["electrolysis-z"] ?? ""),
-			parseFloat(inputs["electrolysis-M"] ?? "")
-		);
+		return electrolysis(inputs);
 	}
 }
 
