@@ -9,7 +9,8 @@ THRESHOLD=90
 COVERAGE_FILE="coverage.out"
 
 echo "Running Go tests with coverage..."
-go test ./internal/... -coverprofile="$COVERAGE_FILE" -covermode=atomic
+cd core
+go test ./... -coverprofile="$COVERAGE_FILE" -covermode=atomic
 
 echo ""
 echo "Coverage summary:"
