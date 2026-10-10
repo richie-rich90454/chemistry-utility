@@ -16,12 +16,25 @@
  * verified by manual diff of the rendered DOM against the legacy markup.
  */
 import type {JSX} from "solid-js";
-import type {CalculationRecord} from "../../modules/dashboardManager.js";
+import type {CalculationRecord, DashboardStats} from "../../modules/dashboardManager.js";
 import type {ChartData, ChartOptions} from "../../modules/chartRenderer.js";
 import {onMount, createMemo, For, Show} from "solid-js";
 import {useDashboard} from "../stores/dashboard";
 import {ChartCanvas} from "../components/third-party/ChartCanvas";
+import {CountUpText} from "../components/CountUpText";
+import {useGsap} from "../lib/useGsap";
+import {DURATION} from "../lib/motion";
 import styles from "./dashboard.module.css";
+interface StatDefinition {
+    label: string;
+    value: (stats: DashboardStats) => string;
+}
+const STAT_DEFINITIONS: StatDefinition[] = [
+    {"label": "Total Calculations", "value": function (stats: DashboardStats): string { return String(stats.totalCalculations); }},
+    {"label": "Favorites", "value": function (stats: DashboardStats): string { return String(stats.favoriteCount); }},
+    {"label": "This Week", "value": function (stats: DashboardStats): string { return String(stats.thisWeekCount); }},
+    {"label": "Calculators Used", "value": function (stats: DashboardStats): string { return String(stats.calculatorsUsed); }}
+];
 function formatDate(iso: string): string {
     let d: Date = new Date(iso);
     if (isNaN(d.getTime())) {
@@ -36,8 +49,11 @@ function formatDate(iso: string): string {
 }
 function Dashboard(): JSX.Element {
     let store = useDashboard();
+    let cardRefs: HTMLDivElement[] = [];
+    let api = useGsap();
     onMount(function (): void {
         void store.refresh();
+        api.animateStagger(cardRefs, {}, DURATION.micro);
     });
     let activityData = createMemo(function (): ChartData {
         let points = store.activity();
@@ -68,20 +84,15 @@ function Dashboard(): JSX.Element {
         };
     });
     function renderStatCards(): JSX.Element {
-        let stats = store.stats();
-        let cards: {"label": string; "value": string}[] = [
-            {"label": "Total Calculations", "value": String(stats.totalCalculations)},
-            {"label": "Favorites", "value": String(stats.favoriteCount)},
-            {"label": "This Week", "value": String(stats.thisWeekCount)},
-            {"label": "Calculators Used", "value": String(stats.calculatorsUsed)}
-        ];
         return (
             <div class={styles.stats}>
-                <For each={cards}>
+                <For each={STAT_DEFINITIONS}>
                     {(card) => (
-                        <div class={styles.statCard}>
+                        <div class={styles.statCard} ref={function (element: HTMLDivElement): void { cardRefs.push(element); }}>
                             <div class={styles.statLabel}>{card.label}</div>
-                            <div class={styles.statValue}>{card.value}</div>
+                            <div class={styles.statValue}>
+                                <CountUpText value={function (): string { return card.value(store.stats()); }} />
+                            </div>
                         </div>
                     )}
                 </For>
