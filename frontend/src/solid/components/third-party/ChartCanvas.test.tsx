@@ -90,6 +90,53 @@ describe("ChartCanvas lifecycle", function (): void {
         expect(renderLineChartSpy).toHaveBeenCalledWith("effect-test", newData, options);
     });
 });
+describe("ChartCanvas update in place", function (): void {
+    let updateChartSpy: ReturnType<typeof vi.spyOn>;
+    let destroyChartSpy: ReturnType<typeof vi.spyOn>;
+    beforeEach(function (): void {
+        ChartRenderer.resetInstance();
+        let proto = Object.getPrototypeOf(ChartRenderer.getInstance());
+        updateChartSpy = vi.spyOn(proto, "updateChart");
+        destroyChartSpy = vi.spyOn(proto, "destroyChart");
+    });
+    afterEach(function (): void {
+        cleanup();
+        externalSetData = function (): void { return; };
+        ChartRenderer.resetInstance();
+        vi.restoreAllMocks();
+    });
+    it("calls updateChart instead of destroy+re-render when data changes", async function (): Promise<void> {
+        let options = createSampleOptions();
+        render(function () { return <ReactiveHost options={options} />; });
+        expect(ChartRenderer.getInstance().hasChart("effect-test")).toBe(true);
+        let newData: ChartData = {
+            "labels": ["x", "y"],
+            "datasets": [{
+                "label": "New Series",
+                "data": [10, 20],
+                "color": "#000000",
+                "borderColor": "#000000",
+                "backgroundColor": "rgba(0,0,0,0.1)"
+            }]
+        };
+        updateChartSpy.mockClear();
+        destroyChartSpy.mockClear();
+        externalSetData(newData);
+        await Promise.resolve();
+        expect(updateChartSpy).toHaveBeenCalledWith("effect-test", newData, options);
+        expect(destroyChartSpy).not.toHaveBeenCalled();
+        expect(ChartRenderer.getInstance().hasChart("effect-test")).toBe(true);
+    });
+    it("keeps the same chart instance across a data update", async function (): Promise<void> {
+        let options = createSampleOptions();
+        render(function () { return <ReactiveHost options={options} />; });
+        let first = (ChartRenderer.getInstance() as unknown as { charts: Map<string, unknown> }).charts.get("effect-test");
+        externalSetData(createSampleData());
+        await Promise.resolve();
+        let second = (ChartRenderer.getInstance() as unknown as { charts: Map<string, unknown> }).charts.get("effect-test");
+        expect(second).toBe(first);
+    });
+});
 describe("ChartCanvas chart types", function (): void {
     let renderLineChartSpy: ReturnType<typeof vi.spyOn>;
     let renderBarChartSpy: ReturnType<typeof vi.spyOn>;
