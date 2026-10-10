@@ -1,4 +1,4 @@
-import {render, fireEvent, cleanup} from "@solidjs/testing-library";
+import {render, fireEvent, cleanup, waitFor} from "@solidjs/testing-library";
 import {describe, it, expect, afterEach, beforeEach, vi} from "vitest";
 import {ChartRenderer} from "../../modules/chartRenderer.js";
 import {Titration} from "./titration";
@@ -52,7 +52,9 @@ describe("Titration route", function (): void {
         fireEvent.click(result.getByText("Calculate"));
         let text = await result.findByText(/Equivalence Point/);
         expect(text).toBeTruthy();
-        expect(renderLineChartSpy).toHaveBeenCalled();
+        await waitFor(function (): void {
+            expect(renderLineChartSpy).toHaveBeenCalled();
+        });
     });
     it("shows an error when acid concentration is zero", async function (): Promise<void> {
         let result = render(function () { return <Titration />; });
