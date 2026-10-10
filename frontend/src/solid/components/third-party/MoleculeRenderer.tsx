@@ -1,6 +1,7 @@
 import type {JSX} from "solid-js";
 import {onMount, onCleanup, createEffect} from "solid-js";
 import SmilesDrawer from "smiles-drawer";
+import {fitCanvas, beginPixelSpace, dps} from "../../../modules/dom/hidpiCanvas.js";
 import styles from "./MoleculeRenderer.module.css";
 export interface MoleculeRendererProps {
     smiles: string;
@@ -13,21 +14,43 @@ interface SmilesDrawerInstance {
 }
 function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
     let canvasRef: HTMLCanvasElement | undefined;
-    let firstEffectRun: boolean = true;
+    let firstRun: boolean = true;
     function getWidth(): number {
         return props.width !== undefined ? props.width : 400;
     }
     function getHeight(): number {
         return props.height !== undefined ? props.height : 300;
     }
-    function getDrawerOptions(): Record<string, unknown> {
+    function getZoom(): number {
+        return props.zoom !== undefined ? props.zoom : 1;
+    }
+    /**
+     * SmilesDrawer multiplies these by its own devicePixelRatio, so the raster
+     * lands at logical * zoom * dpr * window.devicePixelRatio device pixels.
+     * That is a deliberate supersample: every zoom level keeps full device
+     * resolution instead of stretching a small bitmap.
+     */
+    function getDrawerOptions(zoom: number): Record<string, unknown> {
+        let dpr: number = dps();
         return {
-            "width": getWidth(),
-            "height": getHeight(),
+            "width": getWidth() * dpr * zoom,
+            "height": getHeight() * dpr * zoom,
             "atomVisualization": "default",
             "isometric": false,
             "compactDrawing": true
         };
+    }
+    /**
+     * Magnifies by enlarging the CSS box while the backing store keeps the
+     * high-resolution raster, so zooming never resamples.
+     */
+    function pinDisplayBox(zoom: number): void {
+        /* v8 ignore next -- pinDisplayBox only runs after a draw where Solid has assigned the ref */
+        if (canvasRef === undefined) {
+            return;
+        }
+        canvasRef.style.width = String(getWidth() * zoom) + "px";
+        canvasRef.style.height = String(getHeight() * zoom) + "px";
     }
     function reportError(err: unknown): void {
         /* v8 ignore next -- reportError only runs post-mount (parse/draw callbacks) where Solid has assigned the ref; verified by mount tests */
@@ -42,13 +65,15 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
         }
         let ctx: CanvasRenderingContext2D | null = canvasRef.getContext("2d");
         if (ctx !== null) {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
+            beginPixelSpace(ctx);
             ctx.fillStyle = "#d93025";
             ctx.font = "14px sans-serif";
             ctx.fillText("Error: " + message, 10, 30);
         }
     }
-    function renderSmiles(smiles: string): void {
+    function renderSmiles(smiles: string, zoom: number): void {
         /* v8 ignore next -- renderSmiles only runs from onMount/reactive effects where Solid has assigned the ref */
         if (canvasRef === undefined) {
             return;
@@ -57,11 +82,13 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
         if (trimmed.length === 0) {
             return;
         }
-        let drawer: SmilesDrawerInstance = new SmilesDrawer.Drawer(getDrawerOptions()) as SmilesDrawerInstance;
+        fitCanvas(canvasRef, getWidth(), getHeight());
+        let drawer: SmilesDrawerInstance = new SmilesDrawer.Drawer(getDrawerOptions(zoom)) as SmilesDrawerInstance;
         let canvas: HTMLCanvasElement = canvasRef;
         let success: (g: unknown) => void = function (data: unknown): void {
             try {
                 drawer.draw(data, canvas, "light", false, []);
+                pinDisplayBox(zoom);
             } catch (drawErr: unknown) {
                 reportError(drawErr);
             }
@@ -75,43 +102,23 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
             reportError(parseErr);
         }
     }
-    function applyZoom(): void {
-        /* v8 ignore next -- applyZoom only runs from onMount where Solid has assigned the ref */
-        if (canvasRef === undefined) {
-            return;
-        }
-        let zoom: number = props.zoom !== undefined ? props.zoom : 1;
-        if (zoom === 1) {
-            canvasRef.style.transform = "";
-        } else {
-            canvasRef.style.transform = "scale(" + String(zoom) + ")";
-            canvasRef.style.transformOrigin = "center center";
-        }
-    }
     onMount(function (): void {
         /* v8 ignore next -- Solid assigns the ref before onMount so canvasRef is always set here */
         if (canvasRef !== undefined) {
-            canvasRef.width = getWidth();
-            canvasRef.height = getHeight();
+            fitCanvas(canvasRef, getWidth(), getHeight());
         }
-        renderSmiles(props.smiles);
-        applyZoom();
+        renderSmiles(props.smiles, getZoom());
     });
     createEffect(function (): void {
         let smiles: string = props.smiles;
-        if (firstEffectRun) {
-            firstEffectRun = false;
+        let zoom: number = getZoom();
+        if (firstRun) {
+            firstRun = false;
             return;
         }
-        renderSmiles(smiles);
-    });
-    createEffect(function (): void {
-        let zoom: number = props.zoom !== undefined ? props.zoom : 1;
-        /* v8 ignore next -- effects run post-render where Solid has assigned the ref */
-        if (canvasRef !== undefined) {
-            canvasRef.style.transform = zoom === 1 ? "" : "scale(" + String(zoom) + ")";
-            canvasRef.style.transformOrigin = "center center";
-        }
+        // Zoom re-renders the molecule at the new scale instead of scaling a
+        // CSS transform, so the enlarged bonds and labels stay sharp.
+        renderSmiles(smiles, zoom);
     });
     onCleanup(function (): void {
         /* v8 ignore next -- the ref stays assigned for the component lifetime so canvasRef is always set at cleanup */
@@ -120,7 +127,6 @@ function MoleculeRenderer(props: MoleculeRendererProps): JSX.Element {
             if (ctx !== null) {
                 ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
             }
-            canvasRef.style.transform = "";
         }
     });
     return (
