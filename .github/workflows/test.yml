@@ -7,6 +7,18 @@ on:
     branches: [main]
 
 jobs:
+  conformance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install frontend dependencies
+        run: cd frontend && npm install
+      - name: Verify conformance vectors are unchanged
+        run: npm run conformance:verify
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -27,9 +39,11 @@ jobs:
         run: cd frontend && npx playwright test
       - name: Build frontend
         run: cd frontend && npm run build
+      - name: Stage frontend for desktop embed
+        run: npm run stage:desktop
       - name: Run Go tests
-        run: go test ./...
+        run: cd core && go test ./...
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
       - name: Build application
-        run: wails build -tags webkit2_41
+        run: cd core && wails build -tags webkit2_41
