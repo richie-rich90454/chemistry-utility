@@ -9,8 +9,18 @@
         "element2-input": "Cl"
       },
       "expect": {
-        "value": "",
-        "explanation": "Error: Cannot read properties of undefined (reading 'length')"
+        "value": "Na (0.93) and Cl (3.16) -> ΔEN=2.23 -> Ionic bond",
+        "explanation": "ΔEN = |EN(Na) - EN(Cl)| = |0.93 - 3.16| = 2.23; isMetal1=true, isMetal2=false -> Ionic",
+        "metadata": {
+          "element1": "Na",
+          "element2": "Cl",
+          "en1": 0.93,
+          "en2": 3.16,
+          "deltaEN": 2.23,
+          "bondType": "Ionic",
+          "isMetal1": true,
+          "isMetal2": false
+        }
       }
     },
     {
@@ -20,8 +30,18 @@
         "element2-input": "H"
       },
       "expect": {
-        "value": "",
-        "explanation": "Error: Cannot read properties of undefined (reading 'length')"
+        "value": "H (2.2) and H (2.2) -> ΔEN=0.00 -> Nonpolar Covalent bond",
+        "explanation": "ΔEN = |EN(H) - EN(H)| = |2.2 - 2.2| = 0.00; isMetal1=false, isMetal2=false -> Nonpolar Covalent",
+        "metadata": {
+          "element1": "H",
+          "element2": "H",
+          "en1": 2.2,
+          "en2": 2.2,
+          "deltaEN": 0,
+          "bondType": "Nonpolar Covalent",
+          "isMetal1": false,
+          "isMetal2": false
+        }
       }
     },
     {
@@ -31,8 +51,60 @@
         "element2-input": "Cl"
       },
       "expect": {
-        "value": "",
-        "explanation": "Error: Cannot read properties of undefined (reading 'length')"
+        "value": "H (2.2) and Cl (3.16) -> ΔEN=0.96 -> Polar Covalent bond",
+        "explanation": "ΔEN = |EN(H) - EN(Cl)| = |2.2 - 3.16| = 0.96; isMetal1=false, isMetal2=false -> Polar Covalent",
+        "metadata": {
+          "element1": "H",
+          "element2": "Cl",
+          "en1": 2.2,
+          "en2": 3.16,
+          "deltaEN": 0.96,
+          "bondType": "Polar Covalent",
+          "isMetal1": false,
+          "isMetal2": false
+        }
+      }
+    },
+    {
+      "id": "copper-zinc",
+      "inputs": {
+        "element1-input": "Cu",
+        "element2-input": "Zn"
+      },
+      "expect": {
+        "value": "Cu (1.9) and Zn (1.65) -> ΔEN=0.25 -> Metallic bond",
+        "explanation": "ΔEN = |EN(Cu) - EN(Zn)| = |1.9 - 1.65| = 0.25; isMetal1=true, isMetal2=true -> Metallic",
+        "metadata": {
+          "element1": "Cu",
+          "element2": "Zn",
+          "en1": 1.9,
+          "en2": 1.65,
+          "deltaEN": 0.25,
+          "bondType": "Metallic",
+          "isMetal1": true,
+          "isMetal2": true
+        }
+      }
+    },
+    {
+      "id": "oxygen-oxygen",
+      "inputs": {
+        "element1-input": "O",
+        "element2-input": "O"
+      },
+      "expect": {
+        "value": "O (3.44) and O (3.44) -> ΔEN=0.00 -> Nonpolar Covalent bond",
+        "explanation": "ΔEN = |EN(O) - EN(O)| = |3.44 - 3.44| = 0.00; isMetal1=false, isMetal2=false -> Nonpolar Covalent",
+        "metadata": {
+          "element1": "O",
+          "element2": "O",
+          "en1": 3.44,
+          "en2": 3.44,
+          "deltaEN": 0,
+          "bondType": "Nonpolar Covalent",
+          "isMetal1": false,
+          "isMetal2": false
+        }
       }
     }
   ]
