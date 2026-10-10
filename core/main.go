@@ -28,6 +28,8 @@ func main() {
 		Bind: []interface{}{
 			app,
 			app.ptableSvc,
+			app.calculators,
+			app.data,
 		},
 		Windows: &windows.Options{
 			WebviewIsTransparent: false,
