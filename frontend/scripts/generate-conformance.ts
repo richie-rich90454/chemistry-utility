@@ -50,6 +50,7 @@ import {
     BornHaberCycleCalculator
 } from "../src/modules/thermodynamicsCalculators.js";
 import {BondTypePredictor} from "../src/modules/bondPredictor.js";
+import {bondType} from "../src/modules/calculators/bondType.js";
 import {FormulaParser} from "../src/modules/formulaParser.js";
 import {balanceEquation, balanceRedox} from "../src/modules/equationBalancer.js";
 import {elementsToDataset} from "./conformanceData.js";
@@ -98,6 +99,14 @@ function redoxCase(id: string, equation: string, medium: "acidic" | "basic"): Ve
         "id": id,
         "inputs": { "equation": equation, "medium": medium },
         "expect": { "balanced": balanceRedox(equation, medium) }
+    };
+}
+
+function bondCase(id: string, symbol1: string, symbol2: string): VectorCase {
+    return {
+        "id": id,
+        "inputs": { "element1-input": symbol1, "element2-input": symbol2 },
+        "expect": bondType(symbol1, symbol2, elementsToDataset())
     };
 }
 
@@ -428,9 +437,11 @@ function collect(): void {
     ]);
 
     writeVector("bond-type.json", "bond-type", [
-        buildCase(new BondTypePredictor(), "nacl", { "element1-input": "Na", "element2-input": "Cl" }),
-        buildCase(new BondTypePredictor(), "h2", { "element1-input": "H", "element2-input": "H" }),
-        buildCase(new BondTypePredictor(), "hcl", { "element1-input": "H", "element2-input": "Cl" })
+        bondCase("nacl", "Na", "Cl"),
+        bondCase("h2", "H", "H"),
+        bondCase("hcl", "H", "Cl"),
+        bondCase("copper-zinc", "Cu", "Zn"),
+        bondCase("oxygen-oxygen", "O", "O")
     ]);
 
     writeVector("equation-balance.json", "equation-balance", [
