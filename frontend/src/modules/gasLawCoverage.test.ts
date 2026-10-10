@@ -9,6 +9,7 @@ import {
     VanDerWaalsCalculator,
     HalfLifeCalculator,
 } from "./gasLawCalculators.js";
+import {applyIdealGasDefaults, resetIdealGasDefaults} from "./dom/prefill.js";
 import {createContainer, createInput, createSelect, createResultDiv, getResultText} from "../test/helpers.js";
 
 function idealDom(solveFor: string, units: string, P: string, V: string, n: string, T: string, volUnit?: string): void {
@@ -45,7 +46,7 @@ function idealPure(solveFor: string, units: string, P: string, V: string, n: str
 describe("gasLaw coverage: ideal SI and volume units", () => {
     afterEach(() => {
         document.body.innerHTML = "";
-        (IdealGasLawCalculator as unknown as {defaultsApplied: boolean}).defaultsApplied = false;
+        resetIdealGasDefaults();
     });
 
     it("applyDefaults fills empty T and P", () => {
@@ -56,7 +57,7 @@ describe("gasLaw coverage: ideal SI and volume units", () => {
         p.id = "ideal-P";
         document.body.appendChild(t);
         document.body.appendChild(p);
-        IdealGasLawCalculator.applyDefaults();
+        applyIdealGasDefaults();
         expect(t.value).toBe("298.15");
         expect(p.value).toBe("1");
     });
@@ -70,17 +71,17 @@ describe("gasLaw coverage: ideal SI and volume units", () => {
         p.id = "ideal-P";
         document.body.appendChild(t);
         document.body.appendChild(p);
-        IdealGasLawCalculator.applyDefaults();
+        applyIdealGasDefaults();
         expect(t.value).toBe("300");
         expect(p.value).toBe("1");
         t.value = "";
-        IdealGasLawCalculator.applyDefaults();
+        applyIdealGasDefaults();
         expect(t.value).toBe("");
     });
 
     it("applyDefaults tolerates missing elements", () => {
         document.body.innerHTML = "";
-        expect(function(){ IdealGasLawCalculator.applyDefaults(); }).not.toThrow();
+        expect(function(){ applyIdealGasDefaults(); }).not.toThrow();
     });
 
     it("DOM solves P in SI with cubic metres", () => {
