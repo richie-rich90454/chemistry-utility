@@ -1,0 +1,24 @@
+{
+  "calculator": "cell-potential",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "E1": "0.80",
+        "E2": "-0.34"
+      },
+      "expect": {
+        "value": "E_cell = 1.140 V",
+        "explanation": "Cathode E = 0.800 V; Anode E = -0.340 V; E_cell = E_cathode - E_anode = 1.140 V",
+        "metadata": {
+          "E_cell": 1.1400000000000001,
+          "E_cathode": 0.8,
+          "E_anode": -0.34,
+          "E1": 0.8,
+          "E2": -0.34
+        }
+      }
+    }
+  ]
+}

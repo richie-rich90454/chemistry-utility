@@ -1,0 +1,87 @@
+{
+  "calculator": "molar-mass",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "water",
+      "inputs": {
+        "formula": "H2O"
+      },
+      "expect": {
+        "molarMass": 18.0154
+      }
+    },
+    {
+      "id": "glucose",
+      "inputs": {
+        "formula": "C6H12O6"
+      },
+      "expect": {
+        "molarMass": 180.1566
+      }
+    },
+    {
+      "id": "aluminum-sulfate",
+      "inputs": {
+        "formula": "Al2(SO4)3"
+      },
+      "expect": {
+        "molarMass": 342.1508
+      }
+    },
+    {
+      "id": "sodium-chloride",
+      "inputs": {
+        "formula": "NaCl"
+      },
+      "expect": {
+        "molarMass": 58.442800000000005
+      }
+    },
+    {
+      "id": "nested-parens",
+      "inputs": {
+        "formula": "Ca(NO2)2"
+      },
+      "expect": {
+        "molarMass": 132.089
+      }
+    },
+    {
+      "id": "copper-sulfate-pentahydrate",
+      "inputs": {
+        "formula": "CuSO4·5H2O"
+      },
+      "expect": {
+        "molarMass": 249.6856
+      }
+    },
+    {
+      "id": "double-nested",
+      "inputs": {
+        "formula": "K4[Fe(CN)6]"
+      },
+      "expect": {
+        "molarMass": 368.34260000000006
+      }
+    },
+    {
+      "id": "single-atom",
+      "inputs": {
+        "formula": "Fe"
+      },
+      "expect": {
+        "molarMass": 55.845
+      }
+    },
+    {
+      "id": "diatomic",
+      "inputs": {
+        "formula": "O2"
+      },
+      "expect": {
+        "molarMass": 31.9988
+      }
+    }
+  ]
+}

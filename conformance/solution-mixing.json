@@ -1,0 +1,37 @@
+{
+  "calculator": "solution-mixing",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "mix-C1": "2",
+        "mix-V1": "1",
+        "mix-C2": "0.5",
+        "mix-V2": "3"
+      },
+      "expect": {
+        "value": "0.8750 M",
+        "explanation": "Final Concentration: 0.8750 M; Total Volume: 4.0000 L",
+        "metadata": {
+          "finalConcentration": 0.875,
+          "totalVolume": 4,
+          "totalMoles": 3.5
+        }
+      }
+    },
+    {
+      "id": "zero-v1",
+      "inputs": {
+        "mix-C1": "2",
+        "mix-V1": "0",
+        "mix-C2": "0.5",
+        "mix-V2": "3"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: First solution volume must be positive"
+      }
+    }
+  ]
+}

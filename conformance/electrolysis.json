@@ -1,0 +1,21 @@
+{
+  "calculator": "electrolysis",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-m",
+      "inputs": {
+        "electrolysis-m": "",
+        "electrolysis-I": "2",
+        "electrolysis-t": "1800",
+        "electrolysis-z": "2",
+        "electrolysis-M": "63.5",
+        "electrolysis-solve-for": "m"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    }
+  ]
+}

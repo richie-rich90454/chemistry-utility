@@ -1,0 +1,19 @@
+{
+  "calculator": "integrated-rate-law",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "first-order",
+      "inputs": {
+        "irl-order": "first",
+        "irl-A0": "1",
+        "irl-t": "100",
+        "irl-k": "0.01"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solveFor value"
+      }
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "calculator": "half-life",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "remaining",
+      "inputs": {
+        "initial-quantity": "100",
+        "time-input": "3000",
+        "half-life-input": "1000",
+        "remaining-quantity": "",
+        "half-life-solve-for": "remaining"
+      },
+      "expect": {
+        "value": "Remaining: 12.5000 (after 3000 units)",
+        "explanation": "Nt = N0 × (0.5)^(t/t_half) = 12.5000"
+      }
+    },
+    {
+      "id": "time",
+      "inputs": {
+        "initial-quantity": "100",
+        "time-input": "",
+        "half-life-input": "1000",
+        "remaining-quantity": "25",
+        "half-life-solve-for": "time"
+      },
+      "expect": {
+        "value": "Time needed: 2000.0000 units",
+        "explanation": "t = (ln(Nt/N0) / ln(0.5)) × t_half = 2000.0000 units"
+      }
+    },
+    {
+      "id": "half-life",
+      "inputs": {
+        "initial-quantity": "100",
+        "time-input": "3000",
+        "half-life-input": "",
+        "remaining-quantity": "25",
+        "half-life-solve-for": "half-life"
+      },
+      "expect": {
+        "value": "Half-life: 1500.0000 units",
+        "explanation": "t_half = t / (ln(Nt/N0) / ln(0.5)) = 1500.0000 units"
+      }
+    },
+    {
+      "id": "remaining-not-below-initial",
+      "inputs": {
+        "initial-quantity": "100",
+        "time-input": "3000",
+        "half-life-input": "1000",
+        "remaining-quantity": "150",
+        "half-life-solve-for": "time"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Remaining quantity must be less than initial quantity (decay only decreases quantity)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "calculator": "dilution",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-v2",
+      "inputs": {
+        "dilution-M1": "6",
+        "dilution-V1": "1",
+        "dilution-M2": "3",
+        "dilution-V2": "",
+        "dilution-solve-for": "V2"
+      },
+      "expect": {
+        "value": "2.0000 L",
+        "explanation": "V2 = (M1 * V1) / M2 = 2.0000 L",
+        "metadata": {
+          "solveFor": "V2",
+          "result": 2,
+          "unit": "L",
+          "formula": "V2 = (M1 * V1) / M2"
+        }
+      }
+    },
+    {
+      "id": "solve-m1",
+      "inputs": {
+        "dilution-M1": "",
+        "dilution-V1": "0.5",
+        "dilution-M2": "0.1",
+        "dilution-V2": "2",
+        "dilution-solve-for": "M1"
+      },
+      "expect": {
+        "value": "0.4000 M",
+        "explanation": "M1 = (M2 * V2) / V1 = 0.4000 M",
+        "metadata": {
+          "solveFor": "M1",
+          "result": 0.4,
+          "unit": "M",
+          "formula": "M1 = (M2 * V2) / V1"
+        }
+      }
+    },
+    {
+      "id": "solve-m2",
+      "inputs": {
+        "dilution-M1": "12",
+        "dilution-V1": "0.25",
+        "dilution-M2": "",
+        "dilution-V2": "1",
+        "dilution-solve-for": "M2"
+      },
+      "expect": {
+        "value": "3.0000 M",
+        "explanation": "M2 = (M1 * V1) / V2 = 3.0000 M",
+        "metadata": {
+          "solveFor": "M2",
+          "result": 3,
+          "unit": "M",
+          "formula": "M2 = (M1 * V1) / V2"
+        }
+      }
+    },
+    {
+      "id": "missing-inputs",
+      "inputs": {
+        "dilution-M1": "",
+        "dilution-V1": "1",
+        "dilution-M2": "",
+        "dilution-V2": "2",
+        "dilution-solve-for": "V2"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for dilution-M1, dilution-V1, dilution-M2"
+      }
+    },
+    {
+      "id": "negative-m1",
+      "inputs": {
+        "dilution-M1": "-6",
+        "dilution-V1": "1",
+        "dilution-M2": "3",
+        "dilution-V2": "",
+        "dilution-solve-for": "V2"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Initial molarity must be positive"
+      }
+    }
+  ]
+}

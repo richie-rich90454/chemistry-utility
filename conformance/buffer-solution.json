@@ -1,0 +1,28 @@
+{
+  "calculator": "buffer-solution",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "acetic",
+      "inputs": {
+        "buffer-pKa": "4.76",
+        "buffer-HA": "0.1",
+        "buffer-Aminus": "0.1",
+        "buffer-pH": "",
+        "buffer-ratio": "",
+        "buffer-solve-for": "pH"
+      },
+      "expect": {
+        "value": "pH = 4.7600",
+        "explanation": "pH = 4.7600; pKa = 4.7600; [A-]/[HA] = 1.0000; Buffer Capacity: Good (ratio within 10:1)",
+        "metadata": {
+          "pH": 4.76,
+          "pKa": 4.76,
+          "ratio": 1,
+          "bufferCapacity": "Good (ratio within 10:1)",
+          "solveFor": "pH"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "calculator": "rydberg",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "visible-line",
+      "inputs": {
+        "rydberg-n1": "2",
+        "rydberg-n2": "3"
+      },
+      "expect": {
+        "value": "656.34 nm",
+        "explanation": "Spectral series: Balmer (Visible) (n₁ = 2); Transition: n = 3 → n = 2; Wavelength: 656.34 nm; Frequency: 456778611111111.1000 Hz; Energy: 1.8893 eV",
+        "metadata": {
+          "n1": 2,
+          "n2": 3,
+          "wavelengthNm": 656.3354603463993,
+          "frequencyHz": 456778611111111.1,
+          "energyEv": 1.8892728322236094,
+          "seriesName": "Balmer (Visible)"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "calculator": "heat-capacity",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "hc-q": "1000",
+        "hc-m": "50",
+        "hc-deltaT": "10",
+        "hc-c": ""
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    }
+  ]
+}

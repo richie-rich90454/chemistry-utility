@@ -1,0 +1,29 @@
+{
+  "calculator": "common-ion",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "common-ion-salt-type": "AB",
+        "common-ion-Ksp": "1.7e-10",
+        "common-ion-concentration": "0.1"
+      },
+      "expect": {
+        "value": "s (with common ion) = 0.000000 M; s (without) = 0.000013 M",
+        "explanation": "Molar Solubility (with common ion) = 0.000000 M; Molar Solubility (without common ion) = 0.000013 M; [A] = 0.000000 M; [B] = 0.100000 M; Solubility Ratio = 0.000130",
+        "metadata": {
+          "solubilityWithCommonIon": 1.7e-9,
+          "solubilityWithoutCommonIon": 0.000013038404810405297,
+          "concA": 1.7e-9,
+          "concB": 0.10000000170000001,
+          "solubilityRatio": 0.00013038404810405296,
+          "saltType": "AB",
+          "stoichA": 1,
+          "stoichB": 1,
+          "approxValid": true
+        }
+      }
+    }
+  ]
+}

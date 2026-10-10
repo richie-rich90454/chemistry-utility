@@ -1,0 +1,32 @@
+{
+  "calculator": "quantum-numbers",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "3d-electron",
+      "inputs": {
+        "quantum-n": "3",
+        "quantum-l": "2",
+        "quantum-m": "1",
+        "quantum-s": "-1/2"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for qn-n, qn-l, qn-ml, qn-ms"
+      }
+    },
+    {
+      "id": "invalid-m",
+      "inputs": {
+        "quantum-n": "2",
+        "quantum-l": "0",
+        "quantum-m": "1",
+        "quantum-s": "1/2"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for qn-n, qn-l, qn-ml, qn-ms"
+      }
+    }
+  ]
+}

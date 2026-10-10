@@ -1,0 +1,26 @@
+{
+  "calculator": "electron-configuration",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "iron",
+      "inputs": {
+        "electron-config-input": "26"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid input for ec-atomic-number"
+      }
+    },
+    {
+      "id": "uranium",
+      "inputs": {
+        "electron-config-input": "92"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid input for ec-atomic-number"
+      }
+    }
+  ]
+}

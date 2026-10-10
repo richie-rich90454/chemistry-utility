@@ -1,0 +1,39 @@
+{
+  "calculator": "bond-type",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "nacl",
+      "inputs": {
+        "element1-input": "Na",
+        "element2-input": "Cl"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Cannot read properties of undefined (reading 'length')"
+      }
+    },
+    {
+      "id": "h2",
+      "inputs": {
+        "element1-input": "H",
+        "element2-input": "H"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Cannot read properties of undefined (reading 'length')"
+      }
+    },
+    {
+      "id": "hcl",
+      "inputs": {
+        "element1-input": "H",
+        "element2-input": "Cl"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Cannot read properties of undefined (reading 'length')"
+      }
+    }
+  ]
+}

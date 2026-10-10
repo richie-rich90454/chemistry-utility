@@ -1,0 +1,102 @@
+{
+  "calculator": "combined-gas",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-p2",
+      "inputs": {
+        "combined-P1": "1",
+        "combined-V1": "2",
+        "combined-T1": "300",
+        "combined-P2": "",
+        "combined-V2": "4",
+        "combined-T2": "600",
+        "combined-solve-for": "P2"
+      },
+      "expect": {
+        "value": "1.0000 pressure units",
+        "explanation": "P<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(V<sub>2</sub> T<sub>1</sub>) = 1.0000 pressure units"
+      }
+    },
+    {
+      "id": "solve-v2",
+      "inputs": {
+        "combined-P1": "1",
+        "combined-V1": "2",
+        "combined-T1": "300",
+        "combined-P2": "2",
+        "combined-V2": "",
+        "combined-T2": "600",
+        "combined-solve-for": "V2"
+      },
+      "expect": {
+        "value": "2.0000 volume units",
+        "explanation": "V<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> T<sub>1</sub>) = 2.0000 volume units"
+      }
+    },
+    {
+      "id": "solve-t1",
+      "inputs": {
+        "combined-P1": "1",
+        "combined-V1": "2",
+        "combined-T1": "",
+        "combined-P2": "0.5",
+        "combined-V2": "4",
+        "combined-T2": "600",
+        "combined-solve-for": "T1"
+      },
+      "expect": {
+        "value": "600.0000 K",
+        "explanation": "T<sub>1</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(P<sub>2</sub> V<sub>2</sub>) = 600.0000 K"
+      }
+    },
+    {
+      "id": "solve-p1",
+      "inputs": {
+        "combined-P1": "",
+        "combined-V1": "2",
+        "combined-T1": "300",
+        "combined-P2": "1",
+        "combined-V2": "4",
+        "combined-T2": "600",
+        "combined-solve-for": "P1"
+      },
+      "expect": {
+        "value": "1.0000 pressure units",
+        "explanation": "P<sub>1</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(V<sub>1</sub> T<sub>2</sub>) = 1.0000 pressure units"
+      }
+    },
+    {
+      "id": "solve-t2",
+      "inputs": {
+        "combined-P1": "1",
+        "combined-V1": "2",
+        "combined-T1": "300",
+        "combined-P2": "1",
+        "combined-V2": "4",
+        "combined-T2": "",
+        "combined-solve-for": "T2"
+      },
+      "expect": {
+        "value": "600.0000 K",
+        "explanation": "T<sub>2</sub>=(P<sub>2</sub> V<sub>2</sub> T<sub>1</sub>)/(P<sub>1</sub> V<sub>1</sub>) = 600.0000 K"
+      }
+    },
+    {
+      "id": "zero-t2",
+      "inputs": {
+        "combined-P1": "1",
+        "combined-V1": "2",
+        "combined-T1": "300",
+        "combined-P2": "",
+        "combined-V2": "4",
+        "combined-T2": "0",
+        "combined-solve-for": "P2"
+      },
+      "expect": {
+        "value": "0.0000 pressure units",
+        "explanation": "P<sub>2</sub>=(P<sub>1</sub> V<sub>1</sub> T<sub>2</sub>)/(V<sub>2</sub> T<sub>1</sub>) = 0.0000 pressure units"
+      }
+    }
+  ]
+}

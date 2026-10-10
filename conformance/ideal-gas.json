@@ -1,0 +1,142 @@
+{
+  "calculator": "ideal-gas",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-v-atm",
+      "inputs": {
+        "ideal-P": "1",
+        "ideal-V": "",
+        "ideal-n": "1",
+        "ideal-T": "273.15",
+        "ideal-solve-for": "V",
+        "ideal-R-units": "atm-L",
+        "ideal-volume-unit": "L"
+      },
+      "expect": {
+        "value": "22.4147 L",
+        "explanation": "V=(nRT)/P = 22.4147 L",
+        "metadata": {
+          "volumeUnit": "L",
+          "units": "atm-L"
+        }
+      }
+    },
+    {
+      "id": "solve-v-si",
+      "inputs": {
+        "ideal-P": "101325",
+        "ideal-V": "",
+        "ideal-n": "1",
+        "ideal-T": "273.15",
+        "ideal-solve-for": "V",
+        "ideal-R-units": "SI",
+        "ideal-volume-unit": "m³"
+      },
+      "expect": {
+        "value": "0.0224 m³",
+        "explanation": "V=(nRT)/P = 0.0224 m³",
+        "metadata": {
+          "volumeUnit": "m³",
+          "units": "SI"
+        }
+      }
+    },
+    {
+      "id": "solve-p",
+      "inputs": {
+        "ideal-P": "",
+        "ideal-V": "22.414",
+        "ideal-n": "1",
+        "ideal-T": "273.15",
+        "ideal-solve-for": "P",
+        "ideal-R-units": "atm-L",
+        "ideal-volume-unit": "L"
+      },
+      "expect": {
+        "value": "1.0000 atm",
+        "explanation": "P=(nRT)/V = 1.0000 atm",
+        "metadata": {
+          "volumeUnit": "L",
+          "units": "atm-L"
+        }
+      }
+    },
+    {
+      "id": "solve-n",
+      "inputs": {
+        "ideal-P": "1",
+        "ideal-V": "22.414",
+        "ideal-n": "",
+        "ideal-T": "273.15",
+        "ideal-solve-for": "n",
+        "ideal-R-units": "atm-L",
+        "ideal-volume-unit": "L"
+      },
+      "expect": {
+        "value": "1.0000 mol",
+        "explanation": "n=(PV)/(RT) = 1.0000 mol",
+        "metadata": {
+          "volumeUnit": "L",
+          "units": "atm-L"
+        }
+      }
+    },
+    {
+      "id": "solve-t",
+      "inputs": {
+        "ideal-P": "1",
+        "ideal-V": "22.414",
+        "ideal-n": "1",
+        "ideal-T": "",
+        "ideal-solve-for": "T",
+        "ideal-R-units": "atm-L",
+        "ideal-volume-unit": "L"
+      },
+      "expect": {
+        "value": "273.1416 K",
+        "explanation": "T=(PV)/(nR) = 273.1416 K",
+        "metadata": {
+          "volumeUnit": "L",
+          "units": "atm-L"
+        }
+      }
+    },
+    {
+      "id": "m3-input-atm",
+      "inputs": {
+        "ideal-P": "",
+        "ideal-V": "0.022414",
+        "ideal-n": "1",
+        "ideal-T": "273.15",
+        "ideal-solve-for": "P",
+        "ideal-R-units": "atm-L",
+        "ideal-volume-unit": "m³"
+      },
+      "expect": {
+        "value": "1.0000 atm",
+        "explanation": "P=(nRT)/V = 1.0000 atm",
+        "metadata": {
+          "volumeUnit": "m³",
+          "units": "atm-L"
+        }
+      }
+    },
+    {
+      "id": "zero-volume",
+      "inputs": {
+        "ideal-P": "",
+        "ideal-V": "0",
+        "ideal-n": "1",
+        "ideal-T": "273.15",
+        "ideal-solve-for": "P",
+        "ideal-R-units": "atm-L",
+        "ideal-volume-unit": "L"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Volume cannot be zero"
+      }
+    }
+  ]
+}

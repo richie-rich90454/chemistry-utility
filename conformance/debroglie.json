@@ -1,0 +1,27 @@
+{
+  "calculator": "debroglie-wavelength",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "electron",
+      "inputs": {
+        "db-mass": "9.109e-31",
+        "db-velocity": "2e6",
+        "db-mass-unit": "kg"
+      },
+      "expect": {
+        "value": "0.3637 nm",
+        "explanation": "λ = h / (m·v); De Broglie wavelength: 0.3637 nm; Wavelength in meters: 0.0000 m",
+        "metadata": {
+          "wavelengthM": 3.637062246130201e-10,
+          "wavelengthDisplay": 0.3637062246130201,
+          "unit": "nm",
+          "massKg": 9.109e-31,
+          "massRaw": 9.109e-31,
+          "massUnit": "kg",
+          "velocity": 2000000
+        }
+      }
+    }
+  ]
+}

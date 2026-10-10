@@ -1,0 +1,26 @@
+{
+  "calculator": "gibbs-free-energy",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "spontaneous",
+      "inputs": {
+        "gibbs-deltaH": "-100",
+        "gibbs-deltaS": "-100",
+        "gibbs-T": "298"
+      },
+      "expect": {
+        "value": "dG = -70.2000 kJ/mol; Process: Spontaneous",
+        "explanation": "dG = dH - T*dS = -100.0000 - 298.0000 * -0.1000 = -70.2000 kJ/mol; Process: Spontaneous",
+        "metadata": {
+          "deltaG": -70.2,
+          "deltaH": -100,
+          "deltaS": -100,
+          "deltaS_kJ": -0.1,
+          "temperature": 298,
+          "spontaneity": "Spontaneous"
+        }
+      }
+    }
+  ]
+}

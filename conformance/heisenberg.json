@@ -1,0 +1,16 @@
+{
+  "calculator": "heisenberg-uncertainty",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "heisenberg-dx": "1e-10"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "calculator": "colligative-properties",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "water-boiling",
+      "inputs": {
+        "collig-solve-for": "boiling-point",
+        "collig-molality": "1",
+        "collig-solvent-molar-mass": "18.015",
+        "collig-kb": "0.512",
+        "collig-kf": "1.86",
+        "collig-density": "1",
+        "collig-temp": "298.15"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for collig-solute-mass, collig-molar-mass, collig-solvent-mass, collig-vanthoff"
+      }
+    }
+  ]
+}
