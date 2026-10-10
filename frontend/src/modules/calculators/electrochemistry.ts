@@ -5,11 +5,21 @@ function formatter(): NumberFormatter {
     return NumberFormatter.createFromCurrentLocale();
 }
 
+function readNumber(inputs: Record<string, string>, key: string): number {
+    return parseFloat(inputs[key] ?? "");
+}
+
+function readText(inputs: Record<string, string>, key: string): string {
+    return inputs[key] ?? "";
+}
+
 /**
  * Standard cell potential E°_cell from two half-reaction potentials. The
  * higher potential is the cathode, the lower is the anode.
  */
-export function cellPotential(E1: number, E2: number): CalculatorResult {
+export function cellPotential(inputs: Record<string, string>): CalculatorResult {
+    const E1 = readNumber(inputs, "E1");
+    const E2 = readNumber(inputs, "E2");
     if (isNaN(E1) || isNaN(E2)) {
         throw new Error("Please enter valid numbers for both potentials.");
     }
@@ -34,8 +44,12 @@ export function cellPotential(E1: number, E2: number): CalculatorResult {
  * Cell potential under non-standard conditions from the Nernst equation:
  * E = E° - (RT)/(nF) * ln(Q).
  */
-export function nernst(EStandard: number, temperature: number, nElectrons: number, Q: number): CalculatorResult {
+export function nernst(inputs: Record<string, string>): CalculatorResult {
     let nf: NumberFormatter = formatter();
+    const EStandard = readNumber(inputs, "E-standard");
+    const temperature = readNumber(inputs, "temperature");
+    const nElectrons = readNumber(inputs, "n-electrons");
+    const Q = readNumber(inputs, "Q-reaction");
     if (isNaN(EStandard) || isNaN(temperature) || isNaN(nElectrons) || isNaN(Q) || temperature <= 0 || nElectrons <= 0 || Q <= 0) {
         throw new Error("Please enter valid positive numbers for all fields.");
     }
@@ -64,9 +78,15 @@ export function nernst(EStandard: number, temperature: number, nElectrons: numbe
  * Faraday's law of electrolysis, solved for the variable named by
  * `solveFor` ("mass", "current", or "time").
  */
-export function electrolysis(solveFor: string, m: number, I: number, t: number, z: number, M: number): CalculatorResult {
+export function electrolysis(inputs: Record<string, string>): CalculatorResult {
     let nf: NumberFormatter = formatter();
     let faradayConstant: number = 96485;
+    const solveFor = readText(inputs, "electrolysis-solve-for");
+    const m = readNumber(inputs, "electrolysis-m");
+    const I = readNumber(inputs, "electrolysis-I");
+    const t = readNumber(inputs, "electrolysis-t");
+    const z = readNumber(inputs, "electrolysis-z");
+    const M = readNumber(inputs, "electrolysis-M");
     if (solveFor === "mass") {
         if (isNaN(I) || isNaN(t) || isNaN(z) || isNaN(M) || I <= 0 || t <= 0 || z <= 0 || M <= 0) {
             throw new Error("Please enter valid positive numbers for I, t, z, and M.");
