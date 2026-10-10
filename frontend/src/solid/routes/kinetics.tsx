@@ -4,9 +4,10 @@
  *  - This route surfaces a Clear button per calculator (legacy lacked one)
  *  - Each sub-section is wrapped in a <section> with a divider to mirror
  *    the legacy .sub-group visual rhythm
- *  - The Integrated Rate Law sub-calculator renders a <ChartCanvas> for
- *    the concentration-vs-time series returned by calculatePure; the
- *    canvas id remains "integrated-rate-law-chart" for parity
+ *  - The Integrated Rate Law sub-calculator renders a canvas for the
+ *    concentration-vs-time series returned by calculatePure, drawn through
+ *    the DOM chart binding; the canvas id remains
+ *    "integrated-rate-law-chart" for parity
  * Routes math through calculatePure on ArrheniusCalculator,
  * RateLawCalculator, IntegratedRateLawCalculator,
  * ReactionOrderCalculator, and CollisionTheoryCalculator. No Playwright
@@ -14,15 +15,14 @@
  * diff of the rendered DOM.
  */
 import type {JSX} from "solid-js";
-import {createSignal, Show} from "solid-js";
+import {createSignal, onMount, Show} from "solid-js";
 import {ArrheniusCalculator, RateLawCalculator, IntegratedRateLawCalculator, ReactionOrderCalculator, CollisionTheoryCalculator} from "../../modules/kineticsCalculators.js";
-import type {ChartData, ChartOptions, ConcentrationTimePoint} from "../../modules/chartRenderer.js";
+import {renderConcentrationTimeChart} from "../../modules/dom/chartBindings.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
-import {ChartCanvas} from "../components/third-party/ChartCanvas";
 import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./kinetics.module.css";
 let arrheniusCalculator = new ArrheniusCalculator();
@@ -106,30 +106,13 @@ let collisionSelects: CalculatorSelect[] = [{
     ],
     "defaultValue": "k"
 }];
-let irlChartOptions: ChartOptions = {
-    "title": "Concentration vs Time",
-    "xLabel": "Time (s)",
-    "yLabel": "Concentration (M)",
-    "showLegend": false
-};
-function buildConcentrationChartData(points: ConcentrationTimePoint[]): ChartData {
-    let labels: string[] = [];
-    let values: number[] = [];
-    let i: number;
-    for (i = 0; i < points.length; i = i + 1) {
-        labels.push(String(points[i].time));
-        values.push(points[i].concentration);
-    }
-    return {
-        "labels": labels,
-        "datasets": [{
-            "label": "[A] (M)",
-            "data": values,
-            "color": "#0f3a3a",
-            "borderColor": "#0f3a3a",
-            "backgroundColor": "rgba(15,58,58,0.1)"
-        }]
-    };
+function ConcentrationChart(props: {points: unknown[]}): JSX.Element {
+    onMount(function (): void {
+        renderConcentrationTimeChart("integrated-rate-law-chart", props.points);
+    });
+    return (
+        <canvas id="integrated-rate-law-chart" class={styles.chartCanvas} role="img" aria-label="Concentration vs Time" />
+    );
 }
 function Kinetics(): JSX.Element {
     let [arrheniusResult, setArrheniusResult] = createSignal("");
@@ -138,7 +121,7 @@ function Kinetics(): JSX.Element {
     let [rateLawError, setRateLawError] = createSignal("");
     let [integratedRateLawResult, setIntegratedRateLawResult] = createSignal("");
     let [integratedRateLawError, setIntegratedRateLawError] = createSignal("");
-    let [integratedRateLawChartData, setIntegratedRateLawChartData] = createSignal<ChartData | null>(null);
+    let [integratedRateLawChartPoints, setIntegratedRateLawChartPoints] = createSignal<unknown[] | null>(null);
     let [reactionOrderResult, setReactionOrderResult] = createSignal("");
     let [reactionOrderError, setReactionOrderError] = createSignal("");
     let [collisionResult, setCollisionResult] = createSignal("");
@@ -160,17 +143,12 @@ function Kinetics(): JSX.Element {
     function handleIntegratedRateLawCalculate(inputs: Record<string, string>): void {
         let res = integratedRateLawCalculator.calculatePure(inputs);
         resolveResult(res, setIntegratedRateLawResult, setIntegratedRateLawError);
-        if (Array.isArray(res.chartData)) {
-            setIntegratedRateLawChartData(buildConcentrationChartData(res.chartData as ConcentrationTimePoint[]));
-        }
-        else {
-            setIntegratedRateLawChartData(null);
-        }
+        setIntegratedRateLawChartPoints(Array.isArray(res.chartData) ? res.chartData : null);
     }
     function handleIntegratedRateLawClear(): void {
         setIntegratedRateLawResult("");
         setIntegratedRateLawError("");
-        setIntegratedRateLawChartData(null);
+        setIntegratedRateLawChartPoints(null);
     }
     function handleReactionOrderCalculate(inputs: Record<string, string>): void {
         resolveResult(reactionOrderCalculator.calculatePure(inputs), setReactionOrderResult, setReactionOrderError);
@@ -240,8 +218,8 @@ function Kinetics(): JSX.Element {
                     result={integratedRateLawResult}
                     error={integratedRateLawError}
                 >
-                    <Show when={integratedRateLawChartData() !== null}>
-                        <ChartCanvas type="line" data={integratedRateLawChartData() as ChartData} options={irlChartOptions} canvasId="integrated-rate-law-chart" />
+                    <Show when={integratedRateLawChartPoints() !== null}>
+                        <ConcentrationChart points={integratedRateLawChartPoints() as unknown[]} />
                     </Show>
                 </CalculatorForm>
                 <ExampleDetails>
