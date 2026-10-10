@@ -282,6 +282,59 @@ describe("ChartRenderer", function () {
         });
     });
 
+    describe("updateChart", function () {
+        it("updates the registered chart in place instead of destroying it", function () {
+            createCanvas("update-chart");
+            let instance: ChartRenderer = ChartRenderer.getInstance();
+            instance.renderLineChart("update-chart", createSampleData(), ChartRenderer.defaultOptions());
+            let existing = (instance as unknown as { charts: Map<string, { chart: unknown }> }).charts.get("update-chart");
+            let newData: ChartData = {
+                "labels": ["x", "y"],
+                "datasets": [{
+                    "label": "New Series",
+                    "data": [10, 20],
+                    "color": "#000000",
+                    "borderColor": "#000000",
+                    "backgroundColor": "rgba(0,0,0,0.1)"
+                }]
+            };
+            let newOptions: ChartOptions = { "title": "New", "xLabel": "X", "yLabel": "Y", "showLegend": true };
+            expect(function () { instance.updateChart("update-chart", newData, newOptions); }).not.toThrow();
+            let updated = (instance as unknown as { charts: Map<string, { chart: unknown; data: ChartData; options: ChartOptions }> }).charts.get("update-chart");
+            expect(updated!.chart).toBe(existing!.chart);
+            expect(updated!.data).toBe(newData);
+            expect(updated!.options).toBe(newOptions);
+        });
+
+        it("is a no-op when no chart is registered", function () {
+            let instance: ChartRenderer = ChartRenderer.getInstance();
+            expect(function () { instance.updateChart("never", createSampleData(), ChartRenderer.defaultOptions()); }).not.toThrow();
+        });
+
+        it("rejects mismatched data", function () {
+            createCanvas("update-bad");
+            let instance: ChartRenderer = ChartRenderer.getInstance();
+            let bad = { "labels": ["a", "b"], "datasets": createSampleData().datasets } as ChartData;
+            expect(function () { instance.updateChart("update-bad", bad, ChartRenderer.defaultOptions()); }).toThrow();
+        });
+    });
+
+    describe("refitChart", function () {
+        it("resizes the chart when it is registered", function () {
+            createCanvas("refit-chart");
+            let instance: ChartRenderer = ChartRenderer.getInstance();
+            instance.renderLineChart("refit-chart", createSampleData(), ChartRenderer.defaultOptions());
+            let stored = (instance as unknown as { charts: Map<string, { chart: { resize: () => void } }> }).charts.get("refit-chart");
+            expect(function () { instance.refitChart("refit-chart"); }).not.toThrow();
+            expect(typeof stored!.chart.resize).toBe("function");
+        });
+
+        it("is a no-op when no chart is registered", function () {
+            let instance: ChartRenderer = ChartRenderer.getInstance();
+            expect(function () { instance.refitChart("never"); }).not.toThrow();
+        });
+    });
+
     describe("renderBarChart", function () {
         it("renders a bar chart on the canvas", function () {
             createCanvas("bar-chart");
@@ -333,20 +386,36 @@ describe("ChartRenderer", function () {
     });
 
     describe("exportChartAsPng", function () {
-        it("calls canvas toDataURL and triggers download", function () {
+        let downloaded: {href: string; download: string}[] = [];
+        let originalClick: typeof HTMLAnchorElement.prototype.click;
+        beforeEach(function () {
+            downloaded = [];
+            originalClick = HTMLAnchorElement.prototype.click;
+            (HTMLAnchorElement.prototype as unknown as Record<string, unknown>).click = function (this: HTMLAnchorElement): void {
+                downloaded.push({ "href": this.href, "download": this.download });
+            } as typeof HTMLAnchorElement.prototype.click;
+        });
+        afterEach(function () {
+            HTMLAnchorElement.prototype.click = originalClick;
+        });
+        it("downloads the canvas through a blob URL instead of toDataURL", async function () {
             createCanvas("export-chart");
             let instance: ChartRenderer = ChartRenderer.getInstance();
             let data: ChartData = createSampleData();
             let options: ChartOptions = ChartRenderer.defaultOptions();
             instance.renderLineChart("export-chart", data, options);
             toDataURLMock.mockClear();
-            expect(function () { instance.exportChartAsPng("export-chart", "chart.png"); }).not.toThrow();
-            expect(toDataURLMock).toHaveBeenCalledWith("image/png");
+            await instance.exportChartAsPng("export-chart", "chart.png");
+            expect(toDataURLMock).not.toHaveBeenCalled();
+            expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
+            expect(downloaded.length).toBe(1);
+            expect(downloaded[0].download).toBe("chart.png");
+            expect(downloaded[0].href).toBe("blob:mock");
         });
 
-        it("throws when canvas does not exist", function () {
+        it("rejects when canvas does not exist", async function () {
             let instance: ChartRenderer = ChartRenderer.getInstance();
-            expect(function () { instance.exportChartAsPng("missing", "x.png"); }).toThrow();
+            await expect(instance.exportChartAsPng("missing", "x.png")).rejects.toThrow("Canvas element not found");
         });
     });
 
