@@ -1,6 +1,7 @@
 import type {JSX} from "solid-js";
 import {createEffect, createMemo, createSignal, untrack, For, Show} from "solid-js";
 import styles from "./CalculatorForm.module.css";
+import {CountUpText} from "./CountUpText";
 interface CalculatorField {
     id: string;
     label: string;
@@ -223,7 +224,7 @@ function CalculatorForm(props: CalculatorFormProps): JSX.Element {
                 <div class={styles.result + " " + styles.error} role="alert"><p>{props.error()}</p></div>
             </Show>
             <Show when={props.result() !== ""}>
-                <div class={styles.result} aria-live="polite"><p>{props.result()}</p></div>
+                <div class={styles.result} aria-live="polite"><p><CountUpText value={props.result} /></p></div>
             </Show>
             <Show when={props.children !== undefined}>
                 {props.children}
