@@ -2,23 +2,23 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
     parseBalancedEquation,
     parseTerm,
-    calculateStoichiometry,
-    getCalculationType,
     Term,
     BalancedEquation,
-    StoichiometryCalculator,
-} from "./stoichiometryCalculator.js";
+} from "./calculators/stoichiometry.js";
+import { StoichiometryCalculator } from "./stoichiometryCalculator.js";
+import {
+    calculateStoichiometry,
+    getCalculationType,
+    StoichiometryCalculatorDom,
+} from "./dom/stoichiometryDom.js";
 import { setOrCreateInput, setOrCreateSelect, getResultHTML } from "../test/helpers.js";
 
-class TestableStoichiometryCalculator extends StoichiometryCalculator {
+class TestableStoichiometryCalculator extends StoichiometryCalculatorDom {
     constructor() {
         super();
     }
-    public callPerformCalculation(): void {
-        this.performCalculation();
-    }
-    public setTestEquation(equation: string): void {
-        this.setEquation(equation);
+    public callRunCalculation(): void {
+        this.runCalculation();
     }
 }
 
@@ -398,8 +398,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            calc.callPerformCalculation();
+            calc.setEquation(equation);
+            calc.callRunCalculation();
 
             const html = getResultHTML("stoich-result");
             expect(html).toContain("H2O");
@@ -415,8 +415,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            calc.callPerformCalculation();
+            calc.setEquation(equation);
+            calc.callRunCalculation();
 
             const html = getResultHTML("stoich-result");
             expect(html).toContain("H2");
@@ -432,8 +432,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            calc.callPerformCalculation();
+            calc.setEquation(equation);
+            calc.callRunCalculation();
 
             const html = getResultHTML("stoich-result");
             expect(html).toContain("Limiting reactant: H2");
@@ -449,8 +449,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Invalid moles input");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Invalid moles input");
         });
 
         it("throws for invalid moles in reactant-from-product via class", () => {
@@ -462,8 +462,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Invalid moles input");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Invalid moles input");
         });
 
         it("throws for invalid moles in limiting-reactant via class", () => {
@@ -475,8 +475,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Invalid moles for H2");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Invalid moles for H2");
         });
 
         it("throws for invalid calculation type via class", () => {
@@ -488,8 +488,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Invalid calculation type");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Invalid calculation type");
         });
 
         it("removes error class when moles become valid in product-from-reactant", () => {
@@ -502,8 +502,8 @@ describe("stoichiometryCalculator", () => {
             molesInput.classList.add("error");
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            calc.callPerformCalculation();
+            calc.setEquation(equation);
+            calc.callRunCalculation();
 
             expect(molesInput.classList.contains("error")).toBe(false);
         });
@@ -518,8 +518,8 @@ describe("stoichiometryCalculator", () => {
             h2Input.classList.add("error");
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            calc.callPerformCalculation();
+            calc.setEquation(equation);
+            calc.callRunCalculation();
 
             expect(h2Input.classList.contains("error")).toBe(false);
         });
@@ -533,8 +533,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "CO2", "stoich-inputs", ["H2O", "CO2"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Selected compound not found");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Selected compound not found");
         });
 
         it("throws for unknown reactant in reactant-from-product via class", () => {
@@ -546,8 +546,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("reactant-select", "N2", "stoich-inputs", ["H2", "O2", "N2"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Selected compound not found");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Selected compound not found");
         });
 
         it("throws for unknown product in limiting-reactant via class", () => {
@@ -559,8 +559,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "CO2", "stoich-inputs", ["H2O", "CO2"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Selected product not found");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Selected product not found");
         });
 
         it("throws for unknown reactant in product-from-reactant via class", () => {
@@ -572,8 +572,8 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("product-select", "H2O", "stoich-inputs", ["H2O"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Selected compound not found");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Selected compound not found");
         });
 
         it("throws for unknown product in reactant-from-product via class", () => {
@@ -585,21 +585,13 @@ describe("stoichiometryCalculator", () => {
             setOrCreateSelect("reactant-select", "H2", "stoich-inputs", ["H2", "O2"]);
 
             const calc = new TestableStoichiometryCalculator();
-            calc.setTestEquation(equation);
-            expect(() => calc.callPerformCalculation()).toThrow("Selected compound not found");
+            calc.setEquation(equation);
+            expect(() => calc.callRunCalculation()).toThrow("Selected compound not found");
         });
     });
 });
 
 describe("StoichiometryCalculator.calculatePure", () => {
-    beforeEach(() => {
-        // Legacy DOM hooks are still constructed by the calculator; supply
-        // a result element so the constructor does not throw.
-        const result = document.createElement("div");
-        result.id = "stoich-result";
-        document.body.appendChild(result);
-    });
-
     afterEach(() => {
         document.body.innerHTML = "";
     });
