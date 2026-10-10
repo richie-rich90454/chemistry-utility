@@ -1,12 +1,12 @@
-.PHONY: test test-go test-frontend test-coverage check-coverage clean-coverage frontend-coverage
+.PHONY: test test-go test-frontend test-coverage check-coverage clean-coverage frontend-coverage desktop
 
 ## Run all tests (frontend + Go) without coverage
 test: test-frontend test-go
 
 ## Run Go unit tests with coverage profile
 test-go:
-	go test ./internal/... -coverprofile=coverage.out -covermode=atomic
-	go tool cover -func=coverage.out
+	cd core && go test ./... -coverprofile=coverage.out -covermode=atomic
+	cd core && go tool cover -func=coverage.out
 
 ## Run frontend unit tests
 test-frontend:
@@ -20,7 +20,11 @@ check-coverage:
 frontend-coverage:
 	cd frontend && npx vitest run --coverage
 
+## Build the desktop app (builds the web bundle, stages it, then wails build)
+desktop:
+	npm run build:desktop
+
 ## Remove coverage artifacts
 clean-coverage:
-	rm -f coverage.out coverage.html
+	rm -f coverage.out coverage.html core/coverage.out core/coverage.html
 	rm -rf frontend/coverage
