@@ -1,160 +1,64 @@
-import {ChemicalElement} from "../types.js";
-import {Calculator} from "./calculator.js";
-import type {CalculatorResult} from "./calculator.js";
+import type { ChemicalElement } from "../types.js";
+import { PureCalculator } from "./calculators/pureCalculator.js";
+import type { CalculatorResult } from "./calculators/pureCalculator.js";
+import { bondType } from "./calculators/bondType.js";
+import { InputElement } from "./inputElement.js";
+import { ResultDisplay } from "./resultDisplay.js";
 
 /**
  * Predicts the type of chemical bond formed between two elements based on
- * their electronegativity difference and element types. Extends the
- * {@link Calculator} template-method base class.
+ * their electronegativity difference and element types. The periodic table
+ * data is injected through the constructor, which makes the class DOM-free:
+ * instantiating it never touches the document.
  */
-export class BondTypePredictor extends Calculator {
-	private elementsData: ChemicalElement[];
+export class BondTypePredictor extends PureCalculator {
+    private elementsData: ChemicalElement[];
 
-	constructor(elementsData: ChemicalElement[]) {
-		super("bond-type-result", ["element1-input", "element2-input"]);
-		this.elementsData = elementsData;
-	}
+    constructor(elementsData: ChemicalElement[]) {
+        super();
+        this.elementsData = elementsData;
+    }
 
-	protected performCalculation(): void {
-		let element1Input = this.getInput("element1-input");
-		let element2Input = this.getInput("element2-input");
-		let element1Value = element1Input.getStringValue().trim();
-		let element2Value = element2Input.getStringValue().trim();
-		if (!element1Value || !element2Value) {
-			element1Input.markError();
-			element2Input.markError();
-			throw new Error("Please enter both element symbols");
-		}
-		element1Value = element1Value.charAt(0).toUpperCase() + element1Value.slice(1).toLowerCase();
-		element2Value = element2Value.charAt(0).toUpperCase() + element2Value.slice(1).toLowerCase();
-		let element1: ChemicalElement | null = null;
-		let element2: ChemicalElement | null = null;
-		for (let i = 0; i < this.elementsData.length; i++) {
-			let currentElement = this.elementsData[i];
-			if (currentElement.symbol == element1Value) {
-				element1 = currentElement;
-			}
-			if (currentElement.symbol == element2Value) {
-				element2 = currentElement;
-			}
-			if (element1 != null && element2 != null) {
-				break;
-			}
-		}
-		if (!element1 || !element2) {
-			element1Input.markError();
-			element2Input.markError();
-			throw new Error("One or both elements not found in periodic table");
-		}
-		let en1 = element1.electronegativity;
-		let en2 = element2.electronegativity;
-		if (en1 == null || en2 == null) {
-			this.resultDisplay.showResult("<p>Bond prediction not possible due to unavailable electronegativity data</p>");
-			return;
-		}
-		let deltaENValue = Math.abs(en1 - en2);
-		let deltaEN = this.numberFormatter.format(deltaENValue, 2);
-		let type1 = element1.type.toLowerCase();
-		let type2 = element2.type.toLowerCase();
-		let isMetal1 = (type1 == "lanthanide" || type1 == "actinide" || (type1.indexOf("metal") != -1 && type1 != "metalloid" && type1 != "non-metal"));
-		let isMetal2 = (type2 == "lanthanide" || type2 == "actinide" || (type2.indexOf("metal") != -1 && type2 != "metalloid" && type2 != "non-metal"));
-		let bondType: string;
-		if (isMetal1 && isMetal2) {
-			bondType = "Metallic";
-		}
-		else if (isMetal1 != isMetal2 || deltaENValue >= 1.7) {
-			bondType = "Ionic";
-		}
-		else if (deltaENValue >= .4) {
-			bondType = "Polar Covalent";
-		}
-		else {
-			bondType = "Nonpolar Covalent";
-		}
-		let result = "<p>" + element1.symbol + " (" + en1 + ") and " + element2.symbol + " (" + en2 + ") -> ΔEN=" + deltaEN + " -> " + bondType + " bond</p>";
-		this.resultDisplay.showResult(result);
-	}
+    protected getCalculatorId(): string {
+        return "bond-type";
+    }
 
-	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		let element1Value = (inputs["element1-input"] ?? "").trim();
-		let element2Value = (inputs["element2-input"] ?? "").trim();
-		if (!element1Value || !element2Value) {
-			throw new Error("Please enter both element symbols");
-		}
-		element1Value = element1Value.charAt(0).toUpperCase() + element1Value.slice(1).toLowerCase();
-		element2Value = element2Value.charAt(0).toUpperCase() + element2Value.slice(1).toLowerCase();
-		let element1: ChemicalElement | null = null;
-		let element2: ChemicalElement | null = null;
-		for (let i = 0; i < this.elementsData.length; i++) {
-			let currentElement = this.elementsData[i];
-			if (currentElement.symbol == element1Value) {
-				element1 = currentElement;
-			}
-			if (currentElement.symbol == element2Value) {
-				element2 = currentElement;
-			}
-			if (element1 != null && element2 != null) {
-				break;
-			}
-		}
-		if (!element1 || !element2) {
-			throw new Error("One or both elements not found in periodic table");
-		}
-		let en1 = element1.electronegativity;
-		let en2 = element2.electronegativity;
-		if (en1 == null || en2 == null) {
-			return {
-				value: "Bond prediction not possible due to unavailable electronegativity data",
-				explanation: "Element " + element1.symbol + " or " + element2.symbol + " has null electronegativity; cannot compute ΔEN.",
-				metadata: {
-					element1: element1.symbol,
-					element2: element2.symbol,
-					en1: en1,
-					en2: en2
-				}
-			};
-		}
-		let deltaENValue = Math.abs(en1 - en2);
-		let deltaEN = this.numberFormatter.format(deltaENValue, 2);
-		let type1 = element1.type.toLowerCase();
-		let type2 = element2.type.toLowerCase();
-		let isMetal1 = (type1 == "lanthanide" || type1 == "actinide" || (type1.indexOf("metal") != -1 && type1 != "metalloid" && type1 != "non-metal"));
-		let isMetal2 = (type2 == "lanthanide" || type2 == "actinide" || (type2.indexOf("metal") != -1 && type2 != "metalloid" && type2 != "non-metal"));
-		let bondType: string;
-		if (isMetal1 && isMetal2) {
-			bondType = "Metallic";
-		}
-		else if (isMetal1 != isMetal2 || deltaENValue >= 1.7) {
-			bondType = "Ionic";
-		}
-		else if (deltaENValue >= .4) {
-			bondType = "Polar Covalent";
-		}
-		else {
-			bondType = "Nonpolar Covalent";
-		}
-		return {
-			value: element1.symbol + " (" + en1 + ") and " + element2.symbol + " (" + en2 + ") -> ΔEN=" + deltaEN + " -> " + bondType + " bond",
-			explanation: "ΔEN = |EN(" + element1.symbol + ") - EN(" + element2.symbol + ")| = |" + en1 + " - " + en2 + "| = " + deltaEN + "; isMetal1=" + isMetal1 + ", isMetal2=" + isMetal2 + " -> " + bondType,
-			metadata: {
-				element1: element1.symbol,
-				element2: element2.symbol,
-				en1: en1,
-				en2: en2,
-				deltaEN: deltaENValue,
-				bondType: bondType,
-				isMetal1: isMetal1,
-				isMetal2: isMetal2
-			}
-		};
-	}
+    protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
+        return bondType(
+            inputs["element1-input"] ?? "",
+            inputs["element2-input"] ?? "",
+            this.elementsData
+        );
+    }
+}
+
+function readInputs(): Record<string, string> {
+    return {
+        "element1-input": new InputElement("element1-input").getStringValue(),
+        "element2-input": new InputElement("element2-input").getStringValue()
+    };
 }
 
 /**
  * Backwards-compatible wrapper that creates a {@link BondTypePredictor}
- * instance and runs the calculation.
+ * instance and runs the calculation against the legacy element ids kept in
+ * the pre-migration index.html wiring. A failed run is reported through the
+ * same "Error: …" banner the old DOM calculators rendered.
  */
 export function predictBondType(elementsData: ChemicalElement[]): void {
-	let predictor = new BondTypePredictor(elementsData);
-	predictor.calculate();
+    let display: ResultDisplay = new ResultDisplay("bond-type-result");
+    let inputs: Record<string, string>;
+    try {
+        inputs = readInputs();
+    } catch (error) {
+        display.showError((error as Error).message);
+        return;
+    }
+    let result: CalculatorResult = new BondTypePredictor(elementsData).calculatePure(inputs);
+    let explanation: string = result.explanation ?? "";
+    if (explanation.startsWith("Error")) {
+        display.showError(explanation.slice("Error: ".length));
+        return;
+    }
+    display.showResult("<p>" + result.value + "</p>");
 }
