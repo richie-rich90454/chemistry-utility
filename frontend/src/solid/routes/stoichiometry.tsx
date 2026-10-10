@@ -11,7 +11,8 @@
  */
 import type {JSX} from "solid-js";
 import {createSignal, createEffect, For} from "solid-js";
-import {StoichiometryCalculator, parseBalancedEquation} from "../../modules/stoichiometryCalculator.js";
+import {StoichiometryCalculator} from "../../modules/stoichiometryCalculator.js";
+import {parseBalancedEquation} from "../../modules/calculators/stoichiometry.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
@@ -47,15 +48,7 @@ function molesMapsEqual(a: Record<string, string>, b: Record<string, string>): b
     }
     return true;
 }
-let sharedCalculator: StoichiometryCalculator | null = null;
-function getCalculator(): StoichiometryCalculator {
-    // Lazy: constructing at module scope would run document.getElementById
-    // at import time (before any DOM exists, or in non-DOM environments).
-    if (sharedCalculator === null) {
-        sharedCalculator = new StoichiometryCalculator();
-    }
-    return sharedCalculator;
-}
+let calculator = new StoichiometryCalculator();
 let calculationTypeOptions: {"value": string; "label": string}[] = [
     {"value": "product-from-reactant", "label": "Product from Reactant"},
     {"value": "reactant-from-product", "label": "Reactant from Product"},
@@ -185,7 +178,7 @@ function Stoichiometry(): JSX.Element {
             }
             inputs["product-select"] = productSelect();
         }
-        resolveResult(getCalculator().calculatePure(inputs), setResult, setError);
+        resolveResult(calculator.calculatePure(inputs), setResult, setError);
     }
     function handleClear(): void {
         setEquation("");
