@@ -8,3 +8,7 @@
     margin-bottom: 0;
     padding-bottom: 0;
 }
+.chartCanvas{
+    width: 100%;
+    min-height: 300px;
+}
