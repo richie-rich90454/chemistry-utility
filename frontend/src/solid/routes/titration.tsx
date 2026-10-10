@@ -2,23 +2,22 @@
  * Visual verification: The Solid-rendered Titration card should match the
  * legacy #titration-calc card in frontend/index.html. Intentional diff:
  * this route surfaces a Clear button (legacy lacked one) and routes the
- * titration math through TitrationCurveCalculator.calculatePure. The
- * TitrationPoint[] returned from calculatePure is converted to ChartData
- * inline and rendered through the Solid <ChartCanvas> wrapper instead of
- * the legacy ChartRenderer.renderTitrationCurve path; the canvas id
- * remains "titration-chart" for parity. No Playwright screenshot test is
- * added per task spec; parity is verified by manual diff.
+ * titration math through TitrationCurveCalculator.calculatePure. The series
+ * returned from calculatePure is rendered through a local <TitrationChart>
+ * component that draws on the DOM chart binding (mirroring the kinetics
+ * route); the canvas id remains "titration-chart" for parity. No Playwright
+ * screenshot test is added per task spec; parity is verified by manual diff.
  */
 import type {JSX} from "solid-js";
-import {createSignal, Show} from "solid-js";
+import {createSignal, onMount, Show} from "solid-js";
 import {TitrationCurveCalculator} from "../../modules/solutionCalculators.js";
+import {renderTitrationCurve} from "../../modules/dom/chartBindings.js";
 import {resolveResult} from "../../modules/resultResolver.js";
-import type {ChartData, ChartOptions, TitrationPoint} from "../../modules/chartRenderer.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
-import {ChartCanvas} from "../components/third-party/ChartCanvas";
+import styles from "./titration.module.css";
 let calculator = new TitrationCurveCalculator();
 let fields: CalculatorField[] = [
     {"id": "titration-acid-conc", "label": "Acid concentration (M)", "placeholder": "Acid concentration (M)", "ariaLabel": "Acid concentration"},
@@ -37,47 +36,27 @@ let selects: CalculatorSelect[] = [{
     ],
     "defaultValue": "strong"
 }];
-let chartOptions: ChartOptions = {
-    "title": "Titration Curve: pH vs Volume of Base",
-    "xLabel": "Volume of NaOH (mL)",
-    "yLabel": "pH",
-    "showLegend": true
-};
-function buildChartData(points: TitrationPoint[]): ChartData {
-    let labels: string[] = [];
-    let phValues: number[] = [];
-    for (let i = 0; i < points.length; i = i + 1) {
-        labels.push(String(points[i].volume));
-        phValues.push(points[i].pH);
-    }
-    return {
-        "labels": labels,
-        "datasets": [{
-            "label": "pH",
-            "data": phValues,
-            "color": "#2d5a3d",
-            "borderColor": "#2d5a3d",
-            "backgroundColor": "rgba(45,90,61,0.1)"
-        }]
-    };
+function TitrationChart(props: {points: unknown[]}): JSX.Element {
+    onMount(function (): void {
+        renderTitrationCurve("titration-chart", props.points);
+    });
+    return (
+        <canvas id="titration-chart" class={styles.chartCanvas} role="img" aria-label="Titration curve: pH versus volume of base" />
+    );
 }
 function Titration(): JSX.Element {
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
-    let [chartData, setChartData] = createSignal<ChartData | null>(null);
+    let [chartPoints, setChartPoints] = createSignal<unknown[] | null>(null);
     function handleCalculate(inputs: Record<string, string>): void {
         let res = calculator.calculatePure(inputs);
         resolveResult(res, setResult, setError);
-        if (Array.isArray(res.chartData)) {
-            setChartData(buildChartData(res.chartData as TitrationPoint[]));
-        } else {
-            setChartData(null);
-        }
+        setChartPoints(Array.isArray(res.chartData) ? res.chartData : null);
     }
     function handleClear(): void {
         setResult("");
         setError("");
-        setChartData(null);
+        setChartPoints(null);
     }
     return (
         <CalculatorCard
@@ -98,8 +77,8 @@ function Titration(): JSX.Element {
                 result={result}
                 error={error}
             >
-                <Show when={chartData() !== null}>
-                    <ChartCanvas type="line" data={chartData() as ChartData} options={chartOptions} canvasId="titration-chart" />
+                <Show when={chartPoints() !== null}>
+                    <TitrationChart points={chartPoints() as unknown[]} />
                 </Show>
             </CalculatorForm>
         </CalculatorCard>
