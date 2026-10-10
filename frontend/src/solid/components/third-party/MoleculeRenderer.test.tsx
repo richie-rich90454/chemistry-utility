@@ -89,12 +89,19 @@ describe("MoleculeRenderer cleanup", function (): void {
         cleanup();
         expect(clearRectSpy).toHaveBeenCalled();
     });
-    it("resets the canvas transform on unmount", function (): void {
+    it("never uses a CSS transform for zoom", function (): void {
         let result = render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" zoom={2} />; });
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
-        expect(canvas.style.transform).toBe("scale(2)");
+        expect(canvas.style.transform).toBe("");
         cleanup();
         expect(canvas.style.transform).toBe("");
+    });
+    it("grows the drawer options with zoom so the raster matches the magnification", function (): void {
+        render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" zoom={2} />; });
+        expect(mocks.capturedDrawerOptions.length).toBe(1);
+        let opts: {width: number; height: number} = mocks.capturedDrawerOptions[0] as {width: number; height: number};
+        expect(opts.width).toBe(800);
+        expect(opts.height).toBe(600);
     });
 });
 describe("MoleculeRenderer reactivity", function (): void {
@@ -145,35 +152,42 @@ describe("MoleculeRenderer zoom", function (): void {
         cleanup();
         vi.restoreAllMocks();
     });
-    it("applies scale transform when zoom prop is set", function (): void {
+    it("renders at full device resolution instead of a CSS scale", function (): void {
         let result = render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" zoom={2} />; });
-        let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
-        expect(canvas.style.transform).toBe("scale(2)");
-    });
-    it("does not apply transform when zoom is the default of 1", function (): void {
-        let result = render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" />; });
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
         expect(canvas.style.transform).toBe("");
     });
-    it("updates transform when zoom prop changes", async function (): Promise<void> {
+    it("leaves the CSS box at logical size when zoom is the default of 1", function (): void {
+        let result = render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" />; });
+        let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
+        expect(canvas.style.transform).toBe("");
+        expect(canvas.style.width).toBe("400px");
+        expect(canvas.style.height).toBe("300px");
+    });
+    it("re-renders at the new zoom level when the zoom prop changes", async function (): Promise<void> {
         let [zoom, setZoom] = createSignal<number>(2);
         let result = render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" zoom={zoom()} />; });
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
-        expect(canvas.style.transform).toBe("scale(2)");
+        expect(canvas.style.transform).toBe("");
+        expect(canvas.style.width).toBe("800px");
+        expect(mocks.mockDraw).toHaveBeenCalledTimes(1);
         setZoom(3);
         await waitFor(function (): void {
-            expect(canvas.style.transform).toBe("scale(3)");
+            expect(canvas.style.width).toBe("1200px");
         });
+        expect(canvas.style.transform).toBe("");
+        expect(mocks.mockDraw).toHaveBeenCalledTimes(2);
     });
-    it("clears transform when zoom changes back to 1", async function (): Promise<void> {
+    it("restores the logical box when zoom changes back to 1", async function (): Promise<void> {
         let [zoom, setZoom] = createSignal<number>(2);
         let result = render(function (): JSX.Element { return <MoleculeRenderer smiles="CCO" zoom={zoom()} />; });
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
-        expect(canvas.style.transform).toBe("scale(2)");
+        expect(canvas.style.width).toBe("800px");
         setZoom(1);
         await waitFor(function (): void {
-            expect(canvas.style.transform).toBe("");
+            expect(canvas.style.width).toBe("400px");
         });
+        expect(canvas.style.transform).toBe("");
     });
 });
 describe("MoleculeRenderer defaults", function (): void {
