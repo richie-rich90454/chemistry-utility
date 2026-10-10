@@ -5,7 +5,7 @@ import (
 
 	"log/slog"
 
-	"chemistry-utility/internal/ptable"
+	"chemistry-utility/core/internal/ptable"
 )
 
 // App is the main Wails application struct
@@ -18,7 +18,7 @@ type App struct {
 func NewApp() *App {
 	// Read from the embedded asset FS instead of a CWD-relative path, which
 	// does not exist in a packaged desktop binary.
-	data, err := assets.ReadFile("frontend/dist/ptable.json")
+	data, err := assets.ReadFile("dist/ptable.json")
 	if err != nil {
 		slog.Warn("failed to read embedded ptable.json", "error", err)
 	}
@@ -49,3 +49,4 @@ func (s *PTableService) GetPTableData() (string, error) {
 func (s *PTableService) LoadData(dataPath string) error {
 	return s.svc.LoadData(dataPath)
 }
+
