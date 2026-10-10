@@ -27,12 +27,7 @@ export class QuantumNumbersValidator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return quantumNumbers(
-			parseFloat(inputs["qn-n"] ?? ""),
-			parseFloat(inputs["qn-l"] ?? ""),
-			parseFloat(inputs["qn-ml"] ?? ""),
-			parseFloat(inputs["qn-ms"] ?? "")
-		);
+		return quantumNumbers(inputs);
 	}
 }
 
@@ -48,7 +43,7 @@ export class ElectronConfigurationGenerator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return electronConfiguration(parseFloat(inputs["ec-atomic-number"] ?? ""));
+		return electronConfiguration(inputs);
 	}
 }
 
@@ -64,10 +59,7 @@ export class RydbergCalculator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return rydberg(
-			parseFloat(inputs["rydberg-n1"] ?? ""),
-			parseFloat(inputs["rydberg-n2"] ?? "")
-		);
+		return rydberg(inputs);
 	}
 }
 
@@ -83,11 +75,7 @@ export class DeBroglieWavelengthCalculator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return deBroglie(
-			parseFloat(inputs["db-mass"] ?? ""),
-			parseFloat(inputs["db-velocity"] ?? ""),
-			inputs["db-mass-unit"] ?? "kg"
-		);
+		return deBroglie(inputs);
 	}
 }
 
@@ -104,13 +92,7 @@ export class PhotoelectricEffectCalculator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return photoelectric(
-			inputs["pe-solve-for"] ?? "",
-			parseFloat(inputs["pe-wavelength"] ?? ""),
-			parseFloat(inputs["pe-frequency"] ?? ""),
-			parseFloat(inputs["pe-work-function"] ?? ""),
-			parseFloat(inputs["pe-ke"] ?? "")
-		);
+		return photoelectric(inputs);
 	}
 }
 
@@ -128,12 +110,7 @@ export class HeisenbergUncertaintyCalculator extends PureCalculator {
 	}
 
 	protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-		return heisenberg(
-			inputs["heis-solve-for"] ?? "",
-			parseFloat(inputs["heis-delta-x"] ?? ""),
-			parseFloat(inputs["heis-delta-p"] ?? ""),
-			parseFloat(inputs["heis-mass"] ?? "")
-		);
+		return heisenberg(inputs);
 	}
 }
 
