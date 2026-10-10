@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { calculateDilution, calculateMassPercent, calculateMixing, calculateKsp, calculateCommonIonEffect } from "./solutionCalculators.js";
 import { predictBondType } from "./bondPredictor.js";
-import { parseBalancedEquation, parseTerm, calculateStoichiometry } from "./stoichiometryCalculator.js";
+import { parseBalancedEquation, parseTerm } from "./calculators/stoichiometry.js";
+import { calculateStoichiometry } from "./dom/stoichiometryDom.js";
 import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM, getResultHTML } from "../test/helpers.js";
 import type { ChemicalElement } from "../types.js";
 
