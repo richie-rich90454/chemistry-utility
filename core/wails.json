@@ -4,8 +4,8 @@
   "version": "3.0.0",
   "outputfilename": "chemistry-utility",
   "frontend:install": "npm install",
-  "frontend:build": "npm run build:app",
-  "frontend:dev:watcher": "npm run dev",
+  "frontend:build": "cd ../ && npm run build:web && npm run stage:desktop",
+  "frontend:dev:watcher": "cd ../ && npm run dev:app",
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "richierich"
