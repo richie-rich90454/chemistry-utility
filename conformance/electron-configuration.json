@@ -5,21 +5,79 @@
     {
       "id": "iron",
       "inputs": {
-        "electron-config-input": "26"
+        "ec-atomic-number": "26"
       },
       "expect": {
-        "value": "",
-        "explanation": "Error: Missing or invalid input for ec-atomic-number"
+        "value": "1s2 2s2 2p6 3s2 3p6 4s2 3d6",
+        "explanation": "Atomic number: 26; Full configuration: 1s2 2s2 2p6 3s2 3p6 4s2 3d6; Noble gas notation: [Ar] 4s2 3d6; Valence electrons: 8; Orbital diagram:\n1s: ↑↓\n2s: ↑↓\n2p: ↑↓ | ↑↓ | ↑↓\n3s: ↑↓\n3p: ↑↓ | ↑↓ | ↑↓\n4s: ↑↓\n3d: ↑↓ | ↑  | ↑  | ↑  | ↑ ",
+        "metadata": {
+          "atomicNumber": 26,
+          "fullConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d6",
+          "nobleGasNotation": "[Ar] 4s2 3d6",
+          "valenceElectrons": 8,
+          "orbitalDiagram": "1s: ↑↓\n2s: ↑↓\n2p: ↑↓ | ↑↓ | ↑↓\n3s: ↑↓\n3p: ↑↓ | ↑↓ | ↑↓\n4s: ↑↓\n3d: ↑↓ | ↑  | ↑  | ↑  | ↑ "
+        }
       }
     },
     {
       "id": "uranium",
       "inputs": {
-        "electron-config-input": "92"
+        "ec-atomic-number": "92"
+      },
+      "expect": {
+        "value": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s2 5f4",
+        "explanation": "Atomic number: 92; Full configuration: 1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s2 5f4; Noble gas notation: [Rn] 7s2 5f4; Valence electrons: 6; Orbital diagram:\n1s: ↑↓\n2s: ↑↓\n2p: ↑↓ | ↑↓ | ↑↓\n3s: ↑↓\n3p: ↑↓ | ↑↓ | ↑↓\n4s: ↑↓\n3d: ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓\n4p: ↑↓ | ↑↓ | ↑↓\n5s: ↑↓\n4d: ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓\n5p: ↑↓ | ↑↓ | ↑↓\n6s: ↑↓\n4f: ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓\n5d: ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓\n6p: ↑↓ | ↑↓ | ↑↓\n7s: ↑↓\n5f: ↑  | ↑  | ↑  | ↑  |    |    |   ",
+        "metadata": {
+          "atomicNumber": 92,
+          "fullConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s2 5f4",
+          "nobleGasNotation": "[Rn] 7s2 5f4",
+          "valenceElectrons": 6,
+          "orbitalDiagram": "1s: ↑↓\n2s: ↑↓\n2p: ↑↓ | ↑↓ | ↑↓\n3s: ↑↓\n3p: ↑↓ | ↑↓ | ↑↓\n4s: ↑↓\n3d: ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓\n4p: ↑↓ | ↑↓ | ↑↓\n5s: ↑↓\n4d: ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓\n5p: ↑↓ | ↑↓ | ↑↓\n6s: ↑↓\n4f: ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓\n5d: ↑↓ | ↑↓ | ↑↓ | ↑↓ | ↑↓\n6p: ↑↓ | ↑↓ | ↑↓\n7s: ↑↓\n5f: ↑  | ↑  | ↑  | ↑  |    |    |   "
+        }
+      }
+    },
+    {
+      "id": "hydrogen",
+      "inputs": {
+        "ec-atomic-number": "1"
+      },
+      "expect": {
+        "value": "1s1",
+        "explanation": "Atomic number: 1; Full configuration: 1s1; Noble gas notation: 1s1; Valence electrons: 1; Orbital diagram:\n1s: ↑ ",
+        "metadata": {
+          "atomicNumber": 1,
+          "fullConfig": "1s1",
+          "nobleGasNotation": "1s1",
+          "valenceElectrons": 1,
+          "orbitalDiagram": "1s: ↑ "
+        }
+      }
+    },
+    {
+      "id": "chromium-exception",
+      "inputs": {
+        "ec-atomic-number": "24"
+      },
+      "expect": {
+        "value": "1s2 2s2 2p6 3s2 3p6 3d5 4s1",
+        "explanation": "Atomic number: 24; Full configuration: 1s2 2s2 2p6 3s2 3p6 3d5 4s1; Noble gas notation: [Ar] 3d5 4s1; Valence electrons: 6; Orbital diagram:\n1s: ↑↓\n2s: ↑↓\n2p: ↑↓ | ↑↓ | ↑↓\n3s: ↑↓\n3p: ↑↓ | ↑↓ | ↑↓\n3d: ↑  | ↑  | ↑  | ↑  | ↑ \n4s: ↑ ",
+        "metadata": {
+          "atomicNumber": 24,
+          "fullConfig": "1s2 2s2 2p6 3s2 3p6 3d5 4s1",
+          "nobleGasNotation": "[Ar] 3d5 4s1",
+          "valenceElectrons": 6,
+          "orbitalDiagram": "1s: ↑↓\n2s: ↑↓\n2p: ↑↓ | ↑↓ | ↑↓\n3s: ↑↓\n3p: ↑↓ | ↑↓ | ↑↓\n3d: ↑  | ↑  | ↑  | ↑  | ↑ \n4s: ↑ "
+        }
+      }
+    },
+    {
+      "id": "out-of-range",
+      "inputs": {
+        "ec-atomic-number": "200"
       },
       "expect": {
         "value": "",
-        "explanation": "Error: Missing or invalid input for ec-atomic-number"
+        "explanation": "Error: Atomic number must be between 1 and 118"
       }
     }
   ]
