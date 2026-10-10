@@ -1,4 +1,4 @@
-import {render, fireEvent, cleanup} from "@solidjs/testing-library";
+import {render, fireEvent, cleanup, waitFor} from "@solidjs/testing-library";
 import {describe, it, expect, afterEach, beforeEach, vi} from "vitest";
 import {ChartRenderer} from "../../modules/chartRenderer.js";
 import {Kinetics} from "./kinetics";
@@ -138,7 +138,9 @@ describe("Kinetics route", function (): void {
         expect(text).toBeTruthy();
         expect(text.textContent).toMatch(/0\.6065/);
         expect(text.textContent).toMatch(/M/);
-        expect(renderLineChartSpy).toHaveBeenCalled();
+        await waitFor(function (): void {
+            expect(renderLineChartSpy).toHaveBeenCalled();
+        });
     });
     it("determines reaction order from exponential decay data as first order", async function (): Promise<void> {
         let result = render(function () { return <Kinetics />; });
