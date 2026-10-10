@@ -93,7 +93,8 @@ describe("MolecularViewerRoute", function (): void {
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
         expect(canvas.style.transform).toBe("");
         fireEvent.click(result.getByLabelText("Zoom in"));
-        expect(canvas.style.transform).toBe("scale(1.2)");
+        expect(canvas.style.transform).toBe("");
+        expect(canvas.style.width).toBe("480px");
     });
     it("applies zoom out when the - button is clicked", async function (): Promise<void> {
         let result = render(function () { return <MolecularViewerRoute />; });
@@ -106,9 +107,10 @@ describe("MolecularViewerRoute", function (): void {
         });
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
         fireEvent.click(result.getByLabelText("Zoom in"));
-        expect(canvas.style.transform).toBe("scale(1.2)");
+        expect(canvas.style.width).toBe("480px");
         fireEvent.click(result.getByLabelText("Zoom out"));
         expect(canvas.style.transform).toBe("");
+        expect(canvas.style.width).toBe("400px");
     });
     it("resets zoom when the Reset button is clicked", async function (): Promise<void> {
         let result = render(function () { return <MolecularViewerRoute />; });
@@ -122,9 +124,11 @@ describe("MolecularViewerRoute", function (): void {
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
         fireEvent.click(result.getByLabelText("Zoom in"));
         fireEvent.click(result.getByLabelText("Zoom in"));
-        expect(canvas.style.transform).toBe("scale(1.44)");
+        expect(canvas.style.transform).toBe("");
+        expect(canvas.style.width).toBe("576px");
         fireEvent.click(result.getByLabelText("Reset view"));
         expect(canvas.style.transform).toBe("");
+        expect(canvas.style.width).toBe("400px");
     });
     it("clears the canvas and shows empty state when Clear is clicked", async function (): Promise<void> {
         let result = render(function () { return <MolecularViewerRoute />; });
@@ -162,7 +166,8 @@ describe("MolecularViewerRoute", function (): void {
             fireEvent.click(zoomIn);
         }
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
-        expect(canvas.style.transform).toBe("scale(5)");
+        expect(canvas.style.transform).toBe("");
+        expect(canvas.style.width).toBe("2000px");
     });
     it("clamps zoom out at 0.2x", async function (): Promise<void> {
         let result = render(function () { return <MolecularViewerRoute />; });
@@ -178,7 +183,8 @@ describe("MolecularViewerRoute", function (): void {
             fireEvent.click(zoomOut);
         }
         let canvas: HTMLCanvasElement = result.container.querySelector("canvas") as HTMLCanvasElement;
-        expect(canvas.style.transform).toBe("scale(0.2)");
+        expect(canvas.style.transform).toBe("");
+        expect(canvas.style.width).toBe("80px");
     });
     it("changes the sketch element when the palette select changes", function (): void {
         let result = render(function () { return <MolecularViewerRoute />; });
