@@ -3,6 +3,7 @@ import {onMount, onCleanup, createMemo, createRenderEffect, createEffect} from "
 import "../../third-party/registerChartPlugins.js";
 import {ChartRenderer} from "../../../modules/chartRenderer.js";
 import type {ChartData, ChartOptions} from "../../../modules/chartRenderer.js";
+import {observeCanvasResize} from "../../../modules/dom/hidpiCanvas.js";
 import styles from "./ChartCanvas.module.css";
 export interface ChartCanvasProps {
     type: "line" | "bar" | "scatter";
@@ -21,6 +22,8 @@ function ChartCanvas(props: ChartCanvasProps): JSX.Element {
     createRenderEffect(function (): void {
         canvasId = canvasIdMemo();
     });
+    let canvasEl: HTMLCanvasElement | undefined;
+    let stopObserving: (() => void) | null = null;
     function renderByType(type: "line" | "bar" | "scatter", data: ChartData, options: ChartOptions): void {
         let renderer = ChartRenderer.getInstance();
         if (type === "line") {
@@ -35,6 +38,11 @@ function ChartCanvas(props: ChartCanvasProps): JSX.Element {
     }
     onMount(function (): void {
         renderByType(props.type, props.data, props.options);
+        if (canvasEl !== undefined) {
+            stopObserving = observeCanvasResize(canvasEl, function (): void {
+                ChartRenderer.getInstance().refitChart(canvasId);
+            });
+        }
     });
     let firstEffectRun: boolean = true;
     createEffect(function (): void {
@@ -45,15 +53,22 @@ function ChartCanvas(props: ChartCanvasProps): JSX.Element {
             firstEffectRun = false;
             return;
         }
-        ChartRenderer.getInstance().destroyChart(canvasId);
+        if (ChartRenderer.getInstance().hasChart(canvasId)) {
+            ChartRenderer.getInstance().updateChart(canvasId, currentData, currentOptions);
+            return;
+        }
         renderByType(currentType, currentData, currentOptions);
     });
     onCleanup(function (): void {
+        if (stopObserving !== null) {
+            stopObserving();
+            stopObserving = null;
+        }
         ChartRenderer.getInstance().destroyChart(canvasId);
     });
     return (
         <div class={styles.chartContainer}>
-            <canvas id={canvasId} role="img" aria-label={props.options.title} />
+            <canvas id={canvasId} ref={function (el: HTMLCanvasElement): void { canvasEl = el; }} role="img" aria-label={props.options.title} />
         </div>
     );
 }
