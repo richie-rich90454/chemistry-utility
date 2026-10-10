@@ -5,7 +5,7 @@ import { NavigationManager } from "./navigationManager.js";
 import { UrlStateManager } from "./urlStateManager.js";
 import { InputPersistence } from "./inputPersistence.js";
 import { ExportManager } from "./exportManager.js";
-import { IdealGasLawCalculator } from "./gasLawCalculators.js";
+import { resetIdealGasDefaults } from "./dom/prefill.js";
 
 function setupAppDOM(): void {
     document.body.innerHTML = [
@@ -41,6 +41,7 @@ describe("AppNavigationStrategy", () => {
         vi.spyOn(UrlStateManager.prototype, "restoreState").mockReturnValue(null);
         vi.spyOn(UrlStateManager.prototype, "fillInputs").mockImplementation(() => {});
         vi.spyOn(InputPersistence.prototype, "restore").mockReturnValue(null);
+        resetIdealGasDefaults();
     });
 
     afterEach(() => {
@@ -124,9 +125,15 @@ describe("AppNavigationStrategy", () => {
     });
 
     it("applies gas-law defaults when navigating to gas-laws", () => {
-        const spy = vi.spyOn(IdealGasLawCalculator, "applyDefaults").mockImplementation(() => {});
+        const tempInput = document.createElement("input");
+        tempInput.id = "ideal-T";
+        const pressureInput = document.createElement("input");
+        pressureInput.id = "ideal-P";
+        document.body.appendChild(tempInput);
+        document.body.appendChild(pressureInput);
         strategy.navigate("gas-laws");
-        expect(spy).toHaveBeenCalledTimes(1);
+        expect(tempInput.value).toBe("298.15");
+        expect(pressureInput.value).toBe("1");
     });
 
     it("prefers URL state over persisted inputs", () => {
