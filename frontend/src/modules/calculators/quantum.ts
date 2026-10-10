@@ -5,6 +5,14 @@ function formatter(): NumberFormatter {
     return NumberFormatter.createFromCurrentLocale();
 }
 
+function readNumber(inputs: Record<string, string>, key: string): number {
+    return parseFloat(inputs[key] ?? "");
+}
+
+function readText(inputs: Record<string, string>, key: string): string {
+    return inputs[key] ?? "";
+}
+
 /** Planck constant in J*s */
 const PLANCK: number = 6.626e-34;
 /** Reduced Planck constant (h-bar) in J*s */
@@ -23,7 +31,11 @@ const AMU_TO_KG: number = 1.661e-27;
  * n: positive integer (1, 2, 3, ...), l: 0 to n-1, ml: -l to +l,
  * ms: +1/2 or -1/2.
  */
-export function quantumNumbers(n: number, l: number, ml: number, ms: number): CalculatorResult {
+export function quantumNumbers(inputs: Record<string, string>): CalculatorResult {
+    const n = readNumber(inputs, "qn-n");
+    const l = readNumber(inputs, "qn-l");
+    const ml = readNumber(inputs, "qn-ml");
+    const ms = readNumber(inputs, "qn-ms");
     if (isNaN(n) || isNaN(l) || isNaN(ml) || isNaN(ms)) {
         throw new Error("Missing or invalid inputs for qn-n, qn-l, qn-ml, qn-ms");
     }
@@ -83,7 +95,8 @@ export function quantumNumbers(n: number, l: number, ml: number, ms: number): Ca
 /** Full electron configuration from an atomic number, honouring the Aufbau
  * exceptions, plus the noble gas shorthand, orbital diagram, and valence
  * electron count. */
-export function electronConfiguration(z: number): CalculatorResult {
+export function electronConfiguration(inputs: Record<string, string>): CalculatorResult {
+    const z = readNumber(inputs, "ec-atomic-number");
     if (isNaN(z)) {
         throw new Error("Missing or invalid input for ec-atomic-number");
     }
@@ -114,7 +127,9 @@ export function electronConfiguration(z: number): CalculatorResult {
 }
 
 /** Hydrogen spectral line from the Rydberg formula 1/lambda = R_H*(1/n1^2 - 1/n2^2). */
-export function rydberg(n1: number, n2: number): CalculatorResult {
+export function rydberg(inputs: Record<string, string>): CalculatorResult {
+    const n1 = readNumber(inputs, "rydberg-n1");
+    const n2 = readNumber(inputs, "rydberg-n2");
     if (isNaN(n1) || isNaN(n2)) {
         throw new Error("Missing or invalid inputs for rydberg-n1, rydberg-n2");
     }
@@ -156,7 +171,10 @@ export function rydberg(n1: number, n2: number): CalculatorResult {
 }
 
 /** de Broglie wavelength lambda = h / (m*v); mass in kg, g, or amu. */
-export function deBroglie(massRaw: number, velocity: number, massUnit: string): CalculatorResult {
+export function deBroglie(inputs: Record<string, string>): CalculatorResult {
+    const massRaw = readNumber(inputs, "db-mass");
+    const velocity = readNumber(inputs, "db-velocity");
+    const massUnit = inputs["db-mass-unit"] ?? "kg";
     if (isNaN(massRaw) || isNaN(velocity)) {
         throw new Error("Missing or invalid inputs for db-mass, db-velocity");
     }
@@ -217,13 +235,12 @@ export function deBroglie(massRaw: number, velocity: number, massUnit: string): 
 
 /** Photoelectric effect KE = hf - phi, solved for the variable named by
  * `solveFor` ("KE", "threshold-frequency", "work-function", or "wavelength"). */
-export function photoelectric(
-    solveFor: string,
-    wavelengthNm: number,
-    frequencyHz: number,
-    workFunctionEv: number,
-    keEv: number
-): CalculatorResult {
+export function photoelectric(inputs: Record<string, string>): CalculatorResult {
+    const solveFor = readText(inputs, "pe-solve-for");
+    const wavelengthNm = readNumber(inputs, "pe-wavelength");
+    const frequencyHz = readNumber(inputs, "pe-frequency");
+    const workFunctionEv = readNumber(inputs, "pe-work-function");
+    const keEv = readNumber(inputs, "pe-ke");
     let nf: NumberFormatter = formatter();
     if (solveFor === "KE") {
         let freq: number = frequencyHz;
@@ -368,7 +385,11 @@ export function photoelectric(
 
 /** Heisenberg uncertainty deltaX * deltaP >= hbar/2, solved for the variable
  * named by `solveFor` ("min-delta-x" or "min-delta-p"). */
-export function heisenberg(solveFor: string, deltaX: number, deltaP: number, mass: number): CalculatorResult {
+export function heisenberg(inputs: Record<string, string>): CalculatorResult {
+    const solveFor = readText(inputs, "heis-solve-for");
+    const deltaX = readNumber(inputs, "heis-delta-x");
+    const deltaP = readNumber(inputs, "heis-delta-p");
+    const mass = readNumber(inputs, "heis-mass");
     let nf: NumberFormatter = formatter();
     let minProduct: number = HBAR / 2.0;
     if (solveFor === "min-delta-x") {
