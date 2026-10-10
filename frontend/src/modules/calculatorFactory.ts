@@ -1,4 +1,5 @@
 import type { Calculator } from "./calculator.js";
+import type { PureCalculator } from "./calculators/pureCalculator.js";
 import type { ChemicalElement } from "../types.js";
 import { DilutionCalculator, MassPercentCalculator, MixingCalculator } from "./solutionCalculators.js";
 import { IdealGasLawCalculator, CombinedGasLawCalculator, VanDerWaalsCalculator, HalfLifeCalculator } from "./gasLawCalculators.js";
@@ -22,7 +23,7 @@ export class CalculatorFactory {
 	 * Creates a calculator instance for the given id, optionally injecting
 	 * a custom {@link InputProvider}. Returns undefined for unknown ids.
 	 */
-	public create(calculatorId: string): Calculator | undefined {
+	public create(calculatorId: string): Calculator | PureCalculator | undefined {
 		switch (calculatorId) {
 			case "dilution":
 				return new DilutionCalculator();
