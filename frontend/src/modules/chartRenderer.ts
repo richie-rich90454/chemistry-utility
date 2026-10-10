@@ -1,5 +1,7 @@
 import { Chart } from "../solid/third-party/registerChartPlugins.js";
 import { ThemeManager, Theme } from "./themeManager.js";
+import { dps } from "./dom/hidpiCanvas.js";
+import { downloadCanvasPng } from "./dom/canvasExport.js";
 
 export interface ChartDataset {
     label: string;
@@ -56,6 +58,10 @@ interface ChartThemeOptions {
         x?: ChartThemeScale;
         y?: ChartThemeScale;
     };
+}
+
+interface ChartPixelRatioOptions {
+    devicePixelRatio?: number;
 }
 
 type ChartType = "line" | "bar" | "scatter";
@@ -146,6 +152,7 @@ function buildChartConfiguration(type: ChartType, data: ChartData, options: Char
             "datasets": datasetsConfig
         },
         "options": {
+            "devicePixelRatio": dps(),
             "responsive": true,
             "maintainAspectRatio": false,
             "interaction": {
@@ -366,6 +373,39 @@ class ChartRenderer {
     private buildConfiguration(type: ChartType, data: ChartData, options: ChartOptions): ChartConfiguration {
         return buildChartConfiguration(type, data, options, this.isDark);
     }
+
+    /**
+     * Re-applies data and options to the chart already registered for
+     * canvasId instead of destroying and rebuilding it, so a prop change no
+     * longer blanks the canvas for a frame.
+     */
+    public updateChart(canvasId: string, data: ChartData, options: ChartOptions): void {
+        this.validateChartData(data);
+        let stored: StoredChart | undefined = this.charts.get(canvasId);
+        if (!stored) {
+            return;
+        }
+        stored.data = data;
+        stored.options = options;
+        let config: ChartConfiguration = this.buildConfiguration(stored.type, data, options);
+        stored.chart.data = config.data as unknown as typeof stored.chart.data;
+        stored.chart.options = config.options as unknown as typeof stored.chart.options;
+        stored.chart.update();
+    }
+
+    /**
+     * Re-measures the canvas backing store for the current device pixel
+     * ratio after the element has been resized or moved to a display with a
+     * different pixel density.
+     */
+    public refitChart(canvasId: string): void {
+        let stored: StoredChart | undefined = this.charts.get(canvasId);
+        if (!stored) {
+            return;
+        }
+        (stored.chart.options as unknown as ChartPixelRatioOptions).devicePixelRatio = dps();
+        stored.chart.resize();
+    }
     private getThemeColors(): ThemeColors {
         return getThemeColorsForTheme(this.isDark);
     }
@@ -456,22 +496,16 @@ class ChartRenderer {
     }
 
     /**
-     * Exports the canvas content as a PNG download. Triggers a browser
-     * download using the provided filename.
+     * Exports the canvas content as a PNG download at twice the backing
+     * store resolution. Triggers a browser download using the provided
+     * filename.
      */
-    public exportChartAsPng(canvasId: string, filename: string): void {
+    public async exportChartAsPng(canvasId: string, filename: string): Promise<void> {
         let canvas: HTMLCanvasElement | null = document.getElementById(canvasId) as HTMLCanvasElement | null;
         if (!canvas) {
             throw new Error("Canvas element not found: " + canvasId);
         }
-        let dataUrl: string = canvas.toDataURL("image/png");
-        let link: HTMLAnchorElement = document.createElement("a");
-        link.href = dataUrl;
-        link.download = filename;
-        link.style.display = "none";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        await downloadCanvasPng(canvas, filename);
     }
 
     /**
