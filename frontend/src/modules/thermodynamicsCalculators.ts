@@ -16,13 +16,7 @@ export class GibbsFreeEnergyCalculator extends PureCalculator {
     }
 
     protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-        const deltaH = parseFloat(inputs["gibbs-deltaH"] ?? "");
-        const deltaS = parseFloat(inputs["gibbs-deltaS"] ?? "");
-        const T = parseFloat(inputs["gibbs-T"] ?? "");
-        if (isNaN(deltaH) || isNaN(deltaS) || isNaN(T)) {
-            throw new Error("Missing or invalid inputs for gibbs-deltaH, gibbs-deltaS, gibbs-T");
-        }
-        return gibbsFreeEnergy(deltaH, deltaS, T);
+        return gibbsFreeEnergy(inputs);
     }
 }
 
@@ -36,7 +30,7 @@ export class HessLawCalculator extends PureCalculator {
     }
 
     protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-        return hessLaw(inputs["hess-steps"] ?? "");
+        return hessLaw(inputs);
     }
 }
 
@@ -47,7 +41,7 @@ export class EntropyCalculator extends PureCalculator {
     }
 
     protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-        return entropy(inputs["entropy-products"] ?? "", inputs["entropy-reactants"] ?? "");
+        return entropy(inputs);
     }
 }
 
@@ -58,13 +52,7 @@ export class HeatCapacityCalculator extends PureCalculator {
     }
 
     protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-        const solveFor = inputs["heat-cap-solve-for"] ?? "";
-        const mass = parseFloat(inputs["heat-cap-mass"] ?? "");
-        const c = parseFloat(inputs["heat-cap-specific-heat"] ?? "");
-        const T_initial = parseFloat(inputs["heat-cap-initial-temp"] ?? "");
-        const T_final = parseFloat(inputs["heat-cap-final-temp"] ?? "");
-        const q = parseFloat(inputs["heat-cap-heat"] ?? "");
-        return heatCapacity(solveFor, mass, c, T_initial, T_final, q);
+        return heatCapacity(inputs);
     }
 }
 
@@ -75,7 +63,7 @@ export class BondEnthalpyCalculator extends PureCalculator {
     }
 
     protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-        return bondEnthalpy(inputs["bond-enthalpy-broken"] ?? "", inputs["bond-enthalpy-formed"] ?? "");
+        return bondEnthalpy(inputs);
     }
 }
 
@@ -86,15 +74,7 @@ export class BornHaberCycleCalculator extends PureCalculator {
     }
 
     protected performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-        const dHf = parseFloat(inputs["born-haber-dHf"] ?? "");
-        const dHsub = parseFloat(inputs["born-haber-dHsub"] ?? "");
-        const IE = parseFloat(inputs["born-haber-IE"] ?? "");
-        const dHdiss = parseFloat(inputs["born-haber-dHdiss"] ?? "");
-        const EA = parseFloat(inputs["born-haber-EA"] ?? "");
-        if (isNaN(dHf) || isNaN(dHsub) || isNaN(IE) || isNaN(dHdiss) || isNaN(EA)) {
-            throw new Error("Missing or invalid inputs for born-haber-dHf, born-haber-dHsub, born-haber-IE, born-haber-dHdiss, born-haber-EA");
-        }
-        return bornHaber(dHf, dHsub, IE, dHdiss, EA);
+        return bornHaber(inputs);
     }
 }
 
