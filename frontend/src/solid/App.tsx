@@ -37,6 +37,7 @@ import {ScrollTopButton} from "./components/ScrollTopButton";
 import {CommandPalette} from "./components/CommandPalette";
 import {OnboardingTour} from "./components/OnboardingTour";
 import {ComparisonModal} from "./components/ComparisonModal";
+import {RouteTransition} from "./components/RouteTransition";
 import {createSignal} from "solid-js";
 import {isDesktop} from "./lib/desktopOnly";
 function MassCalcRedirect(): JSX.Element {
@@ -134,7 +135,7 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
             </aside>
             <main class="app-content" id="main-content" aria-label="Main content">
                 <SkipLink />
-                {props.children}
+                <RouteTransition>{props.children}</RouteTransition>
                 <ScrollTopButton />
             </main>
             <MobileNavSheet />
