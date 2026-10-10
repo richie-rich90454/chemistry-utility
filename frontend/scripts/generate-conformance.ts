@@ -51,6 +51,27 @@ import {
 } from "../src/modules/thermodynamicsCalculators.js";
 import {BondTypePredictor} from "../src/modules/bondPredictor.js";
 import {bondType} from "../src/modules/calculators/bondType.js";
+import {
+    cellPotential,
+    electrolysis,
+    nernst
+} from "../src/modules/calculators/electrochemistry.js";
+import {
+    bondEnthalpy,
+    bornHaber,
+    entropy,
+    gibbsFreeEnergy,
+    heatCapacity,
+    hessLaw
+} from "../src/modules/calculators/thermodynamics.js";
+import {
+    deBroglie,
+    electronConfiguration,
+    heisenberg,
+    photoelectric,
+    quantumNumbers,
+    rydberg
+} from "../src/modules/calculators/quantum.js";
 import {FormulaParser} from "../src/modules/formulaParser.js";
 import {balanceEquation, balanceRedox} from "../src/modules/equationBalancer.js";
 import {elementsToDataset} from "./conformanceData.js";
@@ -71,6 +92,21 @@ const CONTRACT = "calc-result-v1";
 
 interface PureCalculator {
     calculatePure(inputs: Record<string, string>): unknown;
+}
+
+/**
+ * Records the output of a pure calculator function. Thrown errors are
+ * captured as the web engine surfaces them: an empty value plus an
+ * "Error: …" explanation. That way a vector pins the error message too.
+ */
+function pureCase(fn: (inputs: Record<string, string>) => unknown, id: string, inputs: Record<string, string>): VectorCase {
+    try {
+        let out = fn(Object.assign({}, inputs));
+        return { "id": id, "inputs": inputs, "expect": out };
+    } catch (error) {
+        let message = error instanceof Error ? error.message : String(error);
+        return { "id": id, "inputs": inputs, "expect": { value: "", explanation: "Error: " + message } };
+    }
 }
 
 function buildCase(calculator: PureCalculator, id: string, inputs: Record<string, string>): VectorCase {
@@ -106,7 +142,7 @@ function bondCase(id: string, symbol1: string, symbol2: string): VectorCase {
     return {
         "id": id,
         "inputs": { "element1-input": symbol1, "element2-input": symbol2 },
-        "expect": bondType(symbol1, symbol2, elementsToDataset())
+        "expect": bondType({ "element1-input": symbol1, "element2-input": symbol2 })
     };
 }
 
@@ -358,40 +394,94 @@ function collect(): void {
     ]);
 
     writeVector("quantum-numbers.json", "quantum-numbers", [
-        buildCase(new QuantumNumbersValidator(), "3d-electron", {
-            "quantum-n": "3", "quantum-l": "2", "quantum-m": "1", "quantum-s": "-1/2"
+        pureCase(quantumNumbers, "3d-electron", {
+            "qn-n": "3", "qn-l": "2", "qn-ml": "1", "qn-ms": "-0.5"
         }),
-        buildCase(new QuantumNumbersValidator(), "invalid-m", {
-            "quantum-n": "2", "quantum-l": "0", "quantum-m": "1", "quantum-s": "1/2"
+        pureCase(quantumNumbers, "invalid-m", {
+            "qn-n": "2", "qn-l": "0", "qn-ml": "1", "qn-ms": "0.5"
+        }),
+        pureCase(quantumNumbers, "invalid-l-out-of-range", {
+            "qn-n": "2", "qn-l": "2", "qn-ml": "0", "qn-ms": "0.5"
+        }),
+        pureCase(quantumNumbers, "1s-electron", {
+            "qn-n": "1", "qn-l": "0", "qn-ml": "0", "qn-ms": "0.5"
+        }),
+        pureCase(quantumNumbers, "missing-inputs", {
+            "qn-n": "", "qn-l": "1", "qn-ml": "0", "qn-ms": "0.5"
         })
     ]);
 
     writeVector("electron-configuration.json", "electron-configuration", [
-        buildCase(new ElectronConfigurationGenerator(), "iron", { "electron-config-input": "26" }),
-        buildCase(new ElectronConfigurationGenerator(), "uranium", { "electron-config-input": "92" })
+        pureCase(electronConfiguration, "iron", { "ec-atomic-number": "26" }),
+        pureCase(electronConfiguration, "uranium", { "ec-atomic-number": "92" }),
+        pureCase(electronConfiguration, "hydrogen", { "ec-atomic-number": "1" }),
+        pureCase(electronConfiguration, "chromium-exception", { "ec-atomic-number": "24" }),
+        pureCase(electronConfiguration, "out-of-range", { "ec-atomic-number": "200" })
     ]);
 
     writeVector("rydberg.json", "rydberg", [
-        buildCase(new RydbergCalculator(), "visible-line", {
+        pureCase(rydberg, "visible-line", {
             "rydberg-n1": "2", "rydberg-n2": "3"
+        }),
+        pureCase(rydberg, "lyman-alpha", {
+            "rydberg-n1": "1", "rydberg-n2": "2"
+        }),
+        pureCase(rydberg, "balmer-limit", {
+            "rydberg-n1": "2", "rydberg-n2": "99"
+        }),
+        pureCase(rydberg, "missing-n2", {
+            "rydberg-n1": "2", "rydberg-n2": ""
         })
     ]);
 
     writeVector("debroglie.json", "debroglie-wavelength", [
-        buildCase(new DeBroglieWavelengthCalculator(), "electron", {
+        pureCase(deBroglie, "electron", {
             "db-mass": "9.109e-31", "db-velocity": "2e6", "db-mass-unit": "kg"
+        }),
+        pureCase(deBroglie, "proton", {
+            "db-mass": "1.673e-27", "db-velocity": "1e5", "db-mass-unit": "kg"
+        }),
+        pureCase(deBroglie, "ammonia-molecule", {
+            "db-mass": "17", "db-velocity": "611", "db-mass-unit": "amu"
+        }),
+        pureCase(deBroglie, "zero-velocity", {
+            "db-mass": "9.109e-31", "db-velocity": "0", "db-mass-unit": "kg"
         })
     ]);
 
     writeVector("photoelectric.json", "photoelectric-effect", [
-        buildCase(new PhotoelectricEffectCalculator(), "typical", {
-            "photo-work-function": "4.5", "photo-frequency": "1e15"
+        pureCase(photoelectric, "solve-ke", {
+            "pe-solve-for": "KE", "pe-work-function": "4.5", "pe-frequency": "2e15"
+        }),
+        pureCase(photoelectric, "below-threshold", {
+            "pe-solve-for": "KE", "pe-work-function": "4.5", "pe-frequency": "1e14"
+        }),
+        pureCase(photoelectric, "solve-threshold-frequency", {
+            "pe-solve-for": "threshold-frequency", "pe-work-function": "4.5", "pe-ke": "1.5"
+        }),
+        pureCase(photoelectric, "solve-wavelength", {
+            "pe-solve-for": "wavelength", "pe-ke": "1.5", "pe-work-function": "4.5"
+        }),
+        pureCase(photoelectric, "invalid-solve-for", {
+            "pe-solve-for": "nope", "pe-work-function": "4.5", "pe-frequency": "2e15"
         })
     ]);
 
     writeVector("heisenberg.json", "heisenberg-uncertainty", [
-        buildCase(new HeisenbergUncertaintyCalculator(), "typical", {
-            "heisenberg-dx": "1e-10"
+        pureCase(heisenberg, "solve-min-delta-p", {
+            "heis-solve-for": "min-delta-p", "heis-delta-x": "1e-10"
+        }),
+        pureCase(heisenberg, "solve-min-delta-x", {
+            "heis-solve-for": "min-delta-x", "heis-delta-p": "1e-24"
+        }),
+        pureCase(heisenberg, "macroscopic-position", {
+            "heis-solve-for": "min-delta-p", "heis-delta-x": "1e-3"
+        }),
+        pureCase(heisenberg, "invalid-solve-for", {
+            "heis-solve-for": "nope", "heis-delta-x": "1e-10"
+        }),
+        pureCase(heisenberg, "missing-delta-x", {
+            "heis-solve-for": "min-delta-p", "heis-delta-x": ""
         })
     ]);
 
@@ -406,9 +496,20 @@ function collect(): void {
     ]);
 
     writeVector("electrolysis.json", "electrolysis", [
-        buildCase(new ElectrolysisCalculator(), "solve-m", {
-            "electrolysis-m": "", "electrolysis-I": "2", "electrolysis-t": "1800",
-            "electrolysis-z": "2", "electrolysis-M": "63.5", "electrolysis-solve-for": "m"
+        pureCase(electrolysis, "solve-mass", {
+            "electrolysis-solve-for": "mass", "electrolysis-I": "2", "electrolysis-t": "1800",
+            "electrolysis-z": "2", "electrolysis-M": "63.5"
+        }),
+        pureCase(electrolysis, "solve-current", {
+            "electrolysis-solve-for": "current", "electrolysis-m": "10", "electrolysis-t": "1800",
+            "electrolysis-z": "2", "electrolysis-M": "63.5"
+        }),
+        pureCase(electrolysis, "solve-time", {
+            "electrolysis-solve-for": "time", "electrolysis-m": "10", "electrolysis-I": "2",
+            "electrolysis-z": "2", "electrolysis-M": "63.5"
+        }),
+        pureCase(electrolysis, "invalid-solve-for", {
+            "electrolysis-solve-for": "nope", "electrolysis-I": "2"
         })
     ]);
 
@@ -425,8 +526,24 @@ function collect(): void {
     ]);
 
     writeVector("heat-capacity.json", "heat-capacity", [
-        buildCase(new HeatCapacityCalculator(), "typical", {
-            "hc-q": "1000", "hc-m": "50", "hc-deltaT": "10", "hc-c": ""
+        pureCase(heatCapacity, "solve-q", {
+            "heat-cap-solve-for": "q", "heat-cap-mass": "50", "heat-cap-specific-heat": "4.184",
+            "heat-cap-initial-temp": "25", "heat-cap-final-temp": "75"
+        }),
+        pureCase(heatCapacity, "solve-c", {
+            "heat-cap-solve-for": "c", "heat-cap-mass": "50", "heat-cap-heat": "10460",
+            "heat-cap-initial-temp": "25", "heat-cap-final-temp": "75"
+        }),
+        pureCase(heatCapacity, "solve-deltaT", {
+            "heat-cap-solve-for": "deltaT", "heat-cap-mass": "50",
+            "heat-cap-specific-heat": "4.184", "heat-cap-heat": "10460"
+        }),
+        pureCase(heatCapacity, "solve-Tfinal", {
+            "heat-cap-solve-for": "Tfinal", "heat-cap-mass": "50", "heat-cap-specific-heat": "4.184",
+            "heat-cap-heat": "10460", "heat-cap-initial-temp": "25"
+        }),
+        pureCase(heatCapacity, "invalid-solve-for", {
+            "heat-cap-solve-for": "nope", "heat-cap-mass": "50"
         })
     ]);
 
