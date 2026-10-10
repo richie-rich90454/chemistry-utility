@@ -1,5 +1,6 @@
 import type { ChemicalElement } from "../../types.js";
 import { NumberFormatter } from "../i18n/numberFormatter.js";
+import { loadElements } from "./elementData.js";
 import type { CalculatorResult } from "./pureCalculator.js";
 
 function formatter(): NumberFormatter {
@@ -12,12 +13,14 @@ function isMetal(type: string): boolean {
 
 /**
  * Predicts the type of chemical bond formed between two elements from their
- * electronegativity difference and element types. Element symbols are
- * matched case-insensitively against the supplied periodic table data.
+ * electronegativity difference and element types. Element symbols are read
+ * from the "element1-input" and "element2-input" inputs and matched
+ * case-insensitively against the loaded periodic table data.
  */
-export function bondType(element1Symbol: string, element2Symbol: string, elements: ChemicalElement[]): CalculatorResult {
-    let element1Value: string = element1Symbol.trim();
-    let element2Value: string = element2Symbol.trim();
+export function bondType(inputs: Record<string, string>): CalculatorResult {
+    let elements: ChemicalElement[] = loadElements();
+    let element1Value: string = (inputs["element1-input"] ?? "").trim();
+    let element2Value: string = (inputs["element2-input"] ?? "").trim();
     if (!element1Value || !element2Value) {
         throw new Error("Please enter both element symbols");
     }
