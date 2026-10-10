@@ -1,0 +1,11 @@
+{
+  "name": "chemistry-utility-core",
+  "version": "3.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wails dev",
+    "build": "wails build",
+    "test": "go test ./...",
+    "lint": "golangci-lint run"
+  }
+}
