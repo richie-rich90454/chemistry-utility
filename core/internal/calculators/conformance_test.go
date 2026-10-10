@@ -92,6 +92,7 @@ var ported = map[string]calcFunc{
 	"cell-potential":         cellPotential,
 	"nernst":                 nernst,
 	"electrolysis":           electrolysis,
+	"born-haber":             bornHaber,
 }
 
 func conformanceDir(t *testing.T) string {
