@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { buildChartConfiguration } from "./chartRenderer.js";
 import type { ChartConfiguration } from "./chartRenderer.js";
 import type { ChartData, ChartOptions } from "./chartRenderer.js";
+import { dps } from "./dom/hidpiCanvas.js";
 interface TooltipCallbackContext {
     dataset: { label?: string };
     parsed: { x: number; y: number };
@@ -66,6 +67,10 @@ describe("buildChartConfiguration", function (): void {
         it("returns a configuration with type line", function (): void {
             let config: ChartConfiguration = buildChartConfiguration("line", createSampleData(), createSampleOptions(), false);
             expect(config.type).toBe("line");
+        });
+        it("renders at the current device pixel ratio", function (): void {
+            let config: ChartConfiguration = buildChartConfiguration("line", createSampleData(), createSampleOptions(), false);
+            expect(config.options.devicePixelRatio).toBe(dps());
         });
         it("preserves labels and dataset properties from input data", function (): void {
             let data: ChartData = createSampleData();
