@@ -1,5 +1,6 @@
 import SmilesDrawer from "smiles-drawer";
 import { SketchState, sketchToSmiles } from "./structureSketch.js";
+import { dps } from "./dom/hidpiCanvas.js";
 
 /**
  * A single molecule preset entry used to populate the dropdown in the
@@ -236,8 +237,16 @@ class MolecularViewer {
         }
         let canvas: HTMLCanvasElement = document.createElement("canvas");
         canvas.id = canvasId;
-        canvas.width = this.drawerOptions.width;
-        canvas.height = this.drawerOptions.height;
+        // SmilesDrawer sizes the canvas to its drawer dimensions times its own
+        // devicePixelRatio, so pre-sizing at the same ratio keeps the backing
+        // store at device resolution while the CSS box stays logical.
+        let dpr: number = dps();
+        let logicalWidth: number = this.drawerOptions.width;
+        let logicalHeight: number = this.drawerOptions.height;
+        canvas.width = Math.round(logicalWidth * dpr);
+        canvas.height = Math.round(logicalHeight * dpr);
+        canvas.style.width = logicalWidth + "px";
+        canvas.style.height = logicalHeight + "px";
         container.appendChild(canvas);
         this.render(smiles, canvasId);
     }
