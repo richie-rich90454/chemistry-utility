@@ -3,9 +3,50 @@ import "@testing-library/jest-dom/vitest";
 
 // Mock gsap (required by appNavigationStrategy transitively imported via navigationManager)
 // Hoisted to top level by vitest; safe to call unconditionally.
-vi.mock("gsap", () => ({
-    default: { to: vi.fn(), from: vi.fn(), fromTo: vi.fn(), set: vi.fn() },
-}));
+// Tweens are inert objects, and onUpdate/onComplete are queued as macrotasks so
+// code that chains on tween completion still resolves under test.
+vi.mock("gsap", () => {
+    function fakeTween(): Record<string, unknown> {
+        return {
+            "kill": vi.fn(),
+            "pause": vi.fn(),
+            "play": vi.fn(),
+            "progress": vi.fn(),
+            "duration": vi.fn(),
+            "time": vi.fn(),
+            "eventCallback": vi.fn(),
+            "invalidate": vi.fn()
+        };
+    }
+    function fakeAnimate(_target: unknown, vars?: Record<string, unknown>): unknown {
+        if (vars !== undefined) {
+            if (typeof vars.onUpdate === "function") {
+                setTimeout(function (): void { (vars.onUpdate as () => void)(); }, 0);
+            }
+            if (typeof vars.onComplete === "function") {
+                setTimeout(function (): void { (vars.onComplete as () => void)(); }, 0);
+            }
+        }
+        return fakeTween();
+    }
+    return {
+        default: {
+            to: vi.fn(fakeAnimate),
+            from: vi.fn(fakeAnimate),
+            fromTo: vi.fn(fakeAnimate),
+            set: vi.fn(),
+            timeline: vi.fn(function (): Record<string, unknown> {
+                let chain = fakeTween();
+                chain.to = vi.fn(function (): Record<string, unknown> { return chain; });
+                chain.from = vi.fn(function (): Record<string, unknown> { return chain; });
+                chain.fromTo = vi.fn(function (): Record<string, unknown> { return chain; });
+                chain.set = vi.fn(function (): Record<string, unknown> { return chain; });
+                return chain;
+            }),
+            killTweensOf: vi.fn()
+        },
+    };
+});
 
 // Skip DOM setup when running in Node environment (e.g., CLI tests)
 if (typeof window !== "undefined") {
@@ -52,11 +93,23 @@ if (typeof window !== "undefined") {
 
     // Mock clipboard API
     Object.defineProperty(navigator, "clipboard", {
-        value: {
-            writeText: vi.fn().mockResolvedValue(undefined),
-            readText: vi.fn().mockResolvedValue(""),
+        "value": {
+            "writeText": vi.fn().mockResolvedValue(undefined),
+            "readText": vi.fn().mockResolvedValue(""),
         },
-        writable: true,
+        "writable": true,
+    });
+
+    // Mock object URLs used by the canvas PNG export (jsdom does not implement them)
+    Object.defineProperty(URL, "createObjectURL", {
+        "value": vi.fn().mockReturnValue("blob:mock"),
+        "writable": true,
+        "configurable": true,
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+        "value": vi.fn(),
+        "writable": true,
+        "configurable": true,
     });
 
     // Mock scrollY
@@ -119,4 +172,11 @@ if (typeof window !== "undefined") {
     HTMLCanvasElement.prototype.toDataURL = vi.fn(function (): string {
         return "data:image/png;base64,FAKEDATA";
     }) as typeof HTMLCanvasElement.prototype.toDataURL;
+
+    // jsdom has no canvas implementation, so toBlob never fires its callback.
+    // The PNG export path relies on it, so hand back a deterministic blob.
+    HTMLCanvasElement.prototype.toBlob = vi.fn(function (callback: BlobCallback, type?: string): void {
+        let blob: Blob = new Blob(["\x89PNG"], { "type": type || "image/png" });
+        callback(blob);
+    }) as typeof HTMLCanvasElement.prototype.toBlob;
 }
