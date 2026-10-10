@@ -13,9 +13,6 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-//go:embed migrations
-var migrationsFS embed.FS
-
 func main() {
 	app := NewApp()
 
