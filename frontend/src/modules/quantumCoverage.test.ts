@@ -8,9 +8,11 @@ import {
     PhotoelectricEffectCalculator,
     HeisenbergUncertaintyCalculator,
 } from "./quantumCalculators.js";
+import {compareSubshellParts} from "./calculators/quantum.js";
+import type {PureCalculator} from "./calculators/pureCalculator.js";
 
 describe("quantumCoverage: subshell comparator", () => {
-    const cmp = (ElectronConfigurationGenerator as unknown as Record<string, (a: string, b: string) => number>)["compareSubshellParts"] as (a: string, b: string) => number;
+    const cmp = compareSubshellParts;
 
     it("orders by n then subshell", () => {
         expect(cmp("1s2", "2s2")).toBeLessThan(0);
@@ -20,6 +22,29 @@ describe("quantumCoverage: subshell comparator", () => {
         expect(cmp("3d6", "3p6")).toBeGreaterThan(0);
         expect(cmp("4f14", "4d10")).toBeGreaterThan(0);
         expect(cmp("2s2", "2s2")).toBe(0);
+    });
+});
+
+describe("quantumCoverage: calculator ids", () => {
+    it("reports the stable id of every calculator to the history sink", () => {
+        let cases: { calculator: PureCalculator; inputs: Record<string, string> }[] = [
+            {"calculator": new QuantumNumbersValidator(), "inputs": {"qn-n": "2", "qn-l": "1", "qn-ml": "0", "qn-ms": "0.5"}},
+            {"calculator": new ElectronConfigurationGenerator(), "inputs": {"ec-atomic-number": "26"}},
+            {"calculator": new RydbergCalculator(), "inputs": {"rydberg-n1": "2", "rydberg-n2": "3"}},
+            {"calculator": new DeBroglieWavelengthCalculator(), "inputs": {"db-mass": "9.109e-31", "db-velocity": "1e6", "db-mass-unit": "kg"}},
+            {"calculator": new PhotoelectricEffectCalculator(), "inputs": {"pe-solve-for": "KE", "pe-wavelength": "400", "pe-frequency": "", "pe-work-function": "2.3", "pe-ke": ""}},
+            {"calculator": new HeisenbergUncertaintyCalculator(), "inputs": {"heis-solve-for": "min-delta-p", "heis-delta-x": "1e-10", "heis-delta-p": "", "heis-mass": ""}}
+        ];
+        let ids: string[] = [];
+        for (let i = 0; i < cases.length; i++) {
+            cases[i].calculator.setHistorySink({
+                "addToHistory": function (calculatorId: string): void {
+                    ids.push(calculatorId);
+                }
+            });
+            expect(cases[i].calculator.calculatePure(cases[i].inputs).value).not.toBe("");
+        }
+        expect(ids).toEqual(["quantum-numbers", "electron-config", "rydberg", "debroglie", "photoelectric", "heisenberg"]);
     });
 });
 
