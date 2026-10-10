@@ -35,6 +35,42 @@ export default [
 		},
 	},
 	{
+		// The pure calculator layer is the contract boundary shared with the Go
+		// implementation in core/. It must stay DOM-free so it runs under Node
+		// in tests and under Go in the desktop build. DOM access belongs in
+		// src/modules/dom/.
+		files: ["src/modules/calculators/**/*.ts"],
+		rules: {
+			"no-restricted-globals": [
+				"error",
+				{
+					"name": "document",
+					"message": "The pure calculator layer must not touch the DOM. Put DOM access in src/modules/dom/.",
+				},
+				{
+					"name": "window",
+					"message": "The pure calculator layer must not touch the DOM. Put DOM access in src/modules/dom/.",
+				},
+				{
+					"name": "localStorage",
+					"message": "The pure calculator layer must be storage-free. Inject a HistorySink instead.",
+				},
+				{
+					"name": "sessionStorage",
+					"message": "The pure calculator layer must be storage-free. Inject a HistorySink instead.",
+				},
+				{
+					"name": "fetch",
+					"message": "The pure calculator layer must not perform I/O. Go performs any network access in the desktop build.",
+				},
+				{
+					"name": "XMLHttpRequest",
+					"message": "The pure calculator layer must not perform I/O. Go performs any network access in the desktop build.",
+				},
+			],
+		},
+	},
+	{
 		ignores: ["src/wailsjs/**", "dist/**", "build/**"],
 	},
 ];
