@@ -9,8 +9,22 @@ import { NumberFormatter } from "../i18n/numberFormatter.js";
  * ../thermodynamicsCalculators.ts and the Go port in core/ mirror.
  */
 
+function readText(inputs: Record<string, string>, key: string): string {
+    return inputs[key] ?? "";
+}
+
+function readNumber(inputs: Record<string, string>, key: string): number {
+    return parseFloat(inputs[key] ?? "");
+}
+
 /** ΔG = ΔH - TΔS. deltaH in kJ/mol, deltaS in J/(mol·K), T in K. */
-export function gibbsFreeEnergy(deltaH: number, deltaS: number, T: number): CalculatorResult {
+export function gibbsFreeEnergy(inputs: Record<string, string>): CalculatorResult {
+    const deltaH = readNumber(inputs, "gibbs-deltaH");
+    const deltaS = readNumber(inputs, "gibbs-deltaS");
+    const T = readNumber(inputs, "gibbs-T");
+    if (isNaN(deltaH) || isNaN(deltaS) || isNaN(T)) {
+        throw new Error("Missing or invalid inputs for gibbs-deltaH, gibbs-deltaS, gibbs-T");
+    }
     if (T < 0) {
         throw new Error("Temperature cannot be negative");
     }
@@ -41,9 +55,9 @@ export function gibbsFreeEnergy(deltaH: number, deltaS: number, T: number): Calc
 }
 
 /** Hess's Law: sum of 2-10 comma-separated ΔH values (kJ/mol). */
-export function hessLaw(stepsRaw: string): CalculatorResult {
+export function hessLaw(inputs: Record<string, string>): CalculatorResult {
     const fmt = NumberFormatter.createFromCurrentLocale();
-    const rawValue = stepsRaw.trim();
+    const rawValue = readText(inputs, "hess-steps").trim();
     if (rawValue === "") {
         throw new Error("Please enter at least 2 enthalpy values separated by commas");
     }
@@ -74,10 +88,10 @@ export function hessLaw(stepsRaw: string): CalculatorResult {
 }
 
 /** ΔS° = ΣS°(products) - ΣS°(reactants). Both inputs are comma-separated (J/(mol·K)). */
-export function entropy(productsRaw: string, reactantsRaw: string): CalculatorResult {
+export function entropy(inputs: Record<string, string>): CalculatorResult {
     const fmt = NumberFormatter.createFromCurrentLocale();
-    const productsTrimmed = productsRaw.trim();
-    const reactantsTrimmed = reactantsRaw.trim();
+    const productsTrimmed = readText(inputs, "entropy-products").trim();
+    const reactantsTrimmed = readText(inputs, "entropy-reactants").trim();
     if (productsTrimmed === "" || reactantsTrimmed === "") {
         throw new Error("Please enter entropy values for both products and reactants");
     }
@@ -118,8 +132,14 @@ export function entropy(productsRaw: string, reactantsRaw: string): CalculatorRe
  * depending on solveFor. mass in g, specific heat in J/(g·K), temperatures
  * in K, heat in J.
  */
-export function heatCapacity(solveFor: string, mass: number, c: number, T_initial: number, T_final: number, q: number): CalculatorResult {
+export function heatCapacity(inputs: Record<string, string>): CalculatorResult {
     const fmt = NumberFormatter.createFromCurrentLocale();
+    const solveFor = readText(inputs, "heat-cap-solve-for");
+    const mass = readNumber(inputs, "heat-cap-mass");
+    const c = readNumber(inputs, "heat-cap-specific-heat");
+    const T_initial = readNumber(inputs, "heat-cap-initial-temp");
+    const T_final = readNumber(inputs, "heat-cap-final-temp");
+    const q = readNumber(inputs, "heat-cap-heat");
     if (solveFor === "q") {
         if (isNaN(mass) || isNaN(c) || isNaN(T_initial) || isNaN(T_final)) {
             throw new Error("Missing or invalid inputs for heat-cap-mass, heat-cap-specific-heat, heat-cap-initial-temp, heat-cap-final-temp");
@@ -223,10 +243,10 @@ function parseBondList(raw: string, label: string): number {
 }
 
 /** ΔH ≈ Σ(bonds broken) - Σ(bonds formed), using the built-in bond-energy table. */
-export function bondEnthalpy(brokenRaw: string, formedRaw: string): CalculatorResult {
+export function bondEnthalpy(inputs: Record<string, string>): CalculatorResult {
     const fmt = NumberFormatter.createFromCurrentLocale();
-    const brokenTrimmed = brokenRaw.trim();
-    const formedTrimmed = formedRaw.trim();
+    const brokenTrimmed = readText(inputs, "bond-enthalpy-broken").trim();
+    const formedTrimmed = readText(inputs, "bond-enthalpy-formed").trim();
     if (brokenTrimmed === "" || formedTrimmed === "") {
         throw new Error("Please enter bond information for both broken and formed bonds");
     }
@@ -258,8 +278,16 @@ export function bondEnthalpy(brokenRaw: string, formedRaw: string): CalculatorRe
  * U = ΔHf - ΔHsub - IE - ΔHdiss/2 - EA. All inputs in kJ/mol. EA uses the
  * "energy released on electron attachment" convention (negative when exothermic).
  */
-export function bornHaber(dHf: number, dHsub: number, IE: number, dHdiss: number, EA: number): CalculatorResult {
+export function bornHaber(inputs: Record<string, string>): CalculatorResult {
     const fmt = NumberFormatter.createFromCurrentLocale();
+    const dHf = readNumber(inputs, "born-haber-dHf");
+    const dHsub = readNumber(inputs, "born-haber-dHsub");
+    const IE = readNumber(inputs, "born-haber-IE");
+    const dHdiss = readNumber(inputs, "born-haber-dHdiss");
+    const EA = readNumber(inputs, "born-haber-EA");
+    if (isNaN(dHf) || isNaN(dHsub) || isNaN(IE) || isNaN(dHdiss) || isNaN(EA)) {
+        throw new Error("Missing or invalid inputs for born-haber-dHf, born-haber-dHsub, born-haber-IE, born-haber-dHdiss, born-haber-EA");
+    }
     const U = dHf - dHsub - IE - (dHdiss / 2) - EA;
     return {
         value: "Lattice Energy U = " + fmt.format(U, 4) + " kJ/mol",
