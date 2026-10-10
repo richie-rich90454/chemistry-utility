@@ -1,0 +1,106 @@
+{
+  "calculator": "hess-law",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "two-steps",
+      "inputs": {
+        "hess-steps": "-100,50"
+      },
+      "expect": {
+        "value": "Total dH = -50.0000 kJ/mol",
+        "explanation": "Sum of 2 enthalpy steps = -50.0000 kJ/mol",
+        "metadata": {
+          "totalH": -50,
+          "stepCount": 2,
+          "steps": [
+            -100,
+            50
+          ]
+        }
+      }
+    },
+    {
+      "id": "three-steps",
+      "inputs": {
+        "hess-steps": "-40,-10,-15"
+      },
+      "expect": {
+        "value": "Total dH = -65.0000 kJ/mol",
+        "explanation": "Sum of 3 enthalpy steps = -65.0000 kJ/mol",
+        "metadata": {
+          "totalH": -65,
+          "stepCount": 3,
+          "steps": [
+            -40,
+            -10,
+            -15
+          ]
+        }
+      }
+    },
+    {
+      "id": "max-steps",
+      "inputs": {
+        "hess-steps": "1,2,3,4,5,6,7,8,9,10"
+      },
+      "expect": {
+        "value": "Total dH = 55.0000 kJ/mol",
+        "explanation": "Sum of 10 enthalpy steps = 55.0000 kJ/mol",
+        "metadata": {
+          "totalH": 55,
+          "stepCount": 10,
+          "steps": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "id": "decimals",
+      "inputs": {
+        "hess-steps": "-12.5,7.25,-3.75"
+      },
+      "expect": {
+        "value": "Total dH = -9.0000 kJ/mol",
+        "explanation": "Sum of 3 enthalpy steps = -9.0000 kJ/mol",
+        "metadata": {
+          "totalH": -9,
+          "stepCount": 3,
+          "steps": [
+            -12.5,
+            7.25,
+            -3.75
+          ]
+        }
+      }
+    },
+    {
+      "id": "scientific",
+      "inputs": {
+        "hess-steps": "-2.5e2,1.1e2"
+      },
+      "expect": {
+        "value": "Total dH = -140.0000 kJ/mol",
+        "explanation": "Sum of 2 enthalpy steps = -140.0000 kJ/mol",
+        "metadata": {
+          "totalH": -140,
+          "stepCount": 2,
+          "steps": [
+            -250,
+            110
+          ]
+        }
+      }
+    }
+  ]
+}
