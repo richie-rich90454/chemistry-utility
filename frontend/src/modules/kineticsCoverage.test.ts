@@ -7,6 +7,7 @@ import {
     ReactionOrderCalculator,
     CollisionTheoryCalculator,
 } from "./kineticsCalculators.js";
+import {buildConcentrationTimeSeries, calculateRSquared} from "./calculators/kinetics.js";
 
 function pureArrhenius(solveFor: string, A: string, Ea: string, T: string, k: string) {
     return new ArrheniusCalculator().calculatePure({
@@ -302,10 +303,8 @@ describe("kineticsCoverage: pure missing-key fallbacks", () => {
     });
 
     it("covers whitebox helpers directly", () => {
-        const calc = new IntegratedRateLawCalculator() as unknown as Record<string, (o: number, a: number, k: number, e: number) => Array<{ time: number; concentration: number }>>;
-        const series = calc["buildConcentrationTimeSeries"](0, 1, 0.05, 0);
+        const series = buildConcentrationTimeSeries(0, 1, 0.05, 0);
         expect(series.length).toBe(31);
-        const rc = new ReactionOrderCalculator() as unknown as Record<string, (pts: Array<{ t: number; c: number }>, fn: (p: { t: number; c: number }) => number) => number>;
-        expect(rc["calculateRSquared"]([{ t: 0, c: 1 }], (p) => p.c)).toBe(0);
+        expect(calculateRSquared([{ t: 0, c: 1 }], (p) => p.c)).toBe(0);
     });
 });
