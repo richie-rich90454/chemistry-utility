@@ -1,7 +1,7 @@
 import gsap from "gsap";
 import type { NavigationStrategy } from "./navigationManager.js";
 import { NavigationManager, CALCULATORS } from "./navigationManager.js";
-import { IdealGasLawCalculator } from "./gasLawCalculators.js";
+import { applyIdealGasDefaults } from "./dom/prefill.js";
 import { InputPersistence } from "./inputPersistence.js";
 import { UrlStateManager } from "./urlStateManager.js";
 import { ExportManager } from "./exportManager.js";
@@ -64,7 +64,7 @@ export class AppNavigationStrategy implements NavigationStrategy {
 
 		// Apply smart defaults for gas law calculator
 		if (targetId === "gas-laws") {
-			IdealGasLawCalculator.applyDefaults();
+			applyIdealGasDefaults();
 		}
 
 		// Restore persisted input values
