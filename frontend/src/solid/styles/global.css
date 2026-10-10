@@ -1,6 +1,8 @@
 /* Chemistry Utility — App Design Tokens
    Flat palette, zero rounded edges, asymmetric layout. */
 
+@import "./motion.css";
+
 /* Font loading */
 @font-face {
     font-family: "Noto Sans";
