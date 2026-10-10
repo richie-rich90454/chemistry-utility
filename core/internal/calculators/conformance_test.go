@@ -2,6 +2,8 @@ package calculators
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -14,6 +16,20 @@ type vecCase struct {
 	ID     string                 `json:"id"`
 	Inputs map[string]interface{} `json:"inputs"`
 	Expect CalcResultJSON         `json:"expect"`
+	// Numeric carries the number-only contract some vectors record instead
+	// of the calc-result value/explanation pair (molar-mass). The bare
+	// number is compared against the metadata the ported calculator
+	// returns under the same key.
+	Numeric map[string]float64 `json:"-"`
+}
+
+// vecFileNumeric re-reads each expect object as raw JSON so the number-only
+// keys survive; the CalculatorResult shape above drops everything it does
+// not model.
+type vecFileNumeric struct {
+	Cases []struct {
+		Expect map[string]interface{} `json:"expect"`
+	} `json:"cases"`
 }
 
 // CalcResultJSON is the wire shape the vectors record. It mirrors the
@@ -40,9 +56,42 @@ type vecFile struct {
 // Calculators absent from this map are skipped, so the suite grows as the
 // port lands instead of failing on not-yet-ported calculators.
 var ported = map[string]calcFunc{
-	"dilution":        dilution,
-	"mass-percent":    massPercent,
-	"solution-mixing": solutionMixing,
+	"dilution":               dilution,
+	"mass-percent":           massPercent,
+	"solution-mixing":        solutionMixing,
+	"buffer-solution":        bufferSolution,
+	"pka-pkb":                pKaPKb,
+	"ksp":                    ksp,
+	"colligative-properties": colligativeProperties,
+	"titration-curve":        titrationCurve,
+	"debye-huckel":           debyeHuckel,
+	"common-ion":             commonIonEffect,
+	"bond-type":              bondType,
+	"hess-law":               hessLaw,
+	"arrhenius":              arrhenius,
+	"collision-theory":       collisionTheory,
+	"half-life":              halfLife,
+	"integrated-rate-law":    integratedRateLaw,
+	"rate-law":               rateLaw,
+	"reaction-order":         reactionOrder,
+	"stoichiometry":          stoichiometry,
+	"ideal-gas":              idealGas,
+	"combined-gas":           combinedGas,
+	"van-der-waals":          vanDerWaals,
+	"molar-mass":             molarMass,
+	"gibbs-free-energy":      gibbsFreeEnergy,
+	"entropy":                entropy,
+	"heat-capacity":          heatCapacity,
+	"bond-enthalpy":          bondEnthalpy,
+	"quantum-numbers":        quantumNumbers,
+	"electron-configuration": electronConfiguration,
+	"rydberg":                rydberg,
+	"debroglie-wavelength":   deBroglie,
+	"photoelectric-effect":   photoelectric,
+	"heisenberg-uncertainty": heisenberg,
+	"cell-potential":         cellPotential,
+	"nernst":                 nernst,
+	"electrolysis":           electrolysis,
 }
 
 func conformanceDir(t *testing.T) string {
@@ -85,6 +134,9 @@ func TestConformance(t *testing.T) {
 		if err := json.Unmarshal(data, &vf); err != nil {
 			t.Fatalf("parse %s: %v", entry.Name(), err)
 		}
+		if err := readNumericExpects(data, &vf); err != nil {
+			t.Fatalf("parse %s numerics: %v", entry.Name(), err)
+		}
 		fn, ok := ported[vf.Calculator]
 		if !ok {
 			continue
@@ -99,6 +151,52 @@ func TestConformance(t *testing.T) {
 		t.Skip("no calculators ported to the shared contract yet")
 	}
 	t.Logf("verified %d cases across %d ported calculators", vectorCount, portedCount)
+}
+
+// readNumericExpects copies every number-valued key of each case's expect
+// object into Numeric. Vectors on the calc-result contract carry only
+// strings there, so they end up with no numeric expectations and compare
+// exactly as before.
+func readNumericExpects(data []byte, vf *vecFile) error {
+	var numeric vecFileNumeric
+	if err := json.Unmarshal(data, &numeric); err != nil {
+		return err
+	}
+	for i := range vf.Cases {
+		if i >= len(numeric.Cases) {
+			break
+		}
+		for key, raw := range numeric.Cases[i].Expect {
+			value, ok := raw.(float64)
+			if !ok {
+				continue
+			}
+			if vf.Cases[i].Numeric == nil {
+				vf.Cases[i].Numeric = map[string]float64{}
+			}
+			vf.Cases[i].Numeric[key] = value
+		}
+	}
+	return nil
+}
+
+// compareNumeric compares a number-only contract against the metadata the
+// ported calculator returns under the same key.
+func compareNumeric(name string, c vecCase, got CalcResult) error {
+	for key, want := range c.Numeric {
+		gotValue, ok := got.Metadata[key].(float64)
+		if !ok {
+			return &caseError{file: name, id: c.ID,
+				msg: "metadata " + key + " missing or not numeric"}
+		}
+		if gotValue != want {
+			return &caseError{file: name, id: c.ID,
+				msg: "metadata " + key + " mismatch\n  got:  " +
+					strconv.FormatFloat(gotValue, 'g', -1, 64) +
+					"\n  want: " + strconv.FormatFloat(want, 'g', -1, 64)}
+		}
+	}
+	return nil
 }
 
 func compareResults(t *testing.T, name string, vf vecFile, fn calcFunc) error {
@@ -135,6 +233,9 @@ func compareResults(t *testing.T, name string, vf vecFile, fn calcFunc) error {
 			return &caseError{file: name, id: c.ID,
 				msg: "unexpected error\n  got:  " + err.Error() + "\n  want: " + c.Expect.Value}
 		}
+		if c.Numeric != nil {
+			return compareNumeric(name, c, got)
+		}
 		if got.Value != c.Expect.Value {
 			return &caseError{file: name, id: c.ID,
 				msg: "value mismatch\n  got:  " + got.Value + "\n  want: " + c.Expect.Value}
@@ -142,6 +243,49 @@ func compareResults(t *testing.T, name string, vf vecFile, fn calcFunc) error {
 		if c.Expect.Explanation != "" && got.Explanation != c.Expect.Explanation {
 			return &caseError{file: name, id: c.ID,
 				msg: "explanation mismatch\n  got:  " + got.Explanation + "\n  want: " + c.Expect.Explanation}
+		}
+		if err := compareChartData(name, c.ID, c.Expect.ChartData, got.ChartData); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// compareChartData checks the series the web engine plots. Vector cases that
+// record no chartData are skipped; the rest must match in point count, in
+// field set per point, and in order. Values compare with a tiny epsilon
+// because both engines round chart samples through toFixed before they reach
+// the comparison, so the last bit of the float is not meaningful.
+func compareChartData(name, id string, want []map[string]interface{}, got []ChartData) error {
+	if want == nil {
+		return nil
+	}
+	const epsilon = 1e-9
+	if len(want) != len(got) {
+		return &caseError{file: name, id: id,
+			msg: fmt.Sprintf("chartData length mismatch\n  got:  %d points\n  want: %d points", len(got), len(want))}
+	}
+	for i, wantPoint := range want {
+		gotPoint := got[i]
+		if len(wantPoint) != len(gotPoint) {
+			return &caseError{file: name, id: id,
+				msg: fmt.Sprintf("chartData[%d] field count mismatch\n  got:  %d fields\n  want: %d fields", i, len(gotPoint), len(wantPoint))}
+		}
+		for field, wantRaw := range wantPoint {
+			gotValue, ok := gotPoint[field]
+			if !ok {
+				return &caseError{file: name, id: id,
+					msg: fmt.Sprintf("chartData[%d] is missing field %q", i, field)}
+			}
+			wantValue, ok := wantRaw.(float64)
+			if !ok {
+				return &caseError{file: name, id: id,
+					msg: fmt.Sprintf("chartData[%d].%s is not a number", i, field)}
+			}
+			if math.Abs(wantValue-gotValue) > epsilon {
+				return &caseError{file: name, id: id,
+					msg: fmt.Sprintf("chartData[%d].%s mismatch\n  got:  %v\n  want: %v", i, field, gotValue, wantValue)}
+			}
 		}
 	}
 	return nil
