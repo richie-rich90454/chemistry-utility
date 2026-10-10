@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { UnitConverter, calculateUnitConversion } from "./unitConverter.js";
+import { UnitConverter } from "./calculators/unitConverter.js";
+import { UnitConverterDom, calculateUnitConversion } from "./dom/unitConverterDom.js";
 
-class TestableUnitConverter extends UnitConverter {
+class TestableUnitConverter extends UnitConverterDom {
     constructor() {
         super();
     }
