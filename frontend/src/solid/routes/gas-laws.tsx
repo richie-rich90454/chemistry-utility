@@ -1,20 +1,12 @@
 /**
- * Visual verification: The Solid-rendered Gas Laws card should match the
- * legacy #gas-laws card in frontend/index.html. Intentional diffs:
- *  - This route surfaces a Clear button per calculator (legacy lacked one)
- *  - The Ideal Gas Law "Gas constant units" select renders above the
- *    input group (CalculatorForm renders all selects first) instead of
- *    below it as in the legacy markup
- *  - The Van der Waals form remains inside a <details> element to
- *    preserve the "Advanced: Real Gas Correction" collapsible pattern
- * Routes math through calculatePure on IdealGasLawCalculator,
- * CombinedGasLawCalculator, and VanDerWaalsCalculator. No Playwright
- * screenshot test is added per task spec; parity is verified by manual
- * diff of the rendered DOM.
+ * Gas laws route.
+ *
+ * Runs ideal gas, combined gas, and Van der Waals math through the
+ * calculation engine, one section per sub-calculator.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {IdealGasLawCalculator, CombinedGasLawCalculator, VanDerWaalsCalculator} from "../../modules/gasLawCalculators.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
@@ -22,9 +14,6 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./gas-laws.module.css";
-let idealCalculator = new IdealGasLawCalculator();
-let combinedCalculator = new CombinedGasLawCalculator();
-let vdwCalculator = new VanDerWaalsCalculator();
 let idealFields: CalculatorField[] = [
     {"id": "ideal-P", "label": "P", "placeholder": "P (atm)", "ariaLabel": "Pressure"},
     {"id": "ideal-V", "label": "V", "placeholder": "V (L)", "ariaLabel": "Volume"},
@@ -85,6 +74,7 @@ let vdwFields: CalculatorField[] = [
     {"id": "vdw-b", "label": "b", "placeholder": "b (L mol⁻¹)", "ariaLabel": "Van der Waals constant b"}
 ];
 function GasLaws(): JSX.Element {
+    let engine = getEngine();
     let [idealResult, setIdealResult] = createSignal("");
     let [idealError, setIdealError] = createSignal("");
     let [combinedResult, setCombinedResult] = createSignal("");
@@ -92,21 +82,21 @@ function GasLaws(): JSX.Element {
     let [vdwResult, setVdwResult] = createSignal("");
     let [vdwError, setVdwError] = createSignal("");
     function handleIdealCalculate(inputs: Record<string, string>): void {
-        resolveResult(idealCalculator.calculatePure(inputs), setIdealResult, setIdealError);
+        resolveResult(engine.calculate("ideal-gas", inputs), setIdealResult, setIdealError);
     }
     function handleIdealClear(): void {
         setIdealResult("");
         setIdealError("");
     }
     function handleCombinedCalculate(inputs: Record<string, string>): void {
-        resolveResult(combinedCalculator.calculatePure(inputs), setCombinedResult, setCombinedError);
+        resolveResult(engine.calculate("combined-gas", inputs), setCombinedResult, setCombinedError);
     }
     function handleCombinedClear(): void {
         setCombinedResult("");
         setCombinedError("");
     }
     function handleVdwCalculate(inputs: Record<string, string>): void {
-        resolveResult(vdwCalculator.calculatePure(inputs), setVdwResult, setVdwError);
+        resolveResult(engine.calculate("van-der-waals", inputs), setVdwResult, setVdwError);
     }
     function handleVdwClear(): void {
         setVdwResult("");
