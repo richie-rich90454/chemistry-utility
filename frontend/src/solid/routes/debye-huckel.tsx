@@ -1,20 +1,16 @@
 /**
- * Visual verification: The Solid-rendered Debye-Huckel card should match
- * the legacy #debye-huckel-calc card in frontend/index.html. Intentional
- * diff: this route surfaces a Clear button (legacy lacked one) and
- * routes the ionic-strength and activity-coefficient math through
- * DebyeHuckelCalculator.calculatePure. Parity is verified by manual
- * diff.
+ * Debye-Huckel route.
+ *
+ * Runs the activity coefficient math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {DebyeHuckelCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
-let calculator = new DebyeHuckelCalculator();
 let fields: CalculatorField[] = [
     {"id": "dh-zplus", "label": "Cation charge (z+)", "placeholder": "Cation charge (z+)", "ariaLabel": "Cation charge"},
     {"id": "dh-zminus", "label": "Anion charge (z-)", "placeholder": "Anion charge (z-)", "ariaLabel": "Anion charge"},
@@ -22,10 +18,11 @@ let fields: CalculatorField[] = [
     {"id": "dh-ion-size", "label": "Ion size parameter a (Angstrom)", "placeholder": "Ion size parameter a (Angstrom)", "ariaLabel": "Ion size parameter"}
 ];
 function DebyeHuckel(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("debye-huckel", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
