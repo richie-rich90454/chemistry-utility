@@ -42,6 +42,18 @@ import {
     ElectrolysisCalculator
 } from "../src/modules/electrochemistryCalculators.js";
 import {
+    beerLambert,
+    calorimetry,
+    empiricalFormula,
+    gibbsEquilibrium,
+    leChatelier,
+    massSpectrometry,
+    molality,
+    photoelectronSpectroscopy,
+    serialDilution,
+    vseprGeometry
+} from "../src/modules/calculators/advanced.js";
+import {
     GibbsFreeEnergyCalculator,
     HessLawCalculator,
     EntropyCalculator,
@@ -566,6 +578,329 @@ function collect(): void {
         balanceCase("synthesis", "H2+O2->H2O"),
         balanceCase("single-displacement", "Fe+CuSO4->FeSO4+Cu"),
         redoxCase("redox-acidic", "MnO4-+8H++5e-->Mn2++4H2O||Zn->Zn2++2e-", "acidic")
+    ]);
+
+    writeVector("photoelectron-spectroscopy.json", "photoelectron-spectroscopy", [
+        pureCase(photoelectronSpectroscopy, "nitrogen", { "pes-peaks": "39.548, 2.466, 1.402" }),
+        pureCase(photoelectronSpectroscopy, "oxygen", { "pes-peaks": "52.403, 2.748, 1.314" }),
+        pureCase(photoelectronSpectroscopy, "carbon", { "pes-peaks": "27.424, 1.871, 1.086" }),
+        pureCase(photoelectronSpectroscopy, "neon", { "pes-peaks": "83.964, 4.676, 2.090" }),
+        pureCase(photoelectronSpectroscopy, "hydrogen", { "pes-peaks": "1.312" }),
+        pureCase(photoelectronSpectroscopy, "lithium", { "pes-peaks": "5.278, 0.520" }),
+        pureCase(photoelectronSpectroscopy, "sodium", { "pes-peaks": "103.320, 6.106, 2.957, 0.496" }),
+        pureCase(photoelectronSpectroscopy, "argon", { "pes-peaks": "309.039, 18.127, 12.824, 2.822, 1.526" }),
+        pureCase(photoelectronSpectroscopy, "calcium", { "pes-peaks": "389.600, 22.700, 16.800, 3.792, 2.693, 0.605" }),
+        pureCase(photoelectronSpectroscopy, "unsorted-input", { "pes-peaks": "1.402, 39.548, 2.466" }),
+        pureCase(photoelectronSpectroscopy, "no-input", { "pes-peaks": "" }),
+        pureCase(photoelectronSpectroscopy, "non-numeric-peak", { "pes-peaks": "39.548, abc" }),
+        pureCase(photoelectronSpectroscopy, "negative-peak", { "pes-peaks": "-39.548, 2.466" }),
+        pureCase(photoelectronSpectroscopy, "no-match", { "pes-peaks": "10, 5, 2" }),
+        pureCase(photoelectronSpectroscopy, "too-many-peaks", { "pes-peaks": "400, 20, 15, 3, 2, 1, 0.5" })
+    ]);
+
+    writeVector("empirical-formula.json", "empirical-formula", [
+        pureCase(empiricalFormula, "glucose", { "ef-composition": "C:40,H:6.71,O:53.29" }),
+        pureCase(empiricalFormula, "glucose-molar-mass", {
+            "ef-composition": "C:40,H:6.71,O:53.29", "ef-molar-mass": "180.156"
+        }),
+        pureCase(empiricalFormula, "water", { "ef-composition": "H:11.19,O:88.81" }),
+        pureCase(empiricalFormula, "zinc-iodide", { "ef-composition": "Zn:20.5,I:79.5" }),
+        pureCase(empiricalFormula, "iron-oxide", { "ef-composition": "Fe:69.9,O:30.1" }),
+        pureCase(empiricalFormula, "hydrogen-peroxide", { "ef-composition": "H:5.93,O:94.07" }),
+        pureCase(empiricalFormula, "no-input", { "ef-composition": "" }),
+        pureCase(empiricalFormula, "missing-colon", { "ef-composition": "C40,H6,O53" }),
+        pureCase(empiricalFormula, "unknown-element", { "ef-composition": "Xx:100" }),
+        pureCase(empiricalFormula, "bad-percent", { "ef-composition": "C:forty,O:60" }),
+        pureCase(empiricalFormula, "percent-sum", { "ef-composition": "C:50,H:6.7,O:10" }),
+        pureCase(empiricalFormula, "negative-percent", { "ef-composition": "C:-40,H:60" }),
+        pureCase(empiricalFormula, "zero-percent", { "ef-composition": "C:100,O:0" }),
+        pureCase(empiricalFormula, "duplicate-element", { "ef-composition": "C:40,C:60" }),
+        pureCase(empiricalFormula, "negative-molar-mass", {
+            "ef-composition": "C:40,H:6.71,O:53.29", "ef-molar-mass": "-180"
+        })
+    ]);
+
+    writeVector("mass-spectrometry.json", "mass-spectrometry", [
+        pureCase(massSpectrometry, "chlorine", { "ms-isotopes": "34.9689,0.7576;36.9659,0.2424" }),
+        pureCase(massSpectrometry, "bromine", { "ms-isotopes": "78.9183,0.5069;80.9163,0.4931" }),
+        pureCase(massSpectrometry, "chlorine-percent", { "ms-isotopes": "35,75.76;37,24.24" }),
+        pureCase(massSpectrometry, "single-isotope", { "ms-isotopes": "197,1" }),
+        pureCase(massSpectrometry, "copper-zinc", { "ms-isotopes": "63.929,0.6917;65.926,0.3083" }),
+        pureCase(massSpectrometry, "newline-separated", { "ms-isotopes": "34.9689,0.7576\n36.9659,0.2424" }),
+        pureCase(massSpectrometry, "no-input", { "ms-isotopes": "" }),
+        pureCase(massSpectrometry, "missing-comma", { "ms-isotopes": "34.9689;36.9659" }),
+        pureCase(massSpectrometry, "non-numeric", { "ms-isotopes": "abc,0.5;37,0.5" }),
+        pureCase(massSpectrometry, "negative-mass", { "ms-isotopes": "-35,0.5;37,0.5" }),
+        pureCase(massSpectrometry, "negative-abundance", { "ms-isotopes": "35,-0.5;37,0.5" }),
+        pureCase(massSpectrometry, "zero-total-abundance", { "ms-isotopes": "35,0;37,0" })
+    ]);
+
+    writeVector("vsepr-geometry.json", "vsepr-geometry", [
+        pureCase(vseprGeometry, "water", { "vsepr-central": "O", "vsepr-bonded": "2", "vsepr-lone-pairs": "2" }),
+        pureCase(vseprGeometry, "methane", { "vsepr-central": "C", "vsepr-bonded": "4", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "ammonia", { "vsepr-central": "N", "vsepr-bonded": "3", "vsepr-lone-pairs": "1" }),
+        pureCase(vseprGeometry, "carbon-dioxide", { "vsepr-central": "C", "vsepr-bonded": "2", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "boron-trifluoride", { "vsepr-central": "B", "vsepr-bonded": "3", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "xenon-tetrafluoride", { "vsepr-central": "Xe", "vsepr-bonded": "4", "vsepr-lone-pairs": "2" }),
+        pureCase(vseprGeometry, "phosphorus-pentachloride", { "vsepr-central": "P", "vsepr-bonded": "5", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "sulfur-hexafluoride", { "vsepr-central": "S", "vsepr-bonded": "6", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "sulfur-tetrafluoride", { "vsepr-central": "S", "vsepr-bonded": "4", "vsepr-lone-pairs": "1" }),
+        pureCase(vseprGeometry, "chlorine-trifluoride", { "vsepr-central": "Cl", "vsepr-bonded": "3", "vsepr-lone-pairs": "2" }),
+        pureCase(vseprGeometry, "lowercase-central", { "vsepr-central": "o", "vsepr-bonded": "2", "vsepr-lone-pairs": "2" }),
+        pureCase(vseprGeometry, "missing-central", { "vsepr-central": "", "vsepr-bonded": "2", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "missing-bonded", { "vsepr-central": "O", "vsepr-bonded": "", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "fractional-bonded", { "vsepr-central": "O", "vsepr-bonded": "2.5", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "negative-bonded", { "vsepr-central": "O", "vsepr-bonded": "-1", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "negative-lone-pairs", { "vsepr-central": "O", "vsepr-bonded": "2", "vsepr-lone-pairs": "-1" }),
+        pureCase(vseprGeometry, "steric-too-large", { "vsepr-central": "I", "vsepr-bonded": "7", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "unknown-element", { "vsepr-central": "Xx", "vsepr-bonded": "3", "vsepr-lone-pairs": "1" }),
+        pureCase(vseprGeometry, "no-domain", { "vsepr-central": "O", "vsepr-bonded": "0", "vsepr-lone-pairs": "0" }),
+        pureCase(vseprGeometry, "unsupported-axe", { "vsepr-central": "O", "vsepr-bonded": "1", "vsepr-lone-pairs": "1" })
+    ]);
+
+    writeVector("calorimetry.json", "calorimetry", [
+        pureCase(calorimetry, "solve-q", {
+            "calor-solve-for": "q", "calor-mass": "100", "calor-specific-heat": "4.184", "calor-delta-t": "50"
+        }),
+        pureCase(calorimetry, "solve-m", {
+            "calor-solve-for": "m", "calor-mass": "", "calor-specific-heat": "4.184", "calor-delta-t": "50", "calor-heat": "20920"
+        }),
+        pureCase(calorimetry, "solve-c", {
+            "calor-solve-for": "c", "calor-mass": "100", "calor-specific-heat": "", "calor-delta-t": "50", "calor-heat": "20920"
+        }),
+        pureCase(calorimetry, "solve-delta-t", {
+            "calor-solve-for": "deltaT", "calor-mass": "100", "calor-specific-heat": "4.184", "calor-delta-t": "", "calor-heat": "20920"
+        }),
+        pureCase(calorimetry, "exothermic-q", {
+            "calor-solve-for": "q", "calor-mass": "50", "calor-specific-heat": "4.184", "calor-delta-t": "-20"
+        }),
+        pureCase(calorimetry, "invalid-solve-for", {
+            "calor-solve-for": "nope", "calor-mass": "100"
+        }),
+        pureCase(calorimetry, "missing-inputs", {
+            "calor-solve-for": "q", "calor-mass": "100", "calor-specific-heat": "4.184"
+        }),
+        pureCase(calorimetry, "zero-specific-heat", {
+            "calor-solve-for": "q", "calor-mass": "100", "calor-specific-heat": "0", "calor-delta-t": "50"
+        }),
+        pureCase(calorimetry, "zero-delta-t-solving-mass", {
+            "calor-solve-for": "m", "calor-specific-heat": "4.184", "calor-delta-t": "0", "calor-heat": "20920"
+        })
+    ]);
+
+    writeVector("gibbs-equilibrium.json", "gibbs-equilibrium", [
+        pureCase(gibbsEquilibrium, "solve-k", {
+            "geq-solve-for": "K", "geq-delta-g": "46.5", "geq-temperature": "298.15"
+        }),
+        pureCase(gibbsEquilibrium, "solve-k-default-temperature", {
+            "geq-solve-for": "K", "geq-delta-g": "-100", "geq-temperature": ""
+        }),
+        pureCase(gibbsEquilibrium, "solve-k-zero", {
+            "geq-solve-for": "K", "geq-delta-g": "0", "geq-temperature": "298.15"
+        }),
+        pureCase(gibbsEquilibrium, "solve-k-hot", {
+            "geq-solve-for": "K", "geq-delta-g": "46.5", "geq-temperature": "500"
+        }),
+        pureCase(gibbsEquilibrium, "solve-delta-g", {
+            "geq-solve-for": "delta-g", "geq-k": "10", "geq-temperature": "298.15"
+        }),
+        pureCase(gibbsEquilibrium, "solve-delta-g-tiny-k", {
+            "geq-solve-for": "delta-g", "geq-k": "0.0000000001", "geq-temperature": "298.15"
+        }),
+        pureCase(gibbsEquilibrium, "solve-delta-g-unit-k", {
+            "geq-solve-for": "delta-g", "geq-k": "1", "geq-temperature": "298.15"
+        }),
+        pureCase(gibbsEquilibrium, "invalid-solve-for", {
+            "geq-solve-for": "nope", "geq-delta-g": "46.5"
+        }),
+        pureCase(gibbsEquilibrium, "missing-delta-g", {
+            "geq-solve-for": "K", "geq-delta-g": ""
+        }),
+        pureCase(gibbsEquilibrium, "missing-k", {
+            "geq-solve-for": "delta-g", "geq-k": ""
+        }),
+        pureCase(gibbsEquilibrium, "zero-k", {
+            "geq-solve-for": "delta-g", "geq-k": "0"
+        }),
+        pureCase(gibbsEquilibrium, "negative-k", {
+            "geq-solve-for": "delta-g", "geq-k": "-2"
+        }),
+        pureCase(gibbsEquilibrium, "zero-temperature", {
+            "geq-solve-for": "K", "geq-delta-g": "46.5", "geq-temperature": "0"
+        })
+    ]);
+
+    writeVector("molality.json", "molality", [
+        pureCase(molality, "solve-molality", {
+            "molality-solve-for": "molality", "molality-solute-mass": "20", "molality-solvent-mass": "500",
+            "molality-molar-mass": "39.997"
+        }),
+        pureCase(molality, "solve-solute-mass", {
+            "molality-solve-for": "solute-mass", "molality-solvent-mass": "500",
+            "molality-molar-mass": "39.997", "molality-value": "1"
+        }),
+        pureCase(molality, "solve-solvent-mass", {
+            "molality-solve-for": "solvent-mass", "molality-solute-mass": "20",
+            "molality-molar-mass": "39.997", "molality-value": "1"
+        }),
+        pureCase(molality, "solve-molar-mass", {
+            "molality-solve-for": "molar-mass", "molality-solute-mass": "20",
+            "molality-solvent-mass": "500", "molality-value": "1"
+        }),
+        pureCase(molality, "zero-molality-solution", {
+            "molality-solve-for": "molality", "molality-solute-mass": "0", "molality-solvent-mass": "500",
+            "molality-molar-mass": "39.997"
+        }),
+        pureCase(molality, "invalid-solve-for", {
+            "molality-solve-for": "nope", "molality-solute-mass": "20"
+        }),
+        pureCase(molality, "missing-inputs", {
+            "molality-solve-for": "molality", "molality-solute-mass": "20"
+        }),
+        pureCase(molality, "zero-molar-mass", {
+            "molality-solve-for": "molality", "molality-solute-mass": "20", "molality-solvent-mass": "500",
+            "molality-molar-mass": "0"
+        }),
+        pureCase(molality, "negative-solute-mass", {
+            "molality-solve-for": "molality", "molality-solute-mass": "-20", "molality-solvent-mass": "500",
+            "molality-molar-mass": "39.997"
+        }),
+        pureCase(molality, "zero-molality-value", {
+            "molality-solve-for": "solvent-mass", "molality-solute-mass": "20",
+            "molality-molar-mass": "39.997", "molality-value": "0"
+        })
+    ]);
+
+    writeVector("beer-lambert.json", "beer-lambert", [
+        pureCase(beerLambert, "solve-absorbance", {
+            "bl-solve-for": "absorbance", "bl-absorptivity": "6239.5", "bl-path-length": "1", "bl-concentration": "0.0001"
+        }),
+        pureCase(beerLambert, "solve-absorptivity", {
+            "bl-solve-for": "absorptivity", "bl-absorbance": "0.699", "bl-path-length": "1", "bl-concentration": "0.0001"
+        }),
+        pureCase(beerLambert, "solve-path-length", {
+            "bl-solve-for": "path-length", "bl-absorbance": "0.699", "bl-absorptivity": "10000", "bl-concentration": "0.0001"
+        }),
+        pureCase(beerLambert, "solve-concentration", {
+            "bl-solve-for": "concentration", "bl-absorbance": "0.699", "bl-absorptivity": "10000", "bl-path-length": "1"
+        }),
+        pureCase(beerLambert, "transmittance", {
+            "bl-solve-for": "transmittance", "bl-absorbance": "0.9"
+        }),
+        pureCase(beerLambert, "transmittance-zero", {
+            "bl-solve-for": "transmittance", "bl-absorbance": "0"
+        }),
+        pureCase(beerLambert, "invalid-solve-for", {
+            "bl-solve-for": "nope", "bl-absorbance": "0.5"
+        }),
+        pureCase(beerLambert, "missing-inputs", {
+            "bl-solve-for": "absorbance", "bl-absorptivity": "6239.5"
+        }),
+        pureCase(beerLambert, "zero-concentration", {
+            "bl-solve-for": "absorptivity", "bl-absorbance": "0.699", "bl-path-length": "1", "bl-concentration": "0"
+        }),
+        pureCase(beerLambert, "negative-absorbance", {
+            "bl-solve-for": "transmittance", "bl-absorbance": "-0.5"
+        })
+    ]);
+
+    writeVector("serial-dilution.json", "serial-dilution", [
+        pureCase(serialDilution, "tenfold-three-steps", {
+            "sd-initial-concentration": "1", "sd-dilution-factor": "10", "sd-steps": "3"
+        }),
+        pureCase(serialDilution, "twofold-five-steps", {
+            "sd-initial-concentration": "2", "sd-dilution-factor": "2", "sd-steps": "5"
+        }),
+        pureCase(serialDilution, "tenfold-six-steps", {
+            "sd-initial-concentration": "1", "sd-dilution-factor": "10", "sd-steps": "6"
+        }),
+        pureCase(serialDilution, "single-step", {
+            "sd-initial-concentration": "0.5", "sd-dilution-factor": "5", "sd-steps": "1"
+        }),
+        pureCase(serialDilution, "invalid-factor", {
+            "sd-initial-concentration": "1", "sd-dilution-factor": "1", "sd-steps": "3"
+        }),
+        pureCase(serialDilution, "zero-steps", {
+            "sd-initial-concentration": "1", "sd-dilution-factor": "10", "sd-steps": "0"
+        }),
+        pureCase(serialDilution, "too-many-steps", {
+            "sd-initial-concentration": "1", "sd-dilution-factor": "10", "sd-steps": "11"
+        }),
+        pureCase(serialDilution, "fractional-steps", {
+            "sd-initial-concentration": "1", "sd-dilution-factor": "10", "sd-steps": "1.5"
+        }),
+        pureCase(serialDilution, "missing-initial", {
+            "sd-initial-concentration": "", "sd-dilution-factor": "10", "sd-steps": "3"
+        }),
+        pureCase(serialDilution, "negative-initial", {
+            "sd-initial-concentration": "-1", "sd-dilution-factor": "10", "sd-steps": "3"
+        })
+    ]);
+
+    writeVector("le-chatelier.json", "le-chatelier", [
+        pureCase(leChatelier, "exothermic-heating", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "temperature", "lc-change": "increase", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "endothermic-heating", {
+            "lc-reaction-type": "endothermic", "lc-stress-type": "temperature", "lc-change": "increase", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "exothermic-cooling", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "temperature", "lc-change": "decrease", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "endothermic-cooling", {
+            "lc-reaction-type": "endothermic", "lc-stress-type": "temperature", "lc-change": "decrease", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "add-reactant", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "concentration", "lc-change": "increase", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "add-product", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "concentration", "lc-change": "increase", "lc-side": "products"
+        }),
+        pureCase(leChatelier, "remove-reactant", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "concentration", "lc-change": "decrease", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "remove-product", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "concentration", "lc-change": "decrease", "lc-side": "products"
+        }),
+        pureCase(leChatelier, "pressure-products-fewer", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "pressure", "lc-change": "increase", "lc-side": "products"
+        }),
+        pureCase(leChatelier, "pressure-reactants-fewer", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "pressure", "lc-change": "increase", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "pressure-drop-reactants-fewer", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "pressure", "lc-change": "decrease", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "equal-gas-moles", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "pressure", "lc-change": "increase", "lc-side": "equal"
+        }),
+        pureCase(leChatelier, "compress-volume", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "volume", "lc-change": "decrease", "lc-side": "products"
+        }),
+        pureCase(leChatelier, "expand-volume", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "volume", "lc-change": "increase", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "catalyst", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "catalyst", "lc-change": "increase", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "no-change", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "concentration", "lc-change": "none", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "invalid-reaction-type", {
+            "lc-reaction-type": "nope", "lc-stress-type": "temperature", "lc-change": "increase", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "invalid-stress-type", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "nope", "lc-change": "increase", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "invalid-change", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "temperature", "lc-change": "nope", "lc-side": "reactants"
+        }),
+        pureCase(leChatelier, "invalid-side", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "temperature", "lc-change": "increase", "lc-side": "nope"
+        }),
+        pureCase(leChatelier, "concentration-equal-side", {
+            "lc-reaction-type": "exothermic", "lc-stress-type": "concentration", "lc-change": "increase", "lc-side": "equal"
+        })
     ]);
 }
 
