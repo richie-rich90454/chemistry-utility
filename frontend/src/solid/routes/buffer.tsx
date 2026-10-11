@@ -1,20 +1,16 @@
 /**
- * Visual verification: The Solid-rendered Buffer Solution card should
- * match the legacy #buffer-calc card in frontend/index.html. Intentional
- * diff: this route surfaces a Clear button (legacy lacked one) and routes
- * the Henderson-Hasselbalch math through
- * BufferSolutionCalculator.calculatePure. Parity is verified by manual
- * diff.
+ * Buffer solution route.
+ *
+ * Runs the Henderson-Hasselbalch math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {BufferSolutionCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
-let calculator = new BufferSolutionCalculator();
 let fields: CalculatorField[] = [
     {"id": "buffer-pKa", "label": "pKa", "placeholder": "pKa", "ariaLabel": "pKa value"},
     {"id": "buffer-HA", "label": "[HA]", "placeholder": "[HA] (M)", "ariaLabel": "Acid concentration"},
@@ -34,10 +30,11 @@ let selects: CalculatorSelect[] = [{
     "defaultValue": "pH"
 }];
 function BufferSolution(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("buffer-solution", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
