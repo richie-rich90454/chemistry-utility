@@ -155,6 +155,9 @@ function Dashboard(): JSX.Element {
         <section class={styles.dashboard} aria-label="User dashboard">
             <div class={styles.container}>
                 <h2 class={styles.header}>Dashboard</h2>
+                <div class={styles.actions}>
+                    <a class={styles.actionButton} href="/report">Print report</a>
+                </div>
                 <Show when={store.loading()}>
                     <div class={styles.loading}>Loading dashboard...</div>
                 </Show>
