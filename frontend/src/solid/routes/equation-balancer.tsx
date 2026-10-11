@@ -21,7 +21,7 @@ function EquationBalancerRoute(): JSX.Element {
     let result = state.result;
     let error = state.error;
     let isLoading = state.isLoading;
-    let balance = state.balance;
+    let balanceAsync = state.balanceAsync;
     let clearFn = state.clear;
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -40,7 +40,7 @@ function EquationBalancerRoute(): JSX.Element {
         }
         if (value.trim().length > 0) {
             debounceTimer = setTimeout(function (): void {
-                balance();
+                balanceAsync();
             }, 500);
         } else {
             clearFn();
@@ -56,7 +56,7 @@ function EquationBalancerRoute(): JSX.Element {
             never reset to null, so it is always non-null here. */
             if (debounceTimer !== null) clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function (): void {
-                balance();
+                balanceAsync();
             }, 300);
         }
     }
