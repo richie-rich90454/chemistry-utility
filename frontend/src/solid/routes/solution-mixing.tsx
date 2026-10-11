@@ -1,20 +1,17 @@
 /**
- * Visual verification: The Solid-rendered Solution Mixing card should
- * match the legacy #solution-mixing-calc card in frontend/index.html.
- * Intentional diff: this route surfaces a Clear button (legacy lacked
- * one) and routes the final-concentration math through
- * MixingCalculator.calculatePure. Parity is verified by manual diff.
+ * Solution mixing route.
+ *
+ * Runs the mixed concentration math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {MixingCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
-let calculator = new MixingCalculator();
 let fields: CalculatorField[] = [
     {"id": "mix-C1", "label": "C1", "placeholder": "C1 (M)", "ariaLabel": "Concentration 1"},
     {"id": "mix-V1", "label": "V1", "placeholder": "V1 (L)", "ariaLabel": "Volume 1"},
@@ -22,10 +19,11 @@ let fields: CalculatorField[] = [
     {"id": "mix-V2", "label": "V2", "placeholder": "V2 (L)", "ariaLabel": "Volume 2"}
 ];
 function SolutionMixing(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("solution-mixing", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
