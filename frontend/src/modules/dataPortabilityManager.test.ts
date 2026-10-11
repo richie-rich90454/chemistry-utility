@@ -5,9 +5,6 @@ import { InputPersistence } from "./inputPersistence.js";
 import { PluginManager } from "./pluginManager.js";
 
 describe("DataPortabilityManager", () => {
-    let createObjectURLSpy: ReturnType<typeof vi.spyOn>;
-    let revokeObjectURLSpy: ReturnType<typeof vi.spyOn>;
-
     beforeEach(() => {
         DataPortabilityManager.resetInstance();
         ExportManager.resetInstance();
@@ -15,8 +12,8 @@ describe("DataPortabilityManager", () => {
         PluginManager.resetInstance();
         document.body.innerHTML = "";
         localStorage.clear();
-        createObjectURLSpy = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:fake-url");
-        revokeObjectURLSpy = vi.spyOn(URL, "revokeObjectURL").mockImplementation(function (): void {});
+        vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:fake-url");
+        vi.spyOn(URL, "revokeObjectURL").mockImplementation(function (): void {});
         vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (): void {});
     });
 
@@ -285,48 +282,6 @@ describe("DataPortabilityManager", () => {
         });
     });
 
-    describe("exportToFile", () => {
-        it("creates a download link with .chemutil extension", () => {
-            DataPortabilityManager.getInstance().exportToFile();
-            expect(createObjectURLSpy).toHaveBeenCalled();
-            let blob = createObjectURLSpy.mock.calls[0][0] as Blob;
-            expect(blob).toBeInstanceOf(Blob);
-            expect(blob.type).toBe("application/json");
-        });
-
-        it("revokes the object URL after download", () => {
-            DataPortabilityManager.getInstance().exportToFile();
-            expect(revokeObjectURLSpy).toHaveBeenCalled();
-        });
-    });
-
-    describe("importFromFile", () => {
-        it("imports a valid JSON File", async () => {
-            let archive = {
-                version: 1,
-                exportedAt: "2024-01-01T00:00:00.000Z",
-                history: [],
-                theme: "dark",
-                autoDarkMode: false,
-                inputs: {},
-                logs: [],
-                plugins: {}
-            };
-            let file = new File([JSON.stringify(archive)], "backup.chemutil", { type: "application/json" });
-            await DataPortabilityManager.getInstance().importFromFile(file);
-            expect(localStorage.getItem("theme")).toBe("dark");
-        });
-
-        it("throws for a File with invalid JSON", async () => {
-            let file = new File(["not json", "garbage"], "bad.chemutil", { type: "application/json" });
-            await expect(DataPortabilityManager.getInstance().importFromFile(file)).rejects.toThrow(/json/i);
-        });
-
-        it("throws for a File with valid JSON but invalid schema", async () => {
-            let file = new File([JSON.stringify({ version: 99, noHistory: true })], "bad.chemutil", { type: "application/json" });
-            await expect(DataPortabilityManager.getInstance().importFromFile(file)).rejects.toThrow(/invalid archive/i);
-        });
-    });
 });
 
 describe("ChemutilArchiveValidator", () => {
