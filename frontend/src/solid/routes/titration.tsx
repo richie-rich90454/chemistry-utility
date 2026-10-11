@@ -1,16 +1,13 @@
 /**
- * Visual verification: The Solid-rendered Titration card should match the
- * legacy #titration-calc card in frontend/index.html. Intentional diff:
- * this route surfaces a Clear button (legacy lacked one) and routes the
- * titration math through TitrationCurveCalculator.calculatePure. The series
- * returned from calculatePure is rendered through a local <TitrationChart>
- * component that draws on the DOM chart binding (mirroring the kinetics
- * route); the canvas id remains "titration-chart" for parity. No Playwright
- * screenshot test is added per task spec; parity is verified by manual diff.
+ * Titration route.
+ *
+ * Runs the titration curve math through the calculation engine. The
+ * returned pH series is rendered to a canvas through the chart binding.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
+import type {CalculatorResult} from "../../modules/calculators/pureCalculator.js";
 import {createSignal, onMount, Show} from "solid-js";
-import {TitrationCurveCalculator} from "../../modules/solutionCalculators.js";
 import {renderTitrationCurve} from "../../modules/dom/chartBindings.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
@@ -18,7 +15,6 @@ import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import styles from "./titration.module.css";
-let calculator = new TitrationCurveCalculator();
 let fields: CalculatorField[] = [
     {"id": "titration-acid-conc", "label": "Acid concentration (M)", "placeholder": "Acid concentration (M)", "ariaLabel": "Acid concentration"},
     {"id": "titration-acid-vol", "label": "Acid volume (mL)", "placeholder": "Acid volume (mL)", "ariaLabel": "Acid volume"},
@@ -45,13 +41,16 @@ function TitrationChart(props: {points: unknown[]}): JSX.Element {
     );
 }
 function Titration(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     let [chartPoints, setChartPoints] = createSignal<unknown[] | null>(null);
     function handleCalculate(inputs: Record<string, string>): void {
-        let res = calculator.calculatePure(inputs);
+        let res = engine.calculate("titration-curve", inputs);
         resolveResult(res, setResult, setError);
-        setChartPoints(Array.isArray(res.chartData) ? res.chartData : null);
+        void res.then(function (settled: CalculatorResult): void {
+            setChartPoints(Array.isArray(settled.chartData) ? settled.chartData : null);
+        });
     }
     function handleClear(): void {
         setResult("");
