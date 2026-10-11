@@ -1,0 +1,63 @@
+.reportPage {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+}
+.reportHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.reportTitle {
+    margin: 0;
+    font-size: 1.5rem;
+}
+.reportActions {
+    display: flex;
+    gap: 0.5rem;
+}
+.reportButton {
+    padding: 0.5rem 1rem;
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+.reportEmpty {
+    color: #666;
+}
+.reportBody {
+    min-height: 4rem;
+}
+/*
+ * Printing is the PDF export path: the browser dialog writes the file, so
+ * only the report itself may reach the page. The shell is hidden with
+ * visibility (not display) so the layout the report measured against
+ * stays intact while it is pulled out of the flow.
+ */
+@media print {
+    :global(body.printing-report .app-shell *) {
+        visibility: hidden;
+    }
+    :global(body.printing-report .app-shell .route-transition),
+    :global(body.printing-report .app-shell .route-transition *) {
+        visibility: visible;
+    }
+    :global(body.printing-report .app-shell .route-transition) {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+    .reportHeader,
+    .reportActions {
+        display: none;
+    }
+    .reportPage {
+        padding: 0;
+    }
+}
