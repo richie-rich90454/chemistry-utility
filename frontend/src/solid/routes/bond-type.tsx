@@ -1,17 +1,12 @@
 /**
- * Visual verification: The Solid-rendered Bond Type Predictor card should
- * match the legacy #bond-type-predictor card in frontend/index.html.
- * Intentional diff: this route adds a Clear button (legacy lacked one) and
- * surfaces the ΔEN explanation behind the result text. Loads elemental
- * electronegativity data via DataCache + fetch("/ptable.json"), then
- * routes the two symbol inputs through BondTypePredictor.calculatePure.
- * No Playwright screenshot test is added per task spec; parity is
- * verified by manual diff of the rendered DOM against the legacy markup.
+ * Bond Type Predictor route.
+ *
+ * Loads element data, then runs the calculation engine so the same code
+ * path serves the web and desktop builds.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal, onMount} from "solid-js";
-import {BondTypePredictor} from "../../modules/bondPredictor.js";
-import {ChemicalElement} from "../../types.js";
 import {DataCache} from "../../modules/dataCache.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
@@ -19,11 +14,12 @@ import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./bond-type.module.css";
 function BondType(): JSX.Element {
+    let engine = getEngine();
     let [element1, setElement1] = createSignal("");
     let [element2, setElement2] = createSignal("");
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
-    let [predictor, setPredictor] = createSignal<BondTypePredictor | null>(null);
+    let [ready, setReady] = createSignal(false);
     let [loading, setLoading] = createSignal(true);
     let [loadError, setLoadError] = createSignal("");
     onMount(function (): void {
@@ -34,24 +30,23 @@ function BondType(): JSX.Element {
         cache.get("ptable").then(function (cached: string | null): void {
             if (cached !== null) {
                 try {
-                    let parsed: ChemicalElement[] = JSON.parse(cached) as ChemicalElement[];
-                    setPredictor(new BondTypePredictor(parsed));
+                    JSON.parse(cached);
+                    setReady(true);
                     setLoading(false);
                     return;
                 }
                 catch {
-                    // Corrupt cache — fall through to fetch
+                    // Corrupt cache - fall through to fetch
                 }
             }
             fetch("/ptable.json").then(function (response: Response): Promise<unknown> {
                 if (!response.ok) {
-                    throw new Error("HTTP error! status: " + response.status);
+                    throw new Error("HTTP error! status: " + String(response.status));
                 }
                 return response.json();
             }).then(function (data: unknown): void {
-                let elementData = data as ChemicalElement[];
-                cache.set("ptable", JSON.stringify(elementData));
-                setPredictor(new BondTypePredictor(elementData));
+                cache.set("ptable", JSON.stringify(data));
+                setReady(true);
                 setLoading(false);
             }).catch(function (err: unknown): void {
                 let message = err instanceof Error ? err.message : String(err);
@@ -69,14 +64,13 @@ function BondType(): JSX.Element {
         setElement2(target.value);
     }
     function handleCalculate(): void {
-        let p = predictor();
-        if (p === null) {
+        if (!ready()) {
             setError("Elements data not loaded yet");
             setResult("");
             return;
         }
         let inputs: Record<string, string> = {"element1-input": element1(), "element2-input": element2()};
-        resolveResult(p.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("bond-type", inputs), setResult, setError);
     }
     function handleClear(): void {
         setElement1("");
