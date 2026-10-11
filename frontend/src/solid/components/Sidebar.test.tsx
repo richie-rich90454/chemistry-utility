@@ -29,7 +29,7 @@ describe("Sidebar", function (): void {
     beforeEach(function (): void {
         localStorage.clear();
         let manager = DataPortabilityManager.getInstance();
-        exportSpy = vi.spyOn(Object.getPrototypeOf(manager), "exportToFile");
+        exportSpy = vi.spyOn(Object.getPrototypeOf(manager), "export");
     });
 
     afterEach(function (): void {
@@ -53,7 +53,7 @@ describe("Sidebar", function (): void {
         expect(result.getByRole("button", {name: "Import Data"})).toBeTruthy();
     });
 
-    it("calls DataPortabilityManager.exportToFile when Export is clicked", function (): void {
+    it("calls DataPortabilityManager.export when Export is clicked", function (): void {
         let result = render(function () { return <SidebarHost />; });
         let exportButton = result.getByRole("button", {name: "Export Data"});
         fireEvent.click(exportButton);
