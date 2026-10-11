@@ -11,7 +11,7 @@
     "dev:app": "vite --mode app",
     "dev:host": "vite --host",
     "build": "vite build",
-    "build:web": "vite build --mode web",
+    "build:web": "vite build --mode web && node scripts/prerender.mjs",
     "build:app": "vite build --mode app",
     "build:watch": "vite build --watch",
     "build:web:watch": "vite build --mode web --watch",
