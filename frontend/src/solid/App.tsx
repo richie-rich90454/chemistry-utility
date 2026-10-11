@@ -145,50 +145,63 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
         </div>
     );
 }
-function App(): JSX.Element {
+/**
+ * The whole route tree, shell included, so the browser router and the
+ * prerender entry (src/ssr/entrySsr.tsx) share one definition.
+ */
+function AppRoutes(): JSX.Element {
     // Reactive (not a one-time snapshot) so tests/devtools toggling the
     // runtime mode re-resolves the desktop-only routes.
     let desktop = createMemo(function (): boolean {
         return isDesktop();
     });
+    return (
+        <Route path="/" component={AppShell}>
+            <Route path="/" component={HomePage} />
+            <Route path="/molar-mass" component={MolarMass} />
+            <Route path="/mass-calc" component={MassCalcRedirect} />
+            <Route path="/element-lookup" component={ElementLookup} />
+            <Route path="/periodic-table" component={PeriodicTable} />
+            <Route path="/equation-balancer" component={EquationBalancerRoute} />
+            <Route path="/unit-converter" component={UnitConverter} />
+            <Route path="/dilution" component={Dilution} />
+            <Route path="/mass-percent" component={MassPercent} />
+            <Route path="/solution-mixing" component={SolutionMixing} />
+            <Route path="/buffer" component={BufferSolution} />
+            <Route path="/pka-pkb" component={PKaPKb} />
+            <Route path="/ksp" component={Ksp} />
+            <Route path="/colligative" component={Colligative} />
+            <Route path="/titration" component={Titration} />
+            <Route path="/debye-huckel" component={DebyeHuckel} />
+            <Route path="/common-ion" component={CommonIonEffect} />
+            <Route path="/nuclear" component={NuclearChemistry} />
+            <Route path="/gas-laws" component={GasLaws} />
+            <Route path="/electrochemistry" component={Electrochemistry} />
+            <Route path="/thermodynamics" component={Thermodynamics} />
+            <Route path="/kinetics" component={Kinetics} />
+            <Route path="/quantum-atomic" component={QuantumAtomic} />
+            <Route path="/stoichiometry" component={Stoichiometry} />
+            <Route path="/bond-type" component={BondType} />
+            <Route path="/molecular-viewer" component={MolecularViewerRoute} />
+            <Route path="/compound-search" component={CompoundSearch} />
+            {desktop() ? <Route path="/batch-calc" component={BatchCalc} /> : <Route path="/batch-calc" component={DesktopOnlyNotice} />}
+            {desktop() ? <Route path="/dashboard" component={Dashboard} /> : <Route path="/dashboard" component={DesktopOnlyNotice} />}
+            <Route path="*" component={CatchAllRedirect} />
+        </Route>
+    );
+}
+/**
+ * `url` is only passed by the prerender entry, which renders the same
+ * component tree as the browser so every Solid hydration key lines up.
+ */
+function App(props: {url?: string}): JSX.Element {
     onMount(function (): void {
         applyHashRedirect();
     });
     return (
-        <Router>
-            <Route path="/" component={AppShell}>
-                <Route path="/" component={HomePage} />
-                <Route path="/molar-mass" component={MolarMass} />
-                <Route path="/mass-calc" component={MassCalcRedirect} />
-                <Route path="/element-lookup" component={ElementLookup} />
-                <Route path="/periodic-table" component={PeriodicTable} />
-                <Route path="/equation-balancer" component={EquationBalancerRoute} />
-                <Route path="/unit-converter" component={UnitConverter} />
-                <Route path="/dilution" component={Dilution} />
-                <Route path="/mass-percent" component={MassPercent} />
-                <Route path="/solution-mixing" component={SolutionMixing} />
-                <Route path="/buffer" component={BufferSolution} />
-                <Route path="/pka-pkb" component={PKaPKb} />
-                <Route path="/ksp" component={Ksp} />
-                <Route path="/colligative" component={Colligative} />
-                <Route path="/titration" component={Titration} />
-                <Route path="/debye-huckel" component={DebyeHuckel} />
-                <Route path="/common-ion" component={CommonIonEffect} />
-                <Route path="/nuclear" component={NuclearChemistry} />
-                <Route path="/gas-laws" component={GasLaws} />
-                <Route path="/electrochemistry" component={Electrochemistry} />
-                <Route path="/thermodynamics" component={Thermodynamics} />
-                <Route path="/kinetics" component={Kinetics} />
-                <Route path="/quantum-atomic" component={QuantumAtomic} />
-                <Route path="/stoichiometry" component={Stoichiometry} />
-                <Route path="/bond-type" component={BondType} />
-                <Route path="/molecular-viewer" component={MolecularViewerRoute} />
-                <Route path="/compound-search" component={CompoundSearch} />
-                {desktop() ? <Route path="/batch-calc" component={BatchCalc} /> : <Route path="/batch-calc" component={DesktopOnlyNotice} />}
-                {desktop() ? <Route path="/dashboard" component={Dashboard} /> : <Route path="/dashboard" component={DesktopOnlyNotice} />}
-                <Route path="*" component={CatchAllRedirect} />
-            </Route>
+        <Router url={props.url}>
+            <AppRoutes />
         </Router>
     );
 }
-export {App, hashToPath};
+export {App, AppRoutes, hashToPath};
