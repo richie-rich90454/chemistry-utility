@@ -20,9 +20,9 @@
             "purpose": "any"
         },
         {
-            "src": "/app-image.png",
+            "src": "/app-image.webp",
             "sizes": "1220x1220",
-            "type": "image/png",
+            "type": "image/webp",
             "purpose": "any"
         }
     ]
