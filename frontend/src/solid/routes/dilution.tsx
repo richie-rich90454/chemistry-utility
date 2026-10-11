@@ -1,22 +1,17 @@
 /**
- * Visual verification: The Solid-rendered Dilution card should match the
- * legacy #dilution-calc card in frontend/index.html. Intentional diff:
- * this route surfaces a Clear button (legacy lacked one) and routes the
- * M1V1=M2V2 math through DilutionCalculator.calculatePure instead of the
- * DOM-coupled performCalculation path. No Playwright screenshot test is
- * added per task spec; parity is verified by manual diff of the rendered
- * DOM against the legacy markup.
+ * Dilution route.
+ *
+ * Runs the M1V1 = M2V2 math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {DilutionCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
-let calculator = new DilutionCalculator();
 let fields: CalculatorField[] = [
     {"id": "dilution-M1", "label": "M1", "placeholder": "M1 (M)", "ariaLabel": "Initial molarity"},
     {"id": "dilution-V1", "label": "V1", "placeholder": "V1 (L)", "ariaLabel": "Initial volume"},
@@ -36,10 +31,11 @@ let selects: CalculatorSelect[] = [{
     "defaultValue": "V2"
 }];
 function Dilution(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("dilution", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
