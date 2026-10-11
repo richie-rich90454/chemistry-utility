@@ -19,6 +19,9 @@ function ScrollTopButton(): JSX.Element {
         handleScroll();
     });
     onCleanup(function (): void {
+        if (typeof window === "undefined") {
+            return;
+        }
         window.removeEventListener("scroll", handleScroll);
     });
     return (
