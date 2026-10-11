@@ -14,6 +14,7 @@ type App struct {
 	ptableSvc   *PTableService
 	calculators *CalculatorService
 	data        *DataService
+	files       *FileService
 }
 
 // NewApp creates a new App instance.
@@ -29,12 +30,16 @@ func NewApp() *App {
 		ptableSvc:   &PTableService{svc: table},
 		calculators: NewCalculatorService(),
 		data:        NewDataService(table),
+		files:       NewFileService(),
 	}
 }
 
 // startup is called when the app starts.
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	// The file dialogs need the Wails runtime context, which only exists
+	// once the app is running.
+	a.files.ctx = ctx
 }
 
 // shutdown is called when the app closes.
