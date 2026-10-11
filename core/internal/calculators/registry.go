@@ -79,4 +79,14 @@ func (r *Registry) registerAll() {
 	r.calculators["van-der-waals"] = vanDerWaals
 	r.calculators["half-life"] = halfLife
 	r.calculators["molar-mass"] = molarMass
+	r.calculators["photoelectron-spectroscopy"] = photoelectronSpectroscopy
+	r.calculators["empirical-formula"] = empiricalFormula
+	r.calculators["mass-spectrometry"] = massSpectrometry
+	r.calculators["vsepr-geometry"] = vseprGeometry
+	r.calculators["calorimetry"] = calorimetry
+	r.calculators["gibbs-equilibrium"] = gibbsEquilibrium
+	r.calculators["molality"] = molality
+	r.calculators["beer-lambert"] = beerLambert
+	r.calculators["serial-dilution"] = serialDilution
+	r.calculators["le-chatelier"] = leChatelier
 }
