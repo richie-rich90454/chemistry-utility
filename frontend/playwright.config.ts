@@ -16,6 +16,10 @@ export default defineConfig({
   ],
   webServer: {
     command: "npm run build:web && npx vite preview --port 5173",
+    // the command rebuilds and prerenders before serving, so Playwright has to
+    // wait for the port instead of assuming the process is ready on start
+    url: "http://localhost:5173",
     reuseExistingServer: true,
+    timeout: 120_000,
   },
 });
