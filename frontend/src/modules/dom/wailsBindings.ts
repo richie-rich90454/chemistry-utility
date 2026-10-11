@@ -34,6 +34,9 @@ export interface WailsBindings {
 
 /** Returns the Wails binding namespace, or null outside a Wails runtime. */
 export function getBindings(): WailsBindings | null {
+    if (typeof window === "undefined") {
+        return null;
+    }
     let w = window as unknown as { go?: WailsBindings["go"] };
     if (w.go === undefined) {
         return null;
