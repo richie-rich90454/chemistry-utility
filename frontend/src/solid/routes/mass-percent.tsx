@@ -1,19 +1,16 @@
 /**
- * Visual verification: The Solid-rendered Mass Percent card should match
- * the legacy #mass-percent-calc card in frontend/index.html. Intentional
- * diff: this route surfaces a Clear button (legacy lacked one) and routes
- * the concentration math through MassPercentCalculator.calculatePure.
- * Parity is verified by manual diff of the rendered DOM.
+ * Mass percent route.
+ *
+ * Runs the concentration math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {MassPercentCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
-let calculator = new MassPercentCalculator();
 let fields: CalculatorField[] = [
     {"id": "mass-solute", "label": "Mass of solute (g)", "placeholder": "Mass of solute (g)", "ariaLabel": "Mass of solute"},
     {"id": "mass-solution", "label": "Mass of solution (g)", "placeholder": "Mass of solution (g)", "ariaLabel": "Mass of solution"}
@@ -30,10 +27,11 @@ let selects: CalculatorSelect[] = [{
     "defaultValue": "percent"
 }];
 function MassPercent(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("mass-percent", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
