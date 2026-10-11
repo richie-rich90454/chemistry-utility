@@ -1,23 +1,13 @@
 /**
- * Visual verification: The Solid-rendered Thermodynamics card should match
- * the legacy #thermodynamics card in frontend/index.html. Intentional diffs:
- *  - This route surfaces a Clear button per calculator (legacy lacked one)
- *  - Each sub-section is wrapped in a <section> with a divider to mirror
- *    the legacy .sub-group visual rhythm
- *  - Hess's Law and Entropy inputs use type="text" via the shared
- *    CalculatorForm (legacy used <input type="text">); Bond Enthalpy
- *    uses a dynamic BondEditor component (see SubTask 20.2) that
- *    serializes rows of bond-type + count into the comma-separated
- *    format expected by BondEnthalpyCalculator.calculatePure
- * Routes math through calculatePure on GibbsFreeEnergyCalculator,
- * HessLawCalculator, EntropyCalculator, HeatCapacityCalculator,
- * BondEnthalpyCalculator, and BornHaberCycleCalculator. No Playwright
- * screenshot test is added per task spec; parity is verified by manual
- * diff of the rendered DOM.
+ * Thermodynamics route.
+ *
+ * Runs Gibbs free energy, Hess law, entropy, heat capacity, bond enthalpy,
+ * and Born-Haber math through the calculation engine, one section per
+ * sub-calculator.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {GibbsFreeEnergyCalculator, HessLawCalculator, EntropyCalculator, HeatCapacityCalculator, BondEnthalpyCalculator, BornHaberCycleCalculator} from "../../modules/thermodynamicsCalculators.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
@@ -26,12 +16,6 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./thermodynamics.module.css";
-let gibbsCalculator = new GibbsFreeEnergyCalculator();
-let hessCalculator = new HessLawCalculator();
-let entropyCalculator = new EntropyCalculator();
-let heatCapacityCalculator = new HeatCapacityCalculator();
-let bondEnthalpyCalculator = new BondEnthalpyCalculator();
-let bornHaberCalculator = new BornHaberCycleCalculator();
 let gibbsFields: CalculatorField[] = [
     {"id": "gibbs-deltaH", "label": "ΔH", "placeholder": "ΔH (kJ/mol)", "ariaLabel": "Enthalpy change"},
     {"id": "gibbs-deltaS", "label": "ΔS", "placeholder": "ΔS (J/(mol·K))", "ariaLabel": "Entropy change"},
@@ -71,6 +55,7 @@ let bornHaberFields: CalculatorField[] = [
     {"id": "born-haber-EA", "label": "EA", "placeholder": "EA (kJ/mol)", "ariaLabel": "Electron affinity"}
 ];
 function Thermodynamics(): JSX.Element {
+    let engine = getEngine();
     let [gibbsResult, setGibbsResult] = createSignal("");
     let [gibbsError, setGibbsError] = createSignal("");
     let [hessResult, setHessResult] = createSignal("");
@@ -84,42 +69,42 @@ function Thermodynamics(): JSX.Element {
     let [bornHaberResult, setBornHaberResult] = createSignal("");
     let [bornHaberError, setBornHaberError] = createSignal("");
     function handleGibbsCalculate(inputs: Record<string, string>): void {
-        resolveResult(gibbsCalculator.calculatePure(inputs), setGibbsResult, setGibbsError);
+        resolveResult(engine.calculate("gibbs-free-energy", inputs), setGibbsResult, setGibbsError);
     }
     function handleGibbsClear(): void {
         setGibbsResult("");
         setGibbsError("");
     }
     function handleHessCalculate(inputs: Record<string, string>): void {
-        resolveResult(hessCalculator.calculatePure(inputs), setHessResult, setHessError);
+        resolveResult(engine.calculate("hess-law", inputs), setHessResult, setHessError);
     }
     function handleHessClear(): void {
         setHessResult("");
         setHessError("");
     }
     function handleEntropyCalculate(inputs: Record<string, string>): void {
-        resolveResult(entropyCalculator.calculatePure(inputs), setEntropyResult, setEntropyError);
+        resolveResult(engine.calculate("entropy", inputs), setEntropyResult, setEntropyError);
     }
     function handleEntropyClear(): void {
         setEntropyResult("");
         setEntropyError("");
     }
     function handleHeatCapacityCalculate(inputs: Record<string, string>): void {
-        resolveResult(heatCapacityCalculator.calculatePure(inputs), setHeatCapacityResult, setHeatCapacityError);
+        resolveResult(engine.calculate("heat-capacity", inputs), setHeatCapacityResult, setHeatCapacityError);
     }
     function handleHeatCapacityClear(): void {
         setHeatCapacityResult("");
         setHeatCapacityError("");
     }
     function handleBondEnthalpyCalculate(inputs: Record<string, string>): void {
-        resolveResult(bondEnthalpyCalculator.calculatePure(inputs), setBondEnthalpyResult, setBondEnthalpyError);
+        resolveResult(engine.calculate("bond-enthalpy", inputs), setBondEnthalpyResult, setBondEnthalpyError);
     }
     function handleBondEnthalpyClear(): void {
         setBondEnthalpyResult("");
         setBondEnthalpyError("");
     }
     function handleBornHaberCalculate(inputs: Record<string, string>): void {
-        resolveResult(bornHaberCalculator.calculatePure(inputs), setBornHaberResult, setBornHaberError);
+        resolveResult(engine.calculate("born-haber", inputs), setBornHaberResult, setBornHaberError);
     }
     function handleBornHaberClear(): void {
         setBornHaberResult("");
