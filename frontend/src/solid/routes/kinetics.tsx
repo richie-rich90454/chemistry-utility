@@ -1,22 +1,15 @@
 /**
- * Visual verification: The Solid-rendered Kinetics card should match the
- * legacy #kinetics card in frontend/index.html. Intentional diffs:
- *  - This route surfaces a Clear button per calculator (legacy lacked one)
- *  - Each sub-section is wrapped in a <section> with a divider to mirror
- *    the legacy .sub-group visual rhythm
- *  - The Integrated Rate Law sub-calculator renders a canvas for the
- *    concentration-vs-time series returned by calculatePure, drawn through
- *    the DOM chart binding; the canvas id remains
- *    "integrated-rate-law-chart" for parity
- * Routes math through calculatePure on ArrheniusCalculator,
- * RateLawCalculator, IntegratedRateLawCalculator,
- * ReactionOrderCalculator, and CollisionTheoryCalculator. No Playwright
- * screenshot test is added per task spec; parity is verified by manual
- * diff of the rendered DOM.
+ * Kinetics route.
+ *
+ * Runs Arrhenius, rate law, integrated rate law, reaction order, and
+ * collision theory math through the calculation engine. The integrated
+ * rate law section renders its concentration-time series to a canvas
+ * through the chart binding.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
+import type {CalculatorResult} from "../../modules/calculators/pureCalculator.js";
 import {createSignal, onMount, Show} from "solid-js";
-import {ArrheniusCalculator, RateLawCalculator, IntegratedRateLawCalculator, ReactionOrderCalculator, CollisionTheoryCalculator} from "../../modules/kineticsCalculators.js";
 import {renderConcentrationTimeChart} from "../../modules/dom/chartBindings.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
@@ -25,11 +18,6 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./kinetics.module.css";
-let arrheniusCalculator = new ArrheniusCalculator();
-let rateLawCalculator = new RateLawCalculator();
-let integratedRateLawCalculator = new IntegratedRateLawCalculator();
-let reactionOrderCalculator = new ReactionOrderCalculator();
-let collisionTheoryCalculator = new CollisionTheoryCalculator();
 let arrheniusFields: CalculatorField[] = [
     {"id": "arrhenius-A", "label": "A", "placeholder": "A (s⁻¹)", "ariaLabel": "Frequency factor"},
     {"id": "arrhenius-Ea", "label": "Ea", "placeholder": "Ea (kJ/mol)", "ariaLabel": "Arrhenius activation energy"},
@@ -115,6 +103,7 @@ function ConcentrationChart(props: {points: unknown[]}): JSX.Element {
     );
 }
 function Kinetics(): JSX.Element {
+    let engine = getEngine();
     let [arrheniusResult, setArrheniusResult] = createSignal("");
     let [arrheniusError, setArrheniusError] = createSignal("");
     let [rateLawResult, setRateLawResult] = createSignal("");
@@ -127,23 +116,25 @@ function Kinetics(): JSX.Element {
     let [collisionResult, setCollisionResult] = createSignal("");
     let [collisionError, setCollisionError] = createSignal("");
     function handleArrheniusCalculate(inputs: Record<string, string>): void {
-        resolveResult(arrheniusCalculator.calculatePure(inputs), setArrheniusResult, setArrheniusError);
+        resolveResult(engine.calculate("arrhenius", inputs), setArrheniusResult, setArrheniusError);
     }
     function handleArrheniusClear(): void {
         setArrheniusResult("");
         setArrheniusError("");
     }
     function handleRateLawCalculate(inputs: Record<string, string>): void {
-        resolveResult(rateLawCalculator.calculatePure(inputs), setRateLawResult, setRateLawError);
+        resolveResult(engine.calculate("rate-law", inputs), setRateLawResult, setRateLawError);
     }
     function handleRateLawClear(): void {
         setRateLawResult("");
         setRateLawError("");
     }
     function handleIntegratedRateLawCalculate(inputs: Record<string, string>): void {
-        let res = integratedRateLawCalculator.calculatePure(inputs);
+        let res = engine.calculate("integrated-rate-law", inputs);
         resolveResult(res, setIntegratedRateLawResult, setIntegratedRateLawError);
-        setIntegratedRateLawChartPoints(Array.isArray(res.chartData) ? res.chartData : null);
+        void res.then(function (settled: CalculatorResult): void {
+            setIntegratedRateLawChartPoints(Array.isArray(settled.chartData) ? settled.chartData : null);
+        });
     }
     function handleIntegratedRateLawClear(): void {
         setIntegratedRateLawResult("");
@@ -151,14 +142,14 @@ function Kinetics(): JSX.Element {
         setIntegratedRateLawChartPoints(null);
     }
     function handleReactionOrderCalculate(inputs: Record<string, string>): void {
-        resolveResult(reactionOrderCalculator.calculatePure(inputs), setReactionOrderResult, setReactionOrderError);
+        resolveResult(engine.calculate("reaction-order", inputs), setReactionOrderResult, setReactionOrderError);
     }
     function handleReactionOrderClear(): void {
         setReactionOrderResult("");
         setReactionOrderError("");
     }
     function handleCollisionCalculate(inputs: Record<string, string>): void {
-        resolveResult(collisionTheoryCalculator.calculatePure(inputs), setCollisionResult, setCollisionError);
+        resolveResult(engine.calculate("collision-theory", inputs), setCollisionResult, setCollisionError);
     }
     function handleCollisionClear(): void {
         setCollisionResult("");
