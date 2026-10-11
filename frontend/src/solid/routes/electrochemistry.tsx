@@ -1,27 +1,18 @@
 /**
- * Visual verification: The Solid-rendered Electrochemistry card should
- * match the legacy #electrochemistry card in frontend/index.html.
- * Intentional diffs:
- *  - This route surfaces a Clear button per calculator (legacy lacked one)
- *  - Each sub-section is wrapped in a <section> with a divider to mirror
- *    the legacy .sub-group visual rhythm
- * Routes math through calculatePure on CellPotentialCalculator,
- * NernstCalculator, and ElectrolysisCalculator. No Playwright screenshot
- * test is added per task spec; parity is verified by manual diff of the
- * rendered DOM.
+ * Electrochemistry route.
+ *
+ * Runs cell potential, Nernst, and electrolysis math through the
+ * calculation engine, one section per sub-calculator.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {CellPotentialCalculator, NernstCalculator, ElectrolysisCalculator} from "../../modules/electrochemistryCalculators.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./electrochemistry.module.css";
-let cellCalculator = new CellPotentialCalculator();
-let nernstCalculator = new NernstCalculator();
-let electrolysisCalculator = new ElectrolysisCalculator();
 let cellFields: CalculatorField[] = [
     {"id": "E1", "label": "E°₁", "placeholder": "E°_1 (V)", "ariaLabel": "First reduction potential"},
     {"id": "E2", "label": "E°₂", "placeholder": "E°_2 (V)", "ariaLabel": "Second reduction potential"}
@@ -51,6 +42,7 @@ let electrolysisSelects: CalculatorSelect[] = [{
     "defaultValue": "mass"
 }];
 function Electrochemistry(): JSX.Element {
+    let engine = getEngine();
     let [cellResult, setCellResult] = createSignal("");
     let [cellError, setCellError] = createSignal("");
     let [nernstResult, setNernstResult] = createSignal("");
@@ -58,21 +50,21 @@ function Electrochemistry(): JSX.Element {
     let [electrolysisResult, setElectrolysisResult] = createSignal("");
     let [electrolysisError, setElectrolysisError] = createSignal("");
     function handleCellCalculate(inputs: Record<string, string>): void {
-        resolveResult(cellCalculator.calculatePure(inputs), setCellResult, setCellError);
+        resolveResult(engine.calculate("cell-potential", inputs), setCellResult, setCellError);
     }
     function handleCellClear(): void {
         setCellResult("");
         setCellError("");
     }
     function handleNernstCalculate(inputs: Record<string, string>): void {
-        resolveResult(nernstCalculator.calculatePure(inputs), setNernstResult, setNernstError);
+        resolveResult(engine.calculate("nernst", inputs), setNernstResult, setNernstError);
     }
     function handleNernstClear(): void {
         setNernstResult("");
         setNernstError("");
     }
     function handleElectrolysisCalculate(inputs: Record<string, string>): void {
-        resolveResult(electrolysisCalculator.calculatePure(inputs), setElectrolysisResult, setElectrolysisError);
+        resolveResult(engine.calculate("electrolysis", inputs), setElectrolysisResult, setElectrolysisError);
     }
     function handleElectrolysisClear(): void {
         setElectrolysisResult("");
