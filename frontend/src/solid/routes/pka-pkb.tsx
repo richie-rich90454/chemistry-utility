@@ -1,19 +1,16 @@
 /**
- * Visual verification: The Solid-rendered pKa/pKb card should match the
- * legacy #pka-pkb-calc card in frontend/index.html. Intentional diff:
- * this route surfaces a Clear button (legacy lacked one) and routes the
- * Ka/Kb/pKa/pKb conversion through PKaPKbCalculator.calculatePure.
- * Parity is verified by manual diff.
+ * pKa and pKb route.
+ *
+ * Runs the Ka, Kb, pKa, and pKb conversions through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {PKaPKbCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
-let calculator = new PKaPKbCalculator();
 let fields: CalculatorField[] = [
     {"id": "pka-pkb-input-value", "label": "Value", "placeholder": "Value", "ariaLabel": "Input value"}
 ];
@@ -30,10 +27,11 @@ let selects: CalculatorSelect[] = [{
     "defaultValue": "Ka"
 }];
 function PKaPKb(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("pka-pkb", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
