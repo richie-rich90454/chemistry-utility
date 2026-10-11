@@ -1,17 +1,12 @@
 /**
- * Visual verification: The Solid-rendered Stoichiometry card should match
- * the legacy #stoichiometry card in frontend/index.html. Intentional diff:
- * this route uses a createEffect to parse the equation reactively and
- * rebuilds the dynamic input section as a Solid-rendered <div> (legacy
- * rebuilt innerHTML strings). Each calculation type surfaces its own
- * labeled inputs in a dashed .dynamicInputs container so the user can
- * see exactly which fields apply to the current mode. No Playwright
- * screenshot test is added per task spec; parity is verified by manual
- * diff of the rendered DOM against the legacy markup.
+ * Stoichiometry route.
+ *
+ * Parses the balanced equation and runs the mole ratio math through the
+ * calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal, createEffect, For} from "solid-js";
-import {StoichiometryCalculator} from "../../modules/stoichiometryCalculator.js";
 import {parseBalancedEquation} from "../../modules/calculators/stoichiometry.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
@@ -48,13 +43,13 @@ function molesMapsEqual(a: Record<string, string>, b: Record<string, string>): b
     }
     return true;
 }
-let calculator = new StoichiometryCalculator();
 let calculationTypeOptions: {"value": string; "label": string}[] = [
     {"value": "product-from-reactant", "label": "Product from Reactant"},
     {"value": "reactant-from-product", "label": "Reactant from Product"},
     {"value": "limiting-reactant", "label": "Limiting Reactant"}
 ];
 function Stoichiometry(): JSX.Element {
+    let engine = getEngine();
     let [equation, setEquation] = createSignal("");
     let [calcType, setCalcType] = createSignal("product-from-reactant");
     let [parsedEquation, setParsedEquation] = createSignal<ParsedEquation | null>(null);
@@ -178,7 +173,7 @@ function Stoichiometry(): JSX.Element {
             }
             inputs["product-select"] = productSelect();
         }
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("stoichiometry", inputs), setResult, setError);
     }
     function handleClear(): void {
         setEquation("");
