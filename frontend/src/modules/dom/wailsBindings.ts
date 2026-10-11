@@ -23,11 +23,17 @@ interface DataServiceBinding {
     GetPTableData(): Promise<string>;
 }
 
+interface FileServiceBinding {
+    OpenFile(title: string, filters: string): Promise<string>;
+    SaveFile(defaultName: string, data: string): Promise<string>;
+}
+
 export interface WailsBindings {
     go: {
         main: {
             CalculatorService: CalculatorServiceBinding;
             DataService: DataServiceBinding;
+            FileService: FileServiceBinding;
         };
     };
 }
