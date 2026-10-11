@@ -2,33 +2,7 @@ import type {JSX} from "solid-js";
 import {createMemo, onMount} from "solid-js";
 import {Router, Route, Navigate} from "@solidjs/router";
 import {HomePage} from "./routes/HomePage";
-import {MolarMass} from "./routes/molar-mass";
-import {ElementLookup} from "./routes/element-lookup";
-import {PeriodicTable} from "./routes/periodic-table";
-import {EquationBalancerRoute} from "./routes/equation-balancer";
-import UnitConverter from "./routes/unit-converter";
-import {Dilution} from "./routes/dilution";
-import {MassPercent} from "./routes/mass-percent";
-import {SolutionMixing} from "./routes/solution-mixing";
-import {BufferSolution} from "./routes/buffer";
-import {PKaPKb} from "./routes/pka-pkb";
-import {Ksp} from "./routes/ksp";
-import {Colligative} from "./routes/colligative";
-import {Titration} from "./routes/titration";
-import {DebyeHuckel} from "./routes/debye-huckel";
-import {CommonIonEffect} from "./routes/common-ion";
-import {NuclearChemistry} from "./routes/nuclear";
-import {GasLaws} from "./routes/gas-laws";
-import {Electrochemistry} from "./routes/electrochemistry";
-import {Thermodynamics} from "./routes/thermodynamics";
-import {Kinetics} from "./routes/kinetics";
-import {QuantumAtomic} from "./routes/quantum-atomic";
-import {Stoichiometry} from "./routes/stoichiometry";
-import {BondType} from "./routes/bond-type";
-import {MolecularViewerRoute} from "./routes/molecular-viewer";
-import {CompoundSearch} from "./routes/compound-search";
-import {BatchCalc} from "./routes/batch-calc";
-import {Dashboard} from "./routes/dashboard";
+import {lazyRoute} from "./routeLoaders";
 import {Sidebar} from "./components/Sidebar";
 import {MobileBottomTabs} from "./components/MobileBottomTabs";
 import {MobileNavSheet} from "./components/MobileNavSheet";
@@ -40,6 +14,47 @@ import {ComparisonModal} from "./components/ComparisonModal";
 import {RouteTransition} from "./components/RouteTransition";
 import {createSignal} from "solid-js";
 import {isDesktop} from "./lib/desktopOnly";
+import {useUrlState} from "./lib/useUrlState";
+// Heavy routes are code-split: each lazyRoute() key is a dynamic import
+// chunk in routeLoaders.ts. The home route stays eager.
+const MolarMass = lazyRoute("/molar-mass");
+const ElementLookup = lazyRoute("/element-lookup");
+const PeriodicTable = lazyRoute("/periodic-table");
+const EquationBalancerRoute = lazyRoute("/equation-balancer");
+const UnitConverter = lazyRoute("/unit-converter");
+const Dilution = lazyRoute("/dilution");
+const MassPercent = lazyRoute("/mass-percent");
+const SolutionMixing = lazyRoute("/solution-mixing");
+const BufferSolution = lazyRoute("/buffer");
+const PKaPKb = lazyRoute("/pka-pkb");
+const Ksp = lazyRoute("/ksp");
+const Colligative = lazyRoute("/colligative");
+const Titration = lazyRoute("/titration");
+const DebyeHuckel = lazyRoute("/debye-huckel");
+const CommonIonEffect = lazyRoute("/common-ion");
+const NuclearChemistry = lazyRoute("/nuclear");
+const GasLaws = lazyRoute("/gas-laws");
+const Electrochemistry = lazyRoute("/electrochemistry");
+const Thermodynamics = lazyRoute("/thermodynamics");
+const Kinetics = lazyRoute("/kinetics");
+const QuantumAtomic = lazyRoute("/quantum-atomic");
+const Stoichiometry = lazyRoute("/stoichiometry");
+const BondType = lazyRoute("/bond-type");
+const PhotoelectronSpectroscopy = lazyRoute("/photoelectron-spectroscopy");
+const EmpiricalFormula = lazyRoute("/empirical-formula");
+const MassSpectrometry = lazyRoute("/mass-spectrometry");
+const VseprGeometry = lazyRoute("/vsepr-geometry");
+const Calorimetry = lazyRoute("/calorimetry");
+const GibbsEquilibrium = lazyRoute("/gibbs-equilibrium");
+const Molality = lazyRoute("/molality");
+const BeerLambert = lazyRoute("/beer-lambert");
+const SerialDilution = lazyRoute("/serial-dilution");
+const LeChatelier = lazyRoute("/le-chatelier");
+const MolecularViewerRoute = lazyRoute("/molecular-viewer");
+const CompoundSearch = lazyRoute("/compound-search");
+const BatchCalc = lazyRoute("/batch-calc");
+const Dashboard = lazyRoute("/dashboard");
+const LabReport = lazyRoute("/report");
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
@@ -127,6 +142,8 @@ function applyHashRedirect(): void {
 }
 function AppShell(props: {children?: JSX.Element}): JSX.Element {
     let [collapsed, setCollapsed] = createSignal(false);
+    // One owner of the shareable URL state for every calculator route.
+    useUrlState();
     return (
         <div class={"app-shell" + (collapsed() ? " nav-collapsed" : "")}>
             <aside class="nav-pane">
@@ -182,10 +199,21 @@ function AppRoutes(): JSX.Element {
             <Route path="/quantum-atomic" component={QuantumAtomic} />
             <Route path="/stoichiometry" component={Stoichiometry} />
             <Route path="/bond-type" component={BondType} />
+            <Route path="/photoelectron-spectroscopy" component={PhotoelectronSpectroscopy} />
+            <Route path="/empirical-formula" component={EmpiricalFormula} />
+            <Route path="/mass-spectrometry" component={MassSpectrometry} />
+            <Route path="/vsepr-geometry" component={VseprGeometry} />
+            <Route path="/calorimetry" component={Calorimetry} />
+            <Route path="/gibbs-equilibrium" component={GibbsEquilibrium} />
+            <Route path="/molality" component={Molality} />
+            <Route path="/beer-lambert" component={BeerLambert} />
+            <Route path="/serial-dilution" component={SerialDilution} />
+            <Route path="/le-chatelier" component={LeChatelier} />
             <Route path="/molecular-viewer" component={MolecularViewerRoute} />
             <Route path="/compound-search" component={CompoundSearch} />
             {desktop() ? <Route path="/batch-calc" component={BatchCalc} /> : <Route path="/batch-calc" component={DesktopOnlyNotice} />}
             {desktop() ? <Route path="/dashboard" component={Dashboard} /> : <Route path="/dashboard" component={DesktopOnlyNotice} />}
+            <Route path="/report" component={LabReport} />
             <Route path="*" component={CatchAllRedirect} />
         </Route>
     );
