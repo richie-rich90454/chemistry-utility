@@ -16,6 +16,8 @@ import type {JSX} from "solid-js";
 import type {BatchResult, ProgressInfo} from "../../modules/batchCalculator.js";
 import {createSignal, For, Show} from "solid-js";
 import {BatchCalculator} from "../../modules/batchCalculator.js";
+import {getFileAccess} from "../../modules/dom/fileAccess.js";
+import {runBatch} from "../../modules/heavyCalcClient.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
@@ -76,6 +78,20 @@ function BatchCalc(): JSX.Element {
         setError("");
         setStatusMessage("");
     }
+    function handlePickerClick(e: MouseEvent): void {
+        let access = getFileAccess();
+        if (access.kind !== "native") {
+            return;
+        }
+        // The desktop build opens the OS dialog through the Go file service;
+        // suppressing the default keeps the webview's own picker closed.
+        e.preventDefault();
+        void access.openFile(".csv").then(function (picked: File | null): void {
+            setFile(picked);
+            setError("");
+            setStatusMessage("");
+        });
+    }
     async function handleProcess(): Promise<void> {
         let f: File | null = file();
         /* v8 ignore next -- unreachable guard: the Process button is the
@@ -95,7 +111,7 @@ function BatchCalc(): JSX.Element {
         setProgressTotal(1);
         try {
             let text: string = await f.text();
-            let res: BatchResult = await calc.processCsvText(text, calculatorType(), function (info: ProgressInfo): void {
+            let res: BatchResult = await runBatch(text, calculatorType(), function (info: ProgressInfo): void {
                 setProgressCurrent(info.current);
                 setProgressTotal(info.total);
             });
@@ -195,7 +211,7 @@ function BatchCalc(): JSX.Element {
                 </For>
             </select>
             <label class={styles.labelText} for="batch-calc-file-input">CSV file</label>
-            <input type="file" id="batch-calc-file-input" class={styles.fileInput} accept=".csv" aria-label="Choose CSV file" onChange={handleFileChange} />
+            <input type="file" id="batch-calc-file-input" class={styles.fileInput} accept=".csv" aria-label="Choose CSV file" onClick={handlePickerClick} onChange={handleFileChange} />
             <div class={styles.buttonRow}>
                 <button class={styles.button} onClick={handleProcess} disabled={processing() || file() === null}>Process</button>
                 <button class={styles.secondaryButton} onClick={handleClear} disabled={processing()}>Clear</button>
