@@ -1,18 +1,13 @@
 /**
- * Visual verification: The Solid-rendered Quantum & Atomic card should match
- * the legacy #quantum-atomic card in frontend/index.html. Intentional diffs:
- *  - This route surfaces a Clear button per calculator (legacy lacked one)
- *  - Each sub-section is wrapped in a <section> with a divider to mirror
- *    the legacy .sub-group visual rhythm
- * Routes math through calculatePure on QuantumNumbersValidator,
- * ElectronConfigurationGenerator, RydbergCalculator,
- * DeBroglieWavelengthCalculator, PhotoelectricEffectCalculator, and
- * HeisenbergUncertaintyCalculator. No Playwright screenshot test is added
- * per task spec; parity is verified by manual diff of the rendered DOM.
+ * Quantum and atomic structure route.
+ *
+ * Runs quantum numbers, electron configuration, Rydberg, de Broglie,
+ * photoelectric effect, and uncertainty math through the calculation
+ * engine, one section per sub-calculator.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {QuantumNumbersValidator, ElectronConfigurationGenerator, RydbergCalculator, DeBroglieWavelengthCalculator, PhotoelectricEffectCalculator, HeisenbergUncertaintyCalculator} from "../../modules/quantumCalculators.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
@@ -20,12 +15,6 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import {resolveResult} from "../../modules/resultResolver.js";
 import styles from "./quantum-atomic.module.css";
-let quantumNumbersCalculator = new QuantumNumbersValidator();
-let electronConfigurationCalculator = new ElectronConfigurationGenerator();
-let rydbergCalculator = new RydbergCalculator();
-let deBroglieCalculator = new DeBroglieWavelengthCalculator();
-let photoelectricCalculator = new PhotoelectricEffectCalculator();
-let heisenbergCalculator = new HeisenbergUncertaintyCalculator();
 let quantumNumberFields: CalculatorField[] = [
     {"id": "qn-n", "label": "n", "placeholder": "n (1,2,3,...)", "ariaLabel": "Principal quantum number"},
     {"id": "qn-l", "label": "l", "placeholder": "l (0 to n-1)", "ariaLabel": "Angular momentum quantum number"},
@@ -87,6 +76,7 @@ let heisenbergSelects: CalculatorSelect[] = [{
     "defaultValue": "min-delta-x"
 }];
 function QuantumAtomic(): JSX.Element {
+    let engine = getEngine();
     let [quantumNumbersResult, setQuantumNumbersResult] = createSignal("");
     let [quantumNumbersError, setQuantumNumbersError] = createSignal("");
     let [electronConfigResult, setElectronConfigResult] = createSignal("");
@@ -100,42 +90,42 @@ function QuantumAtomic(): JSX.Element {
     let [heisenbergResult, setHeisenbergResult] = createSignal("");
     let [heisenbergError, setHeisenbergError] = createSignal("");
     function handleQuantumNumbersCalculate(inputs: Record<string, string>): void {
-        resolveResult(quantumNumbersCalculator.calculatePure(inputs), setQuantumNumbersResult, setQuantumNumbersError);
+        resolveResult(engine.calculate("quantum-numbers", inputs), setQuantumNumbersResult, setQuantumNumbersError);
     }
     function handleQuantumNumbersClear(): void {
         setQuantumNumbersResult("");
         setQuantumNumbersError("");
     }
     function handleElectronConfigCalculate(inputs: Record<string, string>): void {
-        resolveResult(electronConfigurationCalculator.calculatePure(inputs), setElectronConfigResult, setElectronConfigError);
+        resolveResult(engine.calculate("electron-configuration", inputs), setElectronConfigResult, setElectronConfigError);
     }
     function handleElectronConfigClear(): void {
         setElectronConfigResult("");
         setElectronConfigError("");
     }
     function handleRydbergCalculate(inputs: Record<string, string>): void {
-        resolveResult(rydbergCalculator.calculatePure(inputs), setRydbergResult, setRydbergError);
+        resolveResult(engine.calculate("rydberg", inputs), setRydbergResult, setRydbergError);
     }
     function handleRydbergClear(): void {
         setRydbergResult("");
         setRydbergError("");
     }
     function handleDeBroglieCalculate(inputs: Record<string, string>): void {
-        resolveResult(deBroglieCalculator.calculatePure(inputs), setDeBroglieResult, setDeBroglieError);
+        resolveResult(engine.calculate("debroglie-wavelength", inputs), setDeBroglieResult, setDeBroglieError);
     }
     function handleDeBroglieClear(): void {
         setDeBroglieResult("");
         setDeBroglieError("");
     }
     function handlePhotoelectricCalculate(inputs: Record<string, string>): void {
-        resolveResult(photoelectricCalculator.calculatePure(inputs), setPhotoelectricResult, setPhotoelectricError);
+        resolveResult(engine.calculate("photoelectric-effect", inputs), setPhotoelectricResult, setPhotoelectricError);
     }
     function handlePhotoelectricClear(): void {
         setPhotoelectricResult("");
         setPhotoelectricError("");
     }
     function handleHeisenbergCalculate(inputs: Record<string, string>): void {
-        resolveResult(heisenbergCalculator.calculatePure(inputs), setHeisenbergResult, setHeisenbergError);
+        resolveResult(engine.calculate("heisenberg-uncertainty", inputs), setHeisenbergResult, setHeisenbergError);
     }
     function handleHeisenbergClear(): void {
         setHeisenbergResult("");
