@@ -51,6 +51,18 @@ import {
     electrolysis,
     nernst
 } from "./calculators/electrochemistry.js";
+import {
+    beerLambert,
+    calorimetry,
+    empiricalFormula,
+    gibbsEquilibrium,
+    leChatelier,
+    massSpectrometry,
+    molality,
+    photoelectronSpectroscopy,
+    serialDilution,
+    vseprGeometry
+} from "./calculators/advanced.js";
 import { molarMass } from "./calculators/molarMass.js";
 import { loadElements } from "./calculators/elementData.js";
 import { stoichiometry } from "./calculators/stoichiometry.js";
@@ -77,10 +89,12 @@ type CalculatorEntry = (inputs: Record<string, string>) => CalculatorResult;
  */
 const WEB_CALCULATORS: Record<string, CalculatorEntry> = {
     "arrhenius": arrhenius,
+    "beer-lambert": beerLambert,
     "bond-enthalpy": bondEnthalpy,
     "bond-type": bondType,
     "born-haber": bornHaber,
     "buffer-solution": bufferSolution,
+    "calorimetry": calorimetry,
     "cell-potential": cellPotential,
     "colligative-properties": colligativeProperties,
     "collision-theory": collisionTheory,
@@ -91,7 +105,9 @@ const WEB_CALCULATORS: Record<string, CalculatorEntry> = {
     "dilution": dilution,
     "electrolysis": electrolysis,
     "electron-configuration": electronConfiguration,
+    "empirical-formula": empiricalFormula,
     "entropy": entropy,
+    "gibbs-equilibrium": gibbsEquilibrium,
     "gibbs-free-energy": gibbsFreeEnergy,
     "half-life": halfLife,
     "heat-capacity": heatCapacity,
@@ -100,19 +116,25 @@ const WEB_CALCULATORS: Record<string, CalculatorEntry> = {
     "ideal-gas": idealGas,
     "integrated-rate-law": integratedRateLaw,
     "ksp": ksp,
+    "le-chatelier": leChatelier,
     "mass-percent": massPercent,
+    "mass-spectrometry": massSpectrometry,
+    "molality": molality,
     "molar-mass": molarMassResult,
     "nernst": nernst,
     "photoelectric-effect": photoelectric,
+    "photoelectron-spectroscopy": photoelectronSpectroscopy,
     "pka-pkb": pKaPKb,
     "quantum-numbers": quantumNumbers,
     "rate-law": rateLaw,
     "reaction-order": reactionOrder,
     "rydberg": rydberg,
+    "serial-dilution": serialDilution,
     "solution-mixing": solutionMixing,
     "stoichiometry": stoichiometry,
     "titration-curve": titrationCurve,
-    "van-der-waals": vanDerWaals
+    "van-der-waals": vanDerWaals,
+    "vsepr-geometry": vseprGeometry
 };
 
 /**
