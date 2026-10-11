@@ -53,18 +53,18 @@ describe("useEquationBalancer", () => {
         expect(hook.medium()).toBe("basic");
     });
 
-    it("balance reports an error for empty equation", () => {
+    it("reports an error for empty equation", async (): Promise<void> => {
         const hook = useEquationBalancer();
         hook.setEquation("   ");
-        hook.balance();
+        await hook.balanceAsync();
         expect(hook.error()).toBe("Please enter a chemical equation");
         expect(hook.result()).toBeNull();
     });
 
-    it("balance balances a simple equation", () => {
+    it("balances a simple equation", async (): Promise<void> => {
         const hook = useEquationBalancer();
         hook.setEquation("H2 + O2 -> H2O");
-        hook.balance();
+        await hook.balanceAsync();
         expect(hook.error()).toBe("");
         const res = hook.result();
         expect(res).not.toBeNull();
@@ -73,11 +73,11 @@ describe("useEquationBalancer", () => {
         expect(hook.isLoading()).toBe(false);
     });
 
-    it("balance handles redox equations with medium in the method", () => {
+    it("handles redox equations with medium in the method", async (): Promise<void> => {
         const hook = useEquationBalancer();
         hook.setMedium("basic");
         hook.setEquation("MnO4- -> Mn2+ || Fe2+ -> Fe3+");
-        hook.balance();
+        await hook.balanceAsync();
         expect(hook.error()).toBe("");
         const res = hook.result();
         expect(res).not.toBeNull();
@@ -86,29 +86,29 @@ describe("useEquationBalancer", () => {
         expect(hook.isLoading()).toBe(false);
     });
 
-    it("balance handles redox equations in acidic medium", () => {
+    it("handles redox equations in acidic medium", async (): Promise<void> => {
         const hook = useEquationBalancer();
         hook.setMedium("acidic");
         hook.setEquation("MnO4- -> Mn2+ || Fe2+ -> Fe3+");
-        hook.balance();
+        await hook.balanceAsync();
         expect(hook.error()).toBe("");
         expect(hook.result()!.explanation.method).toContain("acidic");
     });
 
-    it("balance surfaces errors for invalid equations", () => {
+    it("surfaces errors for invalid equations", async (): Promise<void> => {
         const hook = useEquationBalancer();
         hook.setEquation("not a chemical equation !!!");
-        hook.balance();
+        await hook.balanceAsync();
         if (hook.result() === null) {
             expect(hook.error().length).toBeGreaterThan(0);
         }
         expect(hook.isLoading()).toBe(false);
     });
 
-    it("clear resets all state", () => {
+    it("clear resets all state", async (): Promise<void> => {
         const hook = useEquationBalancer();
         hook.setEquation("H2 + O2 -> H2O");
-        hook.balance();
+        await hook.balanceAsync();
         hook.clear();
         expect(hook.equation()).toBe("");
         expect(hook.result()).toBeNull();
@@ -116,20 +116,20 @@ describe("useEquationBalancer", () => {
         expect(hook.isLoading()).toBe(false);
     });
 
-    it("balance surfaces non-Error throws as strings", () => {
+    it("surfaces non-Error throws as strings", async (): Promise<void> => {
         const hook = useEquationBalancer();
         hook.setEquation("__boom__");
-        hook.balance();
+        await hook.balanceAsync();
         expect(hook.error()).toBe("boom");
         expect(hook.result()).toBeNull();
         expect(hook.isLoading()).toBe(false);
         void fastBalance;
     });
 
-    it("assigns coefficients of at least 1 to every species", () => {
+    it("assigns coefficients of at least 1 to every species", async (): Promise<void> => {
         const hook = useEquationBalancer();
         hook.setEquation("H2 + O2 -> H2O");
-        hook.balance();
+        await hook.balanceAsync();
         const res = hook.result();
         expect(res).not.toBeNull();
         for (const s of [...res!.reactants, ...res!.products]) {
