@@ -30,6 +30,7 @@ func main() {
 			app.ptableSvc,
 			app.calculators,
 			app.data,
+			app.files,
 		},
 		Windows: &windows.Options{
 			WebviewIsTransparent: false,
