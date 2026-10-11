@@ -13,7 +13,6 @@ import {
 } from "../modules/electrochemistryCalculators.js";
 import { predictBondType } from "../modules/bondPredictor.js";
 import { calculateStoichiometry, getCalculationType } from "../modules/dom/stoichiometryDom.js";
-import { mockElements } from "../test/elementsData.js";
 
 function createContainer(id: string): HTMLDivElement {
     const div = document.createElement("div");
@@ -279,7 +278,7 @@ describe("Integration: Calculator Workflows", () => {
         });
 
         it("predicts ionic bond for Na and Cl", () => {
-            predictBondType(mockElements);
+            predictBondType();
             const result = getResultText("bond-type-result");
             expect(result).toContain("Ionic");
         });

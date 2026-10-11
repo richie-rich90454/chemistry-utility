@@ -62,7 +62,7 @@ describe("Cross-Calculator Integration", () => {
         createInput("element2-input", "Cl", "bond-type-predictor", "text");
         createResultDiv("bond-type-result", "bond-type-predictor");
 
-        predictBondType(testElements as unknown as ChemicalElement[]);
+        predictBondType();
         const result = getResultText("bond-type-result");
         expect(result).toContain("Ionic");
     });
@@ -253,7 +253,7 @@ describe("Cross-Calculator Integration", () => {
         createInput("element1-input", "Fe", "bond-type-predictor", "text");
         createInput("element2-input", "O", "bond-type-predictor", "text");
         createResultDiv("bond-type-result", "bond-type-predictor");
-        predictBondType(testElements as unknown as ChemicalElement[]);
+        predictBondType();
         const result = getResultText("bond-type-result");
         expect(result).toContain("Ionic");
     });

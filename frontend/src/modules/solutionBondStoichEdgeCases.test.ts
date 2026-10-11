@@ -4,20 +4,6 @@ import { predictBondType } from "./bondPredictor.js";
 import { parseBalancedEquation, parseTerm } from "./calculators/stoichiometry.js";
 import { calculateStoichiometry } from "./dom/stoichiometryDom.js";
 import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM, getResultHTML } from "../test/helpers.js";
-import type { ChemicalElement } from "../types.js";
-
-const testElements: ChemicalElement[] = [
-	{ symbol: "Na", name: "Sodium", atomicMass: 22.990, atomicNumber: 11, type: "alkali metal", electronegativity: 0.93, valenceElectrons: 1, totalElectrons: 11, group: 1, period: 3 },
-	{ symbol: "Cl", name: "Chlorine", atomicMass: 35.453, atomicNumber: 17, type: "non-metal", electronegativity: 3.16, valenceElectrons: 7, totalElectrons: 17, group: 17, period: 3 },
-	{ symbol: "Fe", name: "Iron", atomicMass: 55.845, atomicNumber: 26, type: "transition metal", electronegativity: 1.83, valenceElectrons: 2, totalElectrons: 26, group: 8, period: 4 },
-	{ symbol: "La", name: "Lanthanum", atomicMass: 138.905, atomicNumber: 57, type: "lanthanide", electronegativity: 1.10, valenceElectrons: 2, totalElectrons: 57, group: 3, period: 6 },
-	{ symbol: "U", name: "Uranium", atomicMass: 238.029, atomicNumber: 92, type: "actinide", electronegativity: 1.38, valenceElectrons: 2, totalElectrons: 92, group: 3, period: 7 },
-	{ symbol: "Si", name: "Silicon", atomicMass: 28.086, atomicNumber: 14, type: "metalloid", electronegativity: 1.90, valenceElectrons: 4, totalElectrons: 14, group: 14, period: 3 },
-	{ symbol: "O", name: "Oxygen", atomicMass: 15.999, atomicNumber: 8, type: "non-metal", electronegativity: 3.44, valenceElectrons: 6, totalElectrons: 8, group: 16, period: 2 },
-	{ symbol: "C", name: "Carbon", atomicMass: 12.011, atomicNumber: 6, type: "non-metal", electronegativity: 2.55, valenceElectrons: 4, totalElectrons: 6, group: 14, period: 2 },
-	{ symbol: "H", name: "Hydrogen", atomicMass: 1.008, atomicNumber: 1, type: "non-metal", electronegativity: 2.20, valenceElectrons: 1, totalElectrons: 1, group: 1, period: 1 },
-	{ symbol: "He", name: "Helium", atomicMass: 4.003, atomicNumber: 2, type: "non-metal", electronegativity: null, valenceElectrons: 2, totalElectrons: 2, group: 18, period: 1 },
-];
 
 describe("Solution Calculators", () => {
 	afterEach(() => {
@@ -152,7 +138,7 @@ describe("Bond Predictor", () => {
 		(document.getElementById("element1-input") as HTMLInputElement).value = "La";
 		(document.getElementById("element2-input") as HTMLInputElement).value = "Cl";
 
-		predictBondType(testElements);
+		predictBondType();
 
 		const html = getResultHTML("bond-type-result");
 		expect(html).toContain("Ionic");
@@ -162,7 +148,7 @@ describe("Bond Predictor", () => {
 		(document.getElementById("element1-input") as HTMLInputElement).value = "U";
 		(document.getElementById("element2-input") as HTMLInputElement).value = "U";
 
-		predictBondType(testElements);
+		predictBondType();
 
 		const html = getResultHTML("bond-type-result");
 		expect(html).toContain("Metallic");
@@ -172,7 +158,7 @@ describe("Bond Predictor", () => {
 		(document.getElementById("element1-input") as HTMLInputElement).value = "Si";
 		(document.getElementById("element2-input") as HTMLInputElement).value = "O";
 
-		predictBondType(testElements);
+		predictBondType();
 
 		const html = getResultHTML("bond-type-result");
 		expect(html).toContain("Polar Covalent");
@@ -182,7 +168,7 @@ describe("Bond Predictor", () => {
 		(document.getElementById("element1-input") as HTMLInputElement).value = "Fe";
 		(document.getElementById("element2-input") as HTMLInputElement).value = "Fe";
 
-		predictBondType(testElements);
+		predictBondType();
 
 		const html = getResultHTML("bond-type-result");
 		expect(html).toContain("Metallic");
@@ -192,7 +178,7 @@ describe("Bond Predictor", () => {
 		(document.getElementById("element1-input") as HTMLInputElement).value = "C";
 		(document.getElementById("element2-input") as HTMLInputElement).value = "C";
 
-		predictBondType(testElements);
+		predictBondType();
 
 		const html = getResultHTML("bond-type-result");
 		expect(html).toContain("Nonpolar Covalent");
@@ -202,7 +188,7 @@ describe("Bond Predictor", () => {
 		(document.getElementById("element1-input") as HTMLInputElement).value = "He";
 		(document.getElementById("element2-input") as HTMLInputElement).value = "O";
 
-		predictBondType(testElements);
+		predictBondType();
 
 		const html = getResultHTML("bond-type-result");
 		expect(html).toContain("unavailable electronegativity data");
@@ -412,7 +398,7 @@ describe("Solution Calculators - more edge cases", () => {
 		createInput("element1-input", "Xx", "bond-type-predictor", "text");
 		createInput("element2-input", "O", "bond-type-predictor", "text");
 		createResultDiv("bond-type-result", "bond-type-predictor");
-		predictBondType(testElements);
+		predictBondType();
 		const html = getResultHTML("bond-type-result");
 		expect(html).toContain("not found");
 	});

@@ -15,7 +15,7 @@ describe("CalculatorFactory", () => {
         vi.spyOn(console, "warn").mockImplementation(() => {});
         vi.spyOn(console, "info").mockImplementation(() => {});
         vi.spyOn(console, "debug").mockImplementation(() => {});
-        factory = new CalculatorFactory([]);
+        factory = new CalculatorFactory();
     });
 
     it("returns a DilutionCalculator for the 'dilution' id", () => {
@@ -92,12 +92,8 @@ describe("CalculatorFactory", () => {
         expect(calc1).not.toBe(calc2);
     });
 
-    it("passes elements data to the BondTypePredictor", () => {
-        const elementsData = [
-            { symbol: "H", name: "Hydrogen", atomicMass: 1.008, atomicNumber: 1, valenceElectrons: 1, totalElectrons: 1, group: 1, period: 1, type: "nonmetal" },
-        ];
-        const factoryWithElements = new CalculatorFactory(elementsData);
-        const calc = factoryWithElements.create("bond-type");
+    it("creates a BondTypePredictor for the 'bond-type' id", () => {
+        const calc = factory.create("bond-type");
         expect(calc).toBeInstanceOf(BondTypePredictor);
     });
 
@@ -120,7 +116,7 @@ describe("CalculatorFactory - calculatePure support", () => {
 
     beforeEach(() => {
         document.body.innerHTML = "";
-        factory = new CalculatorFactory([]);
+        factory = new CalculatorFactory();
     });
 
     it("creates calculators that expose calculatePure for the 'dilution' id", () => {
