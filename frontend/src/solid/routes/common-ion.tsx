@@ -1,21 +1,17 @@
 /**
- * Visual verification: The Solid-rendered Common Ion Effect card should
- * match the legacy #common-ion-calc card in frontend/index.html.
- * Intentional diff: this route surfaces a Clear button (legacy lacked
- * one) and routes the common-ion solubility math through
- * CommonIonEffectCalculator.calculatePure. Parity is verified by manual
- * diff.
+ * Common ion effect route.
+ *
+ * Runs the solubility math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {CommonIonEffectCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
-let calculator = new CommonIonEffectCalculator();
 let fields: CalculatorField[] = [
     {"id": "common-ion-Ksp", "label": "Ksp", "placeholder": "Ksp", "ariaLabel": "Ksp value"},
     {"id": "common-ion-concentration", "label": "Common ion concentration (M)", "placeholder": "Common ion concentration (M)", "ariaLabel": "Common ion concentration"}
@@ -34,10 +30,11 @@ let selects: CalculatorSelect[] = [{
     "defaultValue": "AB"
 }];
 function CommonIonEffect(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("common-ion", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
