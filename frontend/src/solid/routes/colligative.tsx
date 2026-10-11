@@ -1,21 +1,16 @@
 /**
- * Visual verification: The Solid-rendered Colligative Properties card
- * should match the legacy #colligative-calc card in frontend/index.html.
- * Intentional diff: this route surfaces a Clear button (legacy lacked
- * one) and routes the boiling-point, freezing-point, osmotic-pressure,
- * and vapor-pressure math through
- * ColligativePropertiesCalculator.calculatePure. Parity is verified by
- * manual diff.
+ * Colligative properties route.
+ *
+ * Runs the freezing and boiling point math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {ColligativePropertiesCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
-let calculator = new ColligativePropertiesCalculator();
 let requiredFields: CalculatorField[] = [
     {"id": "collig-solute-mass", "label": "Solute mass (g)", "placeholder": "Solute mass (g)", "ariaLabel": "Solute mass"},
     {"id": "collig-molar-mass", "label": "Molar mass (g/mol)", "placeholder": "Molar mass (g/mol)", "ariaLabel": "Molar mass"},
@@ -34,10 +29,11 @@ let optionalFields: CalculatorField[] = [
 ];
 let allFields: CalculatorField[] = requiredFields.concat(optionalFields);
 function Colligative(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("colligative-properties", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
