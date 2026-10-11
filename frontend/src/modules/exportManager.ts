@@ -8,6 +8,8 @@ export interface HistoryEntry {
 	calculatorId: string;
 	inputs: Record<string, string>;
 	result: string;
+	/** The worked derivation, when the engine produced one. */
+	explanation?: string;
 	timestamp: string;
 }
 
@@ -53,13 +55,15 @@ export class ExportManager {
 	 * @param calculatorId - The calculator view ID
 	 * @param inputs - The input values used
 	 * @param result - The result text
+	 * @param explanation - The worked derivation, when the engine produced one
 	 */
-	public addToHistory(calculatorId: string, inputs: Record<string, string>, result: string): void {
+	public addToHistory(calculatorId: string, inputs: Record<string, string>, result: string, explanation?: string): void {
 		let history = this.getHistory();
 		let entry: HistoryEntry = {
 			calculatorId: calculatorId,
 			inputs: inputs,
 			result: result,
+			explanation: explanation,
 			timestamp: new Date().toISOString()
 		};
 		history.unshift(entry);
