@@ -126,3 +126,21 @@ func jsNumber(value float64) string {
 	}
 	return strconv.FormatFloat(value, 'f', -1, 64)
 }
+
+// jsExponential reproduces Number.prototype.toExponential(4), which prints a
+// one-digit exponent without the leading zero Go pads to two digits.
+func jsExponential(value float64) string {
+	switch {
+	case math.IsNaN(value):
+		return "NaN"
+	case math.IsInf(value, 1):
+		return "Infinity"
+	case math.IsInf(value, -1):
+		return "-Infinity"
+	}
+	text := strconv.FormatFloat(value, 'e', 4, 64)
+	if len(text) >= 3 && text[len(text)-2] == '0' && (text[len(text)-3] == '+' || text[len(text)-3] == '-') {
+		text = text[:len(text)-2] + text[len(text)-1:]
+	}
+	return text
+}
