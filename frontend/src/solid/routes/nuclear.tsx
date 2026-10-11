@@ -1,22 +1,17 @@
 /**
- * Visual verification: The Solid-rendered Nuclear Chemistry card should
- * match the legacy #nuclear-chemistry card in frontend/index.html.
- * Intentional diff: this route surfaces a Clear button (legacy lacked
- * one) and routes the decay math through HalfLifeCalculator.calculatePure
- * instead of the DOM-coupled performCalculation path. No Playwright
- * screenshot test is added per task spec; parity is verified by manual
- * diff of the rendered DOM against the legacy markup.
+ * Nuclear chemistry route.
+ *
+ * Runs the radioactive decay math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {HalfLifeCalculator} from "../../modules/gasLawCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
-let calculator = new HalfLifeCalculator();
 let fields: CalculatorField[] = [
     {"id": "initial-quantity", "label": "Initial Quantity", "placeholder": "Initial Quantity", "ariaLabel": "Initial quantity"},
     {"id": "time-input", "label": "Time", "placeholder": "Time (s/min/yr)", "ariaLabel": "Time"},
@@ -35,10 +30,11 @@ let selects: CalculatorSelect[] = [{
     "defaultValue": "remaining"
 }];
 function NuclearChemistry(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("half-life", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
