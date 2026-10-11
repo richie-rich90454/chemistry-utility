@@ -2,21 +2,28 @@
  * Bundle size checker - verifies that production build output
  * stays within the configured performance budget.
  *
- * Measures the INITIAL payload: assets referenced by dist/index.html
- * (entry chunk, modulepreloaded vendor chunks, entry CSS). Unreferenced
- * lazy chunks are reported for information only.
+ * Measures the INITIAL payload (gzipped): assets referenced by
+ * dist/index.html (entry chunk, modulepreloaded vendor chunks, entry CSS).
  *
- * Baselines at adoption (raw bytes): JS ~941KB (all routes statically
- * imported today - split routes lazily to reduce this), CSS ~110KB.
+ * Then checks every lazily-loaded chunk. Shared vendor buckets (vendor-*)
+ * are hoisted out of the routes on purpose and are reported for
+ * information; each route's own chunk carries the per-route budget, so no
+ * single route can grow an oversized payload.
+ *
+ * Budgets: initial JS < 250KB gz, initial CSS < 30KB gz,
+ * per-route chunk < 60KB gz.
  */
-import { readdirSync, statSync, readFileSync } from "fs";
-import { join } from "path";
+import {readdirSync, statSync, readFileSync} from "fs";
+import {join} from "path";
+import {gzipSync} from "zlib";
 
 const DIST_DIR = join(import.meta.dirname, "..", "dist");
 const ASSETS_DIR = join(DIST_DIR, "assets");
 
-const JS_LIMIT = 1000 * 1024; // 1000KB initial JS (raw)
-const CSS_LIMIT = 120 * 1024; // 120KB initial CSS (raw)
+const KB = 1024;
+const INITIAL_JS_LIMIT = 250 * KB; // gzipped
+const INITIAL_CSS_LIMIT = 30 * KB; // gzipped
+const ROUTE_CHUNK_LIMIT = 60 * KB; // gzipped, per route chunk
 
 function getFiles(dir, ext) {
   let results = [];
@@ -26,7 +33,7 @@ function getFiles(dir, ext) {
       let filePath = join(dir, entry);
       let stat = statSync(filePath);
       if (stat.isFile() && entry.endsWith(ext)) {
-        results.push({ path: filePath, name: entry, size: stat.size });
+        results.push({ path: filePath, name: entry, size: gzipSync(readFileSync(filePath)).length });
       }
     }
   } catch {
@@ -56,31 +63,53 @@ let cssFiles = getFiles(ASSETS_DIR, ".css");
 let referenced = getReferencedAssets();
 
 let initialJs = 0;
-let lazyJs = 0;
+let initialCss = 0;
+let lazyChunks = [];
+let vendorChunks = [];
 for (const f of jsFiles) {
   if (referenced === null || referenced.has(f.name)) {
     initialJs += f.size;
+  } else if (f.name.startsWith("vendor-")) {
+    vendorChunks.push(f);
   } else {
-    lazyJs += f.size;
+    lazyChunks.push(f);
   }
 }
-let initialCss = cssFiles.reduce((sum, f) => (referenced === null || referenced.has(f.name) ? sum + f.size : sum), 0);
-
-let passed = true;
-
-console.log("Bundle size check:");
-console.log("  Initial JS:  " + (initialJs / 1024).toFixed(1) + "KB (limit: " + (JS_LIMIT / 1024) + "KB)");
-console.log("  Initial CSS: " + (initialCss / 1024).toFixed(1) + "KB (limit: " + (CSS_LIMIT / 1024) + "KB)");
-if (lazyJs > 0) {
-  console.log("  Lazy JS (not counted): " + (lazyJs / 1024).toFixed(1) + "KB");
+for (const f of cssFiles) {
+  if (referenced === null || referenced.has(f.name)) {
+    initialCss += f.size;
+  }
 }
 
-if (initialJs > JS_LIMIT) {
-  console.error("  FAIL: initial JS bundle exceeds " + (JS_LIMIT / 1024) + "KB limit");
+let passed = jsFiles.length > 0;
+if (!passed) {
+  console.error("Bundle size check: no build found in dist/ - run a build first");
+}
+
+console.log("Bundle size check (gzipped):");
+console.log("  Initial JS:  " + (initialJs / 1024).toFixed(1) + "KB (limit: " + (INITIAL_JS_LIMIT / 1024) + "KB)");
+console.log("  Initial CSS: " + (initialCss / 1024).toFixed(1) + "KB (limit: " + (INITIAL_CSS_LIMIT / 1024) + "KB)");
+lazyChunks.sort((a, b) => b.size - a.size);
+if (lazyChunks.length > 0) {
+  console.log("  Route chunks: " + lazyChunks.length + " (largest " + (lazyChunks[0].size / 1024).toFixed(1) + "KB, limit " + (ROUTE_CHUNK_LIMIT / 1024) + "KB each)");
+}
+for (const f of lazyChunks) {
+  if (f.size > ROUTE_CHUNK_LIMIT) {
+    console.error("  FAIL: route chunk " + f.name + " is " + (f.size / 1024).toFixed(1) + "KB, exceeds " + (ROUTE_CHUNK_LIMIT / 1024) + "KB");
+    passed = false;
+  }
+}
+vendorChunks.sort((a, b) => b.size - a.size);
+for (const f of vendorChunks) {
+  console.log("  Shared vendor (informational): " + f.name + " " + (f.size / 1024).toFixed(1) + "KB");
+}
+
+if (initialJs > INITIAL_JS_LIMIT) {
+  console.error("  FAIL: initial JS exceeds " + (INITIAL_JS_LIMIT / 1024) + "KB gzipped");
   passed = false;
 }
-if (initialCss > CSS_LIMIT) {
-  console.error("  FAIL: initial CSS bundle exceeds " + (CSS_LIMIT / 1024) + "KB limit");
+if (initialCss > INITIAL_CSS_LIMIT) {
+  console.error("  FAIL: initial CSS exceeds " + (INITIAL_CSS_LIMIT / 1024) + "KB gzipped");
   passed = false;
 }
 
