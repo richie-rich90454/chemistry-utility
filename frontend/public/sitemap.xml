@@ -145,6 +145,66 @@
         <changefreq>monthly</changefreq>
     </url>
     <url>
+        <loc>https://chemutil.richardsblogs.com/photoelectron-spectroscopy</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/empirical-formula</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/mass-spectrometry</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/vsepr-geometry</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/calorimetry</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/gibbs-equilibrium</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/molality</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/beer-lambert</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/serial-dilution</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
+        <loc>https://chemutil.richardsblogs.com/le-chatelier</loc>
+        <priority>0.8</priority>
+        <lastmod>2026-10-11</lastmod>
+        <changefreq>monthly</changefreq>
+    </url>
+    <url>
         <loc>https://chemutil.richardsblogs.com/molecular-viewer</loc>
         <priority>0.7</priority>
         <lastmod>2026-10-11</lastmod>
