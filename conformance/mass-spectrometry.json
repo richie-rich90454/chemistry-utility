@@ -1,0 +1,230 @@
+{
+  "calculator": "mass-spectrometry",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "chlorine",
+      "inputs": {
+        "ms-isotopes": "34.9689,0.7576;36.9659,0.2424"
+      },
+      "expect": {
+        "value": "Average atomic mass: 35.4530 u (closest element: Chlorine, Cl)",
+        "explanation": "Isotopes: 34.9689 u at 0.7576; 36.9659 u at 0.2424; Total abundance: 1.0000; Average atomic mass = sum(mass * abundance) / total abundance = 35.4530 u; Closest element: Chlorine (Cl, Z = 17, table atomic mass 35.4530 u); Most abundant isotope: 34.9689 u",
+        "metadata": {
+          "averageMass": 35.4529728,
+          "element": "Chlorine",
+          "symbol": "Cl",
+          "atomicNumber": 17,
+          "mostAbundantMass": 34.9689,
+          "totalAbundance": 1,
+          "isotopes": [
+            {
+              "mass": 34.9689,
+              "abundance": 0.7576
+            },
+            {
+              "mass": 36.9659,
+              "abundance": 0.2424
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bromine",
+      "inputs": {
+        "ms-isotopes": "78.9183,0.5069;80.9163,0.4931"
+      },
+      "expect": {
+        "value": "Average atomic mass: 79.9035 u (closest element: Bromine, Br)",
+        "explanation": "Isotopes: 78.9183 u at 0.5069; 80.9163 u at 0.4931; Total abundance: 1.0000; Average atomic mass = sum(mass * abundance) / total abundance = 79.9035 u; Closest element: Bromine (Br, Z = 35, table atomic mass 79.9040 u); Most abundant isotope: 78.9183 u",
+        "metadata": {
+          "averageMass": 79.90351380000001,
+          "element": "Bromine",
+          "symbol": "Br",
+          "atomicNumber": 35,
+          "mostAbundantMass": 78.9183,
+          "totalAbundance": 1,
+          "isotopes": [
+            {
+              "mass": 78.9183,
+              "abundance": 0.5069
+            },
+            {
+              "mass": 80.9163,
+              "abundance": 0.4931
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "chlorine-percent",
+      "inputs": {
+        "ms-isotopes": "35,75.76;37,24.24"
+      },
+      "expect": {
+        "value": "Average atomic mass: 35.4848 u (closest element: Chlorine, Cl)",
+        "explanation": "Isotopes: 35.0000 u at 75.7600; 37.0000 u at 24.2400; Total abundance: 100.0000; Average atomic mass = sum(mass * abundance) / total abundance = 35.4848 u; Closest element: Chlorine (Cl, Z = 17, table atomic mass 35.4530 u); Most abundant isotope: 35.0000 u",
+        "metadata": {
+          "averageMass": 35.48480000000001,
+          "element": "Chlorine",
+          "symbol": "Cl",
+          "atomicNumber": 17,
+          "mostAbundantMass": 35,
+          "totalAbundance": 100,
+          "isotopes": [
+            {
+              "mass": 35,
+              "abundance": 75.76
+            },
+            {
+              "mass": 37,
+              "abundance": 24.24
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "single-isotope",
+      "inputs": {
+        "ms-isotopes": "197,1"
+      },
+      "expect": {
+        "value": "Average atomic mass: 197.0000 u (closest element: Gold, Au)",
+        "explanation": "Isotopes: 197.0000 u at 1.0000; Total abundance: 1.0000; Average atomic mass = sum(mass * abundance) / total abundance = 197.0000 u; Closest element: Gold (Au, Z = 79, table atomic mass 196.9665 u); Most abundant isotope: 197.0000 u",
+        "metadata": {
+          "averageMass": 197,
+          "element": "Gold",
+          "symbol": "Au",
+          "atomicNumber": 79,
+          "mostAbundantMass": 197,
+          "totalAbundance": 1,
+          "isotopes": [
+            {
+              "mass": 197,
+              "abundance": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "copper-zinc",
+      "inputs": {
+        "ms-isotopes": "63.929,0.6917;65.926,0.3083"
+      },
+      "expect": {
+        "value": "Average atomic mass: 64.5447 u (closest element: Zinc, Zn)",
+        "explanation": "Isotopes: 63.9290 u at 0.6917; 65.9260 u at 0.3083; Total abundance: 1.0000; Average atomic mass = sum(mass * abundance) / total abundance = 64.5447 u; Closest element: Zinc (Zn, Z = 30, table atomic mass 65.3800 u); Most abundant isotope: 63.9290 u",
+        "metadata": {
+          "averageMass": 64.5446751,
+          "element": "Zinc",
+          "symbol": "Zn",
+          "atomicNumber": 30,
+          "mostAbundantMass": 63.929,
+          "totalAbundance": 1,
+          "isotopes": [
+            {
+              "mass": 63.929,
+              "abundance": 0.6917
+            },
+            {
+              "mass": 65.926,
+              "abundance": 0.3083
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "newline-separated",
+      "inputs": {
+        "ms-isotopes": "34.9689,0.7576\n36.9659,0.2424"
+      },
+      "expect": {
+        "value": "Average atomic mass: 35.4530 u (closest element: Chlorine, Cl)",
+        "explanation": "Isotopes: 34.9689 u at 0.7576; 36.9659 u at 0.2424; Total abundance: 1.0000; Average atomic mass = sum(mass * abundance) / total abundance = 35.4530 u; Closest element: Chlorine (Cl, Z = 17, table atomic mass 35.4530 u); Most abundant isotope: 34.9689 u",
+        "metadata": {
+          "averageMass": 35.4529728,
+          "element": "Chlorine",
+          "symbol": "Cl",
+          "atomicNumber": 17,
+          "mostAbundantMass": 34.9689,
+          "totalAbundance": 1,
+          "isotopes": [
+            {
+              "mass": 34.9689,
+              "abundance": 0.7576
+            },
+            {
+              "mass": 36.9659,
+              "abundance": 0.2424
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "no-input",
+      "inputs": {
+        "ms-isotopes": ""
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Enter isotope data as mass,abundance pairs separated by semicolons, e.g. 34.97,0.7576;36.97,0.2424"
+      }
+    },
+    {
+      "id": "missing-comma",
+      "inputs": {
+        "ms-isotopes": "34.9689;36.9659"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid isotope entry: 34.9689. Use mass,abundance pairs like 34.97,0.7576;36.97,0.2424"
+      }
+    },
+    {
+      "id": "non-numeric",
+      "inputs": {
+        "ms-isotopes": "abc,0.5;37,0.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid number in data: abc,0.5"
+      }
+    },
+    {
+      "id": "negative-mass",
+      "inputs": {
+        "ms-isotopes": "-35,0.5;37,0.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Isotope masses must be positive"
+      }
+    },
+    {
+      "id": "negative-abundance",
+      "inputs": {
+        "ms-isotopes": "35,-0.5;37,0.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Abundances cannot be negative"
+      }
+    },
+    {
+      "id": "zero-total-abundance",
+      "inputs": {
+        "ms-isotopes": "35,0;37,0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Abundances must sum to a positive total"
+      }
+    }
+  ]
+}
