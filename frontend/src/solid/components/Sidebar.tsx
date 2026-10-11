@@ -5,6 +5,7 @@ import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
 import {isDesktop, visibleCalculators} from "../lib/desktopOnly";
+import {preloadRoute} from "../routeLoaders";
 import {ThemeToggle} from "./ThemeToggle";
 import {WorkspaceList} from "./WorkspaceList";
 import {ExportImportButtons} from "./ExportImportButtons";
@@ -74,6 +75,11 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
     function handleToggleSidebar(): void {
         if (props.onToggle) props.onToggle();
     }
+    // Warm the route's chunk on hover so navigation renders instantly. The
+    // loader is idempotent, so repeat hovers do not re-fetch.
+    function prefetchRouteFor(calc: CalculatorInfo): void {
+        void preloadRoute(calculatorIdToRoute(calc.id)).catch(function (): void { return; });
+    }
     return (
         <aside class={styles.sidebar} role="navigation" aria-label="Calculator sidebar" data-collapsed={collapsed() || undefined} data-tour="sidebar">
             <div class={styles.sidebarHeader}>
@@ -117,7 +123,7 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                                 <For each={group.items}>
                                     {(calc) => (
                                         <li>
-                                            <A href={calculatorIdToRoute(calc.id)} class={styles.navLink} activeClass={styles.active} title={calc.name}>
+                                            <A href={calculatorIdToRoute(calc.id)} class={styles.navLink} activeClass={styles.active} title={calc.name} onPointerOver={function (): void { prefetchRouteFor(calc); }}>
                                                 <svg class={styles.navIcon} aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                                     {getIconContent(calc.id)}
                                                 </svg>
