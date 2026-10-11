@@ -1,0 +1,181 @@
+{
+  "calculator": "serial-dilution",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "tenfold-three-steps",
+      "inputs": {
+        "sd-initial-concentration": "1",
+        "sd-dilution-factor": "10",
+        "sd-steps": "3"
+      },
+      "expect": {
+        "value": "Final concentration: 0.0010 M (total dilution 1000x)",
+        "explanation": "C0 = 1.0000 M; C1 = 0.1000 M; C2 = 0.0100 M; C3 = 0.0010 M; Total dilution factor: 1000; Each step dilutes the sample 10-fold",
+        "metadata": {
+          "initialConcentration": 1,
+          "dilutionFactor": 10,
+          "steps": 3,
+          "finalConcentration": 0.001,
+          "totalDilutionFactor": 1000,
+          "concentrations": [
+            1,
+            0.1,
+            0.01,
+            0.001
+          ]
+        }
+      }
+    },
+    {
+      "id": "twofold-five-steps",
+      "inputs": {
+        "sd-initial-concentration": "2",
+        "sd-dilution-factor": "2",
+        "sd-steps": "5"
+      },
+      "expect": {
+        "value": "Final concentration: 0.0625 M (total dilution 32x)",
+        "explanation": "C0 = 2.0000 M; C1 = 1.0000 M; C2 = 0.5000 M; C3 = 0.2500 M; C4 = 0.1250 M; C5 = 0.0625 M; Total dilution factor: 32; Each step dilutes the sample 2-fold",
+        "metadata": {
+          "initialConcentration": 2,
+          "dilutionFactor": 2,
+          "steps": 5,
+          "finalConcentration": 0.0625,
+          "totalDilutionFactor": 32,
+          "concentrations": [
+            2,
+            1,
+            0.5,
+            0.25,
+            0.125,
+            0.0625
+          ]
+        }
+      }
+    },
+    {
+      "id": "tenfold-six-steps",
+      "inputs": {
+        "sd-initial-concentration": "1",
+        "sd-dilution-factor": "10",
+        "sd-steps": "6"
+      },
+      "expect": {
+        "value": "Final concentration: 1.0000e-6 M (total dilution 1000000x)",
+        "explanation": "C0 = 1.0000 M; C1 = 0.1000 M; C2 = 0.0100 M; C3 = 0.0010 M; C4 = 0.0001 M; C5 = 1.0000e-5 M; C6 = 1.0000e-6 M; Total dilution factor: 1000000; Each step dilutes the sample 10-fold",
+        "metadata": {
+          "initialConcentration": 1,
+          "dilutionFactor": 10,
+          "steps": 6,
+          "finalConcentration": 0.0000010000000000000002,
+          "totalDilutionFactor": 1000000,
+          "concentrations": [
+            1,
+            0.1,
+            0.01,
+            0.001,
+            0.0001,
+            0.00001,
+            0.0000010000000000000002
+          ]
+        }
+      }
+    },
+    {
+      "id": "single-step",
+      "inputs": {
+        "sd-initial-concentration": "0.5",
+        "sd-dilution-factor": "5",
+        "sd-steps": "1"
+      },
+      "expect": {
+        "value": "Final concentration: 0.1000 M (total dilution 5x)",
+        "explanation": "C0 = 0.5000 M; C1 = 0.1000 M; Total dilution factor: 5; Each step dilutes the sample 5-fold",
+        "metadata": {
+          "initialConcentration": 0.5,
+          "dilutionFactor": 5,
+          "steps": 1,
+          "finalConcentration": 0.1,
+          "totalDilutionFactor": 5,
+          "concentrations": [
+            0.5,
+            0.1
+          ]
+        }
+      }
+    },
+    {
+      "id": "invalid-factor",
+      "inputs": {
+        "sd-initial-concentration": "1",
+        "sd-dilution-factor": "1",
+        "sd-steps": "3"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Dilution factor must be greater than 1"
+      }
+    },
+    {
+      "id": "zero-steps",
+      "inputs": {
+        "sd-initial-concentration": "1",
+        "sd-dilution-factor": "10",
+        "sd-steps": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Dilution steps must be a whole number between 1 and 10"
+      }
+    },
+    {
+      "id": "too-many-steps",
+      "inputs": {
+        "sd-initial-concentration": "1",
+        "sd-dilution-factor": "10",
+        "sd-steps": "11"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Dilution steps must be a whole number between 1 and 10"
+      }
+    },
+    {
+      "id": "fractional-steps",
+      "inputs": {
+        "sd-initial-concentration": "1",
+        "sd-dilution-factor": "10",
+        "sd-steps": "1.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Dilution steps must be a whole number between 1 and 10"
+      }
+    },
+    {
+      "id": "missing-initial",
+      "inputs": {
+        "sd-initial-concentration": "",
+        "sd-dilution-factor": "10",
+        "sd-steps": "3"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid input for sd-initial-concentration"
+      }
+    },
+    {
+      "id": "negative-initial",
+      "inputs": {
+        "sd-initial-concentration": "-1",
+        "sd-dilution-factor": "10",
+        "sd-steps": "3"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Initial concentration cannot be negative"
+      }
+    }
+  ]
+}
