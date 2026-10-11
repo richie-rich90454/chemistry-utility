@@ -1,0 +1,423 @@
+{
+  "calculator": "le-chatelier",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "exothermic-heating",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "temperature",
+        "lc-change": "increase",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: left; K decreases",
+        "explanation": "Reaction: exothermic; Heat is a product of an exothermic forward reaction, so adding heat shifts the equilibrium left, toward reactants (the endothermic direction); K decreases with temperature; Shift: left; K decreases.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "temperature",
+          "change": "increase",
+          "side": "reactants",
+          "shift": "left",
+          "equilibriumConstantEffect": "decreases",
+          "reasoning": "Heat is a product of an exothermic forward reaction, so adding heat shifts the equilibrium left, toward reactants (the endothermic direction); K decreases with temperature"
+        }
+      }
+    },
+    {
+      "id": "endothermic-heating",
+      "inputs": {
+        "lc-reaction-type": "endothermic",
+        "lc-stress-type": "temperature",
+        "lc-change": "increase",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: right; K increases",
+        "explanation": "Reaction: endothermic; Heat is a reactant of an endothermic forward reaction, so adding heat shifts the equilibrium right, toward products (the endothermic direction); K increases with temperature; Shift: right; K increases.",
+        "metadata": {
+          "reactionType": "endothermic",
+          "stressType": "temperature",
+          "change": "increase",
+          "side": "reactants",
+          "shift": "right",
+          "equilibriumConstantEffect": "increases",
+          "reasoning": "Heat is a reactant of an endothermic forward reaction, so adding heat shifts the equilibrium right, toward products (the endothermic direction); K increases with temperature"
+        }
+      }
+    },
+    {
+      "id": "exothermic-cooling",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "temperature",
+        "lc-change": "decrease",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: right; K increases",
+        "explanation": "Reaction: exothermic; Heat is a product of an exothermic forward reaction, so removing heat shifts the equilibrium right, toward products (the exothermic direction); K increases with temperature; Shift: right; K increases.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "temperature",
+          "change": "decrease",
+          "side": "reactants",
+          "shift": "right",
+          "equilibriumConstantEffect": "increases",
+          "reasoning": "Heat is a product of an exothermic forward reaction, so removing heat shifts the equilibrium right, toward products (the exothermic direction); K increases with temperature"
+        }
+      }
+    },
+    {
+      "id": "endothermic-cooling",
+      "inputs": {
+        "lc-reaction-type": "endothermic",
+        "lc-stress-type": "temperature",
+        "lc-change": "decrease",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: left; K decreases",
+        "explanation": "Reaction: endothermic; Heat is a reactant of an endothermic forward reaction, so removing heat shifts the equilibrium left, toward reactants (the exothermic direction); K decreases with temperature; Shift: left; K decreases.",
+        "metadata": {
+          "reactionType": "endothermic",
+          "stressType": "temperature",
+          "change": "decrease",
+          "side": "reactants",
+          "shift": "left",
+          "equilibriumConstantEffect": "decreases",
+          "reasoning": "Heat is a reactant of an endothermic forward reaction, so removing heat shifts the equilibrium left, toward reactants (the exothermic direction); K decreases with temperature"
+        }
+      }
+    },
+    {
+      "id": "add-reactant",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "concentration",
+        "lc-change": "increase",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: right; K unchanged",
+        "explanation": "Reaction: exothermic; Adding reactant makes Q smaller than K, so the forward reaction runs faster until Q = K again; K is unchanged because the equilibrium constant depends only on temperature; Shift: right; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "concentration",
+          "change": "increase",
+          "side": "reactants",
+          "shift": "right",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Adding reactant makes Q smaller than K, so the forward reaction runs faster until Q = K again; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "add-product",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "concentration",
+        "lc-change": "increase",
+        "lc-side": "products"
+      },
+      "expect": {
+        "value": "Shift: left; K unchanged",
+        "explanation": "Reaction: exothermic; Adding product makes Q larger than K, so the reverse reaction runs faster until Q = K again; K is unchanged because the equilibrium constant depends only on temperature; Shift: left; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "concentration",
+          "change": "increase",
+          "side": "products",
+          "shift": "left",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Adding product makes Q larger than K, so the reverse reaction runs faster until Q = K again; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "remove-reactant",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "concentration",
+        "lc-change": "decrease",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: left; K unchanged",
+        "explanation": "Reaction: exothermic; Removing reactant makes Q larger than K, so the reverse reaction runs faster until Q = K again; K is unchanged because the equilibrium constant depends only on temperature; Shift: left; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "concentration",
+          "change": "decrease",
+          "side": "reactants",
+          "shift": "left",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Removing reactant makes Q larger than K, so the reverse reaction runs faster until Q = K again; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "remove-product",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "concentration",
+        "lc-change": "decrease",
+        "lc-side": "products"
+      },
+      "expect": {
+        "value": "Shift: right; K unchanged",
+        "explanation": "Reaction: exothermic; Removing product makes Q smaller than K, so the forward reaction runs faster until Q = K again; K is unchanged because the equilibrium constant depends only on temperature; Shift: right; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "concentration",
+          "change": "decrease",
+          "side": "products",
+          "shift": "right",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Removing product makes Q smaller than K, so the forward reaction runs faster until Q = K again; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "pressure-products-fewer",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "pressure",
+        "lc-change": "increase",
+        "lc-side": "products"
+      },
+      "expect": {
+        "value": "Shift: right; K unchanged",
+        "explanation": "Reaction: exothermic; Compressing the gas raises the pressure, so the equilibrium shifts toward the side with fewer moles of gas (products) to oppose the change; K is unchanged because the equilibrium constant depends only on temperature; Shift: right; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "pressure",
+          "change": "increase",
+          "side": "products",
+          "shift": "right",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Compressing the gas raises the pressure, so the equilibrium shifts toward the side with fewer moles of gas (products) to oppose the change; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "pressure-reactants-fewer",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "pressure",
+        "lc-change": "increase",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: left; K unchanged",
+        "explanation": "Reaction: exothermic; Compressing the gas raises the pressure, so the equilibrium shifts toward the side with fewer moles of gas (reactants) to oppose the change; K is unchanged because the equilibrium constant depends only on temperature; Shift: left; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "pressure",
+          "change": "increase",
+          "side": "reactants",
+          "shift": "left",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Compressing the gas raises the pressure, so the equilibrium shifts toward the side with fewer moles of gas (reactants) to oppose the change; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "pressure-drop-reactants-fewer",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "pressure",
+        "lc-change": "decrease",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: right; K unchanged",
+        "explanation": "Reaction: exothermic; Expanding the gas lowers the pressure, so the equilibrium shifts toward the side with more moles of gas, away from reactants; K is unchanged because the equilibrium constant depends only on temperature; Shift: right; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "pressure",
+          "change": "decrease",
+          "side": "reactants",
+          "shift": "right",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Expanding the gas lowers the pressure, so the equilibrium shifts toward the side with more moles of gas, away from reactants; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "equal-gas-moles",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "pressure",
+        "lc-change": "increase",
+        "lc-side": "equal"
+      },
+      "expect": {
+        "value": "Shift: no change; K unchanged",
+        "explanation": "Reaction: exothermic; Both sides hold the same number of moles of gas, so a pressure or volume change does not shift the equilibrium; K is unchanged; Shift: no change; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "pressure",
+          "change": "increase",
+          "side": "equal",
+          "shift": "no change",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Both sides hold the same number of moles of gas, so a pressure or volume change does not shift the equilibrium; K is unchanged"
+        }
+      }
+    },
+    {
+      "id": "compress-volume",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "volume",
+        "lc-change": "decrease",
+        "lc-side": "products"
+      },
+      "expect": {
+        "value": "Shift: right; K unchanged",
+        "explanation": "Reaction: exothermic; Shrinking the volume raises the pressure, so the equilibrium shifts toward the side with fewer moles of gas (products) to oppose the change; K is unchanged because the equilibrium constant depends only on temperature; Shift: right; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "volume",
+          "change": "decrease",
+          "side": "products",
+          "shift": "right",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Shrinking the volume raises the pressure, so the equilibrium shifts toward the side with fewer moles of gas (products) to oppose the change; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "expand-volume",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "volume",
+        "lc-change": "increase",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: right; K unchanged",
+        "explanation": "Reaction: exothermic; Growing the volume lowers the pressure, so the equilibrium shifts toward the side with more moles of gas, away from reactants; K is unchanged because the equilibrium constant depends only on temperature; Shift: right; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "volume",
+          "change": "increase",
+          "side": "reactants",
+          "shift": "right",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "Growing the volume lowers the pressure, so the equilibrium shifts toward the side with more moles of gas, away from reactants; K is unchanged because the equilibrium constant depends only on temperature"
+        }
+      }
+    },
+    {
+      "id": "catalyst",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "catalyst",
+        "lc-change": "increase",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: no change; K unchanged",
+        "explanation": "Reaction: exothermic; A catalyst lowers the activation energy of the forward and reverse reactions equally, so it changes how fast equilibrium is reached but neither the position of equilibrium nor K; Shift: no change; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "catalyst",
+          "change": "increase",
+          "side": "reactants",
+          "shift": "no change",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "A catalyst lowers the activation energy of the forward and reverse reactions equally, so it changes how fast equilibrium is reached but neither the position of equilibrium nor K"
+        }
+      }
+    },
+    {
+      "id": "no-change",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "concentration",
+        "lc-change": "none",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "Shift: no change; K unchanged",
+        "explanation": "Reaction: exothermic; No change was applied, so the equilibrium stays where it is; Shift: no change; K unchanged.",
+        "metadata": {
+          "reactionType": "exothermic",
+          "stressType": "concentration",
+          "change": "none",
+          "side": "reactants",
+          "shift": "no change",
+          "equilibriumConstantEffect": "unchanged",
+          "reasoning": "No change was applied, so the equilibrium stays where it is"
+        }
+      }
+    },
+    {
+      "id": "invalid-reaction-type",
+      "inputs": {
+        "lc-reaction-type": "nope",
+        "lc-stress-type": "temperature",
+        "lc-change": "increase",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Reaction type must be exothermic or endothermic"
+      }
+    },
+    {
+      "id": "invalid-stress-type",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "nope",
+        "lc-change": "increase",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Stress type must be concentration, temperature, pressure, volume, or catalyst"
+      }
+    },
+    {
+      "id": "invalid-change",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "temperature",
+        "lc-change": "nope",
+        "lc-side": "reactants"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Change must be increase, decrease, or none"
+      }
+    },
+    {
+      "id": "invalid-side",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "temperature",
+        "lc-change": "increase",
+        "lc-side": "nope"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Side must be reactants, products, or equal"
+      }
+    },
+    {
+      "id": "concentration-equal-side",
+      "inputs": {
+        "lc-reaction-type": "exothermic",
+        "lc-stress-type": "concentration",
+        "lc-change": "increase",
+        "lc-side": "equal"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Side must be reactants or products for a concentration change"
+      }
+    }
+  ]
+}
