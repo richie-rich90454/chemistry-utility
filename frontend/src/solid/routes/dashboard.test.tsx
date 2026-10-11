@@ -218,6 +218,11 @@ describe("Dashboard", function (): void {
         expect(result.getByText("dilution")).toBeTruthy();
         expect(result.getByText("M1V1=M2V2")).toBeTruthy();
     });
+    it("links to the lab report from the dashboard", function (): void {
+        let result = renderDashboard();
+        let link = result.getByText("Print report") as HTMLAnchorElement;
+        expect(link.getAttribute("href")).toBe("/report");
+    });
     it("renders the weekly activity chart canvas", function (): void {
         let result = renderDashboard();
         let canvas = result.container.querySelector("canvas");
