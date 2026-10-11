@@ -1,0 +1,263 @@
+{
+  "calculator": "empirical-formula",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "glucose",
+      "inputs": {
+        "ef-composition": "C:40,H:6.71,O:53.29"
+      },
+      "expect": {
+        "value": "Empirical formula: CH2O",
+        "explanation": "Percent to moles: C 40.0000% / 12.0107 g/mol = 3.3304 mol, H 6.7100% / 1.0080 g/mol = 6.6567 mol, O 53.2900% / 15.9994 g/mol = 3.3307 mol; Simplest ratio C:H:O = 1:2:1; Empirical formula: CH2O; Empirical formula mass: 30.0261 g/mol",
+        "metadata": {
+          "empiricalFormula": "CH2O",
+          "empiricalFormulaMass": 30.0261,
+          "symbols": [
+            "C",
+            "H",
+            "O"
+          ],
+          "counts": [
+            1,
+            2,
+            1
+          ],
+          "moles": [
+            3.3303637589815747,
+            6.656746031746032,
+            3.330749903121367
+          ]
+        }
+      }
+    },
+    {
+      "id": "glucose-molar-mass",
+      "inputs": {
+        "ef-composition": "C:40,H:6.71,O:53.29",
+        "ef-molar-mass": "180.156"
+      },
+      "expect": {
+        "value": "Empirical formula: CH2O; Molecular formula: C6H12O6",
+        "explanation": "Percent to moles: C 40.0000% / 12.0107 g/mol = 3.3304 mol, H 6.7100% / 1.0080 g/mol = 6.6567 mol, O 53.2900% / 15.9994 g/mol = 3.3307 mol; Simplest ratio C:H:O = 1:2:1; Empirical formula: CH2O; Empirical formula mass: 30.0261 g/mol; Molar mass: 180.1560 g/mol; Multiplier: 6; Molecular formula: C6H12O6",
+        "metadata": {
+          "empiricalFormula": "CH2O",
+          "empiricalFormulaMass": 30.0261,
+          "symbols": [
+            "C",
+            "H",
+            "O"
+          ],
+          "counts": [
+            1,
+            2,
+            1
+          ],
+          "moles": [
+            3.3303637589815747,
+            6.656746031746032,
+            3.330749903121367
+          ],
+          "molecularFormula": "C6H12O6",
+          "molarMass": 180.156,
+          "multiplier": 6
+        }
+      }
+    },
+    {
+      "id": "water",
+      "inputs": {
+        "ef-composition": "H:11.19,O:88.81"
+      },
+      "expect": {
+        "value": "Empirical formula: H2O",
+        "explanation": "Percent to moles: H 11.1900% / 1.0080 g/mol = 11.1012 mol, O 88.8100% / 15.9994 g/mol = 5.5508 mol; Simplest ratio H:O = 2:1; Empirical formula: H2O; Empirical formula mass: 18.0154 g/mol",
+        "metadata": {
+          "empiricalFormula": "H2O",
+          "empiricalFormulaMass": 18.0154,
+          "symbols": [
+            "H",
+            "O"
+          ],
+          "counts": [
+            2,
+            1
+          ],
+          "moles": [
+            11.101190476190476,
+            5.5508331562433595
+          ]
+        }
+      }
+    },
+    {
+      "id": "zinc-iodide",
+      "inputs": {
+        "ef-composition": "Zn:20.5,I:79.5"
+      },
+      "expect": {
+        "value": "Empirical formula: ZnI2",
+        "explanation": "Percent to moles: Zn 20.5000% / 65.3800 g/mol = 0.3136 mol, I 79.5000% / 126.9044 g/mol = 0.6265 mol; Simplest ratio Zn:I = 1:2; Empirical formula: ZnI2; Empirical formula mass: 319.1888 g/mol",
+        "metadata": {
+          "empiricalFormula": "ZnI2",
+          "empiricalFormulaMass": 319.1888,
+          "symbols": [
+            "Zn",
+            "I"
+          ],
+          "counts": [
+            1,
+            2
+          ],
+          "moles": [
+            0.31355154481492814,
+            0.626455820286767
+          ]
+        }
+      }
+    },
+    {
+      "id": "iron-oxide",
+      "inputs": {
+        "ef-composition": "Fe:69.9,O:30.1"
+      },
+      "expect": {
+        "value": "Empirical formula: Fe2O3",
+        "explanation": "Percent to moles: Fe 69.9000% / 55.8450 g/mol = 1.2517 mol, O 30.1000% / 15.9994 g/mol = 1.8813 mol; Simplest ratio Fe:O = 2:3; Empirical formula: Fe2O3; Empirical formula mass: 159.6882 g/mol",
+        "metadata": {
+          "empiricalFormula": "Fe2O3",
+          "empiricalFormulaMass": 159.6882,
+          "symbols": [
+            "Fe",
+            "O"
+          ],
+          "counts": [
+            2,
+            3
+          ],
+          "moles": [
+            1.2516787536932583,
+            1.8813205495206071
+          ]
+        }
+      }
+    },
+    {
+      "id": "hydrogen-peroxide",
+      "inputs": {
+        "ef-composition": "H:5.93,O:94.07"
+      },
+      "expect": {
+        "value": "Empirical formula: HO",
+        "explanation": "Percent to moles: H 5.9300% / 1.0080 g/mol = 5.8829 mol, O 94.0700% / 15.9994 g/mol = 5.8796 mol; Simplest ratio H:O = 1:1; Empirical formula: HO; Empirical formula mass: 17.0074 g/mol",
+        "metadata": {
+          "empiricalFormula": "HO",
+          "empiricalFormulaMass": 17.0074,
+          "symbols": [
+            "H",
+            "O"
+          ],
+          "counts": [
+            1,
+            1
+          ],
+          "moles": [
+            5.882936507936508,
+            5.879595484830681
+          ]
+        }
+      }
+    },
+    {
+      "id": "no-input",
+      "inputs": {
+        "ef-composition": ""
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Enter the percent composition as element:percent pairs, e.g. C:40,H:6.71,O:53.29"
+      }
+    },
+    {
+      "id": "missing-colon",
+      "inputs": {
+        "ef-composition": "C40,H6,O53"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid composition entry: C40. Use element:percent pairs like C:40,H:6.71,O:53.29"
+      }
+    },
+    {
+      "id": "unknown-element",
+      "inputs": {
+        "ef-composition": "Xx:100"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Element not found: Xx"
+      }
+    },
+    {
+      "id": "bad-percent",
+      "inputs": {
+        "ef-composition": "C:forty,O:60"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid percent in entry: C:forty"
+      }
+    },
+    {
+      "id": "percent-sum",
+      "inputs": {
+        "ef-composition": "C:50,H:6.7,O:10"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Percentages must sum to approximately 100% (got 66.7000%)"
+      }
+    },
+    {
+      "id": "negative-percent",
+      "inputs": {
+        "ef-composition": "C:-40,H:60"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Percentages cannot be negative"
+      }
+    },
+    {
+      "id": "zero-percent",
+      "inputs": {
+        "ef-composition": "C:100,O:0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Each element must have a positive percent (got 0% for O)"
+      }
+    },
+    {
+      "id": "duplicate-element",
+      "inputs": {
+        "ef-composition": "C:40,C:60"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Duplicate element in composition: C"
+      }
+    },
+    {
+      "id": "negative-molar-mass",
+      "inputs": {
+        "ef-composition": "C:40,H:6.71,O:53.29",
+        "ef-molar-mass": "-180"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Molar mass must be positive"
+      }
+    }
+  ]
+}
