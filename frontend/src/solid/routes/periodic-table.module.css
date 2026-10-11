@@ -32,6 +32,8 @@
     width: 100%;
     overflow-x: auto;
     padding-bottom: var(--app-space-2);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 620px;
 }
 .cell{
     position: relative;
