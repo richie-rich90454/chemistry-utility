@@ -1,19 +1,16 @@
 /**
- * Visual verification: The Solid-rendered Ksp card should match the
- * legacy #ksp-calc card in frontend/index.html. Intentional diff: this
- * route surfaces a Clear button (legacy lacked one) and routes the
- * solubility-product math through KspCalculator.calculatePure. Parity is
- * verified by manual diff.
+ * Solubility product route.
+ *
+ * Runs the Ksp math through the calculation engine.
  */
 import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
 import {createSignal} from "solid-js";
-import {KspCalculator} from "../../modules/solutionCalculators.js";
 import {resolveResult} from "../../modules/resultResolver.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
-let calculator = new KspCalculator();
 let fields: CalculatorField[] = [
     {"id": "ksp-value", "label": "Ksp", "placeholder": "Ksp", "ariaLabel": "Ksp value"},
     {"id": "ksp-molar-solubility", "label": "Molar solubility (M)", "placeholder": "Molar solubility (M)", "ariaLabel": "Molar solubility"}
@@ -44,10 +41,11 @@ let selects: CalculatorSelect[] = [
     }
 ];
 function Ksp(): JSX.Element {
+    let engine = getEngine();
     let [result, setResult] = createSignal("");
     let [error, setError] = createSignal("");
     function handleCalculate(inputs: Record<string, string>): void {
-        resolveResult(calculator.calculatePure(inputs), setResult, setError);
+        resolveResult(engine.calculate("ksp", inputs), setResult, setError);
     }
     function handleClear(): void {
         setResult("");
