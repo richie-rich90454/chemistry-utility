@@ -27,7 +27,8 @@ export class UrlStateManager {
 			"formula-input": "formula"
 		},
 		"equation-balancer": {
-			"equation-input": "equation"
+			"equation-input": "equation",
+			"medium-select": "medium"
 		},
 		"unit-converter": {
 			"unit-converter-value": "v",
@@ -157,6 +158,7 @@ export class UrlStateManager {
 			"heat-cap-initial-temp": "Ti",
 			"heat-cap-final-temp": "Tf",
 			"heat-cap-heat": "q",
+			"heat-cap-solve-for": "hcsolve",
 			"bond-enthalpy-broken": "broken",
 			"bond-enthalpy-formed": "formed",
 			"born-haber-dHf": "dHf",
@@ -166,6 +168,7 @@ export class UrlStateManager {
 			"born-haber-EA": "EA"
 		},
 		"kinetics": {
+			"arrhenius-solve-for": "asolve",
 			"arrhenius-A": "A",
 			"arrhenius-Ea": "Ea",
 			"arrhenius-T": "T",
@@ -177,16 +180,18 @@ export class UrlStateManager {
 			"ratelaw-B2": "B2",
 			"ratelaw-rate2": "r2",
 			"irl-order": "order",
+			"irl-solve-for": "irlsolve",
 			"irl-A0": "A0",
-			"irl-k": "k",
+			"irl-k": "irk",
 			"irl-t": "t",
 			"irl-A": "A",
 			"reaction-order-data": "data",
-			"collision-Ea": "Ea",
-			"collision-T": "T",
+			"collision-solve-for": "csolve",
+			"collision-Ea": "cEa",
+			"collision-T": "cT",
 			"collision-Z": "Z",
 			"collision-p": "p",
-			"collision-k": "k"
+			"collision-k": "ck"
 		},
 		"quantum-atomic": {
 			"qn-n": "n",
@@ -203,13 +208,19 @@ export class UrlStateManager {
 			"pe-frequency": "freq",
 			"pe-work-function": "phi",
 			"pe-ke": "ke",
+			"pe-solve-for": "psolve",
+			"heis-solve-for": "hsolve",
 			"heis-delta-x": "dx",
 			"heis-delta-p": "dp",
-			"heis-mass": "m"
+			"heis-mass": "hm"
 		},
 		"stoichiometry": {
 			"stoich-equation-input": "equation",
-			"calculation-type": "type"
+			"calculation-type": "type",
+			"reactant-select": "rsel",
+			"reactant-moles": "rmol",
+			"product-select": "psel",
+			"product-moles": "pmol"
 		},
 		"bond-type": {
 			"element1-input": "e1",
