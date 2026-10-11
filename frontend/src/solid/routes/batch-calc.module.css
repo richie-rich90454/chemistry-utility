@@ -234,6 +234,8 @@
 .previewTable{
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 320px;
 }
 .previewTableElement{
     width: 100%;
