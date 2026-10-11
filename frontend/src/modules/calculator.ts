@@ -192,7 +192,7 @@ export abstract class Calculator {
 			if (typeof afterFinal.result === "string" && afterFinal.result !== result.value) {
 				result = { value: afterFinal.result, explanation: result.explanation, chartData: result.chartData, metadata: result.metadata };
 			}
-			ExportManager.getInstance().addToHistory(this.calculatorId, finalInputs, result.value);
+			ExportManager.getInstance().addToHistory(this.calculatorId, finalInputs, result.value, result.explanation);
 			return result;
 		} catch (error) {
 			let message: string = error instanceof Error ? error.message : String(error);
