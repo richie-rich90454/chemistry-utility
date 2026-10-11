@@ -1,0 +1,162 @@
+{
+  "calculator": "molality",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-molality",
+      "inputs": {
+        "molality-solve-for": "molality",
+        "molality-solute-mass": "20",
+        "molality-solvent-mass": "500",
+        "molality-molar-mass": "39.997"
+      },
+      "expect": {
+        "value": "1.0001 mol/kg",
+        "explanation": "m = (moles of solute)/(kg of solvent) = 1.0001 mol/kg; Moles of solute: 0.5000 mol; kg of solvent: 0.5000 kg",
+        "metadata": {
+          "solveFor": "molality",
+          "formula": "m = (moles of solute)/(kg of solvent)",
+          "result": 1.000075005625422,
+          "unit": "mol/kg"
+        }
+      }
+    },
+    {
+      "id": "solve-solute-mass",
+      "inputs": {
+        "molality-solve-for": "solute-mass",
+        "molality-solvent-mass": "500",
+        "molality-molar-mass": "39.997",
+        "molality-value": "1"
+      },
+      "expect": {
+        "value": "19.9985 g",
+        "explanation": "solute mass = m * (kg of solvent) * molar mass = 19.9985 g; Moles of solute needed: 0.5000 mol",
+        "metadata": {
+          "solveFor": "solute-mass",
+          "formula": "solute mass = m * (kg of solvent) * molar mass",
+          "result": 19.9985,
+          "unit": "g"
+        }
+      }
+    },
+    {
+      "id": "solve-solvent-mass",
+      "inputs": {
+        "molality-solve-for": "solvent-mass",
+        "molality-solute-mass": "20",
+        "molality-molar-mass": "39.997",
+        "molality-value": "1"
+      },
+      "expect": {
+        "value": "500.0375 g",
+        "explanation": "solvent mass (g) = (moles of solute / m) * 1000 = 500.0375 g; Moles of solute: 0.5000 mol",
+        "metadata": {
+          "solveFor": "solvent-mass",
+          "formula": "solvent mass (g) = (moles of solute / m) * 1000",
+          "result": 500.03750281271095,
+          "unit": "g"
+        }
+      }
+    },
+    {
+      "id": "solve-molar-mass",
+      "inputs": {
+        "molality-solve-for": "molar-mass",
+        "molality-solute-mass": "20",
+        "molality-solvent-mass": "500",
+        "molality-value": "1"
+      },
+      "expect": {
+        "value": "40.0000 g/mol",
+        "explanation": "molar mass = (solute mass)/(m * kg of solvent) = 40.0000 g/mol; Moles of solute: 0.5000 mol",
+        "metadata": {
+          "solveFor": "molar-mass",
+          "formula": "molar mass = (solute mass)/(m * kg of solvent)",
+          "result": 40,
+          "unit": "g/mol"
+        }
+      }
+    },
+    {
+      "id": "zero-molality-solution",
+      "inputs": {
+        "molality-solve-for": "molality",
+        "molality-solute-mass": "0",
+        "molality-solvent-mass": "500",
+        "molality-molar-mass": "39.997"
+      },
+      "expect": {
+        "value": "0.0000 mol/kg",
+        "explanation": "m = (moles of solute)/(kg of solvent) = 0.0000 mol/kg; Moles of solute: 0.0000 mol; kg of solvent: 0.5000 kg",
+        "metadata": {
+          "solveFor": "molality",
+          "formula": "m = (moles of solute)/(kg of solvent)",
+          "result": 0,
+          "unit": "mol/kg"
+        }
+      }
+    },
+    {
+      "id": "invalid-solve-for",
+      "inputs": {
+        "molality-solve-for": "nope",
+        "molality-solute-mass": "20"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    },
+    {
+      "id": "missing-inputs",
+      "inputs": {
+        "molality-solve-for": "molality",
+        "molality-solute-mass": "20"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for molality-solute-mass, molality-solvent-mass, molality-molar-mass"
+      }
+    },
+    {
+      "id": "zero-molar-mass",
+      "inputs": {
+        "molality-solve-for": "molality",
+        "molality-solute-mass": "20",
+        "molality-solvent-mass": "500",
+        "molality-molar-mass": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Molar mass must be positive"
+      }
+    },
+    {
+      "id": "negative-solute-mass",
+      "inputs": {
+        "molality-solve-for": "molality",
+        "molality-solute-mass": "-20",
+        "molality-solvent-mass": "500",
+        "molality-molar-mass": "39.997"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Solute mass cannot be negative"
+      }
+    },
+    {
+      "id": "zero-molality-value",
+      "inputs": {
+        "molality-solve-for": "solvent-mass",
+        "molality-solute-mass": "20",
+        "molality-molar-mass": "39.997",
+        "molality-value": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Molality must be positive"
+      }
+    }
+  ]
+}
