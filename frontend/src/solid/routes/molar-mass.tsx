@@ -22,6 +22,7 @@ function MolarMass(): JSX.Element {
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let aborter: AbortController | null = null;
     let disposed: boolean = false;
+    let pendingFormula: string = "";
 
     onMount(function (): void {
         loadElements();
@@ -48,6 +49,7 @@ function MolarMass(): JSX.Element {
                     let parsed: ChemicalElement[] = JSON.parse(cached) as ChemicalElement[];
                     setElements(parsed);
                     setLoading(false);
+                    flushPendingFormula();
                     return;
                 }
                 catch {
@@ -69,6 +71,7 @@ function MolarMass(): JSX.Element {
                 setElements(elementData);
                 cache.set("ptable", JSON.stringify(elementData));
                 setLoading(false);
+                flushPendingFormula();
             }).catch(function (err: unknown): void {
                 if (disposed) {
                     return;
@@ -83,13 +86,34 @@ function MolarMass(): JSX.Element {
         });
     }
 
+    /**
+     * Recomputes a formula that was entered while the element data was still
+     * loading. Called once from each path that finishes loading.
+     */
+    function flushPendingFormula(): void {
+        if (pendingFormula === "") {
+            return;
+        }
+        let formula: string = pendingFormula;
+        pendingFormula = "";
+        doCalculate(formula);
+    }
+
     function doCalculate(f: string): void {
-        if (loading() || loadError() !== "") {
+        if (loadError() !== "") {
             return;
         }
         let trimmed = f.trim();
         if (trimmed === "") {
             setResult("");
+            pendingFormula = "";
+            return;
+        }
+        if (loading()) {
+            // Element data is still in flight, so the formula cannot be
+            // resolved yet. Stash it and recompute as soon as it lands,
+            // otherwise a formula typed during the load is silently dropped.
+            pendingFormula = trimmed;
             return;
         }
         try {
