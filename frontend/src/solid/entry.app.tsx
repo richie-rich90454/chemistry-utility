@@ -1,6 +1,7 @@
 import {render} from "solid-js/web";
 import type {JSX} from "solid-js";
 import {App} from "./App";
+import {preloadRoute} from "./routeLoaders";
 import {RuntimeDetector} from "../modules/runtimeDetector.js";
 import "./styles/global.css";
 
@@ -28,10 +29,18 @@ function clearStaleServiceWorker(): void {
     }
 }
 
-function initializeSolidApp(): void {
+async function initializeSolidApp(): Promise<void> {
     let root: HTMLElement | null = document.getElementById("root");
     if (root === null) {
         return;
+    }
+    // The entry route's chunk is fetched before the first render so the
+    // desktop shell opens straight onto its content.
+    try {
+        await preloadRoute(window.location.pathname.replace(/\/+$/, "") || "/");
+    }
+    catch {
+        /* render anyway; the route mounts once its chunk arrives */
     }
     // CSR only: the embedded desktop bundle ships no prerendered HTML, no SEO
     // markup, no manifest and no service worker.
