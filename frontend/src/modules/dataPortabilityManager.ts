@@ -7,7 +7,6 @@ const AUTO_DARK_KEY: string = "auto-dark-mode";
 const INPUTS_PREFIX: string = "calc-inputs-";
 const LOGS_KEY: string = "chemutil_experiment_logs";
 const PLUGIN_STATES_KEY: string = "chem-utility-plugin-states";
-const EXPORT_FILENAME: string = "chemistry-utility-backup.chemutil";
 
 /**
  * Shape of a portable archive file. Contains all user data that lives in
@@ -118,42 +117,6 @@ export class DataPortabilityManager {
 		this.writeInputs(valid.inputs);
 		this.writeLogs(valid.logs);
 		this.writePlugins(valid.plugins);
-	}
-
-	/**
-	 * Exports the current state and triggers a .chemutil file download.
-	 */
-	public exportToFile(): void {
-		let archive = this.export();
-		let json = JSON.stringify(archive, null, 2);
-		let blob = new Blob([json], { type: "application/json" });
-		let url = URL.createObjectURL(blob);
-		let link = document.createElement("a");
-		link.setAttribute("href", url);
-		link.setAttribute("download", EXPORT_FILENAME);
-		link.style.display = "none";
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
-
-	/**
-	 * Reads a File (from an <input type="file"> picker), parses it as JSON,
-	 * validates the schema, and imports it.
-	 * @throws Error when the file cannot be parsed as JSON or fails validation.
-	 */
-	public importFromFile(file: File): Promise<void> {
-		let manager = this;
-		return file.text().then(function (text: string): void {
-			let parsed: unknown;
-			try {
-				parsed = JSON.parse(text);
-			} catch (err) {
-				throw new Error("File is not valid JSON: " + (err as Error).message);
-			}
-			manager.import(parsed);
-		});
 	}
 
 	private readHistory(): HistoryEntry[] {
