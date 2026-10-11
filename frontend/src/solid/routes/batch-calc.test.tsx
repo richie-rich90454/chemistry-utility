@@ -4,7 +4,8 @@ const mocks = vi.hoisted(function () {
     return {
         "mockProcessCsvText": vi.fn(),
         "mockParseCsv": vi.fn(),
-        "mockDownloadResults": vi.fn()
+        "mockDownloadResults": vi.fn(),
+        "mockGetFileAccess": vi.fn()
     };
 });
 vi.mock("../../modules/batchCalculator.js", function () {
@@ -18,6 +19,11 @@ vi.mock("../../modules/batchCalculator.js", function () {
                 };
             }
         }
+    };
+});
+vi.mock("../../modules/dom/fileAccess.js", function () {
+    return {
+        "getFileAccess": mocks.mockGetFileAccess
     };
 });
 import {BatchCalc} from "./batch-calc";
@@ -35,6 +41,12 @@ describe("BatchCalc", function (): void {
         mocks.mockProcessCsvText.mockReset();
         mocks.mockParseCsv.mockReset();
         mocks.mockDownloadResults.mockReset();
+        mocks.mockGetFileAccess.mockReset();
+        mocks.mockGetFileAccess.mockReturnValue({
+            "kind": "web",
+            "openFile": vi.fn(),
+            "saveFile": vi.fn()
+        });
         mocks.mockParseCsv.mockImplementation(function (text: string): string[][] {
             let rows: string[][] = [];
             let lines: string[] = text.split("\n");
@@ -335,5 +347,46 @@ describe("BatchCalc", function (): void {
         fireEvent.click(result.getByText("Clear"));
         getByIdSpy.mockRestore();
         expect((result.getByText("Process") as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it("reads the CSV through the native file dialog on the desktop build", async function (): Promise<void> {
+        let openFile = vi.fn().mockResolvedValue(new File(["formula\nH2O\n"], "in.csv", { "type": "text/csv" }));
+        mocks.mockGetFileAccess.mockReturnValue({"kind": "native", "openFile": openFile, "saveFile": vi.fn()});
+        mocks.mockProcessCsvText.mockResolvedValue({
+            "csvString": "formula,molar_mass,unit,status\nH2O,18.015,g/mol,ok",
+            "totalRows": 1,
+            "successCount": 1,
+            "errorCount": 0
+        });
+        let result = render(function () { return <BatchCalc />; });
+        fireEvent.click(result.getByLabelText("Choose CSV file"));
+        expect(openFile).toHaveBeenCalledWith(".csv");
+        let processButton = result.getByText("Process") as HTMLButtonElement;
+        await waitFor(function (): void {
+            expect(processButton.disabled).toBe(false);
+        });
+        fireEvent.click(processButton);
+        await waitFor(function (): void {
+            expect(mocks.mockProcessCsvText).toHaveBeenCalled();
+        });
+        expect(mocks.mockProcessCsvText.mock.calls[0][0]).toBe("formula\nH2O\n");
+    });
+
+    it("keeps Process disabled when the native dialog is dismissed", async function (): Promise<void> {
+        mocks.mockGetFileAccess.mockReturnValue({"kind": "native", "openFile": vi.fn().mockResolvedValue(null), "saveFile": vi.fn()});
+        let result = render(function () { return <BatchCalc />; });
+        fireEvent.click(result.getByLabelText("Choose CSV file"));
+        await waitFor(function (): void {
+            expect(result.getByText("Process").hasAttribute("disabled")).toBe(true);
+        });
+        expect((result.getByText("Process") as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it("does not open the native dialog when clicking the picker on the web build", function (): void {
+        let openFile = vi.fn();
+        mocks.mockGetFileAccess.mockReturnValue({"kind": "web", "openFile": openFile, "saveFile": vi.fn()});
+        let result = render(function () { return <BatchCalc />; });
+        fireEvent.click(result.getByLabelText("Choose CSV file"));
+        expect(openFile).not.toHaveBeenCalled();
     });
 });
