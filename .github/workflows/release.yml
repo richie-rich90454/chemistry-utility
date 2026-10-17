@@ -3,7 +3,8 @@ name: Release Builds
 
 on:
   release:
-    types: [published]
+    types:
+      - published
 
   workflow_dispatch:
 
@@ -21,7 +22,7 @@ env:
 
 jobs:
   # ============================================================
-  # Build static website once for all platforms
+  # Static website build
   # ============================================================
 
   web:
@@ -69,7 +70,9 @@ jobs:
           )
 
           unzip -t release/dist.zip
-          unzip -Z1 release/dist.zip | grep -qx index.html
+
+          unzip -Z1 release/dist.zip > web-archive-contents.txt
+          grep -Fx "index.html" web-archive-contents.txt
 
       - name: Upload website archive
         uses: actions/upload-artifact@v4
@@ -174,8 +177,9 @@ jobs:
       - name: Stage frontend for Go embed
         run: npm run desktop:stage
 
-      # Match Wails CLI to the version in core/go.mod.
-      # Avoids the CLI/module mismatch seen in previous logs.
+      # --------------------------------------------------------
+      # Match Wails CLI version to the Go module
+      # --------------------------------------------------------
 
       - name: Detect Wails version
         id: wails
@@ -211,7 +215,7 @@ jobs:
         run: wails version
 
       # --------------------------------------------------------
-      # Build on each native platform
+      # Build each native desktop target
       # --------------------------------------------------------
 
       - name: Build Windows
@@ -252,7 +256,7 @@ jobs:
             -o ChemistryUtility
 
       # --------------------------------------------------------
-      # Windows portable archive
+      # Windows portable package
       # --------------------------------------------------------
 
       - name: Package Windows
@@ -317,10 +321,7 @@ jobs:
           }
 
       # --------------------------------------------------------
-      # macOS Intel + Apple Silicon
-      #
-      # FIX: Wails actually generates chemistry-utility.app.
-      # Never assume the bundle is named ChemistryUtility.app.
+      # macOS Intel and Apple Silicon portable packages
       # --------------------------------------------------------
 
       - name: Detect macOS application bundle
@@ -368,10 +369,10 @@ jobs:
 
           case "${{ matrix.target }}" in
             macos-x64)
-              echo "$ARCHS" | grep -qw x86_64
+              echo "$ARCHS" | grep -w x86_64
               ;;
             macos-arm64)
-              echo "$ARCHS" | grep -qw arm64
+              echo "$ARCHS" | grep -w arm64
               ;;
             *)
               echo "Unsupported macOS target"
@@ -381,7 +382,7 @@ jobs:
 
           echo "app=$APP" >> "$GITHUB_OUTPUT"
 
-      - name: Package macOS application
+      - name: Package macOS
         if: runner.os == 'macOS'
         env:
           APP_PATH: ${{ steps.macos-app.outputs.app }}
@@ -404,13 +405,16 @@ jobs:
           test -s "$ARCHIVE"
           unzip -t "$ARCHIVE"
 
-          unzip -Z1 "$ARCHIVE" |
-            grep -Eq '\.app/Contents/Info\.plist$'
+          unzip -Z1 "$ARCHIVE" > macos-archive-contents.txt
+
+          grep -E \
+            '\.app/Contents/Info\.plist$' \
+            macos-archive-contents.txt
 
           echo "Successfully packaged $TARGET"
 
       # --------------------------------------------------------
-      # Linux portable archive
+      # Linux portable package
       # --------------------------------------------------------
 
       - name: Package Linux
@@ -423,12 +427,15 @@ jobs:
           test -s "$BIN"
           chmod +x "$BIN"
 
+          echo "Checking Linux executable:"
           file "$BIN"
 
-          ldd "$BIN" | tee linux-dependencies.txt
+          echo "Checking shared library dependencies:"
+          ldd "$BIN" > linux-dependencies.txt
 
           if grep -q "not found" linux-dependencies.txt; then
-            echo "Missing shared libraries"
+            echo "Missing shared libraries:"
+            grep "not found" linux-dependencies.txt
             exit 1
           fi
 
@@ -442,9 +449,8 @@ jobs:
           cat > package/ChemistryUtility/README.txt <<'EOF'
           Chemistry Utility - Linux x64
 
-          Extract this archive.
+          Extract this archive and run:
 
-          Run:
             ./ChemistryUtility
 
           Requirements:
@@ -454,17 +460,26 @@ jobs:
           - Compatible graphics libraries
 
           Go and Node.js are not required.
+
+          This is a portable application, not an installer.
           EOF
 
-          tar \
-            -C package \
-            -czf release/ChemistryUtility-linux-x64.tar.gz \
+          ARCHIVE="release/ChemistryUtility-linux-x64.tar.gz"
+
+          tar -C package \
+            -czf "$ARCHIVE" \
             ChemistryUtility
 
-          tar -tzf \
-            release/ChemistryUtility-linux-x64.tar.gz |
-            grep -qx \
-              'ChemistryUtility/ChemistryUtility'
+          test -s "$ARCHIVE"
+
+          # Avoid SIGPIPE: write the listing to a file first.
+          tar -tzf "$ARCHIVE" > linux-archive-contents.txt
+
+          grep -Fx \
+            'ChemistryUtility/ChemistryUtility' \
+            linux-archive-contents.txt
+
+          echo "Linux package successfully verified."
 
       # --------------------------------------------------------
       # Upload per-platform workflow artifacts
@@ -495,12 +510,9 @@ jobs:
           compression-level: 0
 
   # ============================================================
-  # Assemble and verify all packages.
+  # Assemble and verify all release packages
   #
-  # ALWAYS RUNS:
-  # - Manual invocation
-  # - Published release
-  #
+  # Runs for both manual and published-release events.
   # Does not create or modify GitHub Releases.
   # ============================================================
 
@@ -561,27 +573,42 @@ jobs:
             unzip -t "$archive"
           done
 
-          unzip -Z1 release/dist.zip |
-            grep -qx index.html
+          unzip -Z1 release/dist.zip > web-contents.txt
+          grep -Fx index.html web-contents.txt
 
           unzip -Z1 \
-            release/ChemistryUtility-windows-x64.zip |
-            grep -qx ChemistryUtility.exe
+            release/ChemistryUtility-windows-x64.zip \
+            > windows-contents.txt
+
+          grep -Fx \
+            ChemistryUtility.exe \
+            windows-contents.txt
 
           for target in macos-x64 macos-arm64; do
             unzip -Z1 \
-              "release/ChemistryUtility-${target}.zip" |
-              grep -Eq '\.app/Contents/Info\.plist$'
+              "release/ChemistryUtility-${target}.zip" \
+              > "${target}-contents.txt"
+
+            grep -E \
+              '\.app/Contents/Info\.plist$' \
+              "${target}-contents.txt"
           done
 
       - name: Verify Linux archive
         run: |
           set -euo pipefail
 
-          tar -tzf \
-            release/ChemistryUtility-linux-x64.tar.gz |
-            grep -qx \
-              'ChemistryUtility/ChemistryUtility'
+          ARCHIVE="release/ChemistryUtility-linux-x64.tar.gz"
+
+          test -s "$ARCHIVE"
+
+          tar -tzf "$ARCHIVE" > linux-archive-contents.txt
+
+          grep -Fx \
+            'ChemistryUtility/ChemistryUtility' \
+            linux-archive-contents.txt
+
+          echo "Linux archive verification passed."
 
       - name: Generate checksums
         run: |
@@ -620,15 +647,17 @@ jobs:
           compression-level: 0
 
   # ============================================================
-  # GitHub Release publishing
+  # Publish only for GitHub Release events
   #
-  # ONLY RUNS FOR:
-  #   release.published
+  # Manual invocation:
+  #   - Builds all targets
+  #   - Uploads workflow artifacts
+  #   - Skips this job
   #
-  # NEVER RUNS FOR:
-  #   workflow_dispatch
-  #
-  # Manual builds remain workflow artifacts only.
+  # Published release:
+  #   - Builds all targets
+  #   - Uploads workflow artifacts
+  #   - Attaches files to the existing GitHub Release
   # ============================================================
 
   publish:
