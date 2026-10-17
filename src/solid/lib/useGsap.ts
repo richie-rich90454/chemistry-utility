@@ -1,14 +1,18 @@
 import gsap from "gsap";
 import {onCleanup} from "solid-js";
-import {DURATION, EASE, prefersReducedMotion} from "./motion";
+import {DURATION, EASE, STAGGER, prefersReducedMotion} from "./motion";
 interface UseGsapReturn {
     animateIn: (element: Element, vars?: gsap.TweenVars) => gsap.core.Tween;
     animateOut: (element: Element, vars?: gsap.TweenVars) => gsap.core.Tween;
     fromTo: (element: Element, fromVars: gsap.TweenVars, toVars: gsap.TweenVars) => gsap.core.Tween;
     animateCountUp: (element: Element, from: number, to: number, duration: number, format?: (value: number) => string) => gsap.core.Tween | undefined;
     animateStagger: (elements: Element[], vars?: gsap.TweenVars, stagger?: number) => gsap.core.Tween | undefined;
+    animatePop: (element: Element) => gsap.core.Tween | undefined;
 }
 const STAGGER_DEFAULTS: gsap.TweenVars = {opacity: 0, y: 12, duration: DURATION.standard, ease: EASE.enter};
+const ENTER_DEFAULTS: gsap.TweenVars = {opacity: 0, y: 12, duration: DURATION.standard, ease: EASE.enter};
+const EXIT_DEFAULTS: gsap.TweenVars = {opacity: 0, y: -12, duration: DURATION.fast, ease: EASE.exit};
+const POP_DEFAULTS: gsap.TweenVars = {scale: 1.05, duration: DURATION.fast, ease: EASE.spring, clearProps: "transform"};
 function rawNumber(value: number): string {
     return String(value);
 }
@@ -19,13 +23,11 @@ function useGsap(): UseGsapReturn {
         return tween;
     }
     function animateIn(element: Element, vars?: gsap.TweenVars): gsap.core.Tween {
-        let defaults: gsap.TweenVars = {opacity: 0, y: 12, duration: 0.3, ease: "power2.out"};
-        let merged: gsap.TweenVars = vars ? Object.assign({}, defaults, vars) : defaults;
+        let merged: gsap.TweenVars = vars ? Object.assign({}, ENTER_DEFAULTS, vars) : ENTER_DEFAULTS;
         return record(gsap.from(element, merged));
     }
     function animateOut(element: Element, vars?: gsap.TweenVars): gsap.core.Tween {
-        let defaults: gsap.TweenVars = {opacity: 0, y: -12, duration: 0.2, ease: "power2.in"};
-        let merged: gsap.TweenVars = vars ? Object.assign({}, defaults, vars) : defaults;
+        let merged: gsap.TweenVars = vars ? Object.assign({}, EXIT_DEFAULTS, vars) : EXIT_DEFAULTS;
         return record(gsap.to(element, merged));
     }
     function fromTo(element: Element, fromVars: gsap.TweenVars, toVars: gsap.TweenVars): gsap.core.Tween {
@@ -57,8 +59,14 @@ function useGsap(): UseGsapReturn {
             gsap.set(elements, finalState);
             return undefined;
         }
-        let step: number = stagger !== undefined ? stagger : DURATION.micro;
+        let step: number = stagger !== undefined ? stagger : STAGGER;
         return record(gsap.to(elements, Object.assign({}, merged, {"stagger": step})));
+    }
+    function animatePop(element: Element): gsap.core.Tween | undefined {
+        if (prefersReducedMotion()) {
+            return undefined;
+        }
+        return record(gsap.from(element, POP_DEFAULTS));
     }
     onCleanup(function (): void {
         let i: number;
@@ -67,6 +75,6 @@ function useGsap(): UseGsapReturn {
         }
         tweens = [];
     });
-    return {animateIn: animateIn, animateOut: animateOut, fromTo: fromTo, animateCountUp: animateCountUp, animateStagger: animateStagger};
+    return {animateIn: animateIn, animateOut: animateOut, fromTo: fromTo, animateCountUp: animateCountUp, animateStagger: animateStagger, animatePop: animatePop};
 }
 export {useGsap};

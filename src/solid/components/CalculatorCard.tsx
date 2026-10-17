@@ -9,7 +9,7 @@ interface CalculatorCardProps {
 }
 function CalculatorCard(props: CalculatorCardProps): JSX.Element {
     return (
-        <section class={styles.card}>
+        <section class={styles.card} data-motion="enter">
             <h2>{props.title}</h2>
             <p class={styles.cardDescription}>{props.description}</p>
             {props.children}

@@ -100,3 +100,26 @@
     letter-spacing: 0.08em;
     font-weight: 600;
 }
+
+/* ============================================================
+   ENTRANCE — the palette and its scrim arrive together
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+    .paletteBackdrop {
+        animation: paletteBackdropIn var(--app-motion-fast) var(--app-motion-standard-ease) both;
+    }
+
+    @keyframes paletteBackdropIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .commandPalette {
+        animation: paletteIn var(--app-motion-standard) var(--app-motion-enter) both;
+    }
+
+    @keyframes paletteIn {
+        from { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.98); }
+        to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+}

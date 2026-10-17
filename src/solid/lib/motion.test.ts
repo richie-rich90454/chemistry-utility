@@ -19,12 +19,13 @@ function throwOnMatchMedia(): void {
     }) as unknown as typeof window.matchMedia;
 }
 
-async function loadMotion(): Promise<{prefersReducedMotion: () => boolean; DURATION: Record<string, number>; EASE: Record<string, string>}> {
+async function loadMotion(): Promise<{prefersReducedMotion: () => boolean; DURATION: Record<string, number>; EASE: Record<string, string>; STAGGER: number}> {
     const motion = await import("./motion");
     return {
         "prefersReducedMotion": motion.prefersReducedMotion,
         "DURATION": motion.DURATION as unknown as Record<string, number>,
-        "EASE": motion.EASE as unknown as Record<string, string>
+        "EASE": motion.EASE as unknown as Record<string, string>,
+        "STAGGER": motion.STAGGER
     };
 }
 
@@ -58,14 +59,18 @@ beforeEach(function (): void {
 });
 
 describe("motion scale", function (): void {
-    it("exposes durations in seconds and the two easings", async function (): Promise<void> {
-        const {DURATION, EASE} = await loadMotion();
-        expect(DURATION["micro"]).toBe(0.12);
+    it("exposes the duration, easing, and stagger scale", async function (): Promise<void> {
+        const {DURATION, EASE, STAGGER} = await loadMotion();
+        expect(DURATION["instant"]).toBe(0.1);
+        expect(DURATION["fast"]).toBe(0.16);
         expect(DURATION["standard"]).toBe(0.24);
-        expect(DURATION["emphasis"]).toBe(0.38);
+        expect(DURATION["slow"]).toBe(0.36);
         expect(DURATION["reveal"]).toBe(0.52);
+        expect(EASE["standard"]).toBe("cubic-bezier(0.2, 0, 0, 1)");
         expect(EASE["enter"]).toBe("cubic-bezier(0.32, 0.72, 0, 1)");
         expect(EASE["exit"]).toBe("cubic-bezier(0.4, 0, 1, 1)");
+        expect(EASE["spring"]).toBe("cubic-bezier(0.34, 1.4, 0.64, 1)");
+        expect(STAGGER).toBe(0.045);
     });
 });
 
@@ -154,6 +159,27 @@ describe("animateStagger under reduced motion", function (): void {
     });
 });
 
+describe("animatePop", function (): void {
+    it("scales the element in under normal motion", async function (): Promise<void> {
+        setReducedMotion(false);
+        const {api, spy} = await loadGsapApi();
+        const element = makeElement("42");
+        api.animatePop(element);
+        const fromSpy = spy("from");
+        expect(fromSpy).toHaveBeenCalledTimes(1);
+        expect(fromSpy.mock.calls[0][0]).toBe(element);
+        const vars = fromSpy.mock.calls[0][1] as {"scale": number; "clearProps": string};
+        expect(vars.scale).toBe(1.05);
+        expect(vars.clearProps).toBe("transform");
+    });
+    it("skips the tween under reduced motion", async function (): Promise<void> {
+        setReducedMotion(true);
+        const {api, spy} = await loadGsapApi();
+        api.animatePop(makeElement("42"));
+        expect(spy("from")).not.toHaveBeenCalled();
+    });
+});
+
 describe("animateStagger with motion allowed", function (): void {
     it("tweens the list with the supplied stagger step", async function (): Promise<void> {
         setReducedMotion(false);
@@ -167,7 +193,7 @@ describe("animateStagger with motion allowed", function (): void {
         expect(vars.opacity).toBe(0);
         expect(vars.y).toBe(12);
         expect(vars.duration).toBe(0.24);
-        expect(vars.stagger).toBe(0.12);
+        expect(vars.stagger).toBe(0.045);
         expect(spy("set")).not.toHaveBeenCalled();
     });
     it("passes a caller supplied stagger step through", async function (): Promise<void> {

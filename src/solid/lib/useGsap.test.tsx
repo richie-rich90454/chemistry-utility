@@ -79,11 +79,11 @@ describe("useGsap animateIn", function (): void {
         render(function (): JSX.Element { return <AnimateInHost />; });
         expect(fromSpy).toHaveBeenCalledTimes(1);
         expect(fromSpy.mock.calls[0][0]).toBeInstanceOf(HTMLDivElement);
-        expect(fromSpy.mock.calls[0][1]).toEqual({opacity: 0, y: 12, duration: 0.3, ease: "power2.out"});
+        expect(fromSpy.mock.calls[0][1]).toEqual({opacity: 0, y: 12, duration: 0.24, ease: "cubic-bezier(0.32, 0.72, 0, 1)"});
     });
     it("merges user vars with defaults", function (): void {
         render(function (): JSX.Element { return <AnimateInHost vars={{duration: 0.5, y: 20}} />; });
-        expect(fromSpy.mock.calls[0][1]).toEqual({opacity: 0, y: 20, duration: 0.5, ease: "power2.out"});
+        expect(fromSpy.mock.calls[0][1]).toEqual({opacity: 0, y: 20, duration: 0.5, ease: "cubic-bezier(0.32, 0.72, 0, 1)"});
     });
 });
 describe("useGsap animateOut", function (): void {
@@ -100,11 +100,11 @@ describe("useGsap animateOut", function (): void {
         render(function (): JSX.Element { return <AnimateOutHost />; });
         expect(toSpy).toHaveBeenCalledTimes(1);
         expect(toSpy.mock.calls[0][0]).toBeInstanceOf(HTMLDivElement);
-        expect(toSpy.mock.calls[0][1]).toEqual({opacity: 0, y: -12, duration: 0.2, ease: "power2.in"});
+        expect(toSpy.mock.calls[0][1]).toEqual({opacity: 0, y: -12, duration: 0.16, ease: "cubic-bezier(0.4, 0, 1, 1)"});
     });
     it("merges user vars with defaults", function (): void {
         render(function (): JSX.Element { return <AnimateOutHost vars={{duration: 0.4, y: -5}} />; });
-        expect(toSpy.mock.calls[0][1]).toEqual({opacity: 0, y: -5, duration: 0.4, ease: "power2.in"});
+        expect(toSpy.mock.calls[0][1]).toEqual({opacity: 0, y: -5, duration: 0.4, ease: "cubic-bezier(0.4, 0, 1, 1)"});
     });
 });
 describe("useGsap fromTo", function (): void {

@@ -38,7 +38,7 @@ describe("CountUpText", function (): void {
         let vars = toSpy.mock.calls[0][1] as {"value": number; "duration": number; "onUpdate": () => void};
         expect(proxy.value).toBe(1);
         expect(vars.value).toBe(2.5);
-        expect(vars.duration).toBe(0.3);
+        expect(vars.duration).toBe(0.36);
     });
     it("keeps the surrounding text while the number is written", function (): void {
         let toSpy = vi.mocked(gsap.to);

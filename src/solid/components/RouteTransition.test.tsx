@@ -23,24 +23,17 @@ function nextTick(): Promise<void> {
     });
 }
 
-function flushTweens(): Promise<void> {
-    return new Promise<void>(function (resolve: (value: void) => void): void {
-        setTimeout(function (): void {
-            resolve();
-        }, 30);
-    });
-}
-
-/** Lets the router's transition settle without letting tween timers fire. */
+/** Lets the router's navigation settle without waiting on tween timers. */
 async function settle(): Promise<void> {
     let i: number;
     for (i = 0; i < 6; i = i + 1) {
         await Promise.resolve();
     }
+    await nextTick();
 }
 
 /** Mirrors the App.tsx layout: a shell route whose children change per path. */
-function mountRouter(): {goTo: (path: string) => void; text: () => string} {
+function mountRouter(): {goTo: (path: string) => void; text: () => string; container: () => HTMLElement} {
     let navigate: (path: string) => void = function (): void { return; };
     function Links(): JSX.Element {
         navigate = useNavigate();
@@ -53,6 +46,18 @@ function mountRouter(): {goTo: (path: string) => void; text: () => string} {
                 <Links />
             </div>
         );
+    }
+    function MarkedPanel(): JSX.Element {
+        return (
+            <div>
+                <section data-motion="enter">first block</section>
+                <section data-motion="enter">second block</section>
+                <Links />
+            </div>
+        );
+    }
+    function Empty(): JSX.Element {
+        return <>{null}</>;
     }
     function Shell(props: {children?: JSX.Element}): JSX.Element {
         return (
@@ -67,6 +72,8 @@ function mountRouter(): {goTo: (path: string) => void; text: () => string} {
                 <Route path="/" component={Shell}>
                     <Route path="/" component={() => <Panel label="home view" />} />
                     <Route path="/away" component={() => <Panel label="away view" />} />
+                    <Route path="/marked" component={() => <MarkedPanel />} />
+                    <Route path="/empty" component={() => <Empty />} />
                 </Route>
             </MemoryRouter>
         );
@@ -77,6 +84,9 @@ function mountRouter(): {goTo: (path: string) => void; text: () => string} {
         },
         "text": function (): string {
             return rendered.container.textContent ?? "";
+        },
+        "container": function (): HTMLElement {
+            return rendered.container;
         }
     };
 }
@@ -91,75 +101,111 @@ afterEach(function (): void {
 });
 
 describe("RouteTransition", function (): void {
-    it("renders the first route without animating", function (): void {
-        let toSpy = vi.mocked(gsap.to);
-        toSpy.mockClear();
+    it("leaves the first paint untouched", function (): void {
+        let fromToSpy = vi.mocked(gsap.fromTo);
+        fromToSpy.mockClear();
         let router = mountRouter();
         expect(router.text()).toContain("home view");
-        expect(toSpy).not.toHaveBeenCalled();
+        expect(fromToSpy).not.toHaveBeenCalled();
     });
-    it("fades the outgoing route out before revealing the incoming one", async function (): Promise<void> {
-        let toSpy = vi.mocked(gsap.to);
+
+    it("rises the new content in when the route changes", async function (): Promise<void> {
         let fromToSpy = vi.mocked(gsap.fromTo);
-        toSpy.mockClear();
         fromToSpy.mockClear();
         let router = mountRouter();
         router.goTo("/away");
-        await flushTweens();
-        expect(router.text()).toContain("away view");
-        expect(router.text()).not.toContain("home view");
-        expect(toSpy).toHaveBeenCalledTimes(1);
-        let exitVars = toSpy.mock.calls[0][1] as {"opacity": number; "y": number; "duration": number; "ease": string};
-        expect(exitVars.opacity).toBe(0);
-        expect(exitVars.y).toBe(12);
-        expect(exitVars.duration).toBe(0.24);
-        expect(exitVars.ease).toBe("cubic-bezier(0.4, 0, 1, 1)");
+        await settle();
         expect(fromToSpy).toHaveBeenCalledTimes(1);
-        let enterVars = fromToSpy.mock.calls[0][2] as {"opacity": number; "y": number; "duration": number; "ease": string};
-        expect(enterVars.opacity).toBe(1);
-        expect(enterVars.y).toBe(0);
-        expect(enterVars.duration).toBe(0.38);
-        expect(enterVars.ease).toBe("cubic-bezier(0.32, 0.72, 0, 1)");
+        let fromVars = fromToSpy.mock.calls[0][1] as unknown as {"opacity": number; "y": number};
+        expect(fromVars.opacity).toBe(0);
+        expect(fromVars.y).toBe(14);
+        let toVars = fromToSpy.mock.calls[0][2] as {"opacity": number; "y": number; "duration": number; "ease": string; "stagger": number};
+        expect(toVars.opacity).toBe(1);
+        expect(toVars.y).toBe(0);
+        expect(toVars.duration).toBe(0.36);
+        expect(toVars.ease).toBe("cubic-bezier(0.32, 0.72, 0, 1)");
+        expect(toVars.stagger).toBe(0.045);
     });
-    it("keeps the incoming route out of the DOM until the exit tween completes", async function (): Promise<void> {
+
+    it("swaps the route content immediately with no held outgoing node", async function (): Promise<void> {
         let router = mountRouter();
         router.goTo("/away");
-        expect(router.text()).toContain("home view");
-        expect(router.text()).not.toContain("away view");
-        await flushTweens();
+        await settle();
         expect(router.text()).toContain("away view");
         expect(router.text()).not.toContain("home view");
     });
-    it("swaps content immediately when reduced motion is preferred", async function (): Promise<void> {
-        vi.mocked(prefersReducedMotion).mockReturnValue(true);
+
+    it("staggers the blocks marked data-motion in document order", async function (): Promise<void> {
+        let fromToSpy = vi.mocked(gsap.fromTo);
+        fromToSpy.mockClear();
         let router = mountRouter();
-        router.goTo("/away");
-        await nextTick();
-        expect(router.text()).toContain("away view");
+        router.goTo("/marked");
+        await settle();
+        let targets = fromToSpy.mock.calls[0][0] as Element[];
+        expect(targets.length).toBe(2);
+        expect(targets[0].textContent).toBe("first block");
+        expect(targets[1].textContent).toBe("second block");
     });
-    it("kills the previous enter tween when revealing again", async function (): Promise<void> {
-        vi.mocked(prefersReducedMotion).mockReturnValue(false);
+
+    it("falls back to the direct children when nothing is marked", async function (): Promise<void> {
         let fromToSpy = vi.mocked(gsap.fromTo);
         fromToSpy.mockClear();
         let router = mountRouter();
         router.goTo("/away");
-        await flushTweens();
-        router.goTo("/");
-        await flushTweens();
-        expect(fromToSpy).toHaveBeenCalledTimes(2);
-        let firstInTween = fromToSpy.mock.results[0].value as {"kill": () => void};
-        expect(firstInTween.kill).toHaveBeenCalled();
+        await settle();
+        let targets = fromToSpy.mock.calls[0][0] as Element[];
+        expect(targets.length).toBe(1);
+        expect(targets[0].tagName).toBe("DIV");
+        expect(targets[0].textContent).toContain("away view");
     });
-    it("supersedes a pending exit tween when routes change in quick succession", async function (): Promise<void> {
-        vi.mocked(prefersReducedMotion).mockReturnValue(false);
-        let toSpy = vi.mocked(gsap.to);
-        toSpy.mockClear();
+
+    it("does nothing when the route renders no blocks", async function (): Promise<void> {
+        let fromToSpy = vi.mocked(gsap.fromTo);
+        fromToSpy.mockClear();
+        let router = mountRouter();
+        router.goTo("/empty");
+        await settle();
+        expect(fromToSpy).not.toHaveBeenCalled();
+    });
+
+    it("kills the previous entrance tween when navigating again", async function (): Promise<void> {
+        let fromToSpy = vi.mocked(gsap.fromTo);
+        fromToSpy.mockClear();
         let router = mountRouter();
         router.goTo("/away");
         await settle();
         router.goTo("/");
         await settle();
-        await flushTweens();
-        expect(toSpy).toHaveBeenCalledTimes(2);
+        expect(fromToSpy).toHaveBeenCalledTimes(2);
+        let firstTween = fromToSpy.mock.results[0].value as {"kill": () => void};
+        expect(firstTween.kill).toHaveBeenCalled();
+    });
+
+    it("ignores mutations that leave the entering blocks unchanged", async function (): Promise<void> {
+        let fromToSpy = vi.mocked(gsap.fromTo);
+        fromToSpy.mockClear();
+        let router = mountRouter();
+        router.goTo("/marked");
+        await settle();
+        expect(fromToSpy).toHaveBeenCalledTimes(1);
+        let section = router.container().querySelector("[data-motion='enter']") as HTMLElement;
+        section.appendChild(document.createElement("span"));
+        await settle();
+        expect(fromToSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("snaps to the final state under reduced motion", async function (): Promise<void> {
+        vi.mocked(prefersReducedMotion).mockReturnValue(true);
+        let fromToSpy = vi.mocked(gsap.fromTo);
+        fromToSpy.mockClear();
+        let setSpy = vi.mocked(gsap.set);
+        setSpy.mockClear();
+        let router = mountRouter();
+        router.goTo("/away");
+        await settle();
+        expect(fromToSpy).not.toHaveBeenCalled();
+        expect(setSpy).toHaveBeenCalled();
+        let vars = setSpy.mock.calls[0][1] as {"clearProps": string};
+        expect(vars.clearProps).toBe("opacity,transform");
     });
 });

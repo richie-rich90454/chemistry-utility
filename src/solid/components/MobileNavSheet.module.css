@@ -82,3 +82,26 @@
     height: 20px;
     flex-shrink: 0;
 }
+
+/* ============================================================
+   ENTRANCE — the sheet slides in from the edge it lives on
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference) {
+    .navSheetBackdrop {
+        animation: sheetBackdropIn var(--app-motion-fast) var(--app-motion-standard-ease) both;
+    }
+
+    @keyframes sheetBackdropIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .navSheet {
+        animation: sheetIn var(--app-motion-standard) var(--app-motion-enter) both;
+    }
+
+    @keyframes sheetIn {
+        from { transform: translateX(-100%); }
+        to   { transform: translateX(0); }
+    }
+}

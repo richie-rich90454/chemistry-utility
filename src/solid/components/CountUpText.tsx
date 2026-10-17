@@ -2,7 +2,8 @@ import type {JSX} from "solid-js";
 import {createEffect} from "solid-js";
 import {NumberFormatter} from "../../modules/i18n/numberFormatter.js";
 import {useGsap} from "../lib/useGsap";
-const COUNT_UP_DURATION = 0.3;
+import {DURATION} from "../lib/motion";
+const COUNT_UP_DURATION = DURATION.slow;
 interface NumberSpan {
     start: number;
     end: number;
@@ -64,7 +65,8 @@ function CountUpText(props: {value: () => string}): JSX.Element {
         api.animateCountUp(element, previous.value, target.value, COUNT_UP_DURATION, function (value: number): string {
             return prefix + formatter.format(value, target.decimals) + suffix;
         });
+        api.animatePop(element);
     });
-    return <span ref={function (el: HTMLSpanElement): void { spanRef = el; }} />;
+    return <span class="count-up" ref={function (el: HTMLSpanElement): void { spanRef = el; }} />;
 }
 export {CountUpText};

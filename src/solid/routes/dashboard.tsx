@@ -23,7 +23,7 @@ import {useDashboard} from "../stores/dashboard";
 import {ChartCanvas} from "../components/third-party/ChartCanvas";
 import {CountUpText} from "../components/CountUpText";
 import {useGsap} from "../lib/useGsap";
-import {DURATION} from "../lib/motion";
+import {STAGGER} from "../lib/motion";
 import styles from "./dashboard.module.css";
 interface StatDefinition {
     label: string;
@@ -53,7 +53,7 @@ function Dashboard(): JSX.Element {
     let api = useGsap();
     onMount(function (): void {
         void store.refresh();
-        api.animateStagger(cardRefs, {}, DURATION.micro);
+        api.animateStagger(cardRefs, {}, STAGGER);
     });
     let activityData = createMemo(function (): ChartData {
         let points = store.activity();
