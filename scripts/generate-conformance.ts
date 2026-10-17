@@ -160,7 +160,7 @@ function bondCase(id: string, symbol1: string, symbol2: string): VectorCase {
 
 function writeVector(file: string, calculator: string, cases: VectorCase[]): void {
     let payload: VectorFile = { "calculator": calculator, "contract": CONTRACT, "cases": cases };
-    let dir = join(__dirname, "..", "..", "conformance");
+    let dir = join(__dirname, "..", "conformance");
     mkdirSync(dir, { "recursive": true });
     writeFileSync(join(dir, file), JSON.stringify(payload, null, 2) + "\n", "utf8");
     process.stdout.write("wrote conformance/" + file + " (" + String(cases.length) + " cases)\n");

@@ -71,6 +71,6 @@ export default [
 		},
 	},
 	{
-		ignores: ["src/wailsjs/**", "dist/**", "build/**"],
+		ignores: ["dist/**", "build/**", "core/**", "coverage/**", "conformance/**"],
 	},
 ];

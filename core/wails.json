@@ -3,9 +3,11 @@
   "name": "chemistry-utility",
   "version": "3.0.0",
   "outputfilename": "chemistry-utility",
+  "frontend:dir": "../",
+  "wailsjsdir": "tmp/wailsjs",
   "frontend:install": "npm install",
-  "frontend:build": "cd ../ && npm run build:web && npm run stage:desktop",
-  "frontend:dev:watcher": "cd ../ && npm run dev:app",
+  "frontend:build": "npm run build:web && npm run desktop:stage",
+  "frontend:dev:watcher": "npm run dev:app",
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "richierich"

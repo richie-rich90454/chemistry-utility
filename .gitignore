@@ -161,6 +161,7 @@ Thumbs.db
 # Build output
 dist/
 build/bin/
+core/build/
 *.md5
 
 # Go air hot reload
