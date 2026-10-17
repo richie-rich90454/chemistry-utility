@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// Port of frontend/src/modules/calculators/electrochemistry.ts. Input keys,
+// Port of src/modules/calculators/electrochemistry.ts. Input keys,
 // validation order, error messages, and output strings are kept identical so
 // the conformance vectors pass unchanged.
 

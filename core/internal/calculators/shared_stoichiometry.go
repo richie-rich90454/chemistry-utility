@@ -10,7 +10,7 @@ import (
 )
 
 // The calculators in this file are a direct port of
-// frontend/src/modules/calculators/stoichiometry.ts, including its equation
+// src/modules/calculators/stoichiometry.ts, including its equation
 // parsing, which in turn relies on the arrow normalization from the
 // fast-balance package. Input keys, validation order, error messages, and
 // output strings are kept identical so the conformance vectors pass

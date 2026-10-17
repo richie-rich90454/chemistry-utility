@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Port of frontend/src/modules/calculators/quantum.ts. Input keys, validation
+// Port of src/modules/calculators/quantum.ts. Input keys, validation
 // order, error messages, and output strings are kept identical so the
 // conformance vectors pass unchanged.
 

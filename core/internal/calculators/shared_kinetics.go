@@ -8,7 +8,7 @@ import (
 )
 
 // The calculators in this file are a direct port of
-// frontend/src/modules/calculators/kinetics.ts. Input keys, validation order,
+// src/modules/calculators/kinetics.ts. Input keys, validation order,
 // error messages, and output strings are kept identical so the conformance
 // vectors pass unchanged.
 

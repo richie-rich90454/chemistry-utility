@@ -6,7 +6,7 @@ import (
 )
 
 // Expected strings are the values the TypeScript originals in
-// frontend/src/modules/calculators produce for the same inputs. The
+// src/modules/calculators produce for the same inputs. The
 // conformance vectors for these calculators only record error cases, so these
 // cases are what pins the success paths, including the stoichiometry port and
 // the integrated-rate-law series.

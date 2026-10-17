@@ -12,7 +12,7 @@ import (
 )
 
 // The molar-mass calculator is a direct port of
-// frontend/src/modules/calculators/molarMass.ts. Element lookup failures
+// src/modules/calculators/molarMass.ts. Element lookup failures
 // surface with the same messages, and the element order the fast formula
 // parser yields is preserved so the accumulated float matches the web
 // engine bit for bit.
@@ -30,10 +30,11 @@ var elementTable struct {
 var ptablePaths = []string{
 	"dist/ptable.json",
 	"ptable.json",
-	"frontend/public/ptable.json",
-	"../frontend/public/ptable.json",
-	"../../frontend/public/ptable.json",
-	"../../../frontend/public/ptable.json",
+	"public/ptable.json",
+	"../public/ptable.json",
+	"../dist/ptable.json",
+	"../../../public/ptable.json",
+	"../../../dist/ptable.json",
 }
 
 func loadElements() (map[string]float64, error) {

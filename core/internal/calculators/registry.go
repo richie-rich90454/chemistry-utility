@@ -11,7 +11,7 @@ type calcFunc func(inputs map[string]string) (CalcResult, error)
 // The registry is the binding surface for the desktop app: the frontend
 // passes a calculator id and an input record, and gets back a CalcResult in
 // the shared contract. Implementations are the ported calculators in
-// shared_*.go, which mirror frontend/src/modules/calculators/ exactly.
+// shared_*.go, which mirror src/modules/calculators/ exactly.
 type Registry struct {
 	calculators map[string]calcFunc
 }

@@ -12,7 +12,7 @@ import (
 )
 
 // bondType is a direct port of
-// frontend/src/modules/calculators/bondType.ts. The periodic table
+// src/modules/calculators/bondType.ts. The periodic table
 // dataset is loaded the same way shared_molarmass.go loads it, so both
 // calculators agree on element properties.
 
