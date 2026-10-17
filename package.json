@@ -14,6 +14,7 @@
     "dev:host": "vite --host",
     "build": "npm run build:web",
     "build:web": "vite build --mode web && node scripts/prerender.mjs",
+    "build:desktop": "npm run build:web && npm run desktop:stage",
     "build:watch": "vite build --watch",
     "build:web:watch": "vite build --mode web --watch",
     "build:app:watch": "vite build --mode app --watch",

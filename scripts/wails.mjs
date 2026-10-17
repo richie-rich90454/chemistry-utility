@@ -12,10 +12,13 @@
  *   start    launch the built binary
  *   package  build and archive a distributable
  *
- * The frontend build is owned by `core/wails.json` (`frontend:build` runs
- * `npm run build:web && npm run desktop:stage`), so `build` and `package` need
- * no extra steps. The runner only guarantees the embed directory exists, which
- * `go:embed` requires even on a fresh clone.
+ * The runner builds and stages the frontend itself, then compiles with the
+ * CLI's own frontend step skipped. Letting the CLI run `frontend:build` is not
+ * safe here: it clears the directory it is told to embed afterwards, so the
+ * binary would be compiled against a bundle that has already been removed and
+ * would ship the placeholder marker instead of the app. Doing the build here
+ * means the staged bundle is verified to be on disk immediately before the
+ * compiler runs.
  *
  * Usage: node scripts/wails.mjs <command> [wails flags...]
  */
@@ -133,6 +136,23 @@ function ensureEmbedDir() {
     }
 }
 
+/**
+ * Builds the web bundle and stages it into the embed directory, then checks
+ * the staged entry point really is on disk. The desktop binary is only as
+ * complete as this directory, so a silent staging failure has to be a hard
+ * error rather than a binary that renders nothing.
+ */
+function buildFrontend() {
+    ensureEmbedDir();
+    log("Building and staging the frontend bundle...");
+    if (runShell("npm run build:desktop") !== 0) {
+        fail("The frontend build failed. Run `npm run build:desktop` to see why.");
+    }
+    if (!existsSync(join(distDir, "index.html"))) {
+        fail("The frontend bundle was not staged into " + distDir + ".");
+    }
+}
+
 function humanSize(bytes) {
     if (bytes >= 1024 * 1024) {
         return (bytes / (1024 * 1024)).toFixed(1) + " MB";
@@ -205,6 +225,12 @@ function baseFlags(extra) {
 
 function buildCommand(wails, extra, nsis) {
     let flags = baseFlags(extra);
+    let skipFrontend = extra.some(function (arg) {
+        return arg === "-s" || arg === "--skipfrontend";
+    });
+    if (!skipFrontend) {
+        flags.push("-s");
+    }
     if (nsis && !extra.includes("-nsis")) {
         flags.push("-nsis");
     }
@@ -262,11 +288,11 @@ function main() {
         return;
     }
     if (command === "build") {
-        ensureEmbedDir();
+        buildFrontend();
         process.exit(runShell(buildCommand(wails, extra, false), {"cwd": coreDir}));
     }
     if (command === "package") {
-        ensureEmbedDir();
+        buildFrontend();
         // An NSIS installer needs makensis; when it is missing, the portable
         // archive is still produced and the reason is reported.
         let wantNsis = isWindows && commandExists("makensis");

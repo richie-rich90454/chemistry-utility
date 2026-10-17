@@ -37,7 +37,14 @@ for (const entry of readdirSync(target)) {
     }
 }
 cpSync(source, target, { recursive: true });
-if (!existsSync(join(target, EMBED_MARKER))) {
-    writeFileSync(join(target, EMBED_MARKER), EMBED_MARKER_CONTENT, "utf8");
+// Always rewritten with the canonical text: the marker is committed, so an
+// idempotent write keeps the working tree clean and repairs the file if
+// anything ever truncates it.
+writeFileSync(join(target, EMBED_MARKER), EMBED_MARKER_CONTENT, "utf8");
+// The desktop binary embeds this directory, so an empty or partial stage would
+// ship an app that renders nothing. Fail loudly instead of building on it.
+if (!existsSync(join(target, "index.html"))) {
+    process.stderr.write("staging failed: " + join(target, "index.html") + " was not written.\n");
+    process.exit(1);
 }
 process.stdout.write("staged dist -> core/dist\n");

@@ -6,7 +6,7 @@
   "frontend:dir": "../",
   "wailsjsdir": "tmp/wailsjs",
   "frontend:install": "npm install",
-  "frontend:build": "npm run build:web && npm run desktop:stage",
+  "frontend:build": "npm run build:desktop",
   "frontend:dev:watcher": "npm run dev:app",
   "frontend:dev:serverUrl": "auto",
   "author": {
