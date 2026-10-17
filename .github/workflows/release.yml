@@ -1,0 +1,371 @@
+
+name: Release Builds
+
+on:
+  release:
+    types:
+      - published
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event.release.tag_name || github.ref }}
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "24"
+  GO_VERSION: "1.26"
+  CI: "true"
+
+jobs:
+  web:
+    name: Build Static Website
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production website
+        run: npm run build:web
+
+      - name: Verify website
+        run: |
+          test -s dist/index.html
+
+      - name: Package static website
+        run: |
+          mkdir -p release
+          cd dist
+          zip -q -r ../release/dist.zip .
+
+      - name: Verify archive
+        run: |
+          unzip -t release/dist.zip
+          unzip -Z1 release/dist.zip | grep -qx index.html
+
+      - name: Upload website archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-web
+          path: release/dist.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload frontend for desktop builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-frontend
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  desktop:
+    name: Build ${{ matrix.target }}
+    needs: web
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        include:
+          - target: windows-x64
+            os: windows-2022
+            platform: windows/amd64
+
+          - target: macos-x64
+            os: macos-15-intel
+            platform: darwin/amd64
+
+          - target: macos-arm64
+            os: macos-15
+            platform: darwin/arm64
+
+          - target: linux-x64
+            os: ubuntu-24.04
+            platform: linux/amd64
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: core/go.sum
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            pkg-config \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            zip \
+            xvfb
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Download built frontend
+        uses: actions/download-artifact@v4
+        with:
+          name: release-frontend
+          path: dist/
+
+      - name: Stage embedded frontend
+        run: npm run desktop:stage
+
+      - name: Install Wails v2
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@v2.11.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Verify Wails installation
+        run: |
+          wails version
+
+      - name: Build Windows
+        if: runner.os == 'Windows'
+        working-directory: core
+        run: |
+          wails build \
+            -clean \
+            -platform windows/amd64 \
+            -o ChemistryUtility.exe
+
+      - name: Build macOS Intel
+        if: matrix.target == 'macos-x64'
+        working-directory: core
+        run: |
+          wails build \
+            -clean \
+            -platform darwin/amd64 \
+            -o ChemistryUtility
+
+      - name: Build macOS Apple Silicon
+        if: matrix.target == 'macos-arm64'
+        working-directory: core
+        run: |
+          wails build \
+            -clean \
+            -platform darwin/arm64 \
+            -o ChemistryUtility
+
+      - name: Build Linux
+        if: runner.os == 'Linux'
+        working-directory: core
+        run: |
+          wails build \
+            -clean \
+            -tags webkit2_41 \
+            -platform linux/amd64 \
+            -o ChemistryUtility
+
+      - name: Package Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $binary = "core/build/bin/ChemistryUtility.exe"
+
+          if (!(Test-Path $binary)) {
+            throw "Windows executable missing"
+          }
+
+          New-Item -ItemType Directory -Force release |
+            Out-Null
+
+          Compress-Archive `
+            -Path $binary `
+            -DestinationPath "release/ChemistryUtility-windows-x64.zip" `
+            -CompressionLevel Optimal
+
+      - name: Package macOS
+        if: runner.os == 'macOS'
+        run: |
+          set -euo pipefail
+
+          mkdir -p release
+
+          APP="core/build/bin/ChemistryUtility.app"
+
+          if [ ! -d "$APP" ]; then
+            echo "macOS .app bundle missing"
+            find core/build/bin -maxdepth 3 -print
+            exit 1
+          fi
+
+          ditto -c -k \
+            --sequesterRsrc \
+            --keepParent \
+            "$APP" \
+            "release/ChemistryUtility-${{ matrix.target }}.zip"
+
+      - name: Package Linux
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+
+          BIN="core/build/bin/ChemistryUtility"
+
+          test -s "$BIN"
+          chmod +x "$BIN"
+
+          mkdir -p release
+          mkdir -p package/ChemistryUtility
+
+          cp "$BIN" package/ChemistryUtility/
+
+          cat > package/ChemistryUtility/README.txt <<'EOF'
+          Chemistry Utility for Linux x64
+
+          Run:
+            ./ChemistryUtility
+
+          Requires compatible GTK3 and WebKit2GTK 4.1
+          runtime libraries on the host system.
+
+          Node.js and Go are not required.
+          EOF
+
+          tar -C package \
+            -czf release/ChemistryUtility-linux-x64.tar.gz \
+            ChemistryUtility
+
+      - name: Verify package exists
+        run: |
+          test -n "$(find release -type f -size +0c -print -quit)"
+
+      - name: Upload desktop archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.target }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 14
+
+  assemble:
+    name: Assemble and Verify Release
+    needs:
+      - web
+      - desktop
+
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Download release archives
+        uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release/
+          merge-multiple: true
+
+      - name: Verify all assets
+        run: |
+          set -euo pipefail
+
+          test -s release/dist.zip
+          test -s release/ChemistryUtility-windows-x64.zip
+          test -s release/ChemistryUtility-macos-x64.zip
+          test -s release/ChemistryUtility-macos-arm64.zip
+          test -s release/ChemistryUtility-linux-x64.tar.gz
+
+          unzip -t release/dist.zip
+          unzip -t release/ChemistryUtility-windows-x64.zip
+          unzip -t release/ChemistryUtility-macos-x64.zip
+          unzip -t release/ChemistryUtility-macos-arm64.zip
+
+          tar -tzf release/ChemistryUtility-linux-x64.tar.gz \
+            > /dev/null
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd release
+
+          sha256sum \
+            dist.zip \
+            ChemistryUtility-windows-x64.zip \
+            ChemistryUtility-macos-x64.zip \
+            ChemistryUtility-macos-arm64.zip \
+            ChemistryUtility-linux-x64.tar.gz \
+            > SHA256SUMS.txt
+
+          cat SHA256SUMS.txt
+
+      - name: Upload complete release bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: complete-release-bundle
+          path: release/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish:
+    name: Publish Release Assets
+    if: github.event_name == 'release'
+
+    needs: assemble
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download complete release bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: complete-release-bundle
+          path: release/
+
+      - name: Upload to existing GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+
+          gh release upload "$RELEASE_TAG" \
+            release/dist.zip \
+            release/ChemistryUtility-windows-x64.zip \
+            release/ChemistryUtility-macos-x64.zip \
+            release/ChemistryUtility-macos-arm64.zip \
+            release/ChemistryUtility-linux-x64.tar.gz \
+            release/SHA256SUMS.txt \
+            --clobber
