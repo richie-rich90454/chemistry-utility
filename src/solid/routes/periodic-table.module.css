@@ -66,7 +66,7 @@
     z-index: 5;
 }
 .cellDimmed{
-    opacity: 0.2;
+    opacity: 0.3;
 }
 .cellDimmed:hover{
     transform: none;
@@ -75,17 +75,16 @@
 .cellNumber{
     font-size: 0.625rem;
     line-height: 1;
-    opacity: 0.75;
+    font-weight: 600;
 }
 .cellSymbol{
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.1;
 }
 .cellName{
     font-size: 0.5rem;
     line-height: 1;
-    opacity: 0.7;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -94,19 +93,9 @@
 .cellMass{
     font-size: 0.55rem;
     line-height: 1;
-    opacity: 0.7;
 }
-.catAlkaliMetal{ background: var(--app-state-active); color: var(--app-accent); }
-.catAlkalineEarth{ background: var(--md-tertiary-container); color: var(--md-on-tertiary-container); }
-.catTransitionMetal{ background: var(--md-secondary-container); color: var(--md-on-secondary-container); }
-.catPostTransition{ background: var(--app-pane); color: var(--app-text); }
-.catMetalloid{ background: var(--md-warning-container); color: var(--md-on-warning-container); }
-.catNonmetal{ background: var(--md-success-container); color: var(--md-on-success-container); }
-.catHalogen{ background: transparent; color: var(--app-error); }
-.catNobleGas{ background: var(--app-accent); color: var(--app-on-accent); }
-.catLanthanide{ background: var(--app-accent); color: var(--md-on-tertiary); }
-.catActinide{ background: var(--app-accent); color: var(--app-on-accent); }
-.catUnknown{ background: var(--app-pane); color: var(--app-text); }
+/* Category colours come from modules/elementPalette.ts and are applied inline,
+   so the tiles stay identical across the light, dark, and AMOLED themes. */
 .legend{
     display: flex;
     flex-wrap: wrap;

@@ -2,7 +2,14 @@ import {render, fireEvent, waitFor} from "@solidjs/testing-library";
 import {describe, it, expect, vi, beforeEach, afterEach} from "vitest";
 import {PeriodicTable} from "./periodic-table";
 import {ChemicalElement} from "../../types.js";
+import {FALLBACK_CATEGORY_COLORS} from "../../modules/elementPalette.js";
 import styles from "./periodic-table.module.css";
+
+/** jsdom normalises a hex background to rgb() when read back. */
+function toRgb(hex: string): string {
+    let value: string = hex.replace("#", "");
+    return "rgb(" + parseInt(value.slice(0, 2), 16) + ", " + parseInt(value.slice(2, 4), 16) + ", " + parseInt(value.slice(4, 6), 16) + ")";
+}
 const TEST_ELEMENTS: ChemicalElement[] = [
     {atomicNumber: 1, symbol: "H", name: "Hydrogen", atomicMass: 1.008, type: "non-metal", period: 1, group: 1, electronegativity: 2.20, electronAffinity: 72.8, atomicRadius: 53, ionizationEnergy: 1312, valenceElectrons: 1, totalElectrons: 1},
     {atomicNumber: 2, symbol: "He", name: "Helium", atomicMass: 4.003, type: "noble gas", period: 1, group: 18, electronegativity: null, electronAffinity: 0, atomicRadius: 31, ionizationEnergy: 2372, valenceElectrons: 2, totalElectrons: 2},
@@ -236,7 +243,7 @@ describe("PeriodicTable", function (): void {
         let actiniumButton = result.getByLabelText("Actinium, atomic number 89") as HTMLButtonElement;
         expect(actiniumButton.style.gridRow).toBe("10");
         let mysteryButton = result.getByLabelText("Mysterium, atomic number 119") as HTMLButtonElement;
-        expect(mysteryButton.classList.contains(styles.catUnknown)).toBe(true);
+        expect(mysteryButton.style.getPropertyValue("background-color")).toBe(toRgb(FALLBACK_CATEGORY_COLORS.background));
         fireEvent.click(lanthanumButton);
         let detailPanel = await result.findByRole("dialog");
         expect(detailPanel).toBeTruthy();

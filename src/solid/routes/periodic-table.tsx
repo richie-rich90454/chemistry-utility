@@ -11,41 +11,23 @@ import {createSignal, onMount, For} from "solid-js";
 import {ChemicalElement} from "../../types.js";
 import {DataCache} from "../../modules/dataCache.js";
 import {InteractivePTable} from "../../modules/interactivePTable.js";
+import {categoryColors} from "../../modules/elementPalette.js";
 import {CalculatorCard} from "../components/CalculatorCard";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 import styles from "./periodic-table.module.css";
-const CATEGORY_CLASS_MAP: Record<string, string> = {
-    "alkali metal": styles.catAlkaliMetal,
-    "alkaline earth metal": styles.catAlkalineEarth,
-    "transition metal": styles.catTransitionMetal,
-    "post-transition metal": styles.catPostTransition,
-    "metalloid": styles.catMetalloid,
-    "non-metal": styles.catNonmetal,
-    "halogen": styles.catHalogen,
-    "noble gas": styles.catNobleGas,
-    "lanthanide": styles.catLanthanide,
-    "actinide": styles.catActinide
-};
-const CATEGORIES: {label: string; type: string; cls: string}[] = [
-    {label: "Alkali metal", type: "alkali metal", cls: styles.catAlkaliMetal},
-    {label: "Alkaline earth", type: "alkaline earth metal", cls: styles.catAlkalineEarth},
-    {label: "Transition metal", type: "transition metal", cls: styles.catTransitionMetal},
-    {label: "Post-transition", type: "post-transition metal", cls: styles.catPostTransition},
-    {label: "Metalloid", type: "metalloid", cls: styles.catMetalloid},
-    {label: "Nonmetal", type: "non-metal", cls: styles.catNonmetal},
-    {label: "Halogen", type: "halogen", cls: styles.catHalogen},
-    {label: "Noble gas", type: "noble gas", cls: styles.catNobleGas},
-    {label: "Lanthanide", type: "lanthanide", cls: styles.catLanthanide},
-    {label: "Actinide", type: "actinide", cls: styles.catActinide}
+const CATEGORIES: {label: string; type: string}[] = [
+    {label: "Alkali metal", type: "alkali metal"},
+    {label: "Alkaline earth", type: "alkaline earth metal"},
+    {label: "Transition metal", type: "transition metal"},
+    {label: "Post-transition", type: "post-transition metal"},
+    {label: "Metalloid", type: "metalloid"},
+    {label: "Nonmetal", type: "non-metal"},
+    {label: "Halogen", type: "halogen"},
+    {label: "Noble gas", type: "noble gas"},
+    {label: "Lanthanide", type: "lanthanide"},
+    {label: "Actinide", type: "actinide"}
 ];
-function getCategoryClass(type: string): string {
-    let cls = CATEGORY_CLASS_MAP[type];
-    if (cls === undefined) {
-        return styles.catUnknown;
-    }
-    return cls;
-}
 function computeCellPosition(element: ChemicalElement): {row: number; col: number} {
     let z = element.atomicNumber;
     if (z >= 57 && z <= 71) {
@@ -137,7 +119,7 @@ function PeriodicTable(): JSX.Element {
         return "";
     }
     function getCellClass(element: ChemicalElement): string {
-        let cls = styles.cell + " " + getCategoryClass(element.type);
+        let cls = styles.cell;
         let active = activeCategory();
         if (active !== null && element.type !== active) {
             cls = cls + " " + styles.cellDimmed;
@@ -146,7 +128,13 @@ function PeriodicTable(): JSX.Element {
     }
     function getCellStyle(element: ChemicalElement): string {
         let pos = computeCellPosition(element);
-        return "grid-column: " + pos.col + "; grid-row: " + pos.row + ";";
+        let colors = categoryColors(element.type);
+        return "grid-column: " + pos.col + "; grid-row: " + pos.row +
+            "; background-color: " + colors.background + "; color: " + colors.foreground + ";";
+    }
+    /** Inline colour pair for a swatch, so the palette stays the single source. */
+    function swatchStyle(type: string): string {
+        return "background-color: " + categoryColors(type).background + ";";
     }
     function getLegendClass(type: string): string {
         if (activeCategory() === type) {
@@ -178,7 +166,7 @@ function PeriodicTable(): JSX.Element {
         return (
             <div class={styles.detailPanel} role="dialog" aria-label={el.name + " details"}>
                 <div class={styles.detailHeader}>
-                    <div class={styles.detailSymbol + " " + getCategoryClass(el.type)}>{el.symbol}</div>
+                    <div class={styles.detailSymbol} style={swatchStyle(el.type) + " color: " + categoryColors(el.type).foreground + ";"}>{el.symbol}</div>
                     <div class={styles.detailTitle}>
                         <h3>{el.name}</h3>
                         <p>{"#" + String(el.atomicNumber) + " · " + formatCategoryLabel(el.type)}</p>
@@ -232,7 +220,7 @@ function PeriodicTable(): JSX.Element {
                                     onClick={function () { handleToggleCategory(cat.type); }}
                                     aria-pressed={activeCategory() === cat.type}
                                 >
-                                    <span class={styles.legendSwatch + " " + cat.cls} />
+                                    <span class={styles.legendSwatch} style={swatchStyle(cat.type)} />
                                     <span>{cat.label}</span>
                                 </button>
                             )}
