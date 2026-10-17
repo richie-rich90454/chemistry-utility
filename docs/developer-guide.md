@@ -1,403 +1,153 @@
-# Chemistry Utility API — Developer Guide
+# Developer Guide
 
-This guide documents the Chemistry Utility REST API: endpoints, rate limiting,
-errors, pagination, calculator inputs, compound search, and plugin storage.
-For the full machine-readable contract, see the
-[OpenAPI 3.1 specification](../api/openapi.yaml) or browse it interactively at
-`/api/docs` (Swagger UI) once the server is running.
+This repository is **one npm project**: a static chemistry website built with
+TypeScript, SolidJS, and Vite. Everything in `src/` compiles to plain files
+with no server, no database, and no API.
 
-The API is **public and anonymous**: there is no authentication, no user
-accounts, and no server-side history. Two deployment targets exist:
+`core/` is an optional **Go wrapper**: a Wails desktop shell that embeds the
+built website and re-implements a subset of the calculators in Go. It is not
+required to build, test, or run the website.
 
-- **Web server** (`cmd/server`): runs without any database. Calculator
-  endpoints work; database-backed features (compound search, plugins) respond
-  `501 Not Implemented`.
-- **Desktop app** (Wails): starts the same API in-process on a random loopback
-  port (exposed to the frontend via the `App.GetAPIURL` binding) backed by a
-  local SQLite (or PostgreSQL) database. Compound search and plugin storage
-  work there.
+## Requirements
 
-## Table of Contents
-- [Base URL](#base-url)
-- [Authentication](#authentication)
-- [Rate Limiting](#rate-limiting)
-- [Errors (RFC 7807)](#errors-rfc-7807)
-- [Pagination](#pagination)
-- [Calculators](#calculators)
-- [Compounds](#compounds)
-- [Plugins](#plugins)
-- [Example API Calls](#example-api-calls)
-- [Interactive Documentation](#interactive-documentation)
+- **Node.js** 20.19+ (or 22.12+) with **npm**
+- **Go** 1.25+ — only for the desktop wrapper
+- **Wails v2 CLI** — only for the desktop wrapper
 
----
+## Commands
 
-## Base URL
+All commands run from the repository root.
 
-All versioned API endpoints live under `/api/v1`. Documentation endpoints live
-under `/api/docs` (no version prefix).
-
-| Environment | Base URL |
+| Command | What it does |
 | --- | --- |
-| Local development | `http://localhost:6005/api/v1` |
-| Desktop app | `http://127.0.0.1:<random port>/api/v1` (per-run port via Wails binding) |
-| Production | Your deployment of `cmd/server`; default port is `6005` |
+| `npm run dev` | Vite dev server at http://localhost:5173 |
+| `npm run build:web` | Production website build into `dist/` (prerenders all routes) |
+| `npm run build:app` | Desktop-web build into `dist/` (no SEO/PWA assets) |
+| `npm run preview` | Serve the built `dist/` locally |
+| `npm test` | Vitest unit tests |
+| `npm run test:coverage` | Unit tests with the coverage thresholds |
+| `npm run test:e2e` | Playwright end-to-end tests against the built site |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run lint` | ESLint over `src/` |
+| `npm run check-bundle-size` | Gzipped bundle budgets |
+| `npm run cli` | Command-line interface (`src/cli/index.ts`) |
+| `npm run conformance:generate` | Regenerate `conformance/*.json` |
+| `npm run conformance:verify` | Regenerate and fail if the vectors moved |
+| `npm run desktop:build` | Build the Wails desktop binary (Go wrapper) |
+| `npm run desktop:dev` | Run the desktop app with hot reload |
+| `npm run core:test` | Go tests for the wrapper |
+| `npm run core:lint` | `golangci-lint` for the wrapper |
 
-The default local server port is `6005` (overridable via the `PORT` env var).
+`npm run check` runs typecheck, lint, and tests together.
 
----
+## Project layout
 
-## Authentication
-
-None. The API is anonymous by design — calculations never touch a database and
-no user data is stored server-side.
-
----
-
-## Rate Limiting
-
-Rate limiting is applied per client IP with a fixed one-minute window on all
-`/api/v1` routes.
-
-| Scope | Default limit |
-| --- | --- |
-| All `/api/v1` routes | 100 requests/minute |
-
-The limit is configurable:
-
-- Web server: `RATE_LIMIT_PER_MINUTE` env var (defaults to `100`).
-- Programmatic: `Config.RateLimitPerMinute`.
-
-When the limit is exceeded, the server responds with `429 Too Many Requests`
-and a plain JSON body (not Problem Details):
-
-```json
-{ "error": "rate limit exceeded" }
+```
+src/
+  modules/calculators/   pure calculator math (no DOM, no storage, no network)
+  modules/dom/           DOM, charts, platform adapters (web vs native)
+  modules/               shared non-calculator utilities
+  solid/                 routes, components, stores, entry points
+  ssr/                   prerender entry used by scripts/prerender.mjs
+  cli/                   command-line interface
+  workers/               web workers for heavy calculation
+public/                  static assets (fonts, icons, ptable.json, sw.js)
+scripts/                 build, prerender, conformance, and quality scripts
+conformance/             shared behavior vectors (JSON)
+core/                    optional Go wrapper (Wails desktop shell)
 ```
 
-Client IP resolution ignores spoofable `X-Forwarded-For` headers unless the
-proxy's CIDR is listed in the `TRUSTED_PROXIES` env var (web server only).
+## The engine seam
 
----
+`src/modules/engine.ts` is the only file that knows which engine runs.
 
-## Errors (RFC 7807)
+- The website uses the TypeScript calculators in `src/modules/calculators/`.
+- The desktop app calls the Go registry in `core/internal/calculators/` over
+  Wails bindings.
+- If the Go registry does not implement a calculator id, the desktop engine
+  falls back to the TypeScript calculator bundled in the app, so the desktop
+  always exposes the full calculator set.
 
-Error responses from API handlers use **RFC 7807 Problem Details** with the
-`application/problem+json` media type. The shape is:
+Every calculator is a plain function: an input record in, a structured result
+out. The contract is:
 
-```json
-{
-  "type": "https://chemistry-utility.dev/errors/400",
-  "title": "Bad Request",
-  "status": 400,
-  "detail": "missing search query parameter 'q'",
-  "instance": "/api/v1/compounds"
+```ts
+interface CalculatorResult {
+  value: string;                              // display value
+  explanation?: string;                       // worked steps
+  chartData?: unknown;                        // optional series
+  metadata?: Record<string, unknown>;         // machine-readable detail
 }
 ```
 
-| Field | Meaning |
-| --- | --- |
-| `type` | URI identifying the problem type (per status code). |
-| `title` | Short human-readable summary. |
-| `status` | HTTP status code. |
-| `detail` | Specific explanation of this occurrence. |
-| `instance` | Request path that produced the error. |
+The frontend formats numbers once with the shared locale formatter, so the Go
+port never has to reimplement `Intl.NumberFormat`.
 
-Common status codes returned by the API:
+## Adding a calculator
 
-| Status | Title | When |
-| --- | --- | --- |
-| 400 | Bad Request | Validation failure, malformed JSON, calculation error, invalid UUID. |
-| 404 | Not Found | Unknown calculator type or resource id. |
-| 429 | Too Many Requests | Rate limit exceeded (plain JSON shape, see above). |
-| 500 | Internal Server Error | Unexpected server failure (generic detail; full error logged server-side only). |
-| 501 | Not Implemented | Database-backed feature requested from the anonymous web build. |
+1. Add the pure function to `src/modules/calculators/`. Keep it DOM-free,
+   storage-free, and network-free — a lint rule enforces this.
+2. Register it in `WEB_CALCULATORS` in `src/modules/engine.ts`.
+3. Add a route under `src/solid/routes/` and a loader in
+   `src/solid/routeLoaders.ts`.
+4. Add vectors in `scripts/generate-conformance.ts`, then run
+   `npm run conformance:generate`.
+5. (Optional) Port it to Go in `core/internal/calculators/` and register it in
+   the `ported` map in `conformance_test.go`. If you skip this step the
+   desktop app still works: the engine falls back to the TypeScript
+   implementation.
 
-### Validation (400) cases
+## Conformance vectors
 
-All cases below return RFC 7807 Problem Details (`application/problem+json`,
-`type: https://chemistry-utility.dev/errors/400`) with a `detail` string.
-Behavioral notes (body cap, clamping) apply to every request.
+`conformance/*.json` records the inputs and expected outputs of every
+calculator. Both `go test` and `vitest` consume these files, which is what
+keeps the TypeScript and Go engines in agreement.
 
-- **Request body.** `POST /calculators/{type}` accepts at most 1 MiB
-  (`http.MaxBytesReader`); larger or malformed JSON returns 400
-  `invalid JSON body: ...`. A JSON `null` body is treated as `{}` and
-  then validated per calculator. Unknown `{type}` is 404, not 400.
-- **Missing vs. invalid inputs.** Every calculator reports
-  `calculation error: missing required input: <key>` when a required key
-  is absent (e.g. `formula` for `molar-mass`, `equation` for
-  `equation-balance`/`stoichiometry`, `solveFor` for `dilution`/`ideal-gas`,
-  `concentrations`/`orders` for `rate-law`, `deltaHValues` for `hess-law`,
-  `SProducts`/`SReactants` for `entropy`). Wrong types and out-of-range
-  enums report `calculation error: invalid <key>: <value>` — e.g.
-  `invalid solveFor`, `invalid mode`, `invalid unit`/`invalid units`.
-- **Formula and equation syntax.** `molar-mass` rejects unknown elements
-  (`Element not found: <symbol>`), illegal characters
-  (`Invalid character: <ch>`), and unbalanced brackets (`Unmatched ...` /
-  `Empty formula`). `equation-balance` rejects inputs without exactly one
-  `->`/`=` separator (`invalid equation format: expected exactly one
-  '->' or '='`), illegal formula characters, and unsolvable systems
-  (`Could not balance` / `Could not balance ionic equation`); redox mode
-  additionally requires the `||` half-reaction separator.
-- **Compounds.** `GET /compounds` without `q` returns 400
-  `missing search query parameter 'q'`. `limit`/`offset` never 400:
-  out-of-range `limit` is clamped to 20, negative `offset` to 0.
-  `GET /compounds/{id}` with a non-UUID returns 400 `invalid compound id`;
-  a well-formed but unknown UUID returns 404 `compound not found`.
-- **Plugins.** `POST /plugins` returns 400 with the binding error when
-  `name`, `version`, or `author` is missing. Enable/disable/delete with a
-  non-UUID returns 400 `invalid plugin id`; store errors (including unknown
-  ids) surface as 500 via `WriteError`, never 400.
-
----
-
-## Pagination
-
-Only compound search paginates, using offset-based (`limit` + `offset`)
-parameters:
-
-| Parameter | Default | Range |
-| --- | --- | --- |
-| `limit` | 20 | 1–100 (clamped to 20 if out of range) |
-| `offset` | 0 | ≥ 0 |
-
-Example:
 ```
-GET /api/v1/compounds?q=water&limit=10&offset=20
+npm run conformance:generate
+git diff conformance/     # non-empty means behavior changed
 ```
 
----
+A non-empty diff is fine when intended, but the Go port must be updated in the
+same change.
 
-## Calculators
+## Calculator input keys
 
-Calculators are public, rate-limited endpoints that accept a JSON object of
-inputs and return a `CalculationResult`.
+There is no separate wire format: a calculator receives a `Record<string,string>`
+whose keys are its own. Each calculator reads the keys it needs and ignores the
+rest, so the authoritative list is the calculator itself.
 
-### List available calculators
+- TypeScript: `src/modules/calculators/*.ts` (the `inputs["…"]` reads).
+- A worked example per calculator: `conformance/<id>.json` (`cases[].inputs`).
 
-`GET /calculators` returns the sorted list of registered calculator type IDs:
+The Go ports reuse the exact same keys; the conformance vectors are what keep
+the two in step. When an input is missing or invalid, the calculator throws
+(TypeScript) or returns an error (Go). The engine maps both to the same result
+shape: `{ value: "", explanation: "Error: <message>" }`.
 
-```bash
-curl http://localhost:6005/api/v1/calculators
+## The Go wrapper
+
+`core/` is a single Go module (`chemistry-utility/core`):
+
+```
+core/
+  main.go               Wails entry point; embeds core/dist
+  app.go                app struct and the PTableService binding
+  services.go           CalculatorService, DataService, FileService bindings
+  internal/calculators/ the ported calculators and the registry
+  internal/ptable/      periodic table service
+  dist/                 the staged website build (git-ignored)
 ```
 
-```json
-{
-  "calculators": [
-    "arrhenius",
-    "bond-type",
-    "buffer-solution",
-    "cell-potential",
-    "colligative-properties",
-    "combined-gas",
-    "debroglie-wavelength",
-    "dilution",
-    "electron-configuration",
-    "electrolysis",
-    "entropy",
-    "equation-balance",
-    "gibbs-free-energy",
-    "half-life",
-    "heat-capacity",
-    "heisenberg-uncertainty",
-    "ideal-gas",
-    "integrated-rate-law",
-    "ksp",
-    "mass-percent",
-    "molar-mass",
-    "nernst",
-    "photoelectric-effect",
-    "pka-pkb",
-    "quantum-numbers",
-    "rate-law",
-    "solution-mixing",
-    "stoichiometry",
-    "titration-curve",
-    "van-der-waals"
-  ]
-}
-```
+`npm run desktop:build` runs `wails build`, which runs the website build,
+stages it into `core/dist` via `scripts/stage-dist.mjs`, and embeds it in the
+binary. The `wails.json` `frontend:dir` points at the repository root, so
+Wails uses the root `package.json`.
 
-### Run a calculator
+The wrapper never starts an HTTP server. The frontend calls bound Go methods
+directly through the Wails runtime (`window.go`).
 
-`POST /calculators/{type}` accepts a JSON object whose shape depends on the
-calculator. The response is a `CalculationResult`:
+## Architecture notes
 
-```json
-{
-  "Value": 18.015,
-  "Unit": "g/mol",
-  "Breakdown": [
-    { "Label": "H", "Value": 2.016, "Unit": "g/mol" },
-    { "Label": "O", "Value": 15.999, "Unit": "g/mol" }
-  ],
-  "Steps": [
-    "H: 1.0080 g/mol × 2.0 = 2.0160 g/mol",
-    "O: 15.9990 g/mol × 1.0 = 15.9990 g/mol"
-  ],
-  "Metadata": { "formula": "H2O" }
-}
-```
-
-### Calculator types and input schemas
-
-The table below lists every registered calculator type and the input keys it
-accepts. Required keys are marked; all others are optional with documented
-defaults. Numeric inputs accept JSON numbers (integers or floats).
-
-| Type | Input keys | Notes |
-| --- | --- | --- |
-| `molar-mass` | `formula` (string, **required**) | e.g. `"H2O"`, `"Ca(OH)2"`. |
-| `equation-balance` | `equation` (string, **required**) | e.g. `"H2 + O2 -> H2O"`. Accepts ion charges like `"Fe2+ + Fe3+"`. |
-| `stoichiometry` | `equation` (**required**), `mode` (`"product-from-reactant"` default, `"reactant-from-product"`, `"limiting-reactant"`), plus mode-specific keys. | |
-| `dilution` | `C1`, `V1`, `C2`, `V2`, `solveFor` (one of `C1`/`V1`/`C2`/`V2`, **required**). | |
-| `mass-percent` | `solute`, `solution`, `unit` (`"percent"` default, `"ppm"`, `"ppb"`). | |
-| `solution-mixing` | `C1`, `V1`, `C2`, `V2`. | Mixes two solutions. |
-| `ideal-gas` | `P`, `V`, `n`, `T`, `solveFor` (one of `P`/`V`/`n`/`T`, **required**), `units` (`"atm-L"` default or `"SI"`). | PV = nRT. |
-| `combined-gas` | `P1`, `V1`, `T1`, `P2`, `V2`, `T2`, `solveFor` (**required**). | |
-| `van-der-waals` | `V`, `n`, `T`, `a`, `b`. | |
-| `half-life` | `N0` (initial quantity), `t` (time), `halfLife` (t½), `Nt` (remaining quantity), `solveFor` (`"remaining"` default, `"time"`, or `"halfLife"`). | Decay decreases quantity: `Nt < N0`. |
-| `cell-potential` | `E1`, `E2`. | Higher potential is the cathode. |
-| `nernst` | `E_standard`, `T`, `n`, `Q`. | |
-| `electrolysis` | `m` (mass), `I` (current), `t` (time), `z` (charge number), `M` (molar mass), `solveFor` (default `"mass"`). | |
-| `bond-type` | `element1` (symbol), `element2` (symbol). | |
-| `gibbs-free-energy` | `deltaH` (kJ/mol), `deltaS` (J/(mol·K)), `T` (K). | ΔG = ΔH − TΔS. |
-| `hess-law` | `deltaHValues` (array of float64). | |
-| `entropy` | `SProducts` (array of float64), `SReactants` (array of float64). | ΔS = ΣS(products) − ΣS(reactants). |
-| `heat-capacity` | `m` (mass), `c` (specific heat), `deltaT` (temperature change), `q`, `solveFor` (default `"q"`). | q = mcΔT. |
-| `arrhenius` | `A` (pre-exponential factor), `Ea` (activation energy in J/mol), `T`, `k`, `solveFor` (default `"k"`; also `"Ea"`, `"T"`, `"A"`). | |
-| `rate-law` | `k`, `concentrations` (array of float64), `orders` (array of float64). | |
-| `integrated-rate-law` | `order` (integer 0, 1, or 2), `k`, `initialConcentration`, `time` or `concentration`, `solveFor` (`"concentration"` default, or `"time"`). | |
-| `buffer-solution` | `pKa`, `HA` (acid concentration), `A` (conjugate base concentration). | Henderson–Hasselbalch. |
-| `pka-pkb` | `pKa` or `pKb`, `pKw` (optional, defaults to 14), `solveFor` (default `"pKb"`). | |
-| `ksp` | `mode` (`"ksp-to-solubility"` default, `"solubility-to-ksp"`), `Ksp` or `molarSolubility`, `cationCount` (default 1), `anionCount` (default 1). | |
-| `colligative-properties` | `mode` (`"boiling"` default, `"freezing"`, `"osmotic"`), plus mode-specific keys: `Kb`/`m`, `Kf`/`m`, or `M`/`T`/`i`. | |
-| `titration-curve` | `analyteConcentration`, `analyteVolume`, `titrantConcentration`, `mode`, `numPoints` (default 50), `pKa` (weak-acid modes). | |
-| `quantum-numbers` | `n`, `l`, `ml`, `ms`. | |
-| `electron-configuration` | `atomicNumber`. | Full Aufbau configuration with known exceptions (Cr, Cu, Nb, Mo, Ru, Rh, Pd, Ag, Pt, Au). |
-| `debroglie-wavelength` | `m` (mass in kg), `v` (velocity in m/s). | |
-| `photoelectric-effect` | `frequency` (Hz), `workFunction` (in J or eV), `solveFor` (default `"KE"`), `unit` (default `"eV"`). | |
-| `heisenberg-uncertainty` | `deltaX` (or `deltaP`), `solveFor` (`"deltaX"`, `"deltaP"`, `"minDeltaX"`, `"minDeltaP"`). | |
-
-If a required input is missing or has the wrong type, the API returns a 400
-Problem Details response with a message like `"missing required input: formula"`.
-
----
-
-## Compounds
-
-Compound search queries the local compound table (populated by the desktop
-app's PubChem-backed cache). On the anonymous web build these endpoints
-respond `501 Not Implemented`.
-
-### Search compounds
-
-`GET /compounds?q=<term>` searches by name, formula, CAS number, and SMILES.
-
-| Parameter | Meaning |
-| --- | --- |
-| `q` (**required**) | Free-text search term. |
-| `type` | Optional filter: `name`, `formula`, `cas`, or `smiles`. Any other value searches all fields. |
-| `limit` / `offset` | See [Pagination](#pagination). |
-
-Response:
-
-```json
-{
-  "compounds": [
-    {
-      "ID": "...",
-      "Name": "Water",
-      "Formula": "H2O",
-      "CASNumber": "7732-18-5",
-      "SMILES": "O",
-      "InChI": "...",
-      "MolarMass": 18.015,
-      "Properties": "{}",
-      "Source": "pubchem",
-      "CreatedAt": "...",
-      "UpdatedAt": "..."
-    }
-  ],
-  "query": "water"
-}
-```
-
-### Get a compound by ID
-
-`GET /compounds/{id}` returns the full compound object (404 if unknown;
-400 for an invalid UUID).
-
----
-
-## Plugins
-
-Plugin registration is persisted in the desktop app's local database. On the
-anonymous web build these endpoints respond `501 Not Implemented`.
-
-| Method | Path | Description |
-| --- | --- | --- |
-| `GET` | `/plugins` | List all plugins. |
-| `POST` | `/plugins` | Create a plugin. Body: `{"name","version","author","manifest"}` (first three required); created disabled. Returns 201. |
-| `PATCH` | `/plugins/{id}/enable` | Enable the plugin. |
-| `PATCH` | `/plugins/{id}/disable` | Disable the plugin. |
-| `DELETE` | `/plugins/{id}` | Delete the plugin. Returns 204. |
-
-Note: these HTTP endpoints manage plugin *records* in the database. The
-frontend plugin runtime (`frontend/src/modules/pluginManager.ts`) manages
-locally installed plugins in browser storage and does not use this API.
-
----
-
-## Example API Calls
-
-### Run the molar-mass calculator (public)
-
-```bash
-curl -X POST http://localhost:6005/api/v1/calculators/molar-mass \
-  -H "Content-Type: application/json" \
-  -d '{"formula":"H2O"}'
-```
-
-### Run the ideal-gas calculator (public)
-
-```bash
-curl -X POST http://localhost:6005/api/v1/calculators/ideal-gas \
-  -H "Content-Type: application/json" \
-  -d '{"solveFor":"P","V":22.4,"n":1,"T":273.15,"units":"atm-L"}'
-```
-
-### Balance an equation with ionic species (public)
-
-```bash
-curl -X POST http://localhost:6005/api/v1/calculators/equation-balance \
-  -H "Content-Type: application/json" \
-  -d '{"equation":"Fe2+ + MnO4- + H+ -> Fe3+ + Mn2+ + H2O"}'
-```
-
-### Search compounds (desktop build)
-
-```bash
-curl "http://localhost:6005/api/v1/compounds?q=water&type=name&limit=10&offset=0"
-```
-
-### Register a plugin record (desktop build)
-
-```bash
-curl -X POST http://localhost:6005/api/v1/plugins \
-  -H "Content-Type: application/json" \
-  -d '{"name":"my-plugin","version":"1.0.0","author":"Alice","manifest":"{}"}'
-```
-
----
-
-## Interactive Documentation
-
-Once the server is running, browse to:
-
-- **Swagger UI**: `http://localhost:6005/api/docs` — interactive UI for
-  exploring and trying endpoints, powered by the served spec.
-- **OpenAPI YAML**: `http://localhost:6005/api/docs/openapi.yaml` — the raw
-  OpenAPI 3.1 specification, suitable for code generation and tooling.
-
-The spec is also available as a source file at
-[`api/openapi.yaml`](../api/openapi.yaml).
+See [`docs/architecture.md`](architecture.md) for the engine seam, the build
+targets, and the conformance contract.
