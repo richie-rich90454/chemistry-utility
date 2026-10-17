@@ -75,6 +75,17 @@ describe("MolarMass", function (): void {
         expect(errorText).toBeTruthy();
         expect(result.container.textContent).toMatch(/HTTP error! status: 500/);
     });
+    it("ignores formula input after a load error until the elements reload", async function (): Promise<void> {
+        fetchSpy.mockResolvedValue({ok: false, status: 500} as Response);
+        let result = render(function () { return <MolarMass />; });
+        await result.findByText(/Error loading elements/);
+        let input = result.getByLabelText("Chemical formula") as HTMLInputElement;
+        input.value = "H2O";
+        fireEvent.input(input);
+        vi.advanceTimersByTime(350);
+        expect(result.queryByText(/Molar Mass:/)).toBeNull();
+        expect(result.container.textContent).toMatch(/Error loading elements/);
+    });
     it("shows a string rejection reason when fetch rejects with a non-Error", async function (): Promise<void> {
         fetchSpy.mockRejectedValue("cable-cut");
         let result = render(function () { return <MolarMass />; });

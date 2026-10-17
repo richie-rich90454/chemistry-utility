@@ -22,6 +22,7 @@ function RouteTransition(props: {children?: JSX.Element}): JSX.Element {
             inTween.kill();
         }
         let node = box;
+        /* v8 ignore next 3 -- box is assigned during render, so reveal() always runs after it is set */
         if (node === undefined) {
             return;
         }
@@ -64,7 +65,7 @@ function RouteTransition(props: {children?: JSX.Element}): JSX.Element {
         });
     });
     return (
-        <div class="route-transition" ref={box}>
+        <div class="route-transition" ref={function (el: HTMLDivElement): void { box = el; }}>
             {props.children}
         </div>
     );

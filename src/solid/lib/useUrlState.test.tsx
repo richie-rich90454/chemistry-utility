@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, cleanup, fireEvent, waitFor } from "@solidjs/testing-library";
+import { createRoot } from "solid-js";
 import type { JSX } from "solid-js";
 import { Router, Route } from "@solidjs/router";
 import { useUrlState } from "./useUrlState";
@@ -84,6 +85,33 @@ describe("useUrlState", function (): void {
         expect(m2.value).toBe("3");
         expect(solve.value).toBe("V2");
     });
+    it("is a no-op when there is no document", function (): void {
+        let realDocument = globalThis.document;
+        Object.defineProperty(globalThis, "document", { "configurable": true, "value": undefined });
+        try {
+            createRoot(function (): void {
+                useUrlState();
+            });
+            expect(replaceStateSpy).not.toHaveBeenCalled();
+        } finally {
+            Object.defineProperty(globalThis, "document", { "configurable": true, "writable": true, "value": realDocument });
+        }
+    });
+
+    it("ignores the root route in both the restore effect and the input handler", async function (): Promise<void> {
+        window.history.replaceState({}, "", "/");
+        renderShell();
+        await new Promise<void>(function (resolve: (value: void) => void): void {
+            setTimeout(resolve, 20);
+        });
+        replaceStateSpy.mockClear();
+        document.dispatchEvent(new Event("input"));
+        await new Promise<void>(function (resolve: (value: void) => void): void {
+            setTimeout(resolve, 20);
+        });
+        expect(replaceStateSpy).not.toHaveBeenCalled();
+    });
+
     it("stops listening after the shell unmounts", async function (): Promise<void> {
         window.history.replaceState({}, "", "/dilution");
         let result = renderShell();

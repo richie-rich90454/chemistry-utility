@@ -1,10 +1,9 @@
 /**
  * Wails binding typings for the desktop build.
  *
- * The generated bindings in frontend/wailsjs are produced by `wails build`
- * and are not committed. Declaring the shapes here lets the web build
- * compile and typecheck against the same surface the desktop build uses,
- * so there is one code path with no build-time branch.
+ * The Wails runtime injects `window.go` when the app is packaged, so the
+ * web build compiles and typechecks against the same surface the desktop
+ * build uses, with one code path and no build-time branch.
  */
 export interface CalcResult {
     value: string;

@@ -137,6 +137,40 @@ describe("fileAccess", function (): void {
         }
     });
 
+    it("keeps waiting when focus arrives before a file is chosen", async function (): Promise<void> {
+        let access = getFileAccess();
+        let realClick = HTMLInputElement.prototype.click;
+        HTMLInputElement.prototype.click = function (): void { /* no dialog in jsdom */ };
+        try {
+            let pending = access.openFile(".csv");
+            await Promise.resolve();
+            let input = document.querySelector("input[type=file]") as HTMLInputElement;
+            setFiles(input, [new File(["a"], "a.csv")]);
+            window.dispatchEvent(new Event("focus"));
+            input.dispatchEvent(new Event("change"));
+            expect((await pending as File).name).toBe("a.csv");
+        } finally {
+            HTMLInputElement.prototype.click = realClick;
+        }
+    });
+
+    it("resolves null when the change event carries no file and ignores a second settle", async function (): Promise<void> {
+        let access = getFileAccess();
+        let realClick = HTMLInputElement.prototype.click;
+        HTMLInputElement.prototype.click = function (): void { /* no dialog in jsdom */ };
+        try {
+            let pending = access.openFile(".csv");
+            await Promise.resolve();
+            let input = document.querySelector("input[type=file]") as HTMLInputElement;
+            setFiles(input, []);
+            input.dispatchEvent(new Event("change"));
+            input.dispatchEvent(new Event("change"));
+            expect(await pending).toBeNull();
+        } finally {
+            HTMLInputElement.prototype.click = realClick;
+        }
+    });
+
     it("downloads a blob on the web build and echoes the file name", async function (): Promise<void> {
         let clicked: HTMLAnchorElement[] = [];
         let realClick = HTMLAnchorElement.prototype.click;

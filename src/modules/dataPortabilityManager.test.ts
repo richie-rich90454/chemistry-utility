@@ -303,6 +303,16 @@ describe("ChemutilArchiveValidator", () => {
         expect(ChemutilArchiveValidator.isValid({ history: [] })).toBe(false);
     });
 
+    it("returns false when exportedAt is missing", () => {
+        let archive = { version: 1, history: [], theme: "light", autoDarkMode: false, inputs: {}, logs: [], plugins: {} };
+        expect(ChemutilArchiveValidator.isValid(archive)).toBe(false);
+    });
+
+    it("returns false when exportedAt is not a string", () => {
+        let archive = { version: 1, exportedAt: 42, history: [], theme: "light", autoDarkMode: false, inputs: {}, logs: [], plugins: {} };
+        expect(ChemutilArchiveValidator.isValid(archive)).toBe(false);
+    });
+
     it("returns false when version is not a number", () => {
         expect(ChemutilArchiveValidator.isValid({ version: "1", history: [] })).toBe(false);
     });

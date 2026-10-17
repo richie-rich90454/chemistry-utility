@@ -7,6 +7,14 @@ const mocks = vi.hoisted(() => ({
     registrations: [] as Array<{ unregister: () => void; register: () => unknown }>,
 }));
 
+const routeMocks = vi.hoisted(() => ({
+    preloadRoute: vi.fn(() => Promise.resolve(undefined)),
+}));
+
+vi.mock("./routeLoaders", () => ({
+    preloadRoute: routeMocks.preloadRoute,
+}));
+
 vi.mock("solid-js/web", async (importOriginal) => {
     const actual = await importOriginal<typeof import("solid-js/web")>();
     return {
@@ -81,11 +89,15 @@ beforeEach(() => {
     const w = window as unknown as Record<string, unknown>;
     delete w["go"];
     vi.unstubAllEnvs();
+    routeMocks.preloadRoute.mockReset();
+    routeMocks.preloadRoute.mockResolvedValue(undefined);
+    window.history.replaceState({}, "", "/");
 });
 
 afterEach(() => {
     vi.unstubAllEnvs();
     document.body.innerHTML = "";
+    window.history.replaceState({}, "", "/");
 });
 
 describe("web entry", () => {
@@ -164,5 +176,45 @@ describe("desktop entry", () => {
         setCaches({ keys: () => Promise.reject(new Error("nope")), delete: vi.fn() });
         await load("./entry.app");
         expect(mocks.renderCalls).toBe(0);
+    });
+});
+
+describe("entry branch coverage", () => {
+    it("hydrates even when the current-route preload rejects", async () => {
+        routeMocks.preloadRoute.mockRejectedValue(new Error("no chunk"));
+        addRoot();
+        await load("./entry.web");
+        expect(mocks.hydrateCalls).toBe(1);
+    });
+
+    it("skips registration when the browser has no service worker", async () => {
+        vi.stubEnv("PROD", true);
+        setServiceWorker(null);
+        addRoot();
+        await load("./entry.web");
+        expect(mocks.hydrateCalls).toBe(1);
+    });
+
+    it("strips a trailing slash from the entry path before preloading", async () => {
+        window.history.replaceState({}, "", "/dilution/");
+        addRoot();
+        routeMocks.preloadRoute.mockClear();
+        await load("./entry.app");
+        expect(routeMocks.preloadRoute).toHaveBeenCalledWith("/dilution");
+        expect(mocks.renderCalls).toBe(1);
+    });
+
+    it("renders even when the entry-route preload rejects", async () => {
+        routeMocks.preloadRoute.mockRejectedValue(new Error("no chunk"));
+        addRoot();
+        await load("./entry.app");
+        expect(mocks.renderCalls).toBe(1);
+    });
+
+    it("tolerates a wails runtime without service-worker or cache APIs", async () => {
+        mocks.isWails = true;
+        addRoot();
+        await load("./entry.app");
+        expect(mocks.renderCalls).toBe(1);
     });
 });

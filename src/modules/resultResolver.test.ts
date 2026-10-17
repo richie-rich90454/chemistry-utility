@@ -85,4 +85,43 @@ describe("resolveResult", () => {
         expect(error).toBe("");
         expect(result).toBe("42");
     });
+
+    it("applies a resolved promise result asynchronously", async function (): Promise<void> {
+        let result = "unset";
+        let error = "unset";
+        resolveResult(
+            Promise.resolve({ value: "42", explanation: "forty-two" }),
+            function (v: string): void { result = v; },
+            function (v: string): void { error = v; },
+        );
+        await new Promise(function (resolve): void { setTimeout(resolve, 0); });
+        expect(error).toBe("");
+        expect(result).toBe("forty-two");
+    });
+
+    it("routes a rejected promise Error to setError and clears the result", async function (): Promise<void> {
+        let result = "unset";
+        let error = "unset";
+        resolveResult(
+            Promise.reject(new Error("boom")),
+            function (v: string): void { result = v; },
+            function (v: string): void { error = v; },
+        );
+        await new Promise(function (resolve): void { setTimeout(resolve, 0); });
+        expect(error).toBe("Error: boom");
+        expect(result).toBe("");
+    });
+
+    it("stringifies a non-Error promise rejection", async function (): Promise<void> {
+        let result = "unset";
+        let error = "unset";
+        resolveResult(
+            Promise.reject("plain failure"),
+            function (v: string): void { result = v; },
+            function (v: string): void { error = v; },
+        );
+        await new Promise(function (resolve): void { setTimeout(resolve, 0); });
+        expect(error).toBe("Error: plain failure");
+        expect(result).toBe("");
+    });
 });

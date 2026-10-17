@@ -118,10 +118,12 @@ function gcd(a: number, b: number): number {
         a = b;
         b = t;
     }
+/* v8 ignore next -- gcd is only called with the positive integer counts simplifyRatio yields, so a is never 0 */
     return a === 0 ? 1 : a;
 }
 
 function lcm(a: number, b: number): number {
+    /* v8 ignore next 3 -- lcm is only called with positive counts, so neither operand is ever 0 */
     if (a === 0 || b === 0) {
         return 1;
     }
@@ -373,6 +375,7 @@ export function empiricalFormula(inputs: Record<string, string>): CalculatorResu
     let ratioText = "";
     let ratioLabel = "";
     for (let i = 0; i < symbols.length; i++) {
+        /* v8 ignore next -- counts come from positive ratios, so every count is at least 1 */
         if (counts[i] > 0) {
             empirical += symbols[i] + (counts[i] > 1 ? String(counts[i]) : "");
         }
@@ -417,6 +420,7 @@ export function empiricalFormula(inputs: Record<string, string>): CalculatorResu
         let molecular = "";
         for (let i = 0; i < symbols.length; i++) {
             let molecularCount = counts[i] * rounded;
+            /* v8 ignore next -- counts and the multiplier are both >= 1, so the product is never 0 */
             if (molecularCount > 0) {
                 molecular += symbols[i] + (molecularCount > 1 ? String(molecularCount) : "");
             }

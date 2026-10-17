@@ -5,7 +5,7 @@ import {describe, it, expect, afterEach, vi} from "vitest";
 import gsap from "gsap";
 import {CountUpText} from "./CountUpText";
 function mountCountUp(initial: string): {"set": (value: string) => void; "text": () => string} {
-    let [value, setValue] = createSignal<string>(initial);
+    let [value, setValue] = createSignal<string>(initial, {"equals": false});
     let rendered = render(function (): JSX.Element {
         return <CountUpText value={value} />;
     });
@@ -66,5 +66,23 @@ describe("CountUpText", function (): void {
         mounted.set("k = 1.5 s⁻¹");
         expect(mounted.text()).toBe("k = 1.5 s⁻¹");
         expect(toSpy).not.toHaveBeenCalled();
+    });
+    it("shows the raw text when the new number is not finite", function (): void {
+        let toSpy = vi.mocked(gsap.to);
+        toSpy.mockClear();
+        let mounted = mountCountUp("Total = 1");
+        let huge = "Total = " + "9".repeat(400);
+        mounted.set(huge);
+        expect(mounted.text()).toBe(huge);
+        expect(toSpy).not.toHaveBeenCalled();
+    });
+    it("tweens toward an integer target without a decimal point", function (): void {
+        let toSpy = vi.mocked(gsap.to);
+        toSpy.mockClear();
+        let mounted = mountCountUp("Count = 1");
+        mounted.set("Count = 2");
+        expect(toSpy).toHaveBeenCalledTimes(1);
+        let vars = toSpy.mock.calls[0][1] as {"value": number};
+        expect(vars.value).toBe(2);
     });
 });

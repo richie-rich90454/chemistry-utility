@@ -6,6 +6,16 @@ import {Sidebar} from "./Sidebar";
 import {DataPortabilityManager} from "../../modules/dataPortabilityManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {RuntimeDetector} from "../../modules/runtimeDetector.js";
+import {preloadRoute} from "../routeLoaders";
+
+vi.mock("../routeLoaders", async function (importOriginal) {
+    let actual = await importOriginal() as Record<string, unknown>;
+    return Object.assign({}, actual, {
+        "preloadRoute": vi.fn(function (): Promise<void> {
+            return Promise.resolve();
+        })
+    });
+});
 
 function SidebarHost(): JSX.Element {
     return (
@@ -137,6 +147,19 @@ describe("Sidebar", function (): void {
     it("renders the expand control when collapsed", function (): void {
         let result = render(function () { return <SidebarPropsHost collapsed={true} />; });
         expect(result.getByRole("button", {name: "Expand sidebar"})).toBeTruthy();
+    });
+
+    it("prefetches a route when a nav link is hovered and ignores preload failures", async function (): Promise<void> {
+        vi.mocked(preloadRoute).mockImplementation(function (): Promise<void> {
+            return Promise.resolve();
+        });
+        vi.mocked(preloadRoute).mockRejectedValueOnce(new Error("chunk failed"));
+        let result = render(function () { return <SidebarHost />; });
+        let link = result.container.querySelector("a") as HTMLAnchorElement;
+        fireEvent.pointerOver(link);
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(vi.mocked(preloadRoute)).toHaveBeenCalled();
     });
 
     it("renders a default icon for unknown calculator ids", function (): void {

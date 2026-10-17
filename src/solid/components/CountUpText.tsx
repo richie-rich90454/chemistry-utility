@@ -40,6 +40,7 @@ function CountUpText(props: {value: () => string}): JSX.Element {
     createEffect(function (): void {
         let next: string = props.value();
         let element = spanRef;
+        /* v8 ignore next 3 -- the effect is deferred until after render, so spanRef is always assigned */
         if (element === undefined) {
             return;
         }
@@ -64,6 +65,6 @@ function CountUpText(props: {value: () => string}): JSX.Element {
             return prefix + formatter.format(value, target.decimals) + suffix;
         });
     });
-    return <span ref={spanRef} />;
+    return <span ref={function (el: HTMLSpanElement): void { spanRef = el; }} />;
 }
 export {CountUpText};

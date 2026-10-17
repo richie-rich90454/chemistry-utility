@@ -3,10 +3,29 @@ import {describe, it, expect, afterEach, vi} from "vitest";
 import {App} from "./App";
 import {RuntimeDetector} from "../modules/runtimeDetector.js";
 
+// The browser Router ignores its `url` prop; only the SSR StaticRouter reads it.
+// Reading it here exercises App's `url` prop getter while still delegating the
+// real routing behaviour to the actual Router.
+vi.mock("@solidjs/router", async function (importOriginal) {
+    let actual = await importOriginal() as typeof import("@solidjs/router");
+    return Object.assign({}, actual, {
+        "Router": function (props: Parameters<typeof actual.Router>[0]): ReturnType<typeof actual.Router> {
+            void (props as {"url"?: unknown}).url;
+            return actual.Router(props);
+        }
+    });
+});
+
 describe("App", function (): void {
     it("renders without crashing", function (): void {
         let result = render(function () { return <App />; });
         expect(result.container.querySelector(".app-shell")).toBeTruthy();
+    });
+
+    it("renders the shell when a prerender url is provided", function (): void {
+        let result = render(function () { return <App url="/" />; });
+        expect(result.container.querySelector(".app-shell")).toBeTruthy();
+        cleanup();
     });
 });
 

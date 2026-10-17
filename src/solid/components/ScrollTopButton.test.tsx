@@ -65,4 +65,16 @@ describe("ScrollTopButton", function (): void {
         }
         expect(calledWithScroll).toBe(true);
     });
+
+    it("skips listener removal when window is unavailable at cleanup", function (): void {
+        render(function () { return <ScrollTopButton />; });
+        let globals = globalThis as unknown as Record<string, unknown>;
+        let realWindow = globals["window"];
+        globals["window"] = undefined;
+        try {
+            expect(function (): void { cleanup(); }).not.toThrow();
+        } finally {
+            globals["window"] = realWindow;
+        }
+    });
 });

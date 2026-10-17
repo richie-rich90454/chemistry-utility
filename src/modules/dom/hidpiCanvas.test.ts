@@ -128,6 +128,44 @@ describe("observeCanvasResize", function (): void {
         resizeHandler(new Event("resize"));
         expect(onResize).toHaveBeenCalledTimes(2);
     });
+    it("falls back to the backing store size when the layout box is unmeasured", function (): void {
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        stubRect(canvas, 0, 0);
+        canvas.width = 200;
+        canvas.height = 100;
+        let onResize = vi.fn();
+        let stop = observeCanvasResize(canvas, onResize);
+        expect(onResize).toHaveBeenCalledWith(200, 100);
+        stop();
+    });
+    it("ignores resize reports when the canvas has no measured size", function (): void {
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        stubRect(canvas, 0, 0);
+        canvas.width = 0;
+        canvas.height = 0;
+        let onResize = vi.fn();
+        let stop = observeCanvasResize(canvas, onResize);
+        expect(onResize).not.toHaveBeenCalled();
+        stop();
+    });
+    it("measures and detaches without a window or ResizeObserver", function (): void {
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        stubRect(canvas, 320, 200);
+        let globals = globalThis as unknown as Record<string, unknown>;
+        let realWindow = globals["window"];
+        let realObserver = globals["ResizeObserver"];
+        globals["window"] = undefined;
+        globals["ResizeObserver"] = undefined;
+        try {
+            let onResize = vi.fn();
+            let stop = observeCanvasResize(canvas, onResize);
+            expect(onResize).toHaveBeenCalledWith(320, 200);
+            stop();
+        } finally {
+            globals["window"] = realWindow;
+            globals["ResizeObserver"] = realObserver;
+        }
+    });
 });
 
 describe("canvasToBlob", function (): void {
@@ -185,5 +223,31 @@ describe("canvasToBlob", function (): void {
         let result: Blob = await canvasToBlob(canvas, 1);
         expect(constructor).not.toHaveBeenCalled();
         expect(result).toBe(blob);
+    });
+    it("falls back to the canvas encoder when the offscreen context is unavailable", async function (): Promise<void> {
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        canvas.width = 100;
+        canvas.height = 50;
+        function ContextlessOffscreen(this: {width: number; height: number; getContext: () => null}, width: number, height: number): void {
+            this.width = width;
+            this.height = height;
+            this.getContext = function (): null {
+                return null;
+            };
+        }
+        (globalThis as unknown as Record<string, unknown>).OffscreenCanvas = ContextlessOffscreen;
+        let result: Blob = await canvasToBlob(canvas, 2);
+        expect(result).toBeInstanceOf(Blob);
+    });
+    it("rejects when the canvas encoder yields no blob", async function (): Promise<void> {
+        let canvas: HTMLCanvasElement = document.createElement("canvas");
+        Object.defineProperty(HTMLCanvasElement.prototype, "toBlob", {
+            "value": vi.fn(function (callback: BlobCallback): void {
+                callback(null);
+            }),
+            "writable": true,
+            "configurable": true
+        });
+        await expect(canvasToBlob(canvas)).rejects.toThrow("Could not encode canvas as PNG");
     });
 });

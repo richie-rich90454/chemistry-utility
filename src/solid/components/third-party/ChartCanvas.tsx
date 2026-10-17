@@ -38,6 +38,7 @@ function ChartCanvas(props: ChartCanvasProps): JSX.Element {
     }
     onMount(function (): void {
         renderByType(props.type, props.data, props.options);
+        /* v8 ignore next -- canvasEl is set by the render-time function ref, so onMount always sees it */
         if (canvasEl !== undefined) {
             stopObserving = observeCanvasResize(canvasEl, function (): void {
                 ChartRenderer.getInstance().refitChart(canvasId);
@@ -60,6 +61,7 @@ function ChartCanvas(props: ChartCanvasProps): JSX.Element {
         renderByType(currentType, currentData, currentOptions);
     });
     onCleanup(function (): void {
+        /* v8 ignore next -- onMount always assigns stopObserving, so cleanup always sees it non-null */
         if (stopObserving !== null) {
             stopObserving();
             stopObserving = null;

@@ -1,9 +1,19 @@
 import {render, cleanup} from "@solidjs/testing-library";
 import type {JSX} from "solid-js";
-import {describe, it, expect, afterEach, vi} from "vitest";
+import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 import gsap from "gsap";
 import {MemoryRouter, Route, useNavigate} from "@solidjs/router";
+import {prefersReducedMotion} from "../lib/motion";
 import {RouteTransition} from "./RouteTransition";
+
+vi.mock("../lib/motion", async function (importOriginal) {
+    let actual = await importOriginal() as typeof import("../lib/motion");
+    return Object.assign({}, actual, {
+        "prefersReducedMotion": vi.fn(function (): boolean {
+            return false;
+        })
+    });
+});
 
 function nextTick(): Promise<void> {
     return new Promise<void>(function (resolve: (value: void) => void): void {
@@ -19,6 +29,14 @@ function flushTweens(): Promise<void> {
             resolve();
         }, 30);
     });
+}
+
+/** Lets the router's transition settle without letting tween timers fire. */
+async function settle(): Promise<void> {
+    let i: number;
+    for (i = 0; i < 6; i = i + 1) {
+        await Promise.resolve();
+    }
 }
 
 /** Mirrors the App.tsx layout: a shell route whose children change per path. */
@@ -62,6 +80,10 @@ function mountRouter(): {goTo: (path: string) => void; text: () => string} {
         }
     };
 }
+
+beforeEach(function (): void {
+    vi.mocked(prefersReducedMotion).mockReturnValue(false);
+});
 
 afterEach(function (): void {
     cleanup();
@@ -109,13 +131,35 @@ describe("RouteTransition", function (): void {
         expect(router.text()).not.toContain("home view");
     });
     it("swaps content immediately when reduced motion is preferred", async function (): Promise<void> {
-        let matchSpy = vi.spyOn(window, "matchMedia").mockImplementation(function (query: string): MediaQueryList {
-            return {"matches": true, "media": query} as MediaQueryList;
-        });
+        vi.mocked(prefersReducedMotion).mockReturnValue(true);
         let router = mountRouter();
         router.goTo("/away");
         await nextTick();
         expect(router.text()).toContain("away view");
-        matchSpy.mockRestore();
+    });
+    it("kills the previous enter tween when revealing again", async function (): Promise<void> {
+        vi.mocked(prefersReducedMotion).mockReturnValue(false);
+        let fromToSpy = vi.mocked(gsap.fromTo);
+        fromToSpy.mockClear();
+        let router = mountRouter();
+        router.goTo("/away");
+        await flushTweens();
+        router.goTo("/");
+        await flushTweens();
+        expect(fromToSpy).toHaveBeenCalledTimes(2);
+        let firstInTween = fromToSpy.mock.results[0].value as {"kill": () => void};
+        expect(firstInTween.kill).toHaveBeenCalled();
+    });
+    it("supersedes a pending exit tween when routes change in quick succession", async function (): Promise<void> {
+        vi.mocked(prefersReducedMotion).mockReturnValue(false);
+        let toSpy = vi.mocked(gsap.to);
+        toSpy.mockClear();
+        let router = mountRouter();
+        router.goTo("/away");
+        await settle();
+        router.goTo("/");
+        await settle();
+        await flushTweens();
+        expect(toSpy).toHaveBeenCalledTimes(2);
     });
 });
