@@ -15,17 +15,17 @@ let requiredFields: CalculatorField[] = [
     {"id": "collig-solute-mass", "label": "Solute mass (g)", "placeholder": "Solute mass (g)", "ariaLabel": "Solute mass"},
     {"id": "collig-molar-mass", "label": "Molar mass (g/mol)", "placeholder": "Molar mass (g/mol)", "ariaLabel": "Molar mass"},
     {"id": "collig-solvent-mass", "label": "Solvent mass (g)", "placeholder": "Solvent mass (g)", "ariaLabel": "Solvent mass"},
-    {"id": "collig-vanthoff", "label": "Van't Hoff factor (i)", "placeholder": "Van't Hoff factor (i)", "ariaLabel": "Van't Hoff factor"}
+    {"id": "collig-vanthoff", "label": "Van't Hoff factor (i)", "placeholder": "e.g. 2", "ariaLabel": "Van't Hoff factor"}
 ];
 let optionalFields: CalculatorField[] = [
-    {"id": "collig-solvent-molar-mass", "label": "Solvent molar mass", "placeholder": "Solvent molar mass g/mol (default: water 18.015)", "ariaLabel": "Solvent molar mass"},
-    {"id": "collig-density", "label": "Solution density", "placeholder": "Solution density g/mL (default: 1)", "ariaLabel": "Solution density"},
-    {"id": "collig-temp", "label": "Temperature", "placeholder": "Temperature K for osmotic pressure (default: 298.15)", "ariaLabel": "Temperature for osmotic pressure"},
+    {"id": "collig-solvent-molar-mass", "label": "Solvent molar mass", "placeholder": "g/mol", "ariaLabel": "Solvent molar mass"},
+    {"id": "collig-density", "label": "Solution density", "placeholder": "g/mL", "ariaLabel": "Solution density"},
+    {"id": "collig-temp", "label": "Temperature", "placeholder": "K", "ariaLabel": "Temperature for osmotic pressure"},
     {"id": "collig-Kb", "label": "Kb", "placeholder": "Kb (C kg/mol)", "ariaLabel": "Boiling point constant"},
     {"id": "collig-Kf", "label": "Kf", "placeholder": "Kf (C kg/mol)", "ariaLabel": "Freezing point constant"},
-    {"id": "collig-solvent-bp", "label": "Solvent bp", "placeholder": "Solvent boiling point (C)", "ariaLabel": "Solvent boiling point"},
-    {"id": "collig-solvent-fp", "label": "Solvent fp", "placeholder": "Solvent freezing point (C)", "ariaLabel": "Solvent freezing point"},
-    {"id": "collig-Psolvent", "label": "Solvent vapor pressure", "placeholder": "Solvent vapor pressure (atm)", "ariaLabel": "Solvent vapor pressure"}
+    {"id": "collig-solvent-bp", "label": "Solvent bp", "placeholder": "C", "ariaLabel": "Solvent boiling point"},
+    {"id": "collig-solvent-fp", "label": "Solvent fp", "placeholder": "C", "ariaLabel": "Solvent freezing point"},
+    {"id": "collig-Psolvent", "label": "Solvent vapor pressure", "placeholder": "atm", "ariaLabel": "Solvent vapor pressure"}
 ];
 let allFields: CalculatorField[] = requiredFields.concat(optionalFields);
 function Colligative(): JSX.Element {

@@ -45,8 +45,8 @@ let deBroglieSelects: CalculatorSelect[] = [{
 let photoelectricFields: CalculatorField[] = [
     {"id": "pe-wavelength", "label": "λ", "placeholder": "Wavelength (nm)", "ariaLabel": "Photoelectric wavelength in nm"},
     {"id": "pe-frequency", "label": "f", "placeholder": "Frequency (Hz)", "ariaLabel": "Photoelectric frequency in Hz"},
-    {"id": "pe-work-function", "label": "φ", "placeholder": "Work function φ (eV)", "ariaLabel": "Photoelectric work function in eV"},
-    {"id": "pe-ke", "label": "KE", "placeholder": "Kinetic energy KE (eV)", "ariaLabel": "Photoelectric kinetic energy in eV"}
+    {"id": "pe-work-function", "label": "φ", "placeholder": "eV", "ariaLabel": "Photoelectric work function in eV"},
+    {"id": "pe-ke", "label": "KE", "placeholder": "eV", "ariaLabel": "Photoelectric kinetic energy in eV"}
 ];
 let photoelectricSelects: CalculatorSelect[] = [{
     "id": "pe-solve-for",

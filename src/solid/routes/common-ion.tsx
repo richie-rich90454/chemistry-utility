@@ -14,7 +14,7 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 let fields: CalculatorField[] = [
     {"id": "common-ion-Ksp", "label": "Ksp", "placeholder": "Ksp", "ariaLabel": "Ksp value"},
-    {"id": "common-ion-concentration", "label": "Common ion concentration (M)", "placeholder": "Common ion concentration (M)", "ariaLabel": "Common ion concentration"}
+    {"id": "common-ion-concentration", "label": "Common ion concentration (M)", "placeholder": "M", "ariaLabel": "Common ion concentration"}
 ];
 let selects: CalculatorSelect[] = [{
     "id": "common-ion-salt-type",

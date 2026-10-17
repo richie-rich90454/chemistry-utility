@@ -21,7 +21,7 @@ let nernstFields: CalculatorField[] = [
     {"id": "E-standard", "label": "E°", "placeholder": "E° (V)", "ariaLabel": "Standard cell potential"},
     {"id": "temperature", "label": "T", "placeholder": "T (K)", "ariaLabel": "Temperature"},
     {"id": "n-electrons", "label": "n", "placeholder": "n (moles of e⁻)", "ariaLabel": "Number of electrons"},
-    {"id": "Q-reaction", "label": "Q", "placeholder": "Q (reaction quotient)", "ariaLabel": "Reaction quotient"}
+    {"id": "Q-reaction", "label": "Q", "placeholder": "Q", "ariaLabel": "Reaction quotient"}
 ];
 let electrolysisFields: CalculatorField[] = [
     {"id": "electrolysis-m", "label": "m", "placeholder": "Mass (g)", "ariaLabel": "Mass"},

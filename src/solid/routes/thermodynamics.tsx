@@ -25,12 +25,12 @@ let hessFields: CalculatorField[] = [
     {"id": "hess-steps", "label": "ΔH steps", "placeholder": "E.g., -100, 50, -200", "ariaLabel": "Enthalpy steps", "type": "text"}
 ];
 let entropyFields: CalculatorField[] = [
-    {"id": "entropy-products", "label": "Products S°", "placeholder": "Products S° (comma-separated, J/(mol·K))", "ariaLabel": "Product entropies", "type": "text"},
-    {"id": "entropy-reactants", "label": "Reactants S°", "placeholder": "Reactants S° (comma-separated, J/(mol·K))", "ariaLabel": "Reactant entropies", "type": "text"}
+    {"id": "entropy-products", "label": "Products S°", "placeholder": "J/(mol·K)", "ariaLabel": "Product entropies", "type": "text"},
+    {"id": "entropy-reactants", "label": "Reactants S°", "placeholder": "J/(mol·K)", "ariaLabel": "Reactant entropies", "type": "text"}
 ];
 let heatCapacityFields: CalculatorField[] = [
     {"id": "heat-cap-mass", "label": "Mass", "placeholder": "Mass (g)", "ariaLabel": "Mass"},
-    {"id": "heat-cap-specific-heat", "label": "Specific heat", "placeholder": "Specific heat (J/(g·K))", "ariaLabel": "Specific heat"},
+    {"id": "heat-cap-specific-heat", "label": "Specific heat", "placeholder": "J/(g·K)", "ariaLabel": "Specific heat"},
     {"id": "heat-cap-initial-temp", "label": "Initial temp", "placeholder": "Initial temp (K)", "ariaLabel": "Initial temperature"},
     {"id": "heat-cap-final-temp", "label": "Final temp", "placeholder": "Final temp (K)", "ariaLabel": "Final temperature"},
     {"id": "heat-cap-heat", "label": "Heat", "placeholder": "Heat (J)", "ariaLabel": "Heat"}

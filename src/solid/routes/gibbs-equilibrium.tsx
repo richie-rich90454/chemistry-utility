@@ -14,7 +14,7 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 let fields: CalculatorField[] = [
     {"id": "geq-delta-g", "label": "Delta G", "placeholder": "Delta G (kJ/mol)", "ariaLabel": "Standard Gibbs free energy change in kilojoules per mole"},
-    {"id": "geq-k", "label": "K", "placeholder": "Equilibrium constant K", "ariaLabel": "Equilibrium constant"},
+    {"id": "geq-k", "label": "K", "placeholder": "K", "ariaLabel": "Equilibrium constant"},
     {"id": "geq-temperature", "label": "Temperature", "placeholder": "T (K)", "ariaLabel": "Temperature in Kelvin"}
 ];
 let selects: CalculatorSelect[] = [{

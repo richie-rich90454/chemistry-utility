@@ -74,7 +74,7 @@ let integratedRateLawSelects: CalculatorSelect[] = [
     }
 ];
 let reactionOrderFields: CalculatorField[] = [
-    {"id": "reaction-order-data", "label": "Data", "placeholder": "E.g., 0,1.0; 100,0.5; 200,0.25; 300,0.125", "ariaLabel": "Time-concentration data", "type": "text"}
+    {"id": "reaction-order-data", "label": "Data", "placeholder": "e.g. 0,1; 100,0.5", "ariaLabel": "Time-concentration data", "type": "text"}
 ];
 let collisionFields: CalculatorField[] = [
     {"id": "collision-Ea", "label": "Ea", "placeholder": "Ea (kJ/mol)", "ariaLabel": "Collision activation energy"},

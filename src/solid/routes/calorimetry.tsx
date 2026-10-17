@@ -14,7 +14,7 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 let fields: CalculatorField[] = [
     {"id": "calor-mass", "label": "Mass", "placeholder": "Mass (g)", "ariaLabel": "Mass in grams"},
-    {"id": "calor-specific-heat", "label": "Specific heat", "placeholder": "Specific heat (J/(g*C))", "ariaLabel": "Specific heat"},
+    {"id": "calor-specific-heat", "label": "Specific heat", "placeholder": "J/(g*C)", "ariaLabel": "Specific heat"},
     {"id": "calor-delta-t", "label": "Temperature change", "placeholder": "Delta T (C)", "ariaLabel": "Temperature change in Celsius"},
     {"id": "calor-heat", "label": "Heat", "placeholder": "Heat (J)", "ariaLabel": "Heat in joules"}
 ];

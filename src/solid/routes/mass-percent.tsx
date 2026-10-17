@@ -12,8 +12,8 @@ import {CalculatorForm} from "../components/CalculatorForm";
 import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 let fields: CalculatorField[] = [
-    {"id": "mass-solute", "label": "Mass of solute (g)", "placeholder": "Mass of solute (g)", "ariaLabel": "Mass of solute"},
-    {"id": "mass-solution", "label": "Mass of solution (g)", "placeholder": "Mass of solution (g)", "ariaLabel": "Mass of solution"}
+    {"id": "mass-solute", "label": "Mass of solute (g)", "placeholder": "g", "ariaLabel": "Mass of solute"},
+    {"id": "mass-solution", "label": "Mass of solution (g)", "placeholder": "g", "ariaLabel": "Mass of solution"}
 ];
 let selects: CalculatorSelect[] = [{
     "id": "concentration-unit",

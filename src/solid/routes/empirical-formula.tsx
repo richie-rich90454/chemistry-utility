@@ -13,7 +13,7 @@ import type {CalculatorField} from "../components/CalculatorForm";
 import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 let fields: CalculatorField[] = [
-    {"id": "ef-composition", "label": "Percent composition", "placeholder": "E.g., C:40,H:6.71,O:53.29", "ariaLabel": "Percent composition as element percent pairs", "type": "text"},
+    {"id": "ef-composition", "label": "Percent composition", "placeholder": "C:40,H:6.71,O:53.29", "ariaLabel": "Percent composition as element percent pairs", "type": "text"},
     {"id": "ef-molar-mass", "label": "Molar mass (optional)", "placeholder": "Molar mass (g/mol)", "ariaLabel": "Molar mass in grams per mole"}
 ];
 function EmpiricalFormula(): JSX.Element {

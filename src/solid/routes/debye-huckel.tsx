@@ -15,7 +15,7 @@ let fields: CalculatorField[] = [
     {"id": "dh-zplus", "label": "Cation charge (z+)", "placeholder": "Cation charge (z+)", "ariaLabel": "Cation charge"},
     {"id": "dh-zminus", "label": "Anion charge (z-)", "placeholder": "Anion charge (z-)", "ariaLabel": "Anion charge"},
     {"id": "dh-concentration", "label": "Concentration (M)", "placeholder": "Concentration (M)", "ariaLabel": "Concentration"},
-    {"id": "dh-ion-size", "label": "Ion size parameter a (Angstrom)", "placeholder": "Ion size parameter a (Angstrom)", "ariaLabel": "Ion size parameter"}
+    {"id": "dh-ion-size", "label": "Ion size parameter a (Angstrom)", "placeholder": "Angstrom", "ariaLabel": "Ion size parameter"}
 ];
 function DebyeHuckel(): JSX.Element {
     let engine = getEngine();

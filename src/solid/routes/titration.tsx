@@ -16,9 +16,9 @@ import type {CalculatorField, CalculatorSelect} from "../components/CalculatorFo
 import {ExampleDetails} from "../components/ExampleDetails";
 import styles from "./titration.module.css";
 let fields: CalculatorField[] = [
-    {"id": "titration-acid-conc", "label": "Acid concentration (M)", "placeholder": "Acid concentration (M)", "ariaLabel": "Acid concentration"},
+    {"id": "titration-acid-conc", "label": "Acid concentration (M)", "placeholder": "M", "ariaLabel": "Acid concentration"},
     {"id": "titration-acid-vol", "label": "Acid volume (mL)", "placeholder": "Acid volume (mL)", "ariaLabel": "Acid volume"},
-    {"id": "titration-base-conc", "label": "Base concentration (M)", "placeholder": "Base concentration (M)", "ariaLabel": "Base concentration"},
+    {"id": "titration-base-conc", "label": "Base concentration (M)", "placeholder": "M", "ariaLabel": "Base concentration"},
     {"id": "titration-max-vol", "label": "Max volume (mL)", "placeholder": "Max volume (mL)", "ariaLabel": "Maximum volume"},
     {"id": "titration-Ka", "label": "Ka (for weak acid)", "placeholder": "Ka (for weak acid)", "ariaLabel": "Ka value"}
 ];

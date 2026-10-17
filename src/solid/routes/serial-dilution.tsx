@@ -14,7 +14,7 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 let fields: CalculatorField[] = [
     {"id": "sd-initial-concentration", "label": "Initial concentration", "placeholder": "C0 (M)", "ariaLabel": "Initial concentration in molarity"},
-    {"id": "sd-dilution-factor", "label": "Dilution factor", "placeholder": "Dilution factor per step", "ariaLabel": "Dilution factor per step"},
+    {"id": "sd-dilution-factor", "label": "Dilution factor", "placeholder": "factor", "ariaLabel": "Dilution factor per step"},
     {"id": "sd-steps", "label": "Steps", "placeholder": "Number of steps", "ariaLabel": "Number of dilution steps"}
 ];
 function SerialDilution(): JSX.Element {

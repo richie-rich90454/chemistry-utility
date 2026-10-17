@@ -14,9 +14,9 @@ import {ExampleDetails} from "../components/ExampleDetails";
 import {SeeAlsoLink} from "../components/SeeAlsoLink";
 let fields: CalculatorField[] = [
     {"id": "bl-absorbance", "label": "Absorbance", "placeholder": "Absorbance (A)", "ariaLabel": "Absorbance"},
-    {"id": "bl-absorptivity", "label": "Absorptivity", "placeholder": "Absorptivity (L/(mol*cm))", "ariaLabel": "Molar absorptivity"},
+    {"id": "bl-absorptivity", "label": "Absorptivity", "placeholder": "L/(mol*cm)", "ariaLabel": "Molar absorptivity"},
     {"id": "bl-path-length", "label": "Path length", "placeholder": "Path length (cm)", "ariaLabel": "Path length in centimeters"},
-    {"id": "bl-concentration", "label": "Concentration", "placeholder": "Concentration (mol/L)", "ariaLabel": "Concentration in moles per liter"}
+    {"id": "bl-concentration", "label": "Concentration", "placeholder": "mol/L", "ariaLabel": "Concentration in moles per liter"}
 ];
 let selects: CalculatorSelect[] = [{
     "id": "bl-solve-for",
