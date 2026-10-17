@@ -14,8 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Install frontend dependencies
-        run: cd frontend && npm install
+      - name: Install dependencies
+        run: npm install
       - name: Verify conformance vectors are unchanged
         run: npm run conformance:verify
 
@@ -29,18 +29,19 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.26"
+          cache-dependency-path: core/go.sum
       - name: Install Linux dependencies
         run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
-      - name: Install frontend dependencies
-        run: cd frontend && npm install
-      - name: Run frontend tests
-        run: cd frontend && npm test
+      - name: Install dependencies
+        run: npm install
+      - name: Run website tests
+        run: npm test
       - name: Run Playwright E2E tests (system Chrome)
-        run: cd frontend && npx playwright test
-      - name: Build frontend
-        run: cd frontend && npm run build
-      - name: Stage frontend for desktop embed
-        run: npm run stage:desktop
+        run: npx playwright test
+      - name: Build web bundle
+        run: npm run build:web
+      - name: Stage web dist for the desktop embed
+        run: npm run desktop:stage
       - name: Run Go tests
         run: cd core && go test ./...
       - name: Install Wails CLI

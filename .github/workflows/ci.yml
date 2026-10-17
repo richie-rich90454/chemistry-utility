@@ -8,8 +8,8 @@ on:
     branches: [main]
 
 jobs:
-  frontend:
-    name: Frontend Build & Test
+  website:
+    name: Website Build & Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,39 +20,38 @@ jobs:
         with:
           node-version: 24
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: npm ci
 
       - name: Type check
-        run: cd frontend && npx tsc --noEmit
+        run: npx tsc --noEmit
 
       - name: Build web bundle (for Go embed)
-        run: cd frontend && npm run build:web
+        run: npm run build:web
 
       - name: Run tests with coverage
-        run: cd frontend && npx vitest run --coverage
+        run: npx vitest run --coverage
 
-      - name: Upload frontend dist
+      - name: Upload web dist
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-dist
-          path: frontend/dist
+          name: web-dist
+          path: dist
           retention-days: 1
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-coverage
-          path: frontend/coverage
+          name: website-coverage
+          path: coverage
           retention-days: 7
           if-no-files-found: warn
 
-  backend:
-    name: Backend Build & Test
+  core:
+    name: Core Wrapper Build & Test
     runs-on: ubuntu-latest
-    needs: [frontend]
+    needs: [website]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -62,37 +61,41 @@ jobs:
         with:
           go-version: '1.26'
           cache: true
+          cache-dependency-path: core/go.sum
 
       - name: Install Linux dependencies (CGO + WebKit for Wails)
         run: sudo apt-get update && sudo apt-get install -y gcc libgtk-3-dev libwebkit2gtk-4.1-dev
 
-      - name: Download frontend dist (for embed)
+      - name: Download web dist (for embed)
         uses: actions/download-artifact@v4
         with:
-          name: frontend-dist
-          path: frontend/dist
+          name: web-dist
+          path: dist
+
+      - name: Stage web dist for the embed
+        run: node scripts/stage-dist.mjs
 
       - name: Build
-        run: go build ./...
+        run: cd core && go build ./...
 
       - name: Run tests with coverage
-        run: go test ./internal/... -coverprofile=coverage.out
+        run: cd core && go test ./internal/... -coverprofile=coverage.out
 
       - name: Print coverage summary
-        run: go tool cover -func=coverage.out
+        run: cd core && go tool cover -func=coverage.out
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
-          name: backend-coverage
-          path: coverage.out
+          name: core-coverage
+          path: core/coverage.out
           retention-days: 7
           if-no-files-found: warn
 
   lint:
     name: Lint & Audit
     runs-on: ubuntu-latest
-    needs: [frontend]
+    needs: [website]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -102,15 +105,19 @@ jobs:
         with:
           go-version: '1.26'
           cache: true
+          cache-dependency-path: core/go.sum
 
       - name: Install Linux dependencies (CGO + WebKit for Wails)
         run: sudo apt-get update && sudo apt-get install -y gcc libgtk-3-dev libwebkit2gtk-4.1-dev
 
-      - name: Download frontend dist (for embed)
+      - name: Download web dist (for embed)
         uses: actions/download-artifact@v4
         with:
-          name: frontend-dist
-          path: frontend/dist
+          name: web-dist
+          path: dist
+
+      - name: Stage web dist for the embed
+        run: node scripts/stage-dist.mjs
 
       # Build from source with the current toolchain: prebuilt golangci-lint
       # binaries are built with Go 1.24 and refuse to load go.mod "go 1.25.0".
@@ -118,26 +125,25 @@ jobs:
         run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
 
       - name: Run golangci-lint
-        run: golangci-lint run ./...
+        run: cd core && golangci-lint run ./...
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install frontend dependencies
-        run: cd frontend && npm ci
+      - name: Install website dependencies
+        run: npm ci
 
       - name: Run npm audit
-        run: cd frontend && npm audit
+        run: npm audit
         continue-on-error: true
 
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
-    needs: [frontend]
+    needs: [website]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -147,31 +153,34 @@ jobs:
         with:
           go-version: '1.26.6'
           cache: true
+          cache-dependency-path: core/go.sum
 
       - name: Install Linux dependencies (CGO + WebKit for Wails)
         run: sudo apt-get update && sudo apt-get install -y gcc libgtk-3-dev libwebkit2gtk-4.1-dev
 
-      - name: Download frontend dist (for embed)
+      - name: Download web dist (for embed)
         uses: actions/download-artifact@v4
         with:
-          name: frontend-dist
-          path: frontend/dist
+          name: web-dist
+          path: dist
+
+      - name: Stage web dist for the embed
+        run: node scripts/stage-dist.mjs
 
       - name: Install govulncheck
         run: go install golang.org/x/vuln/cmd/govulncheck@latest
 
       - name: Run govulncheck
-        run: govulncheck ./...
+        run: cd core && govulncheck ./...
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install frontend dependencies
-        run: cd frontend && npm ci
+      - name: Install website dependencies
+        run: npm ci
 
       - name: Run npm audit (high severity)
-        run: cd frontend && npm audit --audit-level=high
+        run: npm audit --audit-level=high
