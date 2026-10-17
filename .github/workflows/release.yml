@@ -3,8 +3,7 @@ name: Release Builds
 
 on:
   release:
-    types:
-      - published
+    types: [published]
 
   workflow_dispatch:
 
@@ -21,16 +20,25 @@ env:
   CI: "true"
 
 jobs:
+  # ============================================================
+  # Build static website once for all platforms
+  # ============================================================
+
   web:
     name: Build Static Website
     runs-on: ubuntu-24.04
     timeout-minutes: 30
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name || github.ref }}
+          ref: ${{ github.event.release.tag_name || github.sha }}
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,39 +49,48 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build production website
+      - name: Build website
         run: npm run build:web
 
       - name: Verify website
         run: |
+          set -euo pipefail
           test -s dist/index.html
 
-      - name: Package static website
+      - name: Package dist.zip
         run: |
-          mkdir -p release
-          cd dist
-          zip -q -r ../release/dist.zip .
+          set -euo pipefail
 
-      - name: Verify archive
-        run: |
+          mkdir -p release
+
+          (
+            cd dist
+            zip -q -r ../release/dist.zip .
+          )
+
           unzip -t release/dist.zip
           unzip -Z1 release/dist.zip | grep -qx index.html
 
       - name: Upload website archive
         uses: actions/upload-artifact@v4
         with:
-          name: release-web
+          name: package-web
           path: release/dist.zip
           if-no-files-found: error
           retention-days: 14
+          compression-level: 0
 
       - name: Upload frontend for desktop builds
         uses: actions/upload-artifact@v4
         with:
-          name: release-frontend
+          name: frontend-dist
           path: dist/
           if-no-files-found: error
           retention-days: 7
+
+  # ============================================================
+  # Native desktop builds
+  # ============================================================
 
   desktop:
     name: Build ${{ matrix.target }}
@@ -110,7 +127,8 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name || github.ref }}
+          ref: ${{ github.event.release.tag_name || github.sha }}
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -127,7 +145,10 @@ jobs:
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |
+          set -euo pipefail
+
           sudo apt-get update
+
           sudo apt-get install -y \
             build-essential \
             pkg-config \
@@ -136,63 +157,103 @@ jobs:
             zip \
             xvfb
 
-      - name: Install Node dependencies
+      - name: Install frontend dependencies
         run: npm ci
 
-      - name: Download built frontend
+      - name: Download production frontend
         uses: actions/download-artifact@v4
         with:
-          name: release-frontend
+          name: frontend-dist
           path: dist/
 
-      - name: Stage embedded frontend
+      - name: Verify frontend
+        run: |
+          set -euo pipefail
+          test -s dist/index.html
+
+      - name: Stage frontend for Go embed
         run: npm run desktop:stage
 
-      - name: Install Wails v2
+      # Match Wails CLI to the version in core/go.mod.
+      # Avoids the CLI/module mismatch seen in previous logs.
+
+      - name: Detect Wails version
+        id: wails
+        working-directory: core
         run: |
-          go install github.com/wailsapp/wails/v2/cmd/wails@v2.11.0
+          set -euo pipefail
+
+          VERSION="$(
+            go list -m -f '{{.Version}}' \
+              github.com/wailsapp/wails/v2
+          )"
+
+          if [[ ! "$VERSION" =~ ^v2\. ]]; then
+            echo "Invalid Wails v2 version: $VERSION"
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Using Wails $VERSION"
+
+      - name: Install matching Wails CLI
+        env:
+          WAILS_VERSION: ${{ steps.wails.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          go install \
+            "github.com/wailsapp/wails/v2/cmd/wails@${WAILS_VERSION}"
+
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
 
       - name: Verify Wails installation
-        run: |
-          wails version
+        run: wails version
+
+      # --------------------------------------------------------
+      # Build on each native platform
+      # --------------------------------------------------------
 
       - name: Build Windows
         if: runner.os == 'Windows'
         working-directory: core
         run: |
+          set -euo pipefail
+
           wails build \
             -clean \
+            -nosyncgomod \
             -platform windows/amd64 \
             -o ChemistryUtility.exe
 
-      - name: Build macOS Intel
-        if: matrix.target == 'macos-x64'
+      - name: Build macOS
+        if: runner.os == 'macOS'
         working-directory: core
         run: |
-          wails build \
-            -clean \
-            -platform darwin/amd64 \
-            -o ChemistryUtility
+          set -euo pipefail
 
-      - name: Build macOS Apple Silicon
-        if: matrix.target == 'macos-arm64'
-        working-directory: core
-        run: |
           wails build \
             -clean \
-            -platform darwin/arm64 \
+            -nosyncgomod \
+            -platform "${{ matrix.platform }}" \
             -o ChemistryUtility
 
       - name: Build Linux
         if: runner.os == 'Linux'
         working-directory: core
         run: |
+          set -euo pipefail
+
           wails build \
             -clean \
+            -nosyncgomod \
             -tags webkit2_41 \
             -platform linux/amd64 \
             -o ChemistryUtility
+
+      # --------------------------------------------------------
+      # Windows portable archive
+      # --------------------------------------------------------
 
       - name: Package Windows
         if: runner.os == 'Windows'
@@ -200,40 +261,157 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
 
-          $binary = "core/build/bin/ChemistryUtility.exe"
+          $binDir = "core/build/bin"
+          $exe = Join-Path $binDir "ChemistryUtility.exe"
 
-          if (!(Test-Path $binary)) {
+          if (!(Test-Path -LiteralPath $exe -PathType Leaf)) {
+            Get-ChildItem $binDir -Recurse
             throw "Windows executable missing"
+          }
+
+          if ((Get-Item $exe).Length -eq 0) {
+            throw "Windows executable is empty"
           }
 
           New-Item -ItemType Directory -Force release |
             Out-Null
 
+          @"
+          Chemistry Utility - Windows x64
+
+          Extract this archive and run ChemistryUtility.exe.
+
+          Go and Node.js are not required.
+
+          Microsoft Edge WebView2 Runtime is required.
+          This is a portable build, not an installer.
+          "@ | Set-Content `
+            -Path (Join-Path $binDir "README.txt") `
+            -Encoding UTF8
+
+          $archive = "release/ChemistryUtility-windows-x64.zip"
+
           Compress-Archive `
-            -Path $binary `
-            -DestinationPath "release/ChemistryUtility-windows-x64.zip" `
+            -Path (Join-Path $binDir "*") `
+            -DestinationPath $archive `
             -CompressionLevel Optimal
 
-      - name: Package macOS
+          Add-Type -AssemblyName System.IO.Compression
+
+          $zip = [System.IO.Compression.ZipFile]::OpenRead(
+            (Resolve-Path $archive).Path
+          )
+
+          try {
+            $entry = $zip.Entries |
+              Where-Object {
+                $_.FullName -eq "ChemistryUtility.exe"
+              }
+
+            if (!$entry) {
+              throw "Executable missing from archive"
+            }
+          }
+          finally {
+            $zip.Dispose()
+          }
+
+      # --------------------------------------------------------
+      # macOS Intel + Apple Silicon
+      #
+      # FIX: Wails actually generates chemistry-utility.app.
+      # Never assume the bundle is named ChemistryUtility.app.
+      # --------------------------------------------------------
+
+      - name: Detect macOS application bundle
         if: runner.os == 'macOS'
+        id: macos-app
+        run: |
+          set -euo pipefail
+
+          shopt -s nullglob
+          apps=(core/build/bin/*.app)
+          shopt -u nullglob
+
+          if [ "${#apps[@]}" -ne 1 ]; then
+            echo "Expected exactly one .app bundle."
+            echo "Found: ${#apps[@]}"
+
+            find core/build/bin -maxdepth 3 -print
+            exit 1
+          fi
+
+          APP="${apps[0]}"
+
+          echo "Detected bundle: $APP"
+
+          PLIST="$APP/Contents/Info.plist"
+          test -s "$PLIST"
+
+          plutil -lint "$PLIST"
+
+          EXECUTABLE_NAME="$(
+            /usr/libexec/PlistBuddy \
+              -c 'Print :CFBundleExecutable' \
+              "$PLIST"
+          )"
+
+          EXECUTABLE="$APP/Contents/MacOS/$EXECUTABLE_NAME"
+
+          test -s "$EXECUTABLE"
+          test -x "$EXECUTABLE"
+
+          echo "Executable: $EXECUTABLE"
+
+          ARCHS="$(lipo -archs "$EXECUTABLE")"
+          echo "Architectures: $ARCHS"
+
+          case "${{ matrix.target }}" in
+            macos-x64)
+              echo "$ARCHS" | grep -qw x86_64
+              ;;
+            macos-arm64)
+              echo "$ARCHS" | grep -qw arm64
+              ;;
+            *)
+              echo "Unsupported macOS target"
+              exit 1
+              ;;
+          esac
+
+          echo "app=$APP" >> "$GITHUB_OUTPUT"
+
+      - name: Package macOS application
+        if: runner.os == 'macOS'
+        env:
+          APP_PATH: ${{ steps.macos-app.outputs.app }}
+          TARGET: ${{ matrix.target }}
         run: |
           set -euo pipefail
 
           mkdir -p release
 
-          APP="core/build/bin/ChemistryUtility.app"
+          ARCHIVE="release/ChemistryUtility-${TARGET}.zip"
 
-          if [ ! -d "$APP" ]; then
-            echo "macOS .app bundle missing"
-            find core/build/bin -maxdepth 3 -print
-            exit 1
-          fi
-
-          ditto -c -k \
+          ditto \
+            -c \
+            -k \
             --sequesterRsrc \
             --keepParent \
-            "$APP" \
-            "release/ChemistryUtility-${{ matrix.target }}.zip"
+            "$APP_PATH" \
+            "$ARCHIVE"
+
+          test -s "$ARCHIVE"
+          unzip -t "$ARCHIVE"
+
+          unzip -Z1 "$ARCHIVE" |
+            grep -Eq '\.app/Contents/Info\.plist$'
+
+          echo "Successfully packaged $TARGET"
+
+      # --------------------------------------------------------
+      # Linux portable archive
+      # --------------------------------------------------------
 
       - name: Package Linux
         if: runner.os == 'Linux'
@@ -245,41 +423,89 @@ jobs:
           test -s "$BIN"
           chmod +x "$BIN"
 
+          file "$BIN"
+
+          ldd "$BIN" | tee linux-dependencies.txt
+
+          if grep -q "not found" linux-dependencies.txt; then
+            echo "Missing shared libraries"
+            exit 1
+          fi
+
           mkdir -p release
           mkdir -p package/ChemistryUtility
 
-          cp "$BIN" package/ChemistryUtility/
+          cp -a \
+            core/build/bin/. \
+            package/ChemistryUtility/
 
           cat > package/ChemistryUtility/README.txt <<'EOF'
-          Chemistry Utility for Linux x64
+          Chemistry Utility - Linux x64
+
+          Extract this archive.
 
           Run:
             ./ChemistryUtility
 
-          Requires compatible GTK3 and WebKit2GTK 4.1
-          runtime libraries on the host system.
+          Requirements:
+          - Linux x86_64
+          - GTK3 runtime
+          - WebKit2GTK 4.1 runtime
+          - Compatible graphics libraries
 
-          Node.js and Go are not required.
+          Go and Node.js are not required.
           EOF
 
-          tar -C package \
+          tar \
+            -C package \
             -czf release/ChemistryUtility-linux-x64.tar.gz \
             ChemistryUtility
 
-      - name: Verify package exists
-        run: |
-          test -n "$(find release -type f -size +0c -print -quit)"
+          tar -tzf \
+            release/ChemistryUtility-linux-x64.tar.gz |
+            grep -qx \
+              'ChemistryUtility/ChemistryUtility'
 
-      - name: Upload desktop archive
+      # --------------------------------------------------------
+      # Upload per-platform workflow artifacts
+      # --------------------------------------------------------
+
+      - name: Verify package
+        run: |
+          set -euo pipefail
+
+          test -d release
+
+          find release -maxdepth 1 -type f -print
+
+          COUNT="$(
+            find release -maxdepth 1 -type f |
+              wc -l | tr -d ' '
+          )"
+
+          test "$COUNT" -eq 1
+
+      - name: Upload desktop package
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.target }}
+          name: package-${{ matrix.target }}
           path: release/
           if-no-files-found: error
           retention-days: 14
+          compression-level: 0
+
+  # ============================================================
+  # Assemble and verify all packages.
+  #
+  # ALWAYS RUNS:
+  # - Manual invocation
+  # - Published release
+  #
+  # Does not create or modify GitHub Releases.
+  # ============================================================
 
   assemble:
-    name: Assemble and Verify Release
+    name: Assemble Complete Build
     needs:
       - web
       - desktop
@@ -287,79 +513,168 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      - name: Download release archives
+      - name: Download platform packages
         uses: actions/download-artifact@v4
         with:
-          pattern: release-*
+          pattern: package-*
           path: release/
           merge-multiple: true
 
-      - name: Verify all assets
+      - name: Verify expected assets
         run: |
           set -euo pipefail
 
-          test -s release/dist.zip
-          test -s release/ChemistryUtility-windows-x64.zip
-          test -s release/ChemistryUtility-macos-x64.zip
-          test -s release/ChemistryUtility-macos-arm64.zip
-          test -s release/ChemistryUtility-linux-x64.tar.gz
+          expected=(
+            "dist.zip"
+            "ChemistryUtility-windows-x64.zip"
+            "ChemistryUtility-macos-x64.zip"
+            "ChemistryUtility-macos-arm64.zip"
+            "ChemistryUtility-linux-x64.tar.gz"
+          )
 
-          unzip -t release/dist.zip
-          unzip -t release/ChemistryUtility-windows-x64.zip
-          unzip -t release/ChemistryUtility-macos-x64.zip
-          unzip -t release/ChemistryUtility-macos-arm64.zip
+          for asset in "${expected[@]}"; do
+            if [ ! -s "release/$asset" ]; then
+              echo "Missing or empty: $asset"
+              exit 1
+            fi
 
-          tar -tzf release/ChemistryUtility-linux-x64.tar.gz \
-            > /dev/null
+            echo "Verified: $asset"
+          done
 
-      - name: Generate SHA256 checksums
+          COUNT="$(
+            find release -maxdepth 1 -type f |
+              wc -l | tr -d ' '
+          )"
+
+          test "$COUNT" -eq "${#expected[@]}"
+
+      - name: Verify ZIP archives
         run: |
-          cd release
+          set -euo pipefail
 
-          sha256sum \
-            dist.zip \
-            ChemistryUtility-windows-x64.zip \
-            ChemistryUtility-macos-x64.zip \
-            ChemistryUtility-macos-arm64.zip \
-            ChemistryUtility-linux-x64.tar.gz \
-            > SHA256SUMS.txt
+          for archive in release/*.zip; do
+            unzip -t "$archive"
+          done
 
-          cat SHA256SUMS.txt
+          unzip -Z1 release/dist.zip |
+            grep -qx index.html
 
-      - name: Upload complete release bundle
+          unzip -Z1 \
+            release/ChemistryUtility-windows-x64.zip |
+            grep -qx ChemistryUtility.exe
+
+          for target in macos-x64 macos-arm64; do
+            unzip -Z1 \
+              "release/ChemistryUtility-${target}.zip" |
+              grep -Eq '\.app/Contents/Info\.plist$'
+          done
+
+      - name: Verify Linux archive
+        run: |
+          set -euo pipefail
+
+          tar -tzf \
+            release/ChemistryUtility-linux-x64.tar.gz |
+            grep -qx \
+              'ChemistryUtility/ChemistryUtility'
+
+      - name: Generate checksums
+        run: |
+          set -euo pipefail
+
+          (
+            cd release
+
+            sha256sum \
+              dist.zip \
+              ChemistryUtility-windows-x64.zip \
+              ChemistryUtility-macos-x64.zip \
+              ChemistryUtility-macos-arm64.zip \
+              ChemistryUtility-linux-x64.tar.gz \
+              > SHA256SUMS.txt
+
+            sha256sum --check SHA256SUMS.txt
+          )
+
+      - name: Display build inventory
+        run: |
+          echo "Build artifacts:"
+          ls -lh release/
+
+          echo ""
+          echo "SHA256 checksums:"
+          cat release/SHA256SUMS.txt
+
+      - name: Upload complete build
         uses: actions/upload-artifact@v4
         with:
           name: complete-release-bundle
           path: release/
           if-no-files-found: error
           retention-days: 30
+          compression-level: 0
+
+  # ============================================================
+  # GitHub Release publishing
+  #
+  # ONLY RUNS FOR:
+  #   release.published
+  #
+  # NEVER RUNS FOR:
+  #   workflow_dispatch
+  #
+  # Manual builds remain workflow artifacts only.
+  # ============================================================
 
   publish:
-    name: Publish Release Assets
-    if: github.event_name == 'release'
+    name: Upload to GitHub Release
 
-    needs: assemble
+    if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+
+    needs:
+      - assemble
+
     runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     permissions:
       contents: write
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      - name: Download complete release bundle
+      - name: Download complete build
         uses: actions/download-artifact@v4
         with:
           name: complete-release-bundle
           path: release/
 
-      - name: Upload to existing GitHub Release
+      - name: Verify checksums
+        run: |
+          set -euo pipefail
+
+          cd release
+          sha256sum --check SHA256SUMS.txt
+
+      - name: Upload assets to published release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
+
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "Release tag is missing"
+            exit 1
+          fi
 
           gh release upload "$RELEASE_TAG" \
             release/dist.zip \
@@ -369,3 +684,5 @@ jobs:
             release/ChemistryUtility-linux-x64.tar.gz \
             release/SHA256SUMS.txt \
             --clobber
+
+          echo "Successfully uploaded assets to $RELEASE_TAG"
