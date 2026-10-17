@@ -2,7 +2,6 @@ import type {JSX} from "solid-js";
 import {createSignal, onCleanup, onMount} from "solid-js";
 import {useNavSheet} from "../stores/navSheet";
 import {NavigationManager} from "../../modules/navigationManager.js";
-import {isDesktop, isDesktopOnlyId} from "../lib/desktopOnly";
 import {ThemeToggle} from "./ThemeToggle";
 import styles from "./MobileBottomTabs.module.css";
 
@@ -44,9 +43,6 @@ function MobileBottomTabs(): JSX.Element {
         let pathname = window.location.pathname;
         let id = pathname.replace(/^\//, "");
         if (id === "") {
-            id = "dashboard";
-        }
-        if (!isDesktop() && isDesktopOnlyId(id)) {
             setActiveName("Chemistry Utility");
             return;
         }

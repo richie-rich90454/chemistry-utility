@@ -1,7 +1,6 @@
 import {render, cleanup, fireEvent} from "@solidjs/testing-library";
 import {describe, it, expect, afterEach, vi} from "vitest";
 import {App} from "./App";
-import {RuntimeDetector} from "../modules/runtimeDetector.js";
 import {setSidebarResizing} from "./stores/sidebarWidth";
 
 // The browser Router ignores its `url` prop; only the SSR StaticRouter reads it.
@@ -30,52 +29,29 @@ describe("App", function (): void {
     });
 });
 
-describe("desktop-only routes", function (): void {
+describe("shell", function (): void {
     afterEach(function (): void {
         vi.restoreAllMocks();
         // pushState is mocked out in test setup; replaceState is real.
         window.history.replaceState({}, "", "/");
     });
 
-    it("shows desktop-only nav links on desktop", function (): void {
+    it("renders every calculator in the navigation", function (): void {
         let result = render(function () { return <App />; });
         expect(result.getAllByText("Batch Calculator").length).toBeGreaterThan(0);
-        expect(result.getAllByText("Dashboard").length).toBeGreaterThan(0);
-        expect(result.getAllByText("Compound Search").length).toBeGreaterThan(0);
-    });
-
-    it("hides desktop-only nav links in web mode", function (): void {
-        vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
-        let result = render(function () { return <App />; });
-        expect(result.queryAllByText("Batch Calculator").length).toBe(0);
-        expect(result.queryAllByText("Dashboard").length).toBe(0);
         expect(result.getAllByText("Compound Search").length).toBeGreaterThan(0);
         expect(result.getAllByText("Molar Mass").length).toBeGreaterThan(0);
     });
 
-    it("shows the desktop notice for /dashboard in web mode", function (): void {
-        vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
-        window.history.replaceState({}, "", "/dashboard");
+    it("does not render the removed database features in the navigation", function (): void {
         let result = render(function () { return <App />; });
-        expect(result.getByRole("heading", {level: 1, name: "Desktop app only"})).toBeTruthy();
+        expect(result.queryAllByText("Dashboard").length).toBe(0);
+        expect(result.queryAllByText("Workspaces").length).toBe(0);
+        expect(result.queryAllByText("Plugins").length).toBe(0);
     });
 
-    it("shows the desktop notice for /batch-calc in web mode", function (): void {
-        vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
+    it("serves the batch calculator route", function (): void {
         window.history.replaceState({}, "", "/batch-calc");
-        let result = render(function () { return <App />; });
-        expect(result.getByRole("heading", {level: 1, name: "Desktop app only"})).toBeTruthy();
-    });
-
-    it("keeps compound search reachable in web mode", function (): void {
-        vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
-        window.history.replaceState({}, "", "/compound-search");
-        let result = render(function () { return <App />; });
-        expect(result.queryByRole("heading", {name: "Desktop app only"})).toBeNull();
-    });
-
-    it("does not show the desktop notice for /dashboard on desktop", function (): void {
-        window.history.replaceState({}, "", "/dashboard");
         let result = render(function () { return <App />; });
         expect(result.queryByRole("heading", {name: "Desktop app only"})).toBeNull();
     });
@@ -176,9 +152,7 @@ describe("legacy hash redirects", function (): void {
         ["#molecular-viewer", "/molecular-viewer"],
         ["#compound-search", "/compound-search"],
         ["#batch-calc", "/batch-calc"],
-        ["#dashboard-view", "/dashboard"],
-        ["#dashboard", "/dashboard"],
-        ["#home", "/dashboard"]
+        ["#home", "/"]
     ];
     afterEach(function (): void {
         cleanup();

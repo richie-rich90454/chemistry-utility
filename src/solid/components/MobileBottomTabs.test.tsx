@@ -5,7 +5,6 @@ import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
 import {MobileBottomTabs} from "./MobileBottomTabs";
 import {useNavSheet, reset as resetNavSheet} from "../stores/navSheet";
 import {NavigationManager} from "../../modules/navigationManager.js";
-import {RuntimeDetector} from "../../modules/runtimeDetector.js";
 function Host(): JSX.Element {
     return <MobileBottomTabs />;
 }
@@ -47,19 +46,13 @@ describe("MobileBottomTabs", function (): void {
         let sheet = useNavSheet();
         expect(sheet.isOpen()).toBe(true);
     });
-    it("shows the dashboard title for the root path on desktop", function (): void {
+    it("shows the app title for the root path", function (): void {
         let result = renderHost();
-        expect(result.getByText("Dashboard")).toBeTruthy();
-    });
-    it("falls back to the app title for desktop-only paths in web mode", function (): void {
-        vi.spyOn(RuntimeDetector.prototype, "isWebMode", "get").mockReturnValue(true);
-        let result = renderHost();
-        expect(result.queryByText("Dashboard")).toBeNull();
         expect(result.getByText("Chemistry Utility")).toBeTruthy();
     });
     it("updates the title when the path changes via popstate", async function (): Promise<void> {
         let result = renderHost();
-        expect(result.getByText("Dashboard")).toBeTruthy();
+        expect(result.getByText("Chemistry Utility")).toBeTruthy();
         window.history.replaceState({}, "", "/molar-mass");
         window.dispatchEvent(new Event("popstate"));
         await waitFor(function (): void {
@@ -79,11 +72,12 @@ describe("MobileBottomTabs", function (): void {
         });
     });
     it("clears the title when navigation notifies an unknown id", async function (): Promise<void> {
+        window.history.replaceState({}, "", "/molar-mass");
         let result = renderHost();
-        expect(result.getByText("Dashboard")).toBeTruthy();
+        expect(result.getByText("Molar Mass")).toBeTruthy();
         NavigationManager.getInstance().setActiveViewId("mystery-xyz");
         await waitFor(function (): void {
-            expect(result.queryByText("Dashboard")).toBeNull();
+            expect(result.queryByText("Molar Mass")).toBeNull();
         });
     });
 });

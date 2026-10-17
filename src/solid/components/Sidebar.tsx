@@ -1,15 +1,11 @@
 import type {JSX} from "solid-js";
-import {For, Show, createSignal, onMount} from "solid-js";
+import {For, createSignal, onMount} from "solid-js";
 import {A} from "@solidjs/router";
 import type {CalculatorInfo} from "../../modules/navigationManager.js";
 import {NavigationManager} from "../../modules/navigationManager.js";
 import {groupByCategory, calculatorIdToRoute} from "../../modules/calculatorHelper.js";
-import {isDesktop, visibleCalculators} from "../lib/desktopOnly";
 import {preloadRoute} from "../routeLoaders";
 import {ThemeToggle} from "./ThemeToggle";
-import {WorkspaceList} from "./WorkspaceList";
-import {ExportImportButtons} from "./ExportImportButtons";
-import {PluginManagerPanel} from "./PluginManagerPanel";
 import styles from "./Sidebar.module.css";
 
 function getIconContent(id: string): JSX.Element {
@@ -40,7 +36,6 @@ function getIconContent(id: string): JSX.Element {
         case "bond-type": return <><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 9v12M18 9V6M6 15l4 2 4-2 4 2"/></>;
         case "molecular-viewer": return <><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></>;
         case "batch-calc": return <><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></>;
-        case "dashboard": return <><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></>;
         default: return <circle cx="12" cy="12" r="3" fill="currentColor"/>;
     }
 }
@@ -56,7 +51,7 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
 
     function filteredCalculators(): CalculatorInfo[] {
         let q = searchQuery().toLowerCase().trim();
-        let all = visibleCalculators(calculators());
+        let all = calculators();
         if (q === "") {
             return all;
         }
@@ -110,9 +105,6 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                 </span>
                 <input type="text" placeholder="Search calculators..." aria-label="Search calculators" value={searchQuery()} onInput={handleSearchInput} autocomplete="off" spellcheck={false} />
             </div>
-            <Show when={isDesktop()}>
-                <WorkspaceList />
-            </Show>
             <div class={styles.navRecent} />
             <nav class={styles.sidebarNav} data-tour="sidebar-nav">
                 <ul>
@@ -138,10 +130,6 @@ function Sidebar(props: {collapsed?: boolean; onToggle?: () => void}): JSX.Eleme
                 </ul>
             </nav>
             <div class={styles.sidebarFooter}>
-                <Show when={isDesktop()}>
-                    <ExportImportButtons />
-                    <PluginManagerPanel />
-                </Show>
                 <p>&copy; 2026 Richard's Blogs</p>
                 <p>Main site: <a href="https://www.richardsblogs.com" target="_blank" rel="noopener noreferrer">www.richardsblogs.com</a></p>
             </div>

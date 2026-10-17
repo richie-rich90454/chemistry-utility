@@ -4,7 +4,6 @@ import type { JSX } from "solid-js";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { HomePage } from "./HomePage";
 import { NavigationManager } from "../../modules/navigationManager.js";
-import { RuntimeDetector } from "../../modules/runtimeDetector.js";
 
 function HomeHost(): JSX.Element {
     return (
@@ -38,16 +37,9 @@ describe("HomePage", () => {
         expect(link.getAttribute("href")).toBe("/molar-mass");
     });
 
-    it("mentions batch processing on desktop", () => {
+    it("mentions batch processing", () => {
         const rendered = render(() => <HomeHost />);
         expect(rendered.getByText(/Batch Calculator can process/)).toBeTruthy();
-    });
-
-    it("hides the batch note on web builds", () => {
-        vi.spyOn(RuntimeDetector, "getInstance").mockReturnValue({ isWebMode: true } as RuntimeDetector);
-        const rendered = render(() => <HomeHost />);
-        expect(rendered.queryByText(/Batch Calculator can process/)).toBeNull();
-        expect(rendered.getByText("Chemistry Utility")).toBeTruthy();
     });
 
     it("renders no groups when no calculators are visible", () => {

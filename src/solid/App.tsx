@@ -1,5 +1,5 @@
 import type {JSX} from "solid-js";
-import {createMemo, onMount} from "solid-js";
+import {onMount} from "solid-js";
 import {Router, Route, Navigate} from "@solidjs/router";
 import {HomePage} from "./routes/HomePage";
 import {lazyRoute} from "./routeLoaders";
@@ -15,7 +15,6 @@ import {ComparisonModal} from "./components/ComparisonModal";
 import {RouteTransition} from "./components/RouteTransition";
 import {createSignal} from "solid-js";
 import {onCleanup} from "solid-js";
-import {isDesktop} from "./lib/desktopOnly";
 import {useUrlState} from "./lib/useUrlState";
 import {initSidebarWidth, isResizingSidebar} from "./stores/sidebarWidth";
 // Heavy routes are code-split: each lazyRoute() key is a dynamic import
@@ -56,21 +55,12 @@ const LeChatelier = lazyRoute("/le-chatelier");
 const MolecularViewerRoute = lazyRoute("/molecular-viewer");
 const CompoundSearch = lazyRoute("/compound-search");
 const BatchCalc = lazyRoute("/batch-calc");
-const Dashboard = lazyRoute("/dashboard");
 const LabReport = lazyRoute("/report");
 function MassCalcRedirect(): JSX.Element {
     return <Navigate href="/molar-mass" />;
 }
 function CatchAllRedirect(): JSX.Element {
     return <Navigate href="/" />;
-}
-function DesktopOnlyNotice(): JSX.Element {
-    return (
-        <main aria-label="Desktop-only feature">
-            <h1>Desktop app only</h1>
-            <p>This feature is available in the desktop app, where all data stays on your machine. The anonymous web build does not include it.</p>
-        </main>
-    );
 }
 const HASH_REDIRECTS: Array<[string, string]> = [
     ["#mass-calc", "/molar-mass"],
@@ -125,9 +115,7 @@ const HASH_REDIRECTS: Array<[string, string]> = [
     ["#molecular-viewer", "/molecular-viewer"],
     ["#compound-search", "/compound-search"],
     ["#batch-calc", "/batch-calc"],
-    ["#dashboard-view", "/dashboard"],
-    ["#dashboard", "/dashboard"],
-    ["#home", "/dashboard"],
+    ["#home", "/"],
 ];
 function hashToPath(hash: string): string | null {
     for (let i = 0; i < HASH_REDIRECTS.length; i++) {
@@ -175,11 +163,6 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
  * prerender entry (src/ssr/entrySsr.tsx) share one definition.
  */
 function AppRoutes(): JSX.Element {
-    // Reactive (not a one-time snapshot) so tests/devtools toggling the
-    // runtime mode re-resolves the desktop-only routes.
-    let desktop = createMemo(function (): boolean {
-        return isDesktop();
-    });
     return (
         <Route path="/" component={AppShell}>
             <Route path="/" component={HomePage} />
@@ -219,8 +202,7 @@ function AppRoutes(): JSX.Element {
             <Route path="/le-chatelier" component={LeChatelier} />
             <Route path="/molecular-viewer" component={MolecularViewerRoute} />
             <Route path="/compound-search" component={CompoundSearch} />
-            {desktop() ? <Route path="/batch-calc" component={BatchCalc} /> : <Route path="/batch-calc" component={DesktopOnlyNotice} />}
-            {desktop() ? <Route path="/dashboard" component={Dashboard} /> : <Route path="/dashboard" component={DesktopOnlyNotice} />}
+            <Route path="/batch-calc" component={BatchCalc} />
             <Route path="/report" component={LabReport} />
             <Route path="*" component={CatchAllRedirect} />
         </Route>

@@ -223,12 +223,6 @@
         <changefreq>yearly</changefreq>
     </url>
     <url>
-        <loc>https://chemutil.richardsblogs.com/dashboard</loc>
-        <priority>0.6</priority>
-        <lastmod>2026-10-17</lastmod>
-        <changefreq>yearly</changefreq>
-    </url>
-    <url>
         <loc>https://chemutil.richardsblogs.com/mass-calc</loc>
         <priority>0.3</priority>
         <lastmod>2026-10-17</lastmod>

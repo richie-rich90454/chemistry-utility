@@ -14,7 +14,7 @@ const ROUTES = [
     "/thermodynamics", "/kinetics", "/quantum-atomic", "/stoichiometry", "/bond-type",
     "/photoelectron-spectroscopy", "/empirical-formula", "/mass-spectrometry", "/vsepr-geometry",
     "/calorimetry", "/gibbs-equilibrium", "/molality", "/beer-lambert", "/serial-dilution",
-    "/le-chatelier", "/molecular-viewer", "/compound-search", "/batch-calc", "/dashboard", "/report"
+    "/le-chatelier", "/molecular-viewer", "/compound-search", "/batch-calc", "/report"
 ];
 
 const WIDTHS = [1280, 1024, 820];

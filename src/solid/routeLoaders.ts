@@ -47,7 +47,6 @@ const ROUTE_LOADERS: Record<string, RouteLoader> = {
     "/molecular-viewer": () => import("./routes/molecular-viewer").then(m => ({default: m.MolecularViewerRoute})),
     "/compound-search": () => import("./routes/compound-search").then(m => ({default: m.CompoundSearch})),
     "/batch-calc": () => import("./routes/batch-calc").then(m => ({default: m.BatchCalc})),
-    "/dashboard": () => import("./routes/dashboard").then(m => ({default: m.Dashboard})),
     "/report": () => import("./routes/report").then(m => ({default: m.LabReport}))
 };
 

@@ -22,7 +22,7 @@ const TOUR_STEPS: TourStep[] = [
     {
         "selector": null,
         "title": "Welcome to Chemistry Utility",
-        "text": "This is a two-minute tour of the workspace: the calculator list, search, the theme control, and how to open a calculator. You can leave at any point."
+        "text": "This is a two-minute tour of the app: the calculator list, search, the theme control, and how to open a calculator. You can leave at any point."
     },
     {
         "selector": "[data-tour='sidebar']",

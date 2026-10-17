@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import { PureCalculator } from "./pureCalculator.js";
 import type {
     CalculatorResult,
-    HookSink,
     HistorySink
 } from "./pureCalculator.js";
 
@@ -41,18 +40,6 @@ class NonErrorThrowingCalculator extends PureCalculator {
     }
 }
 
-class StubHookSink implements HookSink {
-    private readonly handler: (name: string, payload: unknown) => unknown;
-
-    public constructor(handler: (name: string, payload: unknown) => unknown) {
-        this.handler = handler;
-    }
-
-    public executeHook(name: string, payload: unknown): unknown {
-        return this.handler(name, payload);
-    }
-}
-
 class RecordingHistory implements HistorySink {
     public calls: Array<{ id: string; inputs: Record<string, string>; result: string }> = [];
 
@@ -72,119 +59,34 @@ describe("PureCalculator", function () {
         expect(result.explanation).toBe("explanation");
     });
 
+    it("records history when a sink is installed", function (): void {
+        const calc = new EchoCalculator();
+        const history = new RecordingHistory();
+        calc.setHistorySink(history);
+        calc.calculatePure({ "a": "1" });
+        expect(history.calls).toHaveLength(1);
+        expect(history.calls[0].id).toBe("echo");
+        expect(history.calls[0].inputs).toEqual({ "a": "1" });
+        expect(history.calls[0].result).toBe("value:1");
+    });
+
     it("stops recording after a sink is reset to null", function (): void {
         const calc = new EchoCalculator();
         const history = new RecordingHistory();
         calc.setHistorySink(history);
-        calc.setHookSink(new StubHookSink(function (): unknown {
-            return undefined;
-        }));
         calc.calculatePure({ "a": "1" });
         calc.setHistorySink(null);
-        calc.setHookSink(null);
         calc.calculatePure({ "a": "2" });
         expect(history.calls).toHaveLength(1);
         expect(history.calls[0].id).toBe("echo");
     });
 
-    it("transforms and stringifies inputs through the before hook", function (): void {
-        const calc = new EchoCalculator();
+    it("does not record history for a failed calculation", function (): void {
+        const calc = new ThrowingCalculator();
         const history = new RecordingHistory();
         calc.setHistorySink(history);
-        calc.setHookSink(new StubHookSink(function (name: string): unknown {
-            if (name === "beforeCalculation") {
-                return { calculatorId: "echo", inputs: { "x": "1", "y": null, "z": undefined, "w": 5 } };
-            }
-            return undefined;
-        }));
-        calc.calculatePure({ "a": "orig" });
-        expect(history.calls).toHaveLength(1);
-        expect(history.calls[0].inputs).toEqual({ "x": "1", "y": "", "z": "", "w": "5" });
-    });
-
-    it("ignores an undefined before-hook result", function (): void {
-        const calc = new EchoCalculator();
-        const history = new RecordingHistory();
-        calc.setHistorySink(history);
-        calc.setHookSink(new StubHookSink(function (): unknown {
-            return undefined;
-        }));
-        calc.calculatePure({ "a": "keep" });
-        expect(history.calls[0].inputs).toEqual({ "a": "keep" });
-    });
-
-    it("ignores a null before-hook result", function (): void {
-        const calc = new EchoCalculator();
-        const history = new RecordingHistory();
-        calc.setHistorySink(history);
-        calc.setHookSink(new StubHookSink(function (name: string): unknown {
-            return name === "beforeCalculation" ? null : undefined;
-        }));
-        calc.calculatePure({ "a": "keep" });
-        expect(history.calls[0].inputs).toEqual({ "a": "keep" });
-    });
-
-    it("ignores a before-hook result without an inputs field", function (): void {
-        const calc = new EchoCalculator();
-        const history = new RecordingHistory();
-        calc.setHistorySink(history);
-        calc.setHookSink(new StubHookSink(function (name: string): unknown {
-            return name === "beforeCalculation" ? {} : undefined;
-        }));
-        calc.calculatePure({ "a": "keep" });
-        expect(history.calls[0].inputs).toEqual({ "a": "keep" });
-    });
-
-    it("ignores an undefined after-hook result", function (): void {
-        const calc = new EchoCalculator();
-        calc.setHookSink(new StubHookSink(function (): unknown {
-            return undefined;
-        }));
-        expect(calc.calculatePure({ "a": "keep" }).value).toBe("value:keep");
-    });
-
-    it("ignores a null after-hook result", function (): void {
-        const calc = new EchoCalculator();
-        calc.setHookSink(new StubHookSink(function (name: string): unknown {
-            return name === "afterCalculation" ? null : undefined;
-        }));
-        expect(calc.calculatePure({ "a": "keep" }).value).toBe("value:keep");
-    });
-
-    it("ignores an after-hook result without a result field", function (): void {
-        const calc = new EchoCalculator();
-        calc.setHookSink(new StubHookSink(function (name: string): unknown {
-            return name === "afterCalculation" ? {} : undefined;
-        }));
-        expect(calc.calculatePure({ "a": "keep" }).value).toBe("value:keep");
-    });
-
-    it("ignores a non-string after-hook result", function (): void {
-        const calc = new EchoCalculator();
-        calc.setHookSink(new StubHookSink(function (name: string): unknown {
-            return name === "afterCalculation" ? { calculatorId: "echo", result: 5 } : undefined;
-        }));
-        expect(calc.calculatePure({ "a": "keep" }).value).toBe("value:keep");
-    });
-
-    it("ignores an after-hook result equal to the original value", function (): void {
-        const calc = new EchoCalculator();
-        calc.setHookSink(new StubHookSink(function (name: string): unknown {
-            return name === "afterCalculation" ? { calculatorId: "echo", result: "value:keep" } : undefined;
-        }));
-        expect(calc.calculatePure({ "a": "keep" }).value).toBe("value:keep");
-    });
-
-    it("replaces the value but preserves the rest when the after hook returns a different string", function (): void {
-        const calc = new EchoCalculator();
-        calc.setHookSink(new StubHookSink(function (name: string): unknown {
-            return name === "afterCalculation" ? { calculatorId: "echo", result: "changed" } : undefined;
-        }));
-        const result = calc.calculatePure({ "a": "keep" });
-        expect(result.value).toBe("changed");
-        expect(result.explanation).toBe("explanation");
-        expect(result.chartData).toEqual([1, 2]);
-        expect(result.metadata).toEqual({ a: "keep" });
+        calc.calculatePure({});
+        expect(history.calls).toHaveLength(0);
     });
 
     it("captures a thrown Error as an error result", function (): void {

@@ -1,7 +1,5 @@
 import { ScrollNavigationStrategy } from "./scrollNavigationStrategy.js";
 import { AppNavigationStrategy } from "./appNavigationStrategy.js";
-import { PluginManager } from "./pluginManager.js";
-import { RuntimeDetector } from "./runtimeDetector.js";
 
 export interface NavigationStrategy {
 	navigate(targetId: string): void;
@@ -51,8 +49,7 @@ const CALCULATORS: CalculatorInfo[] = [
 	{ id: "bond-type", name: "Bond Type Predictor", category: "Reactions & Bonds", icon: "bond", description: "Predict ionic, covalent, or metallic" },
 	{ id: "vsepr-geometry", name: "VSEPR Geometry", category: "Reactions & Bonds", icon: "bond", description: "Molecular geometry, angle, polarity" },
 	{ id: "molecular-viewer", name: "Molecular Viewer", category: "Tools", icon: "molecule", description: "3D molecular structure viewer" },
-	{ id: "batch-calc", name: "Batch Calculator", category: "Tools", icon: "batch", description: "Process CSV input files" },
-	{ id: "dashboard", name: "Dashboard", category: "Tools", icon: "dashboard", description: "User analytics and history" }
+	{ id: "batch-calc", name: "Batch Calculator", category: "Tools", icon: "batch", description: "Process CSV input files" }
 ];
 
 const BREADCRUMB_CATEGORIES: Record<string, string> = {
@@ -91,8 +88,7 @@ const BREADCRUMB_CATEGORIES: Record<string, string> = {
 	"bond-type": "Reactions",
 	"vsepr-geometry": "Reactions",
 	"molecular-viewer": "Tools",
-	"batch-calc": "Tools",
-	"dashboard": "Tools"
+	"batch-calc": "Tools"
 };
 
 const FAVORITES_KEY = "favorites";
@@ -132,9 +128,6 @@ class NavigationManager {
 		if (this.activeViewId) {
 			this.pushHistory(targetId);
 		}
-		let pm: PluginManager = PluginManager.getInstance();
-		let payload: { view: string } = { view: targetId };
-		pm.executeHook("onNavigate", payload);
 		if (this.strategy) {
 			this.strategy.navigate(targetId);
 		}
@@ -159,11 +152,6 @@ class NavigationManager {
 	}
 
 	public getCalculators(): CalculatorInfo[] {
-		if (RuntimeDetector.getInstance().isWebMode) {
-			return CALCULATORS.filter(function (c: CalculatorInfo): boolean {
-				return c.id !== "batch-calc" && c.id !== "dashboard";
-			});
-		}
 		return CALCULATORS.slice();
 	}
 

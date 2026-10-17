@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { Calculator, CalculatorResult } from "./calculator.js";
 import { InputElement } from "./inputElement.js";
-import { PluginManager, Plugin } from "./pluginManager.js";
 
 class NoopCalculator extends Calculator {
     constructor(resultId: string, inputIds: string[]) {
@@ -9,18 +8,6 @@ class NoopCalculator extends Calculator {
     }
     protected performCalculation(): void {
         return;
-    }
-}
-
-class EchoCalculator extends Calculator {
-    constructor(resultId: string, inputIds: string[]) {
-        super(resultId, inputIds);
-    }
-    protected performCalculation(): void {
-        this.resultDisplay.showResult("dom-done");
-    }
-    protected override performCalculationPure(inputs: Record<string, string>): CalculatorResult {
-        return { value: "pure:" + (inputs["a"] ?? "") };
     }
 }
 
@@ -45,22 +32,6 @@ class FailingCalculator extends Calculator {
     }
 }
 
-function makePlugin(hooks: Partial<Plugin>): Plugin {
-    return {
-        manifest: {
-            name: "test-hook-plugin",
-            version: "1.0.0",
-            author: "Tester",
-            description: "hook test",
-            permissions: [],
-            lifecycleHooks: [],
-        },
-        install: (): void => {},
-        uninstall: (): void => {},
-        ...hooks,
-    };
-}
-
 function addInput(id: string, value: string): void {
     let input: HTMLInputElement = document.createElement("input");
     input.id = id;
@@ -79,13 +50,11 @@ describe("Calculator base class", () => {
     beforeEach(() => {
         document.body.innerHTML = "";
         localStorage.clear();
-        PluginManager.resetInstance();
     });
 
     afterEach(() => {
         document.body.innerHTML = "";
         localStorage.clear();
-        PluginManager.resetInstance();
         vi.restoreAllMocks();
     });
 
@@ -123,76 +92,6 @@ describe("Calculator base class", () => {
         expect(document.getElementById("in-a")!.classList.contains("error")).toBe(false);
     });
 
-    it("applies hook-transformed inputs including null and missing keys", async () => {
-        addResultDiv("r-result", "");
-        addInput("in-a", "1");
-        addInput("in-b", "2");
-        addInput("in-c", "3");
-        PluginManager.getInstance().registerPlugin(
-            makePlugin({
-                beforeCalculation: (_id: string, _inputs: Record<string, unknown>): Record<string, unknown> => ({
-                    "in-a": "9",
-                    "in-b": null,
-                }),
-            }),
-        );
-        let calc: NoopCalculator = new NoopCalculator("r-result", ["in-a", "in-b", "in-c"]);
-        await calc.calculate();
-        expect((document.getElementById("in-a") as HTMLInputElement).value).toBe("9");
-        expect((document.getElementById("in-b") as HTMLInputElement).value).toBe("2");
-        expect((document.getElementById("in-c") as HTMLInputElement).value).toBe("3");
-    });
-
-    it("applies hook-transformed results", async () => {
-        addResultDiv("r-result", "");
-        PluginManager.getInstance().registerPlugin(
-            makePlugin({
-                afterCalculation: (_id: string, _result: unknown): unknown => "hooked-result",
-            }),
-        );
-        let calc: EchoCalculator = new EchoCalculator("r-result", []);
-        await calc.calculate();
-        expect(document.getElementById("r-result")!.textContent).toBe("hooked-result");
-    });
-
-    it("ignores non-string hook results", () => {
-        PluginManager.getInstance().registerPlugin(
-            makePlugin({
-                afterCalculation: (_id: string, _result: unknown): unknown => ({ result: 42 }),
-            }),
-        );
-        addResultDiv("r-result", "");
-        let calc: EchoCalculator = new EchoCalculator("r-result", []);
-        let out: CalculatorResult = calc.calculatePure({ a: "x" });
-        expect(out.value).toBe("pure:x");
-    });
-
-    it("calculatePure applies hook result overrides with metadata preserved", () => {
-        PluginManager.getInstance().registerPlugin(
-            makePlugin({
-                afterCalculation: (_id: string, _result: unknown): unknown => "overridden",
-            }),
-        );
-        addResultDiv("r-result", "");
-        let calc: EchoCalculator = new EchoCalculator("r-result", []);
-        let out: CalculatorResult = calc.calculatePure({ a: "x" });
-        expect(out.value).toBe("overridden");
-    });
-
-    it("calculatePure stringifies hook-provided input values", () => {
-        PluginManager.getInstance().registerPlugin(
-            makePlugin({
-                beforeCalculation: (_id: string, _inputs: Record<string, unknown>): Record<string, unknown> => ({
-                    a: 7 as unknown as string,
-                    b: null as unknown as string,
-                }),
-            }),
-        );
-        addResultDiv("r-result", "");
-        let calc: EchoCalculator = new EchoCalculator("r-result", []);
-        expect(calc.calculatePure({ a: "x" }).value).toBe("pure:7");
-    });
-
     it("calculatePure surfaces non-Error throws", () => {
         addResultDiv("r-result", "");
         let calc: ThrowingPureCalculator = new ThrowingPureCalculator("r-result", []);
@@ -214,18 +113,6 @@ describe("Calculator base class", () => {
 
     it("tolerates a missing result element", async () => {
         addInput("in-a", "1");
-        let calc: NoopCalculator = new NoopCalculator("missing-result", ["in-a"]);
-        await calc.calculate();
-        expect(calc.getResultDisplay().getElement()).toBeNull();
-    });
-
-    it("applies hook results with a missing result element", async () => {
-        addInput("in-a", "1");
-        PluginManager.getInstance().registerPlugin(
-            makePlugin({
-                afterCalculation: (_id: string, _result: unknown): unknown => "late-result",
-            }),
-        );
         let calc: NoopCalculator = new NoopCalculator("missing-result", ["in-a"]);
         await calc.calculate();
         expect(calc.getResultDisplay().getElement()).toBeNull();
