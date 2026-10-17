@@ -40,7 +40,12 @@ jobs:
 
       - name: Build for GitHub Pages
         run: |
-          npx vite build --mode web --base=/chemistry-utility/
+          set -euo pipefail
+
+          npx vite build \
+            --mode web \
+            --base=/chemistry-utility/
+
           node scripts/prerender.mjs
 
       - name: Verify build output
@@ -48,18 +53,25 @@ jobs:
         run: |
           set -euo pipefail
 
+          test -d dist
           test -s dist/index.html
 
-          echo "Build completed."
-          find dist -maxdepth 2 -type f | head -50
+          echo "Website build completed successfully."
+          echo "Total generated files:"
+          find dist -type f | wc -l
 
-      - name: Disable Jekyll
+          echo "Checking generated assets:"
+          test -d dist/assets
+
+          echo "Build verification passed."
+
+      - name: Disable Jekyll processing
         run: touch dist/.nojekyll
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Upload Pages artifact
+      - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/
