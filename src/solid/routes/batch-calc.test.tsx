@@ -10,15 +10,9 @@ const mocks = vi.hoisted(function () {
 });
 vi.mock("../../modules/batchCalculator.js", function () {
     return {
-        "BatchCalculator": {
-            "getInstance": function () {
-                return {
-                    "processCsvText": mocks.mockProcessCsvText,
-                    "parseCsv": mocks.mockParseCsv,
-                    "downloadResults": mocks.mockDownloadResults
-                };
-            }
-        }
+        "processCsvText": mocks.mockProcessCsvText,
+        "parseCsv": mocks.mockParseCsv,
+        "downloadResults": mocks.mockDownloadResults
     };
 });
 vi.mock("../../modules/dom/fileAccess.js", function () {

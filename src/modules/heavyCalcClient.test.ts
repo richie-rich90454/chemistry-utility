@@ -5,11 +5,7 @@ const batchMocks = vi.hoisted(function () {
 });
 vi.mock("./batchCalculator.js", function () {
     return {
-        "BatchCalculator": {
-            "getInstance": function () {
-                return {"processCsvText": batchMocks.processCsvText};
-            }
-        }
+        "processCsvText": batchMocks.processCsvText
     };
 });
 
@@ -117,5 +113,69 @@ describe("heavyCalcClient", function (): void {
         let second = await client.runBalance("H2 + O2 -> H2O", "acidic");
         expect(second.equation).toMatch(/2 H2 \+ O2 -> 2 H2O/);
         expect(FakeWorker.instances.length).toBe(1);
+    });
+
+    it("reuses the created worker for subsequent jobs", async function (): Promise<void> {
+        let client: ClientModule = await loadClient();
+        let first: Promise<unknown> = client.runBalance("H2 + O2 -> H2O", "acidic");
+        let second: Promise<unknown> = client.runBalance("H2 + O2 -> H2O", "basic");
+        expect(FakeWorker.instances.length).toBe(1);
+        let worker: FakeWorker = latestWorker();
+        expect(worker.posted).toEqual([
+            {"id": 1, "kind": "balance", "equation": "H2 + O2 -> H2O", "medium": "acidic"},
+            {"id": 2, "kind": "balance", "equation": "H2 + O2 -> H2O", "medium": "basic"}
+        ]);
+        deliver(worker, {"id": 1, "ok": true, "result": {"equation": "first"}});
+        deliver(worker, {"id": 2, "ok": true, "result": {"equation": "second"}});
+        await expect(first).resolves.toEqual({"equation": "first"});
+        await expect(second).resolves.toEqual({"equation": "second"});
+    });
+
+    it("ignores worker messages for unknown job ids", async function (): Promise<void> {
+        let client: ClientModule = await loadClient();
+        let promise: Promise<unknown> = client.runBalance("H2 + O2 -> H2O", "acidic");
+        let worker: FakeWorker = latestWorker();
+        deliver(worker, {"id": 99, "ok": true, "result": {"equation": "ghost"}});
+        deliver(worker, {"id": 1, "ok": true, "result": {"equation": "real"}});
+        await expect(promise).resolves.toEqual({"equation": "real"});
+    });
+
+    it("ignores progress messages for a job without a progress callback", async function (): Promise<void> {
+        let client: ClientModule = await loadClient();
+        let promise: Promise<unknown> = client.runBalance("H2 + O2 -> H2O", "acidic");
+        let worker: FakeWorker = latestWorker();
+        deliver(worker, {"id": 1, "progress": {"current": 1, "total": 2}});
+        deliver(worker, {"id": 1, "ok": true, "result": {"equation": "done"}});
+        await expect(promise).resolves.toEqual({"equation": "done"});
+    });
+
+    it("propagates a batch computation error instead of falling back", async function (): Promise<void> {
+        let client: ClientModule = await loadClient();
+        let promise: Promise<unknown> = client.runBatch("formula\nH2O\n", "molar-mass");
+        deliver(latestWorker(), {"id": 1, "ok": false, "error": "bad csv"});
+        await expect(promise).rejects.toThrow("bad csv");
+        expect(batchMocks.processCsvText).not.toHaveBeenCalled();
+    });
+
+    it("falls back when constructing the worker throws", async function (): Promise<void> {
+        class ThrowingWorker {
+            constructor() {
+                throw new Error("no worker here");
+            }
+        }
+        (globalThis as {Worker?: unknown}).Worker = ThrowingWorker;
+        let client: ClientModule = await loadClient();
+        let result = await client.runBalance("H2 + O2 -> H2O", "acidic");
+        expect(result.equation).toMatch(/2 H2 \+ O2 -> 2 H2O/);
+    });
+
+    it("handles a worker failure with no pending jobs", async function (): Promise<void> {
+        let client: ClientModule = await loadClient();
+        let promise: Promise<unknown> = client.runBalance("H2 + O2 -> H2O", "acidic");
+        let worker: FakeWorker = latestWorker();
+        worker.onerror?.();
+        await promise;
+        worker.onmessageerror?.();
+        expect(worker.terminated).toBe(true);
     });
 });

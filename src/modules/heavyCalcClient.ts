@@ -1,6 +1,6 @@
 import {balanceEquation} from "./balanceEquation.js";
 import type {BalanceResult, RedoxMedium} from "./balanceEquation.js";
-import {BatchCalculator} from "./batchCalculator.js";
+import {processCsvText} from "./batchCalculator.js";
 import type {BatchResult, ProgressInfo} from "./batchCalculator.js";
 
 interface BalanceJobMessage {
@@ -154,7 +154,7 @@ function runBatch(csv: string, calculatorType: string, onProgress?: (info: Progr
         },
         function (err: unknown): Promise<BatchResult> {
             if (err instanceof WorkerTransportError) {
-                return BatchCalculator.getInstance().processCsvText(csv, calculatorType, onProgress);
+                return processCsvText(csv, calculatorType, onProgress);
             }
             throw err;
         }

@@ -1,21 +1,13 @@
 /**
- * Visual verification: The Solid-rendered Batch Calculation card should
- * match the legacy #batch-calc card in frontend/index.html. Intentional
- * diff: this route is always enabled — the Go backend server
- * (cmd/server/main.go) serves both the API (/api/v1/*) and the static
- * frontend in browser environments, so the BatchCalculator singleton's
- * HTTP calls succeed. It calls the pure processCsvText helper and owns
- * the file input, progress bar, download button, and preview table via
- * Solid signals. The legacy singleton's progressCallback is bypassed
- * (the component supplies its own onProgress) so progress UI is
- * reactive. No Playwright screenshot test is added per task spec;
- * parity is verified by manual diff of the rendered DOM against the
- * legacy markup.
+ * Batch Calculation route: run one calculator across every row of a CSV.
+ * The route owns the file input, progress bar, download button, and preview
+ * table via Solid signals; the CSV work itself runs through the shared
+ * engine seam, so it behaves the same on the website and in the desktop app.
  */
 import type {JSX} from "solid-js";
 import type {BatchResult, ProgressInfo} from "../../modules/batchCalculator.js";
 import {createSignal, For, Show} from "solid-js";
-import {BatchCalculator} from "../../modules/batchCalculator.js";
+import {downloadResults, parseCsv} from "../../modules/batchCalculator.js";
 import {getFileAccess} from "../../modules/dom/fileAccess.js";
 import {runBatch} from "../../modules/heavyCalcClient.js";
 import {CalculatorCard} from "../components/CalculatorCard";
@@ -54,7 +46,6 @@ let calculatorTypeOptions: {"value": string; "label": string}[] = [
     {"value": "heisenberg-uncertainty", "label": "Heisenberg Uncertainty"}
 ];
 function BatchCalc(): JSX.Element {
-    let calc = BatchCalculator.getInstance();
     let [calculatorType, setCalculatorType] = createSignal("molar-mass");
     let [file, setFile] = createSignal<File | null>(null);
     let [processing, setProcessing] = createSignal(false);
@@ -137,7 +128,7 @@ function BatchCalc(): JSX.Element {
         if (res === null) {
             return;
         }
-        calc.downloadResults(res.csvString, "batch-results.csv");
+        downloadResults(res.csvString, "batch-results.csv");
     }
     function handleClear(): void {
         setFile(null);
@@ -156,7 +147,7 @@ function BatchCalc(): JSX.Element {
         if (res === null) {
             return <></>;
         }
-        let rows: string[][] = calc.parseCsv(res.csvString);
+        let rows: string[][] = parseCsv(res.csvString);
         if (rows.length === 0) {
             return <></>;
         }
@@ -197,7 +188,7 @@ function BatchCalc(): JSX.Element {
             description="Upload a CSV file to run the same calculator across many rows of inputs at once. The first row must contain headers matching the calculator's input field names; each subsequent row is processed independently and appended to the results CSV."
             exampleDetails={
                 <ExampleDetails>
-                    <p>Prepare a CSV like <strong>formula\nH2O\nNaCl\n</strong>, pick <em>Molar Mass</em>, and click Process. A results CSV with molar_mass/unit/status columns is generated for download.</p>
+                    <p>Prepare a CSV like <strong>formula\nH2O\nNaCl\n</strong>, pick <em>Molar Mass</em>, and click Process. A results CSV with value/status columns is generated for download.</p>
                 </ExampleDetails>
             }
             seeAlso={

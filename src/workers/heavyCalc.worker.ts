@@ -1,6 +1,6 @@
 import {balanceEquation} from "../modules/balanceEquation.js";
 import type {BalanceResult, RedoxMedium} from "../modules/balanceEquation.js";
-import {BatchCalculator} from "../modules/batchCalculator.js";
+import {processCsvText} from "../modules/batchCalculator.js";
 import type {BatchResult, ProgressInfo} from "../modules/batchCalculator.js";
 
 interface BalanceJob {
@@ -55,7 +55,7 @@ scope.onmessage = function (event: MessageEvent<HeavyJob>): void {
         }
         return;
     }
-    BatchCalculator.getInstance().processCsvText(job.csv, job.calculatorType, function (info: ProgressInfo): void {
+    processCsvText(job.csv, job.calculatorType, function (info: ProgressInfo): void {
         let progress: ProgressMessage = {id: job.id, progress: info};
         scope.postMessage(progress);
     }).then(function (result: BatchResult): void {
