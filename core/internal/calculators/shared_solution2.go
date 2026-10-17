@@ -447,10 +447,6 @@ func titrationCurve(inputs map[string]string) (CalcResult, error) {
 	}, nil
 }
 
-func jsInt(n int) string {
-	return strconv.Itoa(n)
-}
-
 func saltGcd(a, b float64) float64 {
 	a = math.Abs(a)
 	b = math.Abs(b)

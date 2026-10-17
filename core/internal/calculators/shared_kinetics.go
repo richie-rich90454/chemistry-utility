@@ -343,7 +343,6 @@ func reactionOrder(inputs map[string]string) (CalcResult, error) {
 	}
 	if r2Second > bestR2 {
 		bestOrder = 2
-		bestR2 = r2Second
 	}
 	k, err := calculateSlope(points, bestOrder)
 	if err != nil {

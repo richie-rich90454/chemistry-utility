@@ -31,11 +31,6 @@ func parseNumber(raw string) float64 {
 	return value
 }
 
-// isNaNf is spelled out where several comparisons share one branch.
-func isNaNf(value float64) bool {
-	return math.IsNaN(value)
-}
-
 // jsParseFloat mimics JavaScript's parseFloat: the longest numeric prefix
 // wins, and anything without one reports false.
 func jsParseFloat(raw string) (float64, bool) {

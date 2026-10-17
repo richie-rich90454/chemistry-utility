@@ -371,7 +371,7 @@ func leChatelier(inputs map[string]string) (CalcResult, error) {
 			} else {
 				pressureRises = change == "decrease"
 			}
-			target := side
+			var target string
 			if pressureRises {
 				target = side
 			} else if side == "reactants" {
