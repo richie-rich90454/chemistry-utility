@@ -170,56 +170,86 @@ export function getEngine(): Engine {
 function createNativeEngine(bindings: NonNullable<ReturnType<typeof getBindings>>): Engine {
     return {
         "calculate": async function (calculatorID: string, inputs: Record<string, string>): Promise<CalculatorResult> {
-            return await bindings.go.main.CalculatorService.Calculate(calculatorID, inputs);
+            try {
+                return await bindings.go.main.CalculatorService.Calculate(calculatorID, inputs);
+            } catch (error) {
+                // The Go registry ports a subset of the calculators. An id it
+                // does not implement falls back to the calculator bundled in
+                // the desktop app, so the desktop exposes the full set.
+                let message = error instanceof Error ? error.message : String(error);
+                if (isUnknownCalculator(message) && WEB_CALCULATORS[calculatorID] !== undefined) {
+                    return runWebCalculator(calculatorID, inputs);
+                }
+                return { value: "", explanation: "Error: " + message };
+            }
         },
         "listCalculators": async function (): Promise<string[]> {
-            return await bindings.go.main.CalculatorService.ListCalculators();
+            let native = await bindings.go.main.CalculatorService.ListCalculators();
+            return Array.from(new Set(native.concat(webCalculatorIDs()))).sort();
         },
         "batchCalculate": async function (
             calculatorID: string,
             rows: Array<Record<string, string>>
         ): Promise<CalculatorResult[]> {
-            return await bindings.go.main.CalculatorService.BatchCalculate(calculatorID, rows);
+            try {
+                return await bindings.go.main.CalculatorService.BatchCalculate(calculatorID, rows);
+            } catch (error) {
+                let message = error instanceof Error ? error.message : String(error);
+                if (isUnknownCalculator(message) && WEB_CALCULATORS[calculatorID] !== undefined) {
+                    return runWebBatch(calculatorID, rows);
+                }
+                return rows.map(function (): CalculatorResult {
+                    return { value: "", explanation: "Error: " + message };
+                });
+            }
         }
     };
+}
+
+/** True when a Go error names a calculator the native registry does not have. */
+function isUnknownCalculator(message: string): boolean {
+    return message.indexOf("unknown calculator") !== -1;
+}
+
+/** Runs one TypeScript calculator, mapping a throw to the error contract. */
+function runWebCalculator(calculatorID: string, inputs: Record<string, string>): CalculatorResult {
+    let fn = WEB_CALCULATORS[calculatorID];
+    if (fn === undefined) {
+        return { value: "", explanation: "Error: unknown calculator: " + calculatorID };
+    }
+    try {
+        return fn(inputs);
+    } catch (error) {
+        let message = error instanceof Error ? error.message : String(error);
+        return { value: "", explanation: "Error: " + message };
+    }
+}
+
+/** Runs one TypeScript calculator over many rows. */
+function runWebBatch(calculatorID: string, rows: Array<Record<string, string>>): CalculatorResult[] {
+    return rows.map(function (row: Record<string, string>): CalculatorResult {
+        return runWebCalculator(calculatorID, row);
+    });
+}
+
+/** The TypeScript calculator ids, sorted. */
+function webCalculatorIDs(): string[] {
+    return Object.keys(WEB_CALCULATORS).sort();
 }
 
 function createWebEngine(): Engine {
     return {
         "calculate": function (calculatorID: string, inputs: Record<string, string>): Promise<CalculatorResult> {
-            let fn = WEB_CALCULATORS[calculatorID];
-            if (fn === undefined) {
-                return Promise.resolve({ value: "", explanation: "Error: unknown calculator: " + calculatorID });
-            }
-            try {
-                return Promise.resolve(fn(inputs));
-            } catch (error) {
-                let message = error instanceof Error ? error.message : String(error);
-                return Promise.resolve({ value: "", explanation: "Error: " + message });
-            }
+            return Promise.resolve(runWebCalculator(calculatorID, inputs));
         },
         "listCalculators": function (): Promise<string[]> {
-            return Promise.resolve(Object.keys(WEB_CALCULATORS).sort());
+            return Promise.resolve(webCalculatorIDs());
         },
         "batchCalculate": function (
             calculatorID: string,
             rows: Array<Record<string, string>>
         ): Promise<CalculatorResult[]> {
-            let fn = WEB_CALCULATORS[calculatorID];
-            if (fn === undefined) {
-                let message = "Error: unknown calculator: " + calculatorID;
-                return Promise.resolve(rows.map(() => ({ value: "", explanation: message })));
-            }
-            let results: CalculatorResult[] = [];
-            for (let i = 0; i < rows.length; i++) {
-                try {
-                    results.push(fn(rows[i]));
-                } catch (error) {
-                    let message = error instanceof Error ? error.message : String(error);
-                    results.push({ value: "", explanation: "Error: " + message });
-                }
-            }
-            return Promise.resolve(results);
+            return Promise.resolve(runWebBatch(calculatorID, rows));
         }
     };
 }
