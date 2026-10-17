@@ -4,6 +4,7 @@ import {Router, Route, Navigate} from "@solidjs/router";
 import {HomePage} from "./routes/HomePage";
 import {lazyRoute} from "./routeLoaders";
 import {Sidebar} from "./components/Sidebar";
+import {SidebarResizer} from "./components/SidebarResizer";
 import {MobileBottomTabs} from "./components/MobileBottomTabs";
 import {MobileNavSheet} from "./components/MobileNavSheet";
 import {SkipLink} from "./components/SkipLink";
@@ -13,8 +14,10 @@ import {OnboardingTour} from "./components/OnboardingTour";
 import {ComparisonModal} from "./components/ComparisonModal";
 import {RouteTransition} from "./components/RouteTransition";
 import {createSignal} from "solid-js";
+import {onCleanup} from "solid-js";
 import {isDesktop} from "./lib/desktopOnly";
 import {useUrlState} from "./lib/useUrlState";
+import {initSidebarWidth, isResizingSidebar} from "./stores/sidebarWidth";
 // Heavy routes are code-split: each lazyRoute() key is a dynamic import
 // chunk in routeLoaders.ts. The home route stays eager.
 const MolarMass = lazyRoute("/molar-mass");
@@ -144,12 +147,17 @@ function AppShell(props: {children?: JSX.Element}): JSX.Element {
     let [collapsed, setCollapsed] = createSignal(false);
     // One owner of the shareable URL state for every calculator route.
     useUrlState();
+    onMount(function (): void {
+        // Restores the saved sidebar width and keeps it clamped on resize.
+        onCleanup(initSidebarWidth());
+    });
     return (
-        <div class={"app-shell" + (collapsed() ? " nav-collapsed" : "")}>
+        <div class={"app-shell" + (collapsed() ? " nav-collapsed" : "")} data-resizing={isResizingSidebar() ? "" : undefined}>
             <aside class="nav-pane">
                 <Sidebar collapsed={collapsed()} onToggle={() => setCollapsed(!collapsed())} />
                 <MobileBottomTabs />
             </aside>
+            {collapsed() ? null : <SidebarResizer />}
             <main class="app-content" id="main-content" aria-label="Main content">
                 <SkipLink />
                 <RouteTransition>{props.children}</RouteTransition>

@@ -1,0 +1,53 @@
+/* Sidebar resize handle — its own grid column, so it never covers the
+   sidebar scrollbar. Flat accent affordance, no rounded corners. */
+
+.resizer {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: var(--app-pane);
+    border-right: 1px solid var(--app-border);
+    cursor: col-resize;
+    touch-action: none;
+    user-select: none;
+    transition: background var(--app-duration-fast) var(--app-easing),
+                border-color var(--app-duration-fast) var(--app-easing);
+}
+
+.resizer::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: -1px;
+    width: 2px;
+    height: 0;
+    background: var(--app-accent);
+    transform: translateY(-50%);
+    transition: height var(--app-duration-normal) var(--app-motion-enter);
+}
+
+.resizer:hover::before,
+.resizer:focus-visible::before {
+    height: 48px;
+}
+
+.resizer:hover {
+    background: var(--app-state-hover);
+}
+
+.resizer:focus-visible {
+    outline: none;
+    border-right-color: var(--app-accent);
+}
+
+.resizer[data-resizing] {
+    background: var(--app-state-selected);
+    border-right-color: var(--app-accent);
+}
+
+.resizer[data-resizing]::before {
+    height: 100%;
+}

@@ -57,9 +57,8 @@
     --app-scrim: rgba(15, 15, 17, 0.5);
 
     /* Layout */
-    --app-nav-width: 15%;
-    --app-input-width: 35%;
-    --app-output-width: 50%;
+    --app-nav-width: clamp(200px, 15%, 320px);
+    --app-resizer-width: 8px;
     --app-mobile-header-height: 48px;
 
     /* Spacing grid (4px base) */
@@ -89,11 +88,11 @@
     /* Zero radius — no rounded corners anywhere */
     --app-radius: 0px;
 
-    /* Motion */
-    --app-easing: cubic-bezier(0.2, 0, 0, 1);
-    --app-duration-fast: 100ms;
-    --app-duration-normal: 200ms;
-    --app-duration-slow: 300ms;
+    /* Motion — legacy names map onto the shared scale in motion.css */
+    --app-easing: var(--app-motion-standard-ease);
+    --app-duration-fast: var(--app-motion-fast);
+    --app-duration-normal: var(--app-motion-standard);
+    --app-duration-slow: var(--app-motion-slow);
 
     /* Shadows — minimal, only for overlays */
     --app-shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -338,12 +337,17 @@ h4 { font-size: 14px; }
     border: none;
     cursor: pointer;
     transition: background var(--app-duration-fast) var(--app-easing),
-                color var(--app-duration-fast) var(--app-easing);
+                color var(--app-duration-fast) var(--app-easing),
+                transform var(--app-motion-instant) var(--app-motion-standard-ease);
 }
 
 .token:hover {
     color: var(--app-text);
     background: var(--app-state-hover);
+}
+
+.token:active {
+    transform: scale(0.97);
 }
 
 .token.active,
@@ -405,6 +409,7 @@ button,
     border: none;
     cursor: pointer;
     transition: background var(--app-duration-fast) var(--app-easing),
+                transform var(--app-motion-instant) var(--app-motion-standard-ease),
                 opacity var(--app-duration-fast) var(--app-easing);
 }
 
@@ -415,7 +420,8 @@ button:hover,
 
 button:active,
 .app-btn:active {
-    opacity: 0.85;
+    opacity: 0.9;
+    transform: translateY(1px) scale(0.985);
 }
 
 button:focus-visible,
@@ -473,24 +479,29 @@ a:hover {
 }
 
 /* ============================================================
-   App LAYOUT: THREE-COLUMN DESKTOP
+   App LAYOUT: SIDEBAR + CONTENT (desktop)
    ============================================================ */
 .app-shell {
     display: grid;
-    grid-template-columns: var(--app-nav-width) var(--app-input-width) var(--app-output-width);
+    grid-template-columns: var(--app-nav-width) var(--app-resizer-width, 8px) 1fr;
     min-height: 100vh;
     background: var(--app-canvas);
-    transition: grid-template-columns var(--app-duration-normal) var(--app-easing);
+    transition: grid-template-columns var(--app-duration-normal) var(--app-motion-enter);
+}
+
+/* While dragging the resize handle, snapping the grid transition off keeps
+   the sidebar locked to the pointer. */
+.app-shell[data-resizing] {
+    transition: none;
 }
 
 /* Collapsed nav — content expands to fill space */
 .app-shell.nav-collapsed {
-    grid-template-columns: 56px 1fr;
+    grid-template-columns: 56px 0 1fr;
 }
 
 .nav-pane {
     background: var(--app-pane);
-    border-right: 1px solid var(--app-border);
     overflow-y: auto;
     height: 100vh;
     position: sticky;
@@ -499,29 +510,15 @@ a:hover {
                 border-color var(--app-duration-slow) var(--app-easing);
 }
 
-.input-pane {
-    background: var(--app-pane);
+/* The resize handle carries the divider while it is visible; collapsed, the
+   nav pane draws it again. */
+.app-shell.nav-collapsed .nav-pane {
     border-right: 1px solid var(--app-border);
-    overflow-y: auto;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    transition: background-color var(--app-duration-slow) var(--app-easing),
-                border-color var(--app-duration-slow) var(--app-easing);
 }
 
-.output-pane {
-    background: var(--app-pane);
-    overflow-y: auto;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    transition: background-color var(--app-duration-slow) var(--app-easing);
-}
-
-/* Content area — spans columns 2+ in the three-column grid */
+/* Content area — the rightmost shell column */
 .app-content {
-    grid-column: 2 / -1;
+    grid-column: 3 / -1;
     overflow-y: auto;
     height: 100vh;
     position: sticky;
@@ -549,18 +546,9 @@ a:hover {
         overflow: hidden;
     }
 
-    .input-pane {
-        height: auto;
-        min-height: auto;
-        position: relative;
-        border-right: none;
-        border-bottom: 1px solid var(--app-border);
-    }
-
-    .output-pane {
-        height: auto;
-        min-height: auto;
-        position: relative;
+    /* The resize handle only exists on the desktop layout. */
+    .app-resizer {
+        display: none;
     }
 
     .app-content {
@@ -570,8 +558,6 @@ a:hover {
         position: relative;
         overflow: visible;
     }
-
-
 }
 
 /* ============================================================
@@ -589,11 +575,11 @@ a:hover {
 }
 
 /* ============================================================
-   ANIMATIONS (minimal, no GSAP-style heavy motion)
+   ENTRANCE UTILITIES — used by overlays and inline panels
    ============================================================ */
 @media (prefers-reduced-motion: no-preference) {
     .fade-in {
-        animation: appFadeIn var(--app-duration-normal) var(--app-easing) both;
+        animation: appFadeIn var(--app-motion-standard) var(--app-motion-enter) both;
     }
 
     @keyframes appFadeIn {
@@ -602,11 +588,11 @@ a:hover {
     }
 
     .slide-up {
-        animation: appSlideUp var(--app-duration-normal) var(--app-easing) both;
+        animation: appSlideUp var(--app-motion-standard) var(--app-motion-enter) both;
     }
 
     @keyframes appSlideUp {
-        from { opacity: 0; transform: translateY(4px); }
+        from { opacity: 0; transform: translateY(6px); }
         to   { opacity: 1; transform: translateY(0); }
     }
 }

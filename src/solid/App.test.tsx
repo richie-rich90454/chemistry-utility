@@ -2,6 +2,7 @@ import {render, cleanup, fireEvent} from "@solidjs/testing-library";
 import {describe, it, expect, afterEach, vi} from "vitest";
 import {App} from "./App";
 import {RuntimeDetector} from "../modules/runtimeDetector.js";
+import {setSidebarResizing} from "./stores/sidebarWidth";
 
 // The browser Router ignores its `url` prop; only the SSR StaticRouter reads it.
 // Reading it here exercises App's `url` prop getter while still delegating the
@@ -88,6 +89,19 @@ describe("desktop-only routes", function (): void {
         expect(shell.className).toMatch(/nav-collapsed/);
         fireEvent.click(result.getByLabelText("Expand sidebar"));
         expect(shell.className).not.toMatch(/nav-collapsed/);
+        cleanup();
+    });
+
+    it("renders the sidebar resizer and reflects the drag state", function (): void {
+        window.history.replaceState({}, "", "/");
+        setSidebarResizing(false);
+        let result = render(function () { return <App />; });
+        let shell = result.container.querySelector(".app-shell") as HTMLElement;
+        expect(result.container.querySelector(".app-resizer")).toBeTruthy();
+        expect(shell.hasAttribute("data-resizing")).toBe(false);
+        setSidebarResizing(true);
+        expect(shell.hasAttribute("data-resizing")).toBe(true);
+        setSidebarResizing(false);
         cleanup();
     });
 
