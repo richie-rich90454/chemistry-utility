@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Chemistry Utility">
+    <title>Chemistry Utility</title>
+    <defs>
+        <linearGradient id="bg" gradientUnits="userSpaceOnUse" x1="26" y1="18" x2="486" y2="498">
+            <stop offset="0" stop-color="#12224F"/>
+            <stop offset="0.34" stop-color="#1E40AF"/>
+            <stop offset="0.66" stop-color="#4C1D95"/>
+            <stop offset="1" stop-color="#7C3AED"/>
+        </linearGradient>
+        <radialGradient id="sheen" gradientUnits="userSpaceOnUse" cx="168" cy="128" r="330">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/>
+            <stop offset="0.55" stop-color="#ffffff" stop-opacity="0.06"/>
+            <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="core" gradientUnits="userSpaceOnUse" cx="256" cy="256" r="118">
+            <stop offset="0" stop-color="#67E8F9" stop-opacity="0.34"/>
+            <stop offset="0.6" stop-color="#22D3EE" stop-opacity="0.10"/>
+            <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="ring" gradientUnits="userSpaceOnUse" x1="180" y1="120" x2="332" y2="392">
+            <stop offset="0" stop-color="#F0F9FF"/>
+            <stop offset="0.5" stop-color="#93C5FD"/>
+            <stop offset="1" stop-color="#A5B4FC"/>
+        </linearGradient>
+        <linearGradient id="orbit" gradientUnits="userSpaceOnUse" x1="54" y1="72" x2="466" y2="452">
+            <stop offset="0" stop-color="#ffffff" stop-opacity="0.88"/>
+            <stop offset="0.45" stop-color="#7DD3FC" stop-opacity="0.80"/>
+            <stop offset="1" stop-color="#67E8F9" stop-opacity="0.70"/>
+        </linearGradient>
+    </defs>
+
+    <rect x="0" y="0" width="512" height="512" fill="url(#bg)"/>
+    <rect x="0" y="0" width="512" height="512" fill="url(#sheen)"/>
+
+    <g transform="translate(256 256) scale(0.78) translate(-256 -256)">
+        <g opacity="0.30" fill="#E0F2FE">
+            <path d="M92 58c3.4 10.6 8.1 15.3 18.7 18.7C100.1 80.1 95.4 84.8 92 95.4 88.6 84.8 83.9 80.1 73.3 76.7 83.9 73.3 88.6 68.6 92 58z"/>
+            <path d="M424 80c2.6 8.2 6.3 11.9 14.5 14.5-8.2 2.6-11.9 6.3-14.5 14.5-2.6-8.2-6.3-11.9-14.5-14.5C417.7 91.9 421.4 88.2 424 80z"/>
+            <path d="M108 400c2.6 8.2 6.3 11.9 14.5 14.5-8.2 2.6-11.9 6.3-14.5 14.5-2.6-8.2-6.3-11.9-14.5-14.5C101.7 411.9 105.4 408.2 108 400z"/>
+            <path d="M420 392c3.1 9.7 7.4 14 17.1 17.1-9.7 3.1-14 7.4-17.1 17.1-3.1-9.7-7.4-14-17.1-17.1C412.6 406 416.9 401.7 420 392z"/>
+        </g>
+
+        <circle cx="256" cy="256" r="118" fill="url(#core)"/>
+
+        <g fill="none" stroke="url(#orbit)" stroke-width="8" stroke-linecap="round">
+            <ellipse cx="256" cy="256" rx="170" ry="68" transform="rotate(0 256 256)"/>
+            <ellipse cx="256" cy="256" rx="170" ry="68" transform="rotate(60 256 256)"/>
+            <ellipse cx="256" cy="256" rx="170" ry="68" transform="rotate(120 256 256)"/>
+        </g>
+
+        <path d="M256 128 367 192 367 320 256 384 145 320 145 192Z" fill="none" stroke="#0B1B3F" stroke-opacity="0.5" stroke-width="32" stroke-linejoin="round"/>
+        <path d="M256 128 367 192 367 320 256 384 145 320 145 192Z" fill="none" stroke="url(#ring)" stroke-width="18" stroke-linejoin="round"/>
+        <path d="M256 172 329 214 329 298 256 340 183 298 183 214Z" fill="none" stroke="#BAE6FD" stroke-opacity="0.9" stroke-width="4" stroke-dasharray="15 14" stroke-linejoin="round"/>
+
+        <g fill="#0B1B3F" fill-opacity="0.5">
+            <circle cx="256" cy="128" r="14"/>
+            <circle cx="367" cy="192" r="14"/>
+            <circle cx="367" cy="320" r="14"/>
+            <circle cx="256" cy="384" r="14"/>
+            <circle cx="145" cy="320" r="14"/>
+            <circle cx="145" cy="192" r="14"/>
+        </g>
+        <g fill="#E0F2FE">
+            <circle cx="256" cy="128" r="10"/>
+            <circle cx="367" cy="192" r="10"/>
+            <circle cx="367" cy="320" r="10"/>
+            <circle cx="256" cy="384" r="10"/>
+            <circle cx="145" cy="320" r="10"/>
+            <circle cx="145" cy="192" r="10"/>
+        </g>
+
+        <circle cx="256" cy="256" r="26" fill="#0EA5E9" opacity="0.30"/>
+        <circle cx="256" cy="256" r="17" fill="#38BDF8" opacity="0.55"/>
+        <circle cx="256" cy="256" r="10" fill="#E0F2FE"/>
+        <circle cx="252" cy="252" r="3.4" fill="#ffffff"/>
+
+        <g>
+            <circle cx="426" cy="256" r="18" fill="#0B1B3F" fill-opacity="0.45"/>
+            <circle cx="426" cy="256" r="15" fill="#22D3EE" opacity="0.34"/>
+            <circle cx="426" cy="256" r="9.5" fill="#67E8F9"/>
+            <circle cx="423" cy="253" r="3.4" fill="#ffffff"/>
+        </g>
+        <g>
+            <circle cx="171" cy="108.8" r="18" fill="#0B1B3F" fill-opacity="0.45"/>
+            <circle cx="171" cy="108.8" r="15" fill="#22D3EE" opacity="0.34"/>
+            <circle cx="171" cy="108.8" r="9.5" fill="#93C5FD"/>
+            <circle cx="168" cy="105.8" r="3.4" fill="#ffffff"/>
+        </g>
+        <g>
+            <circle cx="341" cy="403.2" r="18" fill="#0B1B3F" fill-opacity="0.45"/>
+            <circle cx="341" cy="403.2" r="15" fill="#22D3EE" opacity="0.34"/>
+            <circle cx="341" cy="403.2" r="9.5" fill="#C4B5FD"/>
+            <circle cx="338" cy="400.2" r="3.4" fill="#ffffff"/>
+        </g>
+
+        <g fill="#E0F2FE" opacity="0.5">
+            <circle cx="214" cy="92" r="3.4"/>
+            <circle cx="298" cy="420" r="3.4"/>
+            <circle cx="456" cy="330" r="3"/>
+            <circle cx="56" cy="182" r="3"/>
+        </g>
+    </g>
+</svg>

@@ -160,7 +160,11 @@ Thumbs.db
 # Build output
 /dist/
 build/bin/
-core/build/
+core/build/bin/
+core/build/package/
+core/build/tmp/
+core/build/windows/info.json
+core/build/windows/wails.exe.manifest
 *.md5
 
 # The Go wrapper embeds core/dist, and go:embed fails if the directory has no
