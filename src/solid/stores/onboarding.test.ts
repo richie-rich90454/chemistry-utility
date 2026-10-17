@@ -1,78 +1,110 @@
 import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
-import {createRoot} from "solid-js";
-import {OnboardingManager} from "../../modules/onboardingManager.js";
-import {useOnboarding} from "./onboarding";
+import {useOnboarding, TOUR_STEPS} from "./onboarding";
 
-describe("useOnboarding", function (): void {
-    let startTourSpy: ReturnType<typeof vi.spyOn>;
-    let completeTourSpy: ReturnType<typeof vi.spyOn>;
-    let isFirstRunSpy: ReturnType<typeof vi.spyOn>;
-
+describe("onboarding store", function (): void {
     beforeEach(function (): void {
-        OnboardingManager.resetInstance();
-        localStorage.clear();
-        let manager = OnboardingManager.getInstance();
-        startTourSpy = vi.spyOn(Object.getPrototypeOf(manager), "startTour").mockImplementation(function (): void {});
-        completeTourSpy = vi.spyOn(Object.getPrototypeOf(manager), "completeTour").mockImplementation(function (): void {});
-        isFirstRunSpy = vi.spyOn(Object.getPrototypeOf(manager), "isFirstRun").mockReturnValue(false);
         useOnboarding().completeTour();
+        localStorage.clear();
     });
 
     afterEach(function (): void {
-        OnboardingManager.resetInstance();
-        localStorage.clear();
         vi.restoreAllMocks();
     });
 
-    it("initial tourActive is false", function (): void {
-        createRoot(function (): void {
-            let store = useOnboarding();
-            expect(store.tourActive()).toBe(false);
-        });
+    it("starts hidden on the welcome step", function (): void {
+        expect(useOnboarding().tourActive()).toBe(false);
+        expect(useOnboarding().tourStep()).toBe(0);
     });
 
-    it("startTour sets tourActive to true and calls manager.startTour", function (): void {
-        createRoot(function (): void {
-            let store = useOnboarding();
-            store.startTour();
-            expect(store.tourActive()).toBe(true);
-            expect(startTourSpy).toHaveBeenCalled();
-        });
+    it("exposes a five-step tour that opens with the welcome card", function (): void {
+        expect(TOUR_STEPS.length).toBe(5);
+        expect(TOUR_STEPS[0].title).toBe("Welcome to Chemistry Utility");
+        expect(TOUR_STEPS[0].selector).toBeNull();
+        expect(TOUR_STEPS[4].selector).not.toBeNull();
     });
 
-    it("completeTour sets tourActive to false and calls manager.completeTour", function (): void {
-        createRoot(function (): void {
-            let store = useOnboarding();
-            store.startTour();
-            store.completeTour();
-            expect(store.tourActive()).toBe(false);
-            expect(completeTourSpy).toHaveBeenCalled();
-        });
+    it("treats a visitor with no stored completion as a first run", function (): void {
+        expect(useOnboarding().isFirstRun()).toBe(true);
     });
 
-    it("isFirstRun delegates to manager.isFirstRun", function (): void {
-        isFirstRunSpy.mockReturnValue(true);
-        createRoot(function (): void {
-            let store = useOnboarding();
-            expect(store.isFirstRun()).toBe(true);
-            expect(isFirstRunSpy).toHaveBeenCalled();
-        });
+    it("treats a stored completion as a repeat visit", function (): void {
+        localStorage.setItem("onboarding-complete", "true");
+        expect(useOnboarding().isFirstRun()).toBe(false);
     });
 
-    it("isFirstRun returns false when manager returns false", function (): void {
-        isFirstRunSpy.mockReturnValue(false);
-        createRoot(function (): void {
-            let store = useOnboarding();
-            expect(store.isFirstRun()).toBe(false);
+    it("treats an unreadable store as a first run", function (): void {
+        vi.spyOn(Storage.prototype, "getItem").mockImplementation(function (): never {
+            throw new Error("blocked");
         });
+        expect(useOnboarding().isFirstRun()).toBe(true);
     });
 
-    it("store signals are shared across multiple useOnboarding calls", function (): void {
-        createRoot(function (): void {
-            let storeA = useOnboarding();
-            let storeB = useOnboarding();
-            storeA.startTour();
-            expect(storeB.tourActive()).toBe(true);
+    it("opens the tour on the welcome step", function (): void {
+        let store = useOnboarding();
+        store.startTour();
+        expect(store.tourActive()).toBe(true);
+        expect(store.tourStep()).toBe(0);
+    });
+
+    it("advances one step at a time", function (): void {
+        let store = useOnboarding();
+        store.startTour();
+        store.nextStep();
+        expect(store.tourStep()).toBe(1);
+        store.nextStep();
+        expect(store.tourStep()).toBe(2);
+    });
+
+    it("finishes the tour from the last step", function (): void {
+        let store = useOnboarding();
+        store.startTour();
+        let i: number;
+        for (i = 0; i < TOUR_STEPS.length - 1; i++) {
+            store.nextStep();
+        }
+        expect(store.tourStep()).toBe(TOUR_STEPS.length - 1);
+        store.nextStep();
+        expect(store.tourActive()).toBe(false);
+        expect(store.tourStep()).toBe(0);
+        expect(localStorage.getItem("onboarding-complete")).toBe("true");
+    });
+
+    it("steps back and stops at the welcome step", function (): void {
+        let store = useOnboarding();
+        store.startTour();
+        store.nextStep();
+        store.previousStep();
+        expect(store.tourStep()).toBe(0);
+        store.previousStep();
+        expect(store.tourStep()).toBe(0);
+    });
+
+    it("restarts from the welcome step after finishing", function (): void {
+        let store = useOnboarding();
+        store.startTour();
+        store.nextStep();
+        store.completeTour();
+        store.startTour();
+        expect(store.tourStep()).toBe(0);
+        expect(store.tourActive()).toBe(true);
+    });
+
+    it("records completion and hides the tour", function (): void {
+        let store = useOnboarding();
+        store.startTour();
+        store.completeTour();
+        expect(store.tourActive()).toBe(false);
+        expect(store.tourStep()).toBe(0);
+        expect(localStorage.getItem("onboarding-complete")).toBe("true");
+    });
+
+    it("survives a store that refuses writes", function (): void {
+        vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (): never {
+            throw new Error("quota");
         });
+        let store = useOnboarding();
+        store.startTour();
+        expect(function (): void { store.completeTour(); }).not.toThrow();
+        expect(store.tourActive()).toBe(false);
     });
 });

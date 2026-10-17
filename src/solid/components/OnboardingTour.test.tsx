@@ -1,216 +1,284 @@
 import {render, fireEvent, cleanup, waitFor} from "@solidjs/testing-library";
 import type {JSX} from "solid-js";
 import {describe, it, expect, beforeEach, afterEach, vi} from "vitest";
-import {OnboardingManager} from "../../modules/onboardingManager.js";
 import {OnboardingTour} from "./OnboardingTour";
 import {useOnboarding} from "../stores/onboarding";
+import styles from "./OnboardingTour.module.css";
 
-function ManualStartHost(): JSX.Element {
-    let store = useOnboarding();
+/** The tour's first spotlight step targets the sidebar. */
+function TourHost(): JSX.Element {
     return (
         <>
+            <div data-tour="sidebar" id="tour-target" />
             <OnboardingTour />
-            <button type="button" onClick={function (): void { store.startTour(); }}>Start tour</button>
         </>
     );
 }
 
-describe("OnboardingTour", function (): void {
-    let startTourSpy: ReturnType<typeof vi.spyOn>;
-    let completeTourSpy: ReturnType<typeof vi.spyOn>;
-    let isFirstRunSpy: ReturnType<typeof vi.spyOn>;
+/** Lets a test open the tour by hand, mirroring the real "show me the tour" entry. */
+function ManualHost(): JSX.Element {
+    let store = useOnboarding();
+    return (
+        <>
+            <div data-tour="sidebar" id="tour-target" />
+            <button id="outside" type="button" onClick={function (): void { store.startTour(); }}>Show the tour</button>
+            <OnboardingTour />
+        </>
+    );
+}
 
+const Q = (name: string): string => "." + styles[name as keyof typeof styles];
+
+function stubRect(top: number, left: number, width: number, height: number): void {
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
+        "top": top, "left": left, "width": width, "height": height,
+        "bottom": top + height, "right": left + width, "x": left, "y": top,
+        "toJSON": function (): Record<string, number> { return {}; }
+    } as DOMRect);
+}
+
+async function openTour(): Promise<ReturnType<typeof render>> {
+    let result = render(function (): JSX.Element { return <TourHost />; });
+    await waitFor(function (): void {
+        expect(result.queryByRole("dialog")).not.toBeNull();
+    });
+    return result;
+}
+
+async function advanceTo(result: ReturnType<typeof render>, target: number): Promise<void> {
+    let guard = 0;
+    while (useOnboarding().tourStep() < target && guard < 10) {
+        fireEvent.click(result.getByRole("button", {"name": "Next"}));
+        guard++;
+    }
+}
+
+describe("OnboardingTour", function (): void {
     beforeEach(function (): void {
-        OnboardingManager.resetInstance();
+        useOnboarding().completeTour();
         localStorage.clear();
         document.body.innerHTML = "";
-        let manager = OnboardingManager.getInstance();
-        isFirstRunSpy = vi.spyOn(Object.getPrototypeOf(manager), "isFirstRun").mockReturnValue(false);
-        startTourSpy = vi.spyOn(Object.getPrototypeOf(manager), "startTour").mockImplementation(function (): void {});
-        completeTourSpy = vi.spyOn(Object.getPrototypeOf(manager), "completeTour").mockImplementation(function (): void {});
-        useOnboarding().completeTour();
     });
 
     afterEach(function (): void {
         cleanup();
-        OnboardingManager.resetInstance();
+        useOnboarding().completeTour();
         localStorage.clear();
         document.body.innerHTML = "";
         vi.restoreAllMocks();
     });
 
-    it("calls startTour on mount when isFirstRun returns true", function (): void {
-        isFirstRunSpy.mockReturnValue(true);
-        render(function () { return <OnboardingTour />; });
-        expect(startTourSpy).toHaveBeenCalled();
+    it("opens on the welcome step for a first-time visitor and settles focus inside", async function (): Promise<void> {
+        let result = await openTour();
+        expect(result.getByText("Welcome to Chemistry Utility")).toBeTruthy();
+        expect(result.getByText("1 of 5")).toBeTruthy();
+        await waitFor(function (): void {
+            expect(document.activeElement).toBe(result.getByRole("button", {"name": "Skip tour"}));
+        });
     });
 
-    it("does not call startTour on mount when isFirstRun returns false", function (): void {
-        isFirstRunSpy.mockReturnValue(false);
-        render(function () { return <OnboardingTour />; });
-        expect(startTourSpy).not.toHaveBeenCalled();
+    it("stays closed for a returning visitor", function (): void {
+        localStorage.setItem("onboarding-complete", "true");
+        let result = render(function (): JSX.Element { return <TourHost />; });
+        expect(result.queryByRole("dialog")).toBeNull();
     });
 
-    it("renders the welcome overlay when tour is active", function (): void {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
-        expect(result.getByRole("dialog")).toBeTruthy();
+    it("can be opened by hand even on a repeat visit", function (): void {
+        localStorage.setItem("onboarding-complete", "true");
+        let result = render(function (): JSX.Element { return <ManualHost />; });
+        expect(result.queryByRole("dialog")).toBeNull();
+        fireEvent.click(result.getByRole("button", {"name": "Show the tour"}));
         expect(result.getByText("Welcome to Chemistry Utility")).toBeTruthy();
     });
 
-    it("does not render the overlay when tour is inactive", function (): void {
-        isFirstRunSpy.mockReturnValue(false);
-        let result = render(function () { return <OnboardingTour />; });
-        expect(result.queryByRole("dialog")).toBeNull();
+    it("dims the whole viewport on the welcome step, with no spotlight", async function (): Promise<void> {
+        let result = await openTour();
+        expect(result.container.querySelectorAll(Q("panel")).length).toBe(1);
+        expect(result.container.querySelector(Q("spotlight"))).toBeNull();
+        expect(result.container.querySelector(Q("cardCentered"))).not.toBeNull();
     });
 
-    it("calls completeTour when the Skip tour button is clicked", function (): void {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
-        let skipButton = result.getByRole("button", {name: "Skip tour"});
-        fireEvent.click(skipButton);
-        expect(completeTourSpy).toHaveBeenCalled();
-    });
-
-    it("hides the overlay after Skip tour is clicked", function (): void {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
-        let skipButton = result.getByRole("button", {name: "Skip tour"});
-        fireEvent.click(skipButton);
-        expect(result.queryByRole("dialog")).toBeNull();
-    });
-
-    it("can be manually triggered via the store startTour function", function (): void {
-        isFirstRunSpy.mockReturnValue(false);
-        let result = render(function () { return <ManualStartHost />; });
-        expect(startTourSpy).not.toHaveBeenCalled();
-        let startButton = result.getByRole("button", {name: "Start tour"});
-        fireEvent.click(startButton);
-        expect(startTourSpy).toHaveBeenCalled();
-        expect(result.getByRole("dialog")).toBeTruthy();
-    });
-
-    it("moves focus to the dialog button when the tour opens", async function (): Promise<void> {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
+    it("advances from the welcome card into the spotlight steps", async function (): Promise<void> {
+        let result = await openTour();
+        stubRect(100, 20, 200, 40);
+        fireEvent.click(result.getByRole("button", {"name": "Next"}));
         await waitFor(function (): void {
-            expect(document.activeElement).toBe(result.getByRole("button", {name: "Skip tour"}));
+            expect(result.getByText("2 of 5")).toBeTruthy();
+        });
+        expect(result.getByText("Every calculator in one list")).toBeTruthy();
+        // Four panels carve the highlighted element out of the scrim.
+        expect(result.container.querySelectorAll(Q("panel")).length).toBe(4);
+        let spotlight = result.container.querySelector(Q("spotlight")) as HTMLElement | null;
+        expect(spotlight).not.toBeNull();
+        expect((spotlight as HTMLElement).getAttribute("style")).toContain("top: 100px");
+        expect(result.container.querySelector(Q("cardDocked"))).not.toBeNull();
+    });
+
+    it("docks the card below the target when there is room", async function (): Promise<void> {
+        let result = await openTour();
+        stubRect(100, 20, 200, 40);
+        fireEvent.click(result.getByRole("button", {"name": "Next"}));
+        await waitFor(function (): void {
+            expect(result.container.querySelector(Q("cardDocked"))).not.toBeNull();
+        });
+        let card = result.container.querySelector(Q("cardDocked")) as HTMLElement;
+        expect(card.getAttribute("style")).toContain("top: 154px");
+    });
+
+    it("flips the card above a target near the bottom edge and clamps it to the viewport", async function (): Promise<void> {
+        let result = await openTour();
+        stubRect(700, 900, 120, 60);
+        fireEvent.click(result.getByRole("button", {"name": "Next"}));
+        await waitFor(function (): void {
+            expect(result.container.querySelector(Q("cardDocked"))).not.toBeNull();
+        });
+        let card = result.container.querySelector(Q("cardDocked")) as HTMLElement;
+        let style = card.getAttribute("style") ?? "";
+        expect(style).toContain("top: 476px");
+        expect(style).toContain("left: 668px");
+    });
+
+    it("centers the card when the step's target is missing", async function (): Promise<void> {
+        let result = await openTour();
+        stubRect(0, 0, 0, 0);
+        fireEvent.click(result.getByRole("button", {"name": "Next"}));
+        await waitFor(function (): void {
+            expect(result.getByText("2 of 5")).toBeTruthy();
+        });
+        expect(result.container.querySelector(Q("spotlight"))).toBeNull();
+        expect(result.container.querySelector(Q("cardCentered"))).not.toBeNull();
+    });
+
+    it("re-measures when the viewport moves", async function (): Promise<void> {
+        let result = await openTour();
+        stubRect(100, 20, 200, 40);
+        await advanceTo(result, 1);
+        await waitFor(function (): void {
+            expect(result.container.querySelector(Q("spotlight"))).not.toBeNull();
+        });
+        stubRect(300, 30, 200, 40);
+        window.dispatchEvent(new Event("resize"));
+        window.dispatchEvent(new Event("scroll"));
+        await waitFor(function (): void {
+            let spotlight = result.container.querySelector(Q("spotlight")) as HTMLElement | null;
+            expect((spotlight as HTMLElement).getAttribute("style")).toContain("top: 300px");
         });
     });
 
-    it("completes the tour when Escape is pressed", async function (): Promise<void> {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
+    it("goes back to the welcome card", async function (): Promise<void> {
+        let result = await openTour();
+        stubRect(100, 20, 200, 40);
+        await advanceTo(result, 1);
         await waitFor(function (): void {
-            expect(result.getByRole("dialog")).toBeTruthy();
+            expect(result.getByRole("button", {"name": "Back"})).toBeTruthy();
         });
-        document.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape", bubbles: true}));
+        fireEvent.click(result.getByRole("button", {"name": "Back"}));
         await waitFor(function (): void {
-            expect(completeTourSpy).toHaveBeenCalled();
+            expect(result.getByText("1 of 5")).toBeTruthy();
         });
-        expect(result.queryByRole("dialog")).toBeNull();
+    });
+
+    it("finishes from the last step and remembers the choice", async function (): Promise<void> {
+        let result = await openTour();
+        await advanceTo(result, 4);
+        await waitFor(function (): void {
+            expect(result.getByText("5 of 5")).toBeTruthy();
+        });
+        fireEvent.click(result.getByRole("button", {"name": "Finish"}));
+        await waitFor(function (): void {
+            expect(result.queryByRole("dialog")).toBeNull();
+        });
+        expect(localStorage.getItem("onboarding-complete")).toBe("true");
+    });
+
+    it("leaves the tour from any step with Skip tour", async function (): Promise<void> {
+        let result = await openTour();
+        stubRect(100, 20, 200, 40);
+        await advanceTo(result, 2);
+        await waitFor(function (): void {
+            expect(result.getByText("3 of 5")).toBeTruthy();
+        });
+        fireEvent.click(result.getByRole("button", {"name": "Skip tour"}));
+        await waitFor(function (): void {
+            expect(result.queryByRole("dialog")).toBeNull();
+        });
+        expect(localStorage.getItem("onboarding-complete")).toBe("true");
+    });
+
+    it("closes on Escape", async function (): Promise<void> {
+        let result = await openTour();
+        document.dispatchEvent(new KeyboardEvent("keydown", {"key": "Escape", "bubbles": true}));
+        await waitFor(function (): void {
+            expect(result.queryByRole("dialog")).toBeNull();
+        });
     });
 
     it("ignores keys that are neither Escape nor Tab", async function (): Promise<void> {
-        completeTourSpy.mockClear();
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
-        await waitFor(function (): void {
-            expect(result.getByRole("dialog")).toBeTruthy();
-        });
-        document.dispatchEvent(new KeyboardEvent("keydown", {key: "a", bubbles: true}));
-        expect(completeTourSpy).not.toHaveBeenCalled();
-        expect(result.getByRole("dialog")).toBeTruthy();
+        let result = await openTour();
+        document.dispatchEvent(new KeyboardEvent("keydown", {"key": "a", "bubbles": true}));
+        expect(result.queryByRole("dialog")).not.toBeNull();
     });
 
-    it("wraps focus to the first element on Tab from the last", async function (): Promise<void> {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
-        let skip = await waitFor(function (): HTMLElement {
-            let active = document.activeElement as HTMLElement;
-            expect(active).toBe(result.getByRole("button", {name: "Skip tour"}));
-            return active;
+    it("keeps Tab inside the tour", async function (): Promise<void> {
+        let result = await openTour();
+        let next = result.getByRole("button", {"name": "Next"});
+        await waitFor(function (): void {
+            expect(document.activeElement).toBe(result.getByRole("button", {"name": "Skip tour"}));
         });
-        void skip;
-        let tabEvent = new KeyboardEvent("keydown", {key: "Tab", bubbles: true, cancelable: true});
-        document.dispatchEvent(tabEvent);
-        expect(tabEvent.defaultPrevented).toBe(true);
-        expect(document.activeElement).toBe(result.getByRole("button", {name: "Skip tour"}));
-        expect(result.getByRole("dialog")).toBeTruthy();
+        next.focus();
+        let wrapEvent = new KeyboardEvent("keydown", {"key": "Tab", "bubbles": true, "cancelable": true});
+        document.dispatchEvent(wrapEvent);
+        expect(wrapEvent.defaultPrevented).toBe(true);
+        expect(document.activeElement).toBe(result.getByRole("button", {"name": "Skip tour"}));
+
+        let skip = result.getByRole("button", {"name": "Skip tour"});
+        skip.focus();
+        let shiftEvent = new KeyboardEvent("keydown", {"key": "Tab", "shiftKey": true, "bubbles": true, "cancelable": true});
+        document.dispatchEvent(shiftEvent);
+        expect(shiftEvent.defaultPrevented).toBe(true);
+        expect(document.activeElement).toBe(next);
     });
 
-    it("wraps focus to the last element on Shift+Tab from the first", async function (): Promise<void> {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
-        await waitFor(function (): void {
-            expect(document.activeElement).toBe(result.getByRole("button", {name: "Skip tour"}));
-        });
-        let shiftTabEvent = new KeyboardEvent("keydown", {key: "Tab", shiftKey: true, bubbles: true, cancelable: true});
-        document.dispatchEvent(shiftTabEvent);
-        expect(shiftTabEvent.defaultPrevented).toBe(true);
-        expect(document.activeElement).toBe(result.getByRole("button", {name: "Skip tour"}));
-        expect(result.getByRole("dialog")).toBeTruthy();
+    it("does not wrap when focus is outside the ends of the tour", async function (): Promise<void> {
+        let result = await openTour();
+        let dialog = result.getByRole("dialog") as HTMLElement;
+        dialog.focus();
+        let plainTab = new KeyboardEvent("keydown", {"key": "Tab", "bubbles": true, "cancelable": true});
+        document.dispatchEvent(plainTab);
+        expect(plainTab.defaultPrevented).toBe(false);
+        let shiftTab = new KeyboardEvent("keydown", {"key": "Tab", "shiftKey": true, "bubbles": true, "cancelable": true});
+        document.dispatchEvent(shiftTab);
+        expect(shiftTab.defaultPrevented).toBe(false);
     });
 
-    it("restores previous focus when the tour closes", async function (): Promise<void> {
-        isFirstRunSpy.mockReturnValue(false);
-        let result = render(function () { return <ManualStartHost />; });
-        let startButton = result.getByRole("button", {name: "Start tour"}) as HTMLElement;
-        startButton.focus();
-        fireEvent.click(startButton);
+    it("restores focus to the control that opened the tour", async function (): Promise<void> {
+        localStorage.setItem("onboarding-complete", "true");
+        let result = render(function (): JSX.Element { return <ManualHost />; });
+        let opener = result.getByRole("button", {"name": "Show the tour"}) as HTMLElement;
+        opener.focus();
+        fireEvent.click(opener);
         await waitFor(function (): void {
-            expect(result.getByRole("dialog")).toBeTruthy();
+            expect(result.getByRole("dialog")).not.toBeNull();
         });
-        fireEvent.click(result.getByRole("button", {name: "Skip tour"}));
+        fireEvent.click(result.getByRole("button", {"name": "Skip tour"}));
         await waitFor(function (): void {
             expect(result.queryByRole("dialog")).toBeNull();
         });
-        expect(document.activeElement).toBe(startButton);
+        expect(document.activeElement).toBe(opener);
     });
 
-    it("does not wrap focus on Tab when focus is not on the last element", async function (): Promise<void> {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
+    it("skips focus restore when the opener is gone", async function (): Promise<void> {
+        localStorage.setItem("onboarding-complete", "true");
+        let result = render(function (): JSX.Element { return <ManualHost />; });
+        let opener = result.getByRole("button", {"name": "Show the tour"}) as HTMLElement;
+        opener.focus();
+        fireEvent.click(opener);
         await waitFor(function (): void {
-            expect(result.getByRole("dialog")).toBeTruthy();
+            expect(result.getByRole("dialog")).not.toBeNull();
         });
-        let dialog = result.getByRole("dialog") as HTMLElement;
-        dialog.focus();
-        expect(document.activeElement).toBe(dialog);
-        let tabEvent = new KeyboardEvent("keydown", {key: "Tab", bubbles: true, cancelable: true});
-        document.dispatchEvent(tabEvent);
-        expect(tabEvent.defaultPrevented).toBe(false);
-        expect(result.getByRole("dialog")).toBeTruthy();
-    });
-
-    it("skips focus restore when the previous element is gone", async function (): Promise<void> {
-        isFirstRunSpy.mockReturnValue(false);
-        let result = render(function () { return <ManualStartHost />; });
-        let startButton = result.getByRole("button", {name: "Start tour"}) as HTMLElement;
-        startButton.focus();
-        fireEvent.click(startButton);
-        await waitFor(function (): void {
-            expect(result.getByRole("dialog")).toBeTruthy();
-        });
-        startButton.remove();
-        fireEvent.click(result.getByRole("button", {name: "Skip tour"}));
-        await waitFor(function (): void {
-            expect(result.queryByRole("dialog")).toBeNull();
-        });
-    });
-
-    it("does not wrap focus on Shift+Tab when focus is not on the first element", async function (): Promise<void> {
-        isFirstRunSpy.mockReturnValue(true);
-        let result = render(function () { return <OnboardingTour />; });
-        await waitFor(function (): void {
-            expect(result.getByRole("dialog")).toBeTruthy();
-        });
-        let dialog = result.getByRole("dialog") as HTMLElement;
-        dialog.focus();
-        expect(document.activeElement).toBe(dialog);
-        let shiftTabEvent = new KeyboardEvent("keydown", {key: "Tab", shiftKey: true, bubbles: true, cancelable: true});
-        document.dispatchEvent(shiftTabEvent);
-        expect(shiftTabEvent.defaultPrevented).toBe(false);
-        expect(result.getByRole("dialog")).toBeTruthy();
+        opener.remove();
+        expect(function (): void {
+            fireEvent.click(result.getByRole("button", {"name": "Skip tour"}));
+        }).not.toThrow();
     });
 });
