@@ -1,0 +1,44 @@
+package main
+
+import (
+	"embed"
+	"log"
+
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/windows"
+)
+
+//go:embed all:dist
+var assets embed.FS
+
+func main() {
+	app := NewApp()
+
+	err := wails.Run(&options.App{
+		Title:  "Chemistry Utility",
+		Width:  800,
+		Height: 600,
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
+		OnStartup:  app.startup,
+		OnShutdown: app.shutdown,
+		Bind: []interface{}{
+			app,
+			app.ptableSvc,
+			app.calculators,
+			app.data,
+			app.files,
+		},
+		Windows: &windows.Options{
+			WebviewIsTransparent: false,
+			WindowIsTranslucent:  false,
+		},
+	})
+
+	if err != nil {
+		log.Fatal("Error starting application:", err)
+	}
+}

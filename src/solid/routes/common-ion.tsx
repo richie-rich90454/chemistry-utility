@@ -1,0 +1,68 @@
+/**
+ * Common ion effect route.
+ *
+ * Runs the solubility math through the calculation engine.
+ */
+import type {JSX} from "solid-js";
+import {getEngine} from "../../modules/engine.js";
+import {createSignal} from "solid-js";
+import {resolveResult} from "../../modules/resultResolver.js";
+import {CalculatorCard} from "../components/CalculatorCard";
+import {CalculatorForm} from "../components/CalculatorForm";
+import type {CalculatorField, CalculatorSelect} from "../components/CalculatorForm";
+import {ExampleDetails} from "../components/ExampleDetails";
+import {SeeAlsoLink} from "../components/SeeAlsoLink";
+let fields: CalculatorField[] = [
+    {"id": "common-ion-Ksp", "label": "Ksp", "placeholder": "Ksp", "ariaLabel": "Ksp value"},
+    {"id": "common-ion-concentration", "label": "Common ion concentration (M)", "placeholder": "M", "ariaLabel": "Common ion concentration"}
+];
+let selects: CalculatorSelect[] = [{
+    "id": "common-ion-salt-type",
+    "label": "Salt type",
+    "ariaLabel": "Select salt type",
+    "options": [
+        {"value": "AB", "label": "AB"},
+        {"value": "AB2", "label": "AB2"},
+        {"value": "A2B", "label": "A2B"},
+        {"value": "AB3", "label": "AB3"},
+        {"value": "A3B", "label": "A3B"}
+    ],
+    "defaultValue": "AB"
+}];
+function CommonIonEffect(): JSX.Element {
+    let engine = getEngine();
+    let [result, setResult] = createSignal("");
+    let [error, setError] = createSignal("");
+    function handleCalculate(inputs: Record<string, string>): void {
+        resolveResult(engine.calculate("common-ion", inputs), setResult, setError);
+    }
+    function handleClear(): void {
+        setResult("");
+        setError("");
+    }
+    return (
+        <CalculatorCard
+            title="Common Ion Effect Calculator - Solubility with Common Ion"
+            description="Calculate the molar solubility of a salt when a common ion is already present in solution. Compares solubility with and without the common ion, demonstrating the common ion effect on equilibrium."
+            exampleDetails={
+                <ExampleDetails>
+                    <p>Try Ksp=1.8e-10 (AgCl), common ion=0.1 M Cl-, salt type AB. Solubility drops from 1.34e-5 to 1.8e-9 M.</p>
+                </ExampleDetails>
+            }
+            seeAlso={
+                <SeeAlsoLink href="/ksp">For solubility in pure water, use the Ksp Calculator.</SeeAlsoLink>
+            }
+        >
+            <CalculatorForm
+                fields={fields}
+                selects={selects}
+                inputGroupLabel="Common ion parameters"
+                onCalculate={handleCalculate}
+                onClear={handleClear}
+                result={result}
+                error={error}
+            />
+        </CalculatorCard>
+    );
+}
+export {CommonIonEffect};

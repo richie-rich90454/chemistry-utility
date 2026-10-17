@@ -1,0 +1,76 @@
+{
+  "calculator": "heisenberg-uncertainty",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-min-delta-p",
+      "inputs": {
+        "heis-solve-for": "min-delta-p",
+        "heis-delta-x": "1e-10"
+      },
+      "expect": {
+        "value": "0.0000 kg·m/s",
+        "explanation": "Δx·Δp ≥ ħ/2 = 0.0000 J·s; Minimum Δp: 0.0000 kg·m/s",
+        "metadata": {
+          "minProduct": 5.275e-35,
+          "minDeltaP": 5.275e-25,
+          "deltaX": 1e-10
+        }
+      }
+    },
+    {
+      "id": "solve-min-delta-x",
+      "inputs": {
+        "heis-solve-for": "min-delta-x",
+        "heis-delta-p": "1e-24"
+      },
+      "expect": {
+        "value": "0.0000 m",
+        "explanation": "Δx·Δp ≥ ħ/2 = 0.0000 J·s; Minimum Δx: 0.0000 m",
+        "metadata": {
+          "minProduct": 5.275e-35,
+          "minDeltaX": 5.275e-11,
+          "deltaP": 1e-24
+        }
+      }
+    },
+    {
+      "id": "macroscopic-position",
+      "inputs": {
+        "heis-solve-for": "min-delta-p",
+        "heis-delta-x": "1e-3"
+      },
+      "expect": {
+        "value": "0.0000 kg·m/s",
+        "explanation": "Δx·Δp ≥ ħ/2 = 0.0000 J·s; Minimum Δp: 0.0000 kg·m/s",
+        "metadata": {
+          "minProduct": 5.275e-35,
+          "minDeltaP": 5.274999999999999e-32,
+          "deltaX": 0.001
+        }
+      }
+    },
+    {
+      "id": "invalid-solve-for",
+      "inputs": {
+        "heis-solve-for": "nope",
+        "heis-delta-x": "1e-10"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    },
+    {
+      "id": "missing-delta-x",
+      "inputs": {
+        "heis-solve-for": "min-delta-p",
+        "heis-delta-x": ""
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Please enter the uncertainty in position (Δx)"
+      }
+    }
+  ]
+}

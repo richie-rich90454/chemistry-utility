@@ -1,2 +1,0 @@
--- This migration is not reversible without data loss.
--- Recreate tables using 000001_init_schema.up.sql if needed.

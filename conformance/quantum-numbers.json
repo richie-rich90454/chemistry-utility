@@ -1,0 +1,123 @@
+{
+  "calculator": "quantum-numbers",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "3d-electron",
+      "inputs": {
+        "qn-n": "3",
+        "qn-l": "2",
+        "qn-ml": "1",
+        "qn-ms": "-0.5"
+      },
+      "expect": {
+        "value": "Valid quantum numbers",
+        "explanation": "n = 3 (shell M); l = 2 (subshell d); ml = 1; ms = -1/2; Orbital designation: 3d; Max electrons in 3d subshell: 10",
+        "metadata": {
+          "valid": true,
+          "n": 3,
+          "l": 2,
+          "ml": 1,
+          "ms": -0.5,
+          "shell": "M",
+          "subshell": "d",
+          "orbitalDesignation": "3d",
+          "maxElectrons": 10,
+          "errors": []
+        }
+      }
+    },
+    {
+      "id": "invalid-m",
+      "inputs": {
+        "qn-n": "2",
+        "qn-l": "0",
+        "qn-ml": "1",
+        "qn-ms": "0.5"
+      },
+      "expect": {
+        "value": "Invalid quantum numbers",
+        "explanation": "n = 2 (shell L); l = 0 (subshell s); ml = 1; ms = +1/2; Errors: ml must be an integer from -l to +l",
+        "metadata": {
+          "valid": false,
+          "n": 2,
+          "l": 0,
+          "ml": 1,
+          "ms": 0.5,
+          "shell": "L",
+          "subshell": "s",
+          "orbitalDesignation": "2s",
+          "maxElectrons": 2,
+          "errors": [
+            "ml must be an integer from -l to +l"
+          ]
+        }
+      }
+    },
+    {
+      "id": "invalid-l-out-of-range",
+      "inputs": {
+        "qn-n": "2",
+        "qn-l": "2",
+        "qn-ml": "0",
+        "qn-ms": "0.5"
+      },
+      "expect": {
+        "value": "Invalid quantum numbers",
+        "explanation": "n = 2 (shell L); l = 2 (subshell d); ml = 0; ms = +1/2; Errors: l must be an integer from 0 to n-1",
+        "metadata": {
+          "valid": false,
+          "n": 2,
+          "l": 2,
+          "ml": 0,
+          "ms": 0.5,
+          "shell": "L",
+          "subshell": "d",
+          "orbitalDesignation": "2d",
+          "maxElectrons": 10,
+          "errors": [
+            "l must be an integer from 0 to n-1"
+          ]
+        }
+      }
+    },
+    {
+      "id": "1s-electron",
+      "inputs": {
+        "qn-n": "1",
+        "qn-l": "0",
+        "qn-ml": "0",
+        "qn-ms": "0.5"
+      },
+      "expect": {
+        "value": "Valid quantum numbers",
+        "explanation": "n = 1 (shell K); l = 0 (subshell s); ml = 0; ms = +1/2; Orbital designation: 1s; Max electrons in 1s subshell: 2",
+        "metadata": {
+          "valid": true,
+          "n": 1,
+          "l": 0,
+          "ml": 0,
+          "ms": 0.5,
+          "shell": "K",
+          "subshell": "s",
+          "orbitalDesignation": "1s",
+          "maxElectrons": 2,
+          "errors": []
+        }
+      }
+    },
+    {
+      "id": "missing-inputs",
+      "inputs": {
+        "qn-n": "",
+        "qn-l": "1",
+        "qn-ml": "0",
+        "qn-ms": "0.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for qn-n, qn-l, qn-ml, qn-ms"
+      }
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "calculator": "gibbs-equilibrium",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-k",
+      "inputs": {
+        "geq-solve-for": "K",
+        "geq-delta-g": "46.5",
+        "geq-temperature": "298.15"
+      },
+      "expect": {
+        "value": "K = 7.1302e-9",
+        "explanation": "Delta G = 46.5000 kJ/mol at T = 298.1500 K; K = e^(-Delta G/(R*T)) = 7.1302e-9; The equilibrium favors reactants (K < 1)",
+        "metadata": {
+          "solveFor": "K",
+          "formula": "K = e^(-Delta G/(R*T))",
+          "result": 7.130158100719689e-9,
+          "temperature": 298.15
+        }
+      }
+    },
+    {
+      "id": "solve-k-default-temperature",
+      "inputs": {
+        "geq-solve-for": "K",
+        "geq-delta-g": "-100",
+        "geq-temperature": ""
+      },
+      "expect": {
+        "value": "K = 3.3130e+17",
+        "explanation": "Delta G = -100.0000 kJ/mol at T = 298.1500 K; K = e^(-Delta G/(R*T)) = 3.3130e+17; The equilibrium favors products (K > 1)",
+        "metadata": {
+          "solveFor": "K",
+          "formula": "K = e^(-Delta G/(R*T))",
+          "result": 331296509820175000,
+          "temperature": 298.15
+        }
+      }
+    },
+    {
+      "id": "solve-k-zero",
+      "inputs": {
+        "geq-solve-for": "K",
+        "geq-delta-g": "0",
+        "geq-temperature": "298.15"
+      },
+      "expect": {
+        "value": "K = 1.0000e+0",
+        "explanation": "Delta G = 0.0000 kJ/mol at T = 298.1500 K; K = e^(-Delta G/(R*T)) = 1.0000e+0; The equilibrium favors neither side (K = 1)",
+        "metadata": {
+          "solveFor": "K",
+          "formula": "K = e^(-Delta G/(R*T))",
+          "result": 1,
+          "temperature": 298.15
+        }
+      }
+    },
+    {
+      "id": "solve-k-hot",
+      "inputs": {
+        "geq-solve-for": "K",
+        "geq-delta-g": "46.5",
+        "geq-temperature": "500"
+      },
+      "expect": {
+        "value": "K = 1.3868e-5",
+        "explanation": "Delta G = 46.5000 kJ/mol at T = 500.0000 K; K = e^(-Delta G/(R*T)) = 1.3868e-5; The equilibrium favors reactants (K < 1)",
+        "metadata": {
+          "solveFor": "K",
+          "formula": "K = e^(-Delta G/(R*T))",
+          "result": 0.000013867655008344504,
+          "temperature": 500
+        }
+      }
+    },
+    {
+      "id": "solve-delta-g",
+      "inputs": {
+        "geq-solve-for": "delta-g",
+        "geq-k": "10",
+        "geq-temperature": "298.15"
+      },
+      "expect": {
+        "value": "Delta G = -5.7077 kJ/mol",
+        "explanation": "K = 1.0000e+1 at T = 298.1500 K; Delta G = -R*T*ln(K) = -5.7077 kJ/mol; The reaction is spontaneous under standard conditions",
+        "metadata": {
+          "solveFor": "delta-g",
+          "formula": "Delta G = -R*T*ln(K)",
+          "result": -5.707691907888917,
+          "temperature": 298.15
+        }
+      }
+    },
+    {
+      "id": "solve-delta-g-tiny-k",
+      "inputs": {
+        "geq-solve-for": "delta-g",
+        "geq-k": "0.0000000001",
+        "geq-temperature": "298.15"
+      },
+      "expect": {
+        "value": "Delta G = 57.0769 kJ/mol",
+        "explanation": "K = 1.0000e-10 at T = 298.1500 K; Delta G = -R*T*ln(K) = 57.0769 kJ/mol; The reaction is non-spontaneous under standard conditions",
+        "metadata": {
+          "solveFor": "delta-g",
+          "formula": "Delta G = -R*T*ln(K)",
+          "result": 57.076919078889155,
+          "temperature": 298.15
+        }
+      }
+    },
+    {
+      "id": "solve-delta-g-unit-k",
+      "inputs": {
+        "geq-solve-for": "delta-g",
+        "geq-k": "1",
+        "geq-temperature": "298.15"
+      },
+      "expect": {
+        "value": "Delta G = 0.0000 kJ/mol",
+        "explanation": "K = 1.0000e+0 at T = 298.1500 K; Delta G = -R*T*ln(K) = 0.0000 kJ/mol; The reaction is at equilibrium under standard conditions",
+        "metadata": {
+          "solveFor": "delta-g",
+          "formula": "Delta G = -R*T*ln(K)",
+          "result": 0,
+          "temperature": 298.15
+        }
+      }
+    },
+    {
+      "id": "invalid-solve-for",
+      "inputs": {
+        "geq-solve-for": "nope",
+        "geq-delta-g": "46.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    },
+    {
+      "id": "missing-delta-g",
+      "inputs": {
+        "geq-solve-for": "K",
+        "geq-delta-g": ""
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid input for geq-delta-g"
+      }
+    },
+    {
+      "id": "missing-k",
+      "inputs": {
+        "geq-solve-for": "delta-g",
+        "geq-k": ""
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid input for geq-k"
+      }
+    },
+    {
+      "id": "zero-k",
+      "inputs": {
+        "geq-solve-for": "delta-g",
+        "geq-k": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Equilibrium constant must be positive"
+      }
+    },
+    {
+      "id": "negative-k",
+      "inputs": {
+        "geq-solve-for": "delta-g",
+        "geq-k": "-2"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Equilibrium constant must be positive"
+      }
+    },
+    {
+      "id": "zero-temperature",
+      "inputs": {
+        "geq-solve-for": "K",
+        "geq-delta-g": "46.5",
+        "geq-temperature": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Temperature must be positive (Kelvin)"
+      }
+    }
+  ]
+}

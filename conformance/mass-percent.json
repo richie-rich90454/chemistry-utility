@@ -1,0 +1,75 @@
+{
+  "calculator": "mass-percent",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "percent",
+      "inputs": {
+        "mass-solute": "10",
+        "mass-solution": "250",
+        "concentration-unit": "percent"
+      },
+      "expect": {
+        "value": "4.0000 %",
+        "explanation": "Concentration: 4.0000 %",
+        "metadata": {
+          "concentration": 4,
+          "unit": "%",
+          "ratio": 0.04,
+          "solute": 10,
+          "solution": 250
+        }
+      }
+    },
+    {
+      "id": "ppm",
+      "inputs": {
+        "mass-solute": "0.01",
+        "mass-solution": "1000",
+        "concentration-unit": "ppm"
+      },
+      "expect": {
+        "value": "10.0000 ppm",
+        "explanation": "Concentration: 10.0000 ppm",
+        "metadata": {
+          "concentration": 10,
+          "unit": "ppm",
+          "ratio": 0.00001,
+          "solute": 0.01,
+          "solution": 1000
+        }
+      }
+    },
+    {
+      "id": "ppb",
+      "inputs": {
+        "mass-solute": "0.000001",
+        "mass-solution": "1000",
+        "concentration-unit": "ppb"
+      },
+      "expect": {
+        "value": "1.0000 ppb",
+        "explanation": "Concentration: 1.0000 ppb",
+        "metadata": {
+          "concentration": 0.9999999999999999,
+          "unit": "ppb",
+          "ratio": 9.999999999999999e-10,
+          "solute": 0.000001,
+          "solution": 1000
+        }
+      }
+    },
+    {
+      "id": "zero-solution",
+      "inputs": {
+        "mass-solute": "10",
+        "mass-solution": "0",
+        "concentration-unit": "percent"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Solution mass cannot be zero"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "calculator": "collision-theory",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "collision-T": "300",
+        "collision-Ea": "40000"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solveFor value"
+      }
+    }
+  ]
+}

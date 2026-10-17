@@ -1,0 +1,17 @@
+{
+  "calculator": "bond-enthalpy",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "bond-enthalpy-broken": "436, 243",
+        "bond-enthalpy-formed": "744, 498"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Unknown bond type: 436. Supported: C-H, C-C, C=C, C≡C, O-H, O=O, N≡N, C-O, C=O, H-H"
+      }
+    }
+  ]
+}

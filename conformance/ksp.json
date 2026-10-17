@@ -1,0 +1,52 @@
+{
+  "calculator": "ksp",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "ksp-from-solubility",
+      "inputs": {
+        "ksp-salt-type": "AB",
+        "ksp-solve-for": "Ksp",
+        "ksp-value": "",
+        "ksp-molar-solubility": "1.3e-5"
+      },
+      "expect": {
+        "value": "Ksp = 0.000000; s = 0.000013 M",
+        "explanation": "Ksp = 0.000000; Molar Solubility (s) = 0.000013 M; [A] = 0.000013 M; [B] = 0.000013 M",
+        "metadata": {
+          "Ksp": 1.6899999999999999e-10,
+          "solubility": 0.000013,
+          "concA": 0.000013,
+          "concB": 0.000013,
+          "stoichA": 1,
+          "stoichB": 1,
+          "saltType": "AB",
+          "solveFor": "Ksp"
+        }
+      }
+    },
+    {
+      "id": "solubility-from-ksp",
+      "inputs": {
+        "ksp-salt-type": "AB",
+        "ksp-solve-for": "solubility",
+        "ksp-value": "1.7e-10",
+        "ksp-molar-solubility": ""
+      },
+      "expect": {
+        "value": "Ksp = 0.000000; s = 0.000013 M",
+        "explanation": "Ksp = 0.000000; Molar Solubility (s) = 0.000013 M; [A] = 0.000013 M; [B] = 0.000013 M",
+        "metadata": {
+          "Ksp": 1.7e-10,
+          "solubility": 0.000013038404810405297,
+          "concA": 0.000013038404810405297,
+          "concB": 0.000013038404810405297,
+          "stoichA": 1,
+          "stoichB": 1,
+          "saltType": "AB",
+          "solveFor": "solubility"
+        }
+      }
+    }
+  ]
+}

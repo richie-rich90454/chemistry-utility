@@ -1,0 +1,528 @@
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { calculateDilution, calculateMassPercent, calculateMixing, calculateKsp, calculateCommonIonEffect } from "./solutionCalculators.js";
+import { predictBondType } from "./bondPredictor.js";
+import { parseBalancedEquation, parseTerm } from "./calculators/stoichiometry.js";
+import { calculateStoichiometry } from "./dom/stoichiometryDom.js";
+import { createContainer, createInput, createSelect, createResultDiv, cleanupDOM, getResultHTML } from "../test/helpers.js";
+
+describe("Solution Calculators", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("calculates M1 even when current M1 input is negative (dilution)", () => {
+		createContainer("dilution-calc");
+		createInput("dilution-M1", "-5", "dilution-calc");
+		createInput("dilution-V1", "2", "dilution-calc");
+		createInput("dilution-M2", "3", "dilution-calc");
+		createInput("dilution-V2", "4", "dilution-calc");
+		createSelect("dilution-solve-for", "M1", ["M1", "V1", "M2", "V2"], "dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
+
+		calculateDilution();
+
+		const html = getResultHTML("dilution-result");
+		expect(html).toContain("6.0000 M");
+	});
+
+	it("throws error when V1 is zero and solving for V2 (dilution)", () => {
+		createContainer("dilution-calc");
+		createInput("dilution-M1", "1", "dilution-calc");
+		createInput("dilution-V1", "0", "dilution-calc");
+		createInput("dilution-M2", "1", "dilution-calc");
+		createInput("dilution-V2", "1", "dilution-calc");
+		createSelect("dilution-solve-for", "V2", ["M1", "V1", "M2", "V2"], "dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
+
+		calculateDilution();
+
+		const html = getResultHTML("dilution-result");
+		expect(html).toContain("Initial volume must be positive");
+	});
+
+	it("returns over 100% when solute mass exceeds solution mass (massPercent)", () => {
+		createContainer("mass-percent-calc");
+		createInput("mass-solute", "150", "mass-percent-calc");
+		createInput("mass-solution", "100", "mass-percent-calc");
+		createSelect("concentration-unit", "percent", ["percent", "ppm", "ppb"], "mass-percent-calc");
+		createResultDiv("mass-percent-result", "mass-percent-calc");
+
+		calculateMassPercent();
+
+		const html = getResultHTML("mass-percent-result");
+		expect(html).toContain("150.0000 %");
+	});
+
+	it("throws error when solution mass is zero (massPercent)", () => {
+		createContainer("mass-percent-calc");
+		createInput("mass-solute", "10", "mass-percent-calc");
+		createInput("mass-solution", "0", "mass-percent-calc");
+		createSelect("concentration-unit", "percent", ["percent", "ppm", "ppb"], "mass-percent-calc");
+		createResultDiv("mass-percent-result", "mass-percent-calc");
+
+		calculateMassPercent();
+
+		const html = getResultHTML("mass-percent-result");
+		expect(html).toContain("Solution mass cannot be zero");
+	});
+
+	it("throws error when solute mass is negative (massPercent)", () => {
+		createContainer("mass-percent-calc");
+		createInput("mass-solute", "-5", "mass-percent-calc");
+		createInput("mass-solution", "100", "mass-percent-calc");
+		createSelect("concentration-unit", "percent", ["percent", "ppm", "ppb"], "mass-percent-calc");
+		createResultDiv("mass-percent-result", "mass-percent-calc");
+
+		calculateMassPercent();
+
+		const html = getResultHTML("mass-percent-result");
+		expect(html).toContain("Solute mass cannot be negative");
+	});
+
+	it("returns equal concentration when both solutions have same concentration (mixing)", () => {
+		createContainer("solution-mixing-calc");
+		createInput("mix-C1", "5", "solution-mixing-calc");
+		createInput("mix-V1", "2", "solution-mixing-calc");
+		createInput("mix-C2", "5", "solution-mixing-calc");
+		createInput("mix-V2", "3", "solution-mixing-calc");
+		createResultDiv("mixing-result", "solution-mixing-calc");
+
+		calculateMixing();
+
+		const html = getResultHTML("mixing-result");
+		expect(html).toContain("5.0000 M");
+	});
+
+	it("throws error when first solution concentration is zero (mixing)", () => {
+		createContainer("solution-mixing-calc");
+		createInput("mix-C1", "0", "solution-mixing-calc");
+		createInput("mix-V1", "1", "solution-mixing-calc");
+		createInput("mix-C2", "1", "solution-mixing-calc");
+		createInput("mix-V2", "1", "solution-mixing-calc");
+		createResultDiv("mixing-result", "solution-mixing-calc");
+
+		calculateMixing();
+
+		const html = getResultHTML("mixing-result");
+		expect(html).toContain("First solution concentration must be positive");
+	});
+
+	it("handles very large concentration and volume values (mixing)", () => {
+		createContainer("solution-mixing-calc");
+		createInput("mix-C1", "1e10", "solution-mixing-calc");
+		createInput("mix-V1", "1e10", "solution-mixing-calc");
+		createInput("mix-C2", "1e10", "solution-mixing-calc");
+		createInput("mix-V2", "1e10", "solution-mixing-calc");
+		createResultDiv("mixing-result", "solution-mixing-calc");
+
+		calculateMixing();
+
+		const html = getResultHTML("mixing-result");
+		expect(html).toContain("10000000000.0000 M");
+	});
+});
+
+describe("Bond Predictor", () => {
+	beforeEach(() => {
+		createContainer("bond-type-predictor");
+		createInput("element1-input", "", "bond-type-predictor", "text");
+		createInput("element2-input", "", "bond-type-predictor", "text");
+		createResultDiv("bond-type-result", "bond-type-predictor");
+	});
+
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("predicts ionic bond for lanthanide + non-metal", () => {
+		(document.getElementById("element1-input") as HTMLInputElement).value = "La";
+		(document.getElementById("element2-input") as HTMLInputElement).value = "Cl";
+
+		predictBondType();
+
+		const html = getResultHTML("bond-type-result");
+		expect(html).toContain("Ionic");
+	});
+
+	it("predicts metallic bond for actinide + actinide", () => {
+		(document.getElementById("element1-input") as HTMLInputElement).value = "U";
+		(document.getElementById("element2-input") as HTMLInputElement).value = "U";
+
+		predictBondType();
+
+		const html = getResultHTML("bond-type-result");
+		expect(html).toContain("Metallic");
+	});
+
+	it("predicts polar covalent bond for metalloid + non-metal", () => {
+		(document.getElementById("element1-input") as HTMLInputElement).value = "Si";
+		(document.getElementById("element2-input") as HTMLInputElement).value = "O";
+
+		predictBondType();
+
+		const html = getResultHTML("bond-type-result");
+		expect(html).toContain("Polar Covalent");
+	});
+
+	it("predicts metallic bond for transition metal + transition metal", () => {
+		(document.getElementById("element1-input") as HTMLInputElement).value = "Fe";
+		(document.getElementById("element2-input") as HTMLInputElement).value = "Fe";
+
+		predictBondType();
+
+		const html = getResultHTML("bond-type-result");
+		expect(html).toContain("Metallic");
+	});
+
+	it("predicts nonpolar covalent bond for same element (deltaEN=0)", () => {
+		(document.getElementById("element1-input") as HTMLInputElement).value = "C";
+		(document.getElementById("element2-input") as HTMLInputElement).value = "C";
+
+		predictBondType();
+
+		const html = getResultHTML("bond-type-result");
+		expect(html).toContain("Nonpolar Covalent");
+	});
+
+	it("shows not possible message for element with null electronegativity", () => {
+		(document.getElementById("element1-input") as HTMLInputElement).value = "He";
+		(document.getElementById("element2-input") as HTMLInputElement).value = "O";
+
+		predictBondType();
+
+		const html = getResultHTML("bond-type-result");
+		expect(html).toContain("unavailable electronegativity data");
+	});
+});
+
+describe("Stoichiometry", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("parses equation with spaces correctly", () => {
+		const result = parseBalancedEquation("2 H2 + O2 -> 2 H2O");
+		expect(result.reactants).toEqual([
+			{ formula: "H2", coefficient: 2 },
+			{ formula: "O2", coefficient: 1 },
+		]);
+		expect(result.products).toEqual([
+			{ formula: "H2O", coefficient: 2 },
+		]);
+	});
+
+	it("defaults coefficient to 1 when no coefficient is given", () => {
+		const result = parseTerm("H2O");
+		expect(result).toEqual({ formula: "H2O", coefficient: 1 });
+	});
+
+	it("parses multi-digit coefficient correctly", () => {
+		const result = parseTerm("12H2O");
+		expect(result).toEqual({ formula: "H2O", coefficient: 12 });
+	});
+
+	it("throws error for equation without separator", () => {
+		expect(() => parseBalancedEquation("2H2 + O2")).toThrow(
+			'Invalid equation format: missing "->"'
+		);
+	});
+
+	it("calculates product moles from reactant with 2:1 ratio", () => {
+		createContainer("stoich-calc");
+		createSelect("calculation-type", "product-from-reactant", ["product-from-reactant", "reactant-from-product", "limiting-reactant"], "stoich-calc");
+		createResultDiv("stoich-result", "stoich-calc");
+
+		const reactantSelect = document.createElement("select");
+		reactantSelect.id = "reactant-select";
+		const rOpt = document.createElement("option");
+		rOpt.value = "H2O";
+		rOpt.textContent = "H2O";
+		reactantSelect.appendChild(rOpt);
+		document.getElementById("stoich-calc")!.appendChild(reactantSelect);
+
+		createInput("reactant-moles", "4", "stoich-calc");
+
+		const productSelect = document.createElement("select");
+		productSelect.id = "product-select";
+		const pOpt = document.createElement("option");
+		pOpt.value = "O2";
+		pOpt.textContent = "O2";
+		productSelect.appendChild(pOpt);
+		document.getElementById("stoich-calc")!.appendChild(productSelect);
+
+		calculateStoichiometry("2H2O->2H2+O2");
+
+		const html = getResultHTML("stoich-result");
+		expect(html).toContain("2.00");
+	});
+
+	it("throws error when moles input is zero", () => {
+		createContainer("stoich-calc");
+		createSelect("calculation-type", "product-from-reactant", ["product-from-reactant", "reactant-from-product", "limiting-reactant"], "stoich-calc");
+		createResultDiv("stoich-result", "stoich-calc");
+
+		const reactantSelect = document.createElement("select");
+		reactantSelect.id = "reactant-select";
+		const rOpt = document.createElement("option");
+		rOpt.value = "H2O";
+		rOpt.textContent = "H2O";
+		reactantSelect.appendChild(rOpt);
+		document.getElementById("stoich-calc")!.appendChild(reactantSelect);
+
+		createInput("reactant-moles", "0", "stoich-calc");
+
+		const productSelect = document.createElement("select");
+		productSelect.id = "product-select";
+		const pOpt = document.createElement("option");
+		pOpt.value = "O2";
+		pOpt.textContent = "O2";
+		productSelect.appendChild(pOpt);
+		document.getElementById("stoich-calc")!.appendChild(productSelect);
+
+		expect(() => calculateStoichiometry("2H2O->2H2+O2")).toThrow("Invalid moles input");
+	});
+});
+
+describe("Solution Calculators - additional edge cases", () => {
+	beforeEach(() => {
+		createContainer("dilution-calc");
+		createInput("dilution-M1", "1", "dilution-calc");
+		createInput("dilution-V1", "1", "dilution-calc");
+		createInput("dilution-M2", "1", "dilution-calc");
+		createInput("dilution-V2", "1", "dilution-calc");
+		createSelect("dilution-solve-for", "V2", ["M1", "V1", "M2", "V2"], "dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
+
+		createContainer("mass-percent-calc");
+		createInput("mass-solute", "10", "mass-percent-calc");
+		createInput("mass-solution", "100", "mass-percent-calc");
+		createSelect("concentration-unit", "percent", ["percent", "ppm", "ppb"], "mass-percent-calc");
+		createResultDiv("mass-percent-result", "mass-percent-calc");
+
+		createContainer("solution-mixing-calc");
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "1", "solution-mixing-calc");
+		createInput("mix-C2", "2", "solution-mixing-calc");
+		createInput("mix-V2", "1", "solution-mixing-calc");
+		createResultDiv("mixing-result", "solution-mixing-calc");
+	});
+	afterEach(() => { cleanupDOM(); });
+
+	it("dilution with very small concentrations", () => {
+		(document.getElementById("dilution-M1") as HTMLInputElement).value = "0.001";
+		(document.getElementById("dilution-V1") as HTMLInputElement).value = "1";
+		(document.getElementById("dilution-M2") as HTMLInputElement).value = "0.0001";
+		(document.getElementById("dilution-V2") as HTMLInputElement).value = "10";
+		(document.getElementById("dilution-solve-for") as HTMLSelectElement).value = "V2";
+		calculateDilution();
+		const html = getResultHTML("dilution-result");
+		expect(html).toContain("Result:");
+	});
+
+	it("mass percent in ppb with trace amounts", () => {
+		(document.getElementById("mass-solute") as HTMLInputElement).value = "0.001";
+		(document.getElementById("mass-solution") as HTMLInputElement).value = "1000";
+		(document.getElementById("concentration-unit") as HTMLSelectElement).value = "ppb";
+		calculateMassPercent();
+		const html = getResultHTML("mass-percent-result");
+		expect(html).toContain("ppb");
+	});
+
+	it("mixing with same concentration returns same value", () => {
+		(document.getElementById("mix-C1") as HTMLInputElement).value = "1.5";
+		(document.getElementById("mix-V1") as HTMLInputElement).value = "2";
+		(document.getElementById("mix-C2") as HTMLInputElement).value = "1.5";
+		(document.getElementById("mix-V2") as HTMLInputElement).value = "3";
+		calculateMixing();
+		const html = getResultHTML("mixing-result");
+		expect(html).toContain("1.5000 M");
+	});
+});
+
+describe("Solution Calculators - more edge cases", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("dilution: solves for M1 correctly", () => {
+		createContainer("dilution-calc");
+		createInput("dilution-M1", "", "dilution-calc");
+		createInput("dilution-V1", "1", "dilution-calc");
+		createInput("dilution-M2", "2", "dilution-calc");
+		createInput("dilution-V2", "4", "dilution-calc");
+		createSelect("dilution-solve-for", "M1", ["M1", "V1", "M2", "V2"], "dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
+		calculateDilution();
+		const html = getResultHTML("dilution-result");
+		expect(html).toContain("8.0000 M");
+	});
+
+	it("dilution: solves for V1 correctly", () => {
+		createContainer("dilution-calc");
+		createInput("dilution-M1", "6", "dilution-calc");
+		createInput("dilution-V1", "", "dilution-calc");
+		createInput("dilution-M2", "2", "dilution-calc");
+		createInput("dilution-V2", "3", "dilution-calc");
+		createSelect("dilution-solve-for", "V1", ["M1", "V1", "M2", "V2"], "dilution-calc");
+		createResultDiv("dilution-result", "dilution-calc");
+		calculateDilution();
+		const html = getResultHTML("dilution-result");
+		expect(html).toContain("1.0000 L");
+	});
+
+	it("mass percent: ppm conversion is correct", () => {
+		createContainer("mass-percent-calc");
+		createInput("mass-solute", "1", "mass-percent-calc");
+		createInput("mass-solution", "1000", "mass-percent-calc");
+		createSelect("concentration-unit", "ppm", ["percent", "ppm", "ppb"], "mass-percent-calc");
+		createResultDiv("mass-percent-result", "mass-percent-calc");
+		calculateMassPercent();
+		const html = getResultHTML("mass-percent-result");
+		expect(html).toContain("1000.0000 ppm");
+	});
+
+	it("mixing: throws error when both volumes are zero", () => {
+		createContainer("solution-mixing-calc");
+		createInput("mix-C1", "1", "solution-mixing-calc");
+		createInput("mix-V1", "0", "solution-mixing-calc");
+		createInput("mix-C2", "2", "solution-mixing-calc");
+		createInput("mix-V2", "0", "solution-mixing-calc");
+		createResultDiv("mixing-result", "solution-mixing-calc");
+		calculateMixing();
+		const html = getResultHTML("mixing-result");
+		expect(html).toContain("Error");
+	});
+
+	it("bond predictor: shows error for unknown element", () => {
+		createContainer("bond-type-predictor");
+		createInput("element1-input", "Xx", "bond-type-predictor", "text");
+		createInput("element2-input", "O", "bond-type-predictor", "text");
+		createResultDiv("bond-type-result", "bond-type-predictor");
+		predictBondType();
+		const html = getResultHTML("bond-type-result");
+		expect(html).toContain("not found");
+	});
+
+	it("stoichiometry: parseBalancedEquation handles extra spaces", () => {
+		const result = parseBalancedEquation("  2  H2  +  O2  ->  2  H2O  ");
+		expect(result.reactants).toEqual([
+			{ formula: "H2", coefficient: 2 },
+			{ formula: "O2", coefficient: 1 },
+		]);
+		expect(result.products).toEqual([
+			{ formula: "H2O", coefficient: 2 },
+		]);
+	});
+});
+
+describe("Ksp Calculator - charge display", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("displays correct charges for AB2 salt (e.g. CaCl2: Ca^2+, Cl^1-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "AB2", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For AB2 (e.g. CaCl2): A is cation with charge +2 (= stoichB), B is anion with charge -1 (= stoichA)
+		expect(html).toContain("[A<sup>2+</sup>]");
+		expect(html).toContain("[B<sup>1-</sup>]");
+	});
+
+	it("displays correct charges for A2B salt (e.g. Na2S: Na^1+, S^2-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "A2B", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For A2B (e.g. Na2S): A is cation with charge +1 (= stoichB), B is anion with charge -2 (= stoichA)
+		expect(html).toContain("[A<sup>1+</sup>]");
+		expect(html).toContain("[B<sup>2-</sup>]");
+	});
+
+	it("displays correct charges for AB3 salt (e.g. FeCl3: Fe^3+, Cl^1-)", () => {
+		createContainer("ksp-calc");
+		createSelect("ksp-solve-for", "Ksp", ["Ksp", "solubility"], "ksp-calc");
+		createSelect("ksp-salt-type", "AB3", ["AB", "AB2", "A2B", "AB3", "A3B"], "ksp-calc");
+		createInput("ksp-value", "", "ksp-calc");
+		createInput("ksp-molar-solubility", "0.001", "ksp-calc");
+		createResultDiv("ksp-result", "ksp-calc");
+
+		calculateKsp();
+
+		const html = getResultHTML("ksp-result");
+		// For AB3 (e.g. FeCl3): A is cation with charge +3 (= stoichB), B is anion with charge -1 (= stoichA)
+		expect(html).toContain("[A<sup>3+</sup>]");
+		expect(html).toContain("[B<sup>1-</sup>]");
+	});
+});
+
+describe("Common Ion Effect - solubility formula", () => {
+	afterEach(() => {
+		cleanupDOM();
+	});
+
+	it("A2B salt: solubility includes the /stoichA factor (Na2S with common S^2-)", () => {
+		// Ksp = [A]^2 * [B] = (2s)^2 * (commonIonConc) = 4 s^2 * commonIonConc
+		// s = sqrt(Ksp / commonIonConc) / stoichA = sqrt(1.48e-8 / 0.1) / 2
+		//   = sqrt(1.48e-7) / 2 = 3.847e-4 / 2 = 1.9235e-4 -> 0.000192
+		createContainer("common-ion-calc");
+		createSelect("common-ion-salt-type", "A2B", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+		createInput("common-ion-Ksp", "0.0000000148", "common-ion-calc");
+		createInput("common-ion-concentration", "0.1", "common-ion-calc");
+		createResultDiv("common-ion-result", "common-ion-calc");
+
+		calculateCommonIonEffect();
+
+		const html = getResultHTML("common-ion-result");
+		// Correct solubility is 0.000192 M; buggy formula (missing /stoichA) gives 0.000385 M
+		expect(html).toContain("Molar Solubility (with common ion) = 0.000192 M");
+		expect(html).not.toContain("Molar Solubility (with common ion) = 0.000385 M");
+	});
+
+	it("A3B salt: solubility includes the /stoichA factor", () => {
+		// Ksp = [A]^3 * [B] = (3s)^3 * (commonIonConc) = 27 s^3 * commonIonConc
+		// s = (Ksp / commonIonConc)^(1/3) / stoichA = (1.48e-12 / 0.05)^(1/3) / 3
+		//   = (2.96e-11)^(1/3) / 3 = 3.093e-4 / 3 = 1.031e-4 -> 0.000103
+		createContainer("common-ion-calc");
+		createSelect("common-ion-salt-type", "A3B", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+		createInput("common-ion-Ksp", "0.00000000000148", "common-ion-calc");
+		createInput("common-ion-concentration", "0.05", "common-ion-calc");
+		createResultDiv("common-ion-result", "common-ion-calc");
+
+		calculateCommonIonEffect();
+
+		const html = getResultHTML("common-ion-result");
+		// Correct solubility is 0.000103 M; buggy formula gives 0.000309 M
+		expect(html).toContain("Molar Solubility (with common ion) = 0.000103 M");
+		expect(html).not.toContain("Molar Solubility (with common ion) = 0.000309 M");
+	});
+
+	it("rejects zero common ion concentration instead of returning Infinity", () => {
+		// With commonIonConc = 0 the formula Ksp / commonIonConc^stoichB divides by
+		// zero and yields Infinity, which is meaningless for this calculator.
+		createContainer("common-ion-calc");
+		createSelect("common-ion-salt-type", "AB", ["AB", "AB2", "A2B", "AB3", "A3B"], "common-ion-calc");
+		createInput("common-ion-Ksp", "0.00000000018", "common-ion-calc");
+		createInput("common-ion-concentration", "0", "common-ion-calc");
+		createResultDiv("common-ion-result", "common-ion-calc");
+
+		calculateCommonIonEffect();
+
+		const html = getResultHTML("common-ion-result");
+		expect(html).not.toContain("Infinity");
+		expect(html).toContain("Error");
+	});
+});

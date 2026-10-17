@@ -1,0 +1,51 @@
+import {render} from "solid-js/web";
+import type {JSX} from "solid-js";
+import {App} from "./App";
+import {preloadRoute} from "./routeLoaders";
+import {RuntimeDetector} from "../modules/runtimeDetector.js";
+import "./styles/global.css";
+
+// Wails ships no service worker. A stale PWA service worker registered by an
+// earlier build persists in the WebView2 profile and intercepts wails-dev
+// fetches and route navigations, breaking them ("Failed to convert value to
+// Response"). Unregister it and drop its caches before the app boots.
+function clearStaleServiceWorker(): void {
+    if (!RuntimeDetector.getInstance().isWails) {
+        return;
+    }
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function (regs: readonly ServiceWorkerRegistration[]): void {
+            for (let i = 0; i < regs.length; i++) {
+                regs[i].unregister();
+            }
+        }).catch(function (): void { /* best effort */ });
+    }
+    if ("caches" in window) {
+        caches.keys().then(function (keys: string[]): void {
+            for (let i = 0; i < keys.length; i++) {
+                caches.delete(keys[i]);
+            }
+        }).catch(function (): void { /* best effort */ });
+    }
+}
+
+async function initializeSolidApp(): Promise<void> {
+    let root: HTMLElement | null = document.getElementById("root");
+    if (root === null) {
+        return;
+    }
+    // The entry route's chunk is fetched before the first render so the
+    // desktop shell opens straight onto its content.
+    try {
+        await preloadRoute(window.location.pathname.replace(/\/+$/, "") || "/");
+    }
+    catch {
+        /* render anyway; the route mounts once its chunk arrives */
+    }
+    // CSR only: the embedded desktop bundle ships no prerendered HTML, no SEO
+    // markup, no manifest and no service worker.
+    render(function (): JSX.Element { return <App />; }, root);
+}
+
+clearStaleServiceWorker();
+initializeSolidApp();

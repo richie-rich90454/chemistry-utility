@@ -1,0 +1,46 @@
+{
+  "calculator": "pka-pkb",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "ka-to-pka",
+      "inputs": {
+        "pka-pkb-input-type": "Ka",
+        "pka-pkb-input-value": "1.8e-5"
+      },
+      "expect": {
+        "value": "pKa = 4.7447; pKb = 9.2553",
+        "explanation": "Ka = 0.000018; pKa = 4.7447; Kb = 0.000000; pKb = 9.2553; Ka * Kb = Kw = 1.0000 x 10^-14",
+        "metadata": {
+          "Ka": 0.000018,
+          "pKa": 4.7447274948966935,
+          "Kb": 5.55555555555555e-10,
+          "pKb": 9.255272505103306,
+          "Kw": 9.99999999999999e-15,
+          "inputType": "Ka",
+          "inputValue": 0.000018
+        }
+      }
+    },
+    {
+      "id": "kb-to-pkb",
+      "inputs": {
+        "pka-pkb-input-type": "Kb",
+        "pka-pkb-input-value": "1.8e-5"
+      },
+      "expect": {
+        "value": "pKa = 9.2553; pKb = 4.7447",
+        "explanation": "Ka = 0.000000; pKa = 9.2553; Kb = 0.000018; pKb = 4.7447; Ka * Kb = Kw = 1.0000 x 10^-14",
+        "metadata": {
+          "Ka": 5.55555555555555e-10,
+          "pKa": 9.255272505103306,
+          "Kb": 0.000018,
+          "pKb": 4.7447274948966935,
+          "Kw": 9.99999999999999e-15,
+          "inputType": "Kb",
+          "inputValue": 0.000018
+        }
+      }
+    }
+  ]
+}

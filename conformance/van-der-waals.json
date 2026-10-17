@@ -1,0 +1,62 @@
+{
+  "calculator": "van-der-waals",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "co2",
+      "inputs": {
+        "vdw-V": "5",
+        "vdw-n": "2",
+        "vdw-T": "400",
+        "vdw-a": "3.592",
+        "vdw-b": "0.0427"
+      },
+      "expect": {
+        "value": "P=12.7830 atm",
+        "explanation": "P=(nRT)/(V-nb) - a(n/V)² = 12.7830 atm (R = 0.08206 L·atm/(mol·K))"
+      }
+    },
+    {
+      "id": "ideal-like",
+      "inputs": {
+        "vdw-V": "24.79",
+        "vdw-n": "1",
+        "vdw-T": "298.15",
+        "vdw-a": "0",
+        "vdw-b": "0"
+      },
+      "expect": {
+        "value": "P=0.9869 atm",
+        "explanation": "P=(nRT)/(V-nb) - a(n/V)² = 0.9869 atm (R = 0.08206 L·atm/(mol·K))"
+      }
+    },
+    {
+      "id": "volume-too-small",
+      "inputs": {
+        "vdw-V": "0.01",
+        "vdw-n": "1",
+        "vdw-T": "298.15",
+        "vdw-a": "3.592",
+        "vdw-b": "0.0427"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Volume is too small for the given amount of gas (V must be greater than n*b)"
+      }
+    },
+    {
+      "id": "negative-a",
+      "inputs": {
+        "vdw-V": "5",
+        "vdw-n": "1",
+        "vdw-T": "300",
+        "vdw-a": "-1",
+        "vdw-b": "0.04"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Van der Waals constants a and b cannot be negative"
+      }
+    }
+  ]
+}

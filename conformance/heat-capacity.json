@@ -1,0 +1,102 @@
+{
+  "calculator": "heat-capacity",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-q",
+      "inputs": {
+        "heat-cap-solve-for": "q",
+        "heat-cap-mass": "50",
+        "heat-cap-specific-heat": "4.184",
+        "heat-cap-initial-temp": "25",
+        "heat-cap-final-temp": "75"
+      },
+      "expect": {
+        "value": "Heat: 10460.0000 J",
+        "explanation": "q = m*c*dT = 50.0000 * 4.1840 * 50.0000 = 10460.0000 J",
+        "metadata": {
+          "q": 10460,
+          "mass": 50,
+          "c": 4.184,
+          "deltaT": 50,
+          "solveFor": "q"
+        }
+      }
+    },
+    {
+      "id": "solve-c",
+      "inputs": {
+        "heat-cap-solve-for": "c",
+        "heat-cap-mass": "50",
+        "heat-cap-heat": "10460",
+        "heat-cap-initial-temp": "25",
+        "heat-cap-final-temp": "75"
+      },
+      "expect": {
+        "value": "Specific Heat: 4.1840 J/(g*K)",
+        "explanation": "c = q/(m*dT) = 10460.0000 / (50.0000 * 50.0000) = 4.1840 J/(g*K)",
+        "metadata": {
+          "c": 4.184,
+          "mass": 50,
+          "q": 10460,
+          "deltaT": 50,
+          "solveFor": "c"
+        }
+      }
+    },
+    {
+      "id": "solve-deltaT",
+      "inputs": {
+        "heat-cap-solve-for": "deltaT",
+        "heat-cap-mass": "50",
+        "heat-cap-specific-heat": "4.184",
+        "heat-cap-heat": "10460"
+      },
+      "expect": {
+        "value": "Temperature Change: 50.0000 K",
+        "explanation": "dT = q/(m*c) = 10460.0000 / (50.0000 * 4.1840) = 50.0000 K",
+        "metadata": {
+          "deltaT": 49.99999999999999,
+          "mass": 50,
+          "c": 4.184,
+          "q": 10460,
+          "solveFor": "deltaT"
+        }
+      }
+    },
+    {
+      "id": "solve-Tfinal",
+      "inputs": {
+        "heat-cap-solve-for": "Tfinal",
+        "heat-cap-mass": "50",
+        "heat-cap-specific-heat": "4.184",
+        "heat-cap-heat": "10460",
+        "heat-cap-initial-temp": "25"
+      },
+      "expect": {
+        "value": "Final Temperature: 75.0000 K",
+        "explanation": "T_final = T_initial + q/(m*c) = 25.0000 + 50.0000 = 75.0000 K",
+        "metadata": {
+          "Tfinal": 75,
+          "Tinitial": 25,
+          "deltaT": 49.99999999999999,
+          "mass": 50,
+          "c": 4.184,
+          "q": 10460,
+          "solveFor": "Tfinal"
+        }
+      }
+    },
+    {
+      "id": "invalid-solve-for",
+      "inputs": {
+        "heat-cap-solve-for": "nope",
+        "heat-cap-mass": "50"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    }
+  ]
+}

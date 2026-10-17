@@ -1,0 +1,162 @@
+{
+  "calculator": "beer-lambert",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-absorbance",
+      "inputs": {
+        "bl-solve-for": "absorbance",
+        "bl-absorptivity": "6239.5",
+        "bl-path-length": "1",
+        "bl-concentration": "0.0001"
+      },
+      "expect": {
+        "value": "Absorbance: 0.6240",
+        "explanation": "A = epsilon*b*c = 0.6240; Transmittance %T = 100*10^(-A) = 23.7711 %",
+        "metadata": {
+          "solveFor": "absorbance",
+          "formula": "A = epsilon*b*c",
+          "result": 0.62395,
+          "unit": ""
+        }
+      }
+    },
+    {
+      "id": "solve-absorptivity",
+      "inputs": {
+        "bl-solve-for": "absorptivity",
+        "bl-absorbance": "0.699",
+        "bl-path-length": "1",
+        "bl-concentration": "0.0001"
+      },
+      "expect": {
+        "value": "Absorptivity: 6990.0000 L/(mol*cm)",
+        "explanation": "epsilon = A/(b*c) = 6990.0000 L/(mol*cm)",
+        "metadata": {
+          "solveFor": "absorptivity",
+          "formula": "epsilon = A/(b*c)",
+          "result": 6989.999999999999,
+          "unit": "L/(mol*cm)"
+        }
+      }
+    },
+    {
+      "id": "solve-path-length",
+      "inputs": {
+        "bl-solve-for": "path-length",
+        "bl-absorbance": "0.699",
+        "bl-absorptivity": "10000",
+        "bl-concentration": "0.0001"
+      },
+      "expect": {
+        "value": "Path length: 0.6990 cm",
+        "explanation": "b = A/(epsilon*c) = 0.6990 cm",
+        "metadata": {
+          "solveFor": "path-length",
+          "formula": "b = A/(epsilon*c)",
+          "result": 0.699,
+          "unit": "cm"
+        }
+      }
+    },
+    {
+      "id": "solve-concentration",
+      "inputs": {
+        "bl-solve-for": "concentration",
+        "bl-absorbance": "0.699",
+        "bl-absorptivity": "10000",
+        "bl-path-length": "1"
+      },
+      "expect": {
+        "value": "Concentration: 0.0001 mol/L",
+        "explanation": "c = A/(epsilon*b) = 0.0001 mol/L",
+        "metadata": {
+          "solveFor": "concentration",
+          "formula": "c = A/(epsilon*b)",
+          "result": 0.00006989999999999999,
+          "unit": "mol/L"
+        }
+      }
+    },
+    {
+      "id": "transmittance",
+      "inputs": {
+        "bl-solve-for": "transmittance",
+        "bl-absorbance": "0.9"
+      },
+      "expect": {
+        "value": "Transmittance: 12.5893 %",
+        "explanation": "A = 0.9000; %T = 100*10^(-A) = 12.5893 %",
+        "metadata": {
+          "solveFor": "transmittance",
+          "formula": "%T = 100*10^(-A)",
+          "result": 12.589254117941673,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "transmittance-zero",
+      "inputs": {
+        "bl-solve-for": "transmittance",
+        "bl-absorbance": "0"
+      },
+      "expect": {
+        "value": "Transmittance: 100.0000 %",
+        "explanation": "A = 0.0000; %T = 100*10^(-A) = 100.0000 %",
+        "metadata": {
+          "solveFor": "transmittance",
+          "formula": "%T = 100*10^(-A)",
+          "result": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "invalid-solve-for",
+      "inputs": {
+        "bl-solve-for": "nope",
+        "bl-absorbance": "0.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    },
+    {
+      "id": "missing-inputs",
+      "inputs": {
+        "bl-solve-for": "absorbance",
+        "bl-absorptivity": "6239.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for bl-absorptivity, bl-path-length, bl-concentration"
+      }
+    },
+    {
+      "id": "zero-concentration",
+      "inputs": {
+        "bl-solve-for": "absorptivity",
+        "bl-absorbance": "0.699",
+        "bl-path-length": "1",
+        "bl-concentration": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Concentration must be positive"
+      }
+    },
+    {
+      "id": "negative-absorbance",
+      "inputs": {
+        "bl-solve-for": "transmittance",
+        "bl-absorbance": "-0.5"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Absorbance cannot be negative"
+      }
+    }
+  ]
+}

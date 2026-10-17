@@ -1,0 +1,24 @@
+{
+  "calculator": "entropy",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "entropy-products": "120, 130",
+        "entropy-reactants": "50, 40"
+      },
+      "expect": {
+        "value": "dS = 160.0000 J/(mol*K)",
+        "explanation": "dS = S(products) - S(reactants) = 250.0000 - 90.0000 = 160.0000 J/(mol*K)",
+        "metadata": {
+          "deltaS": 160,
+          "sumProducts": 250,
+          "sumReactants": 90,
+          "productCount": 2,
+          "reactantCount": 2
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "calculator": "photoelectric-effect",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-ke",
+      "inputs": {
+        "pe-solve-for": "KE",
+        "pe-work-function": "4.5",
+        "pe-frequency": "2e15"
+      },
+      "expect": {
+        "value": "3.7722 eV",
+        "explanation": "Photon energy: 8.2722 eV; Work function φ: 4.5000 eV; Kinetic energy KE: 3.7722 eV; Threshold frequency: 1087986718985813.4000 Hz; Threshold wavelength: 275.55 nm",
+        "metadata": {
+          "photonEnergyEv": 8.272159800249687,
+          "kineticEnergyEv": 3.7721598002496872,
+          "workFunctionEv": 4.5,
+          "thresholdFrequencyHz": 1087986718985813.4,
+          "thresholdWavelengthNm": 275.55483423498407,
+          "emissionOccurred": true
+        }
+      }
+    },
+    {
+      "id": "below-threshold",
+      "inputs": {
+        "pe-solve-for": "KE",
+        "pe-work-function": "4.5",
+        "pe-frequency": "1e14"
+      },
+      "expect": {
+        "value": "No electron emission",
+        "explanation": "Photon energy: 0.4136 eV; Work function φ: 4.5000 eV; No electron emission (photon energy below work function); KE would be: -4.0864 eV (negative = no emission); Threshold frequency: 1087986718985813.4000 Hz; Threshold wavelength: 275.55 nm",
+        "metadata": {
+          "photonEnergyEv": 0.4136079900124844,
+          "kineticEnergyEv": -4.086392009987516,
+          "workFunctionEv": 4.5,
+          "thresholdFrequencyHz": 1087986718985813.4,
+          "thresholdWavelengthNm": 275.55483423498407,
+          "emissionOccurred": false
+        }
+      }
+    },
+    {
+      "id": "solve-threshold-frequency",
+      "inputs": {
+        "pe-solve-for": "threshold-frequency",
+        "pe-work-function": "4.5",
+        "pe-ke": "1.5"
+      },
+      "expect": {
+        "value": "1087986718985813.4000 Hz",
+        "explanation": "Threshold frequency: 1087986718985813.4000 Hz; Threshold wavelength: 275.55 nm",
+        "metadata": {
+          "thresholdFrequencyHz": 1087986718985813.4,
+          "thresholdWavelengthNm": 275.55483423498407,
+          "workFunctionEv": 4.5
+        }
+      }
+    },
+    {
+      "id": "solve-wavelength",
+      "inputs": {
+        "pe-solve-for": "wavelength",
+        "pe-ke": "1.5",
+        "pe-work-function": "4.5"
+      },
+      "expect": {
+        "value": "206.67 nm",
+        "explanation": "Total photon energy: 6.0000 eV; Required wavelength: 206.67 nm; Required frequency: 1450648958647751.2000 Hz",
+        "metadata": {
+          "totalPhotonEnergyEv": 6,
+          "wavelengthNm": 206.66612567623807,
+          "frequencyHz": 1450648958647751.2
+        }
+      }
+    },
+    {
+      "id": "invalid-solve-for",
+      "inputs": {
+        "pe-solve-for": "nope",
+        "pe-work-function": "4.5",
+        "pe-frequency": "2e15"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    }
+  ]
+}

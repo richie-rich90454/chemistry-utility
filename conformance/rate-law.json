@@ -1,0 +1,20 @@
+{
+  "calculator": "rate-law",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "rate-k": "0.5",
+        "rate-A": "0.1",
+        "rate-B": "0.2",
+        "rate-order-A": "1",
+        "rate-order-B": "2"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for ratelaw-A1, ratelaw-B1, ratelaw-rate1, ratelaw-A2, ratelaw-B2, ratelaw-rate2"
+      }
+    }
+  ]
+}

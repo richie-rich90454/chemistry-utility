@@ -1,0 +1,43 @@
+{
+  "calculator": "equation-balance",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "combustion",
+      "inputs": {
+        "equation": "C3H8+O2->CO2+H2O"
+      },
+      "expect": {
+        "balanced": "C3H8 + 5O2 -> 3CO2 + 4H2O"
+      }
+    },
+    {
+      "id": "synthesis",
+      "inputs": {
+        "equation": "H2+O2->H2O"
+      },
+      "expect": {
+        "balanced": "2H2 + O2 -> 2H2O"
+      }
+    },
+    {
+      "id": "single-displacement",
+      "inputs": {
+        "equation": "Fe+CuSO4->FeSO4+Cu"
+      },
+      "expect": {
+        "balanced": "Fe + CuSO4 -> FeSO4 + Cu"
+      }
+    },
+    {
+      "id": "redox-acidic",
+      "inputs": {
+        "equation": "MnO4-+8H++5e-->Mn2++4H2O||Zn->Zn2++2e-",
+        "medium": "acidic"
+      },
+      "expect": {
+        "balanced": "2MnO4 + 5Zn + 16H+ -> 2Mn2+ + 5Zn2+ + 8H2O"
+      }
+    }
+  ]
+}

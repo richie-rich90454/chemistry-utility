@@ -1,0 +1,81 @@
+{
+  "calculator": "debroglie-wavelength",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "electron",
+      "inputs": {
+        "db-mass": "9.109e-31",
+        "db-velocity": "2e6",
+        "db-mass-unit": "kg"
+      },
+      "expect": {
+        "value": "0.3637 nm",
+        "explanation": "λ = h / (m·v); De Broglie wavelength: 0.3637 nm; Wavelength in meters: 0.0000 m",
+        "metadata": {
+          "wavelengthM": 3.637062246130201e-10,
+          "wavelengthDisplay": 0.3637062246130201,
+          "unit": "nm",
+          "massKg": 9.109e-31,
+          "massRaw": 9.109e-31,
+          "massUnit": "kg",
+          "velocity": 2000000
+        }
+      }
+    },
+    {
+      "id": "proton",
+      "inputs": {
+        "db-mass": "1.673e-27",
+        "db-velocity": "1e5",
+        "db-mass-unit": "kg"
+      },
+      "expect": {
+        "value": "0.0040 nm",
+        "explanation": "λ = h / (m·v); De Broglie wavelength: 0.0040 nm; Wavelength in meters: 0.0000 m",
+        "metadata": {
+          "wavelengthM": 3.960549910340705e-12,
+          "wavelengthDisplay": 0.0039605499103407054,
+          "unit": "nm",
+          "massKg": 1.673e-27,
+          "massRaw": 1.673e-27,
+          "massUnit": "kg",
+          "velocity": 100000
+        }
+      }
+    },
+    {
+      "id": "ammonia-molecule",
+      "inputs": {
+        "db-mass": "17",
+        "db-velocity": "611",
+        "db-mass-unit": "amu"
+      },
+      "expect": {
+        "value": "0.0384 nm",
+        "explanation": "λ = h / (m·v); Mass: 17.0000 amu = 0.0000 kg; De Broglie wavelength: 0.0384 nm; Wavelength in meters: 0.0000 m",
+        "metadata": {
+          "wavelengthM": 3.840534470709606e-11,
+          "wavelengthDisplay": 0.038405344707096056,
+          "unit": "nm",
+          "massKg": 2.8237000000000005e-26,
+          "massRaw": 17,
+          "massUnit": "amu",
+          "velocity": 611
+        }
+      }
+    },
+    {
+      "id": "zero-velocity",
+      "inputs": {
+        "db-mass": "9.109e-31",
+        "db-velocity": "0",
+        "db-mass-unit": "kg"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Velocity must be positive"
+      }
+    }
+  ]
+}

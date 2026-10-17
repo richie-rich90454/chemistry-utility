@@ -1,0 +1,18 @@
+{
+  "calculator": "arrhenius",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "rate-at-350",
+      "inputs": {
+        "arrhenius-A": "1e10",
+        "arrhenius-Ea": "50000",
+        "arrhenius-T": "350"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solveFor value"
+      }
+    }
+  ]
+}

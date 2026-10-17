@@ -1,0 +1,17 @@
+{
+  "calculator": "debye-huckel",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "debye-ion-charge": "1",
+        "debye-ionic-strength": "0.01"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for dh-zplus, dh-zminus, dh-concentration, dh-ion-size"
+      }
+    }
+  ]
+}

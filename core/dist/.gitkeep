@@ -1,0 +1,1 @@
+Placeholder so go:embed has a file to embed. Contents are replaced by `npm run desktop:stage`.

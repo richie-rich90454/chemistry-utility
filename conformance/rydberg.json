@@ -1,0 +1,74 @@
+{
+  "calculator": "rydberg",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "visible-line",
+      "inputs": {
+        "rydberg-n1": "2",
+        "rydberg-n2": "3"
+      },
+      "expect": {
+        "value": "656.34 nm",
+        "explanation": "Spectral series: Balmer (Visible) (n₁ = 2); Transition: n = 3 → n = 2; Wavelength: 656.34 nm; Frequency: 456778611111111.1000 Hz; Energy: 1.8893 eV",
+        "metadata": {
+          "n1": 2,
+          "n2": 3,
+          "wavelengthNm": 656.3354603463993,
+          "frequencyHz": 456778611111111.1,
+          "energyEv": 1.8892728322236094,
+          "seriesName": "Balmer (Visible)"
+        }
+      }
+    },
+    {
+      "id": "lyman-alpha",
+      "inputs": {
+        "rydberg-n1": "1",
+        "rydberg-n2": "2"
+      },
+      "expect": {
+        "value": "121.54 nm",
+        "explanation": "Spectral series: Lyman (UV) (n₁ = 1); Transition: n = 2 → n = 1; Wavelength: 121.54 nm; Frequency: 2466604500000000.0000 Hz; Energy: 10.2021 eV",
+        "metadata": {
+          "n1": 1,
+          "n2": 2,
+          "wavelengthNm": 121.5436037678517,
+          "frequencyHz": 2466604500000000,
+          "energyEv": 10.20207329400749,
+          "seriesName": "Lyman (UV)"
+        }
+      }
+    },
+    {
+      "id": "balmer-limit",
+      "inputs": {
+        "rydberg-n1": "2",
+        "rydberg-n2": "99"
+      },
+      "expect": {
+        "value": "364.78 nm",
+        "explanation": "Spectral series: Balmer (Visible) (n₁ = 2); Transition: n = 99 → n = 2; Wavelength: 364.78 nm; Frequency: 821865941791653.9000 Hz; Energy: 3.3993 eV",
+        "metadata": {
+          "n1": 2,
+          "n2": 99,
+          "wavelengthNm": 364.77968577994733,
+          "frequencyHz": 821865941791653.9,
+          "energyEv": 3.3993032024416348,
+          "seriesName": "Balmer (Visible)"
+        }
+      }
+    },
+    {
+      "id": "missing-n2",
+      "inputs": {
+        "rydberg-n1": "2",
+        "rydberg-n2": ""
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for rydberg-n1, rydberg-n2"
+      }
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "calculator": "born-haber",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "nacl",
+      "inputs": {
+        "born-haber-dHf": "-411",
+        "born-haber-dHsub": "108",
+        "born-haber-IE": "496",
+        "born-haber-dHdiss": "242",
+        "born-haber-EA": "-349"
+      },
+      "expect": {
+        "value": "Lattice Energy U = -787.0000 kJ/mol",
+        "explanation": "U = dHf - dHsub - IE - dHdiss/2 - EA = -411.0000 - 108.0000 - 496.0000 - 121.0000 - -349.0000 = -787.0000 kJ/mol (EA sign convention: energy released on electron attachment, negative when exothermic)",
+        "metadata": {
+          "U": -787,
+          "dHf": -411,
+          "dHsub": 108,
+          "IE": 496,
+          "dHdiss": 242,
+          "EA": -349
+        }
+      }
+    },
+    {
+      "id": "mgo",
+      "inputs": {
+        "born-haber-dHf": "-601",
+        "born-haber-dHsub": "148",
+        "born-haber-IE": "2188",
+        "born-haber-dHdiss": "498",
+        "born-haber-EA": "-141"
+      },
+      "expect": {
+        "value": "Lattice Energy U = -3045.0000 kJ/mol",
+        "explanation": "U = dHf - dHsub - IE - dHdiss/2 - EA = -601.0000 - 148.0000 - 2188.0000 - 249.0000 - -141.0000 = -3045.0000 kJ/mol (EA sign convention: energy released on electron attachment, negative when exothermic)",
+        "metadata": {
+          "U": -3045,
+          "dHf": -601,
+          "dHsub": 148,
+          "IE": 2188,
+          "dHdiss": 498,
+          "EA": -141
+        }
+      }
+    },
+    {
+      "id": "zero-inputs",
+      "inputs": {
+        "born-haber-dHf": "0",
+        "born-haber-dHsub": "0",
+        "born-haber-IE": "0",
+        "born-haber-dHdiss": "0",
+        "born-haber-EA": "0"
+      },
+      "expect": {
+        "value": "Lattice Energy U = 0.0000 kJ/mol",
+        "explanation": "U = dHf - dHsub - IE - dHdiss/2 - EA = 0.0000 - 0.0000 - 0.0000 - 0.0000 - 0.0000 = 0.0000 kJ/mol (EA sign convention: energy released on electron attachment, negative when exothermic)",
+        "metadata": {
+          "U": 0,
+          "dHf": 0,
+          "dHsub": 0,
+          "IE": 0,
+          "dHdiss": 0,
+          "EA": 0
+        }
+      }
+    },
+    {
+      "id": "endothermic-formation",
+      "inputs": {
+        "born-haber-dHf": "100",
+        "born-haber-dHsub": "50",
+        "born-haber-IE": "400",
+        "born-haber-dHdiss": "240",
+        "born-haber-EA": "-30"
+      },
+      "expect": {
+        "value": "Lattice Energy U = -440.0000 kJ/mol",
+        "explanation": "U = dHf - dHsub - IE - dHdiss/2 - EA = 100.0000 - 50.0000 - 400.0000 - 120.0000 - -30.0000 = -440.0000 kJ/mol (EA sign convention: energy released on electron attachment, negative when exothermic)",
+        "metadata": {
+          "U": -440,
+          "dHf": 100,
+          "dHsub": 50,
+          "IE": 400,
+          "dHdiss": 240,
+          "EA": -30
+        }
+      }
+    },
+    {
+      "id": "large-dissociation",
+      "inputs": {
+        "born-haber-dHf": "-800",
+        "born-haber-dHsub": "120",
+        "born-haber-IE": "900",
+        "born-haber-dHdiss": "1000",
+        "born-haber-EA": "-200"
+      },
+      "expect": {
+        "value": "Lattice Energy U = -2120.0000 kJ/mol",
+        "explanation": "U = dHf - dHsub - IE - dHdiss/2 - EA = -800.0000 - 120.0000 - 900.0000 - 500.0000 - -200.0000 = -2120.0000 kJ/mol (EA sign convention: energy released on electron attachment, negative when exothermic)",
+        "metadata": {
+          "U": -2120,
+          "dHf": -800,
+          "dHsub": 120,
+          "IE": 900,
+          "dHdiss": 1000,
+          "EA": -200
+        }
+      }
+    }
+  ]
+}

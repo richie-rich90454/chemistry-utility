@@ -1,0 +1,153 @@
+{
+  "calculator": "calorimetry",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-q",
+      "inputs": {
+        "calor-solve-for": "q",
+        "calor-mass": "100",
+        "calor-specific-heat": "4.184",
+        "calor-delta-t": "50"
+      },
+      "expect": {
+        "value": "20920.0000 J",
+        "explanation": "q = m*c*dT = 20920.0000 J; q is positive, so the surroundings absorbed heat and the reaction is endothermic",
+        "metadata": {
+          "solveFor": "q",
+          "formula": "q = m*c*dT",
+          "result": 20920,
+          "unit": "J"
+        }
+      }
+    },
+    {
+      "id": "solve-m",
+      "inputs": {
+        "calor-solve-for": "m",
+        "calor-mass": "",
+        "calor-specific-heat": "4.184",
+        "calor-delta-t": "50",
+        "calor-heat": "20920"
+      },
+      "expect": {
+        "value": "100.0000 g",
+        "explanation": "m = q/(c*dT) = 100.0000 g",
+        "metadata": {
+          "solveFor": "m",
+          "formula": "m = q/(c*dT)",
+          "result": 99.99999999999999,
+          "unit": "g"
+        }
+      }
+    },
+    {
+      "id": "solve-c",
+      "inputs": {
+        "calor-solve-for": "c",
+        "calor-mass": "100",
+        "calor-specific-heat": "",
+        "calor-delta-t": "50",
+        "calor-heat": "20920"
+      },
+      "expect": {
+        "value": "4.1840 J/(g*C)",
+        "explanation": "c = q/(m*dT) = 4.1840 J/(g*C)",
+        "metadata": {
+          "solveFor": "c",
+          "formula": "c = q/(m*dT)",
+          "result": 4.184,
+          "unit": "J/(g*C)"
+        }
+      }
+    },
+    {
+      "id": "solve-delta-t",
+      "inputs": {
+        "calor-solve-for": "deltaT",
+        "calor-mass": "100",
+        "calor-specific-heat": "4.184",
+        "calor-delta-t": "",
+        "calor-heat": "20920"
+      },
+      "expect": {
+        "value": "50.0000 C",
+        "explanation": "dT = q/(m*c) = 50.0000 C",
+        "metadata": {
+          "solveFor": "deltaT",
+          "formula": "dT = q/(m*c)",
+          "result": 49.99999999999999,
+          "unit": "C"
+        }
+      }
+    },
+    {
+      "id": "exothermic-q",
+      "inputs": {
+        "calor-solve-for": "q",
+        "calor-mass": "50",
+        "calor-specific-heat": "4.184",
+        "calor-delta-t": "-20"
+      },
+      "expect": {
+        "value": "-4184.0000 J",
+        "explanation": "q = m*c*dT = -4184.0000 J; q is negative, so the reaction released heat and is exothermic",
+        "metadata": {
+          "solveFor": "q",
+          "formula": "q = m*c*dT",
+          "result": -4184,
+          "unit": "J"
+        }
+      }
+    },
+    {
+      "id": "invalid-solve-for",
+      "inputs": {
+        "calor-solve-for": "nope",
+        "calor-mass": "100"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    },
+    {
+      "id": "missing-inputs",
+      "inputs": {
+        "calor-solve-for": "q",
+        "calor-mass": "100",
+        "calor-specific-heat": "4.184"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Missing or invalid inputs for calor-mass, calor-specific-heat, calor-delta-t"
+      }
+    },
+    {
+      "id": "zero-specific-heat",
+      "inputs": {
+        "calor-solve-for": "q",
+        "calor-mass": "100",
+        "calor-specific-heat": "0",
+        "calor-delta-t": "50"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Specific heat must be positive"
+      }
+    },
+    {
+      "id": "zero-delta-t-solving-mass",
+      "inputs": {
+        "calor-solve-for": "m",
+        "calor-specific-heat": "4.184",
+        "calor-delta-t": "0",
+        "calor-heat": "20920"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Temperature change cannot be zero"
+      }
+    }
+  ]
+}

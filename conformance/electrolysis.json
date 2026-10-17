@@ -1,0 +1,87 @@
+{
+  "calculator": "electrolysis",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "solve-mass",
+      "inputs": {
+        "electrolysis-solve-for": "mass",
+        "electrolysis-I": "2",
+        "electrolysis-t": "1800",
+        "electrolysis-z": "2",
+        "electrolysis-M": "63.5"
+      },
+      "expect": {
+        "value": "Mass deposited m = 1.185 g",
+        "explanation": "n = (I*t)/(F*z) = 0.018656 mol; m = n*M = 1.185 g",
+        "metadata": {
+          "mass": 1.1846400994973312,
+          "moles": 0.01865574959838317,
+          "I": 2,
+          "t": 1800,
+          "z": 2,
+          "M": 63.5,
+          "solveFor": "mass"
+        }
+      }
+    },
+    {
+      "id": "solve-current",
+      "inputs": {
+        "electrolysis-solve-for": "current",
+        "electrolysis-m": "10",
+        "electrolysis-t": "1800",
+        "electrolysis-z": "2",
+        "electrolysis-M": "63.5"
+      },
+      "expect": {
+        "value": "Current I = 16.883 A",
+        "explanation": "n = m/M = 0.157480 mol; I = (n*F*z)/t = 16.883 A",
+        "metadata": {
+          "current": 16.8827646544182,
+          "moles": 0.15748031496062992,
+          "m": 10,
+          "t": 1800,
+          "z": 2,
+          "M": 63.5,
+          "solveFor": "current"
+        }
+      }
+    },
+    {
+      "id": "solve-time",
+      "inputs": {
+        "electrolysis-solve-for": "time",
+        "electrolysis-m": "10",
+        "electrolysis-I": "2",
+        "electrolysis-z": "2",
+        "electrolysis-M": "63.5"
+      },
+      "expect": {
+        "value": "Time t = 15194.488 s",
+        "explanation": "n = m/M = 0.157480 mol; t = (n*F*z)/I = 15194.488 s",
+        "metadata": {
+          "time": 15194.488188976378,
+          "moles": 0.15748031496062992,
+          "m": 10,
+          "I": 2,
+          "t": null,
+          "z": 2,
+          "M": 63.5,
+          "solveFor": "time"
+        }
+      }
+    },
+    {
+      "id": "invalid-solve-for",
+      "inputs": {
+        "electrolysis-solve-for": "nope",
+        "electrolysis-I": "2"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Invalid solve-for selection"
+      }
+    }
+  ]
+}

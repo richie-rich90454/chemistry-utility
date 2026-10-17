@@ -1,0 +1,389 @@
+{
+  "calculator": "vsepr-geometry",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "water",
+      "inputs": {
+        "vsepr-central": "O",
+        "vsepr-bonded": "2",
+        "vsepr-lone-pairs": "2"
+      },
+      "expect": {
+        "value": "bent (AX2E2), bond angle 104.5 degrees, sp3, polar",
+        "explanation": "Central atom: Oxygen (O); Bonded atoms: 2; Lone pairs: 2; Steric number: 4; Electron-pair geometry: tetrahedral; Molecular geometry: bent; Ideal bond angle: 104.5 degrees; Hybridization: sp3; Polarity: polar; Two lone pairs compress the angle from the ideal 109.5 degrees to about 104.5 degrees.",
+        "metadata": {
+          "centralAtom": "O",
+          "elementName": "Oxygen",
+          "bonded": 2,
+          "lonePairs": 2,
+          "stericNumber": 4,
+          "axe": "AX2E2",
+          "electronGeometry": "tetrahedral",
+          "molecularGeometry": "bent",
+          "bondAngle": "104.5",
+          "hybridization": "sp3",
+          "polarity": "polar"
+        }
+      }
+    },
+    {
+      "id": "methane",
+      "inputs": {
+        "vsepr-central": "C",
+        "vsepr-bonded": "4",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "tetrahedral (AX4), bond angle 109.5 degrees, sp3, nonpolar",
+        "explanation": "Central atom: Carbon (C); Bonded atoms: 4; Lone pairs: 0; Steric number: 4; Electron-pair geometry: tetrahedral; Molecular geometry: tetrahedral; Ideal bond angle: 109.5 degrees; Hybridization: sp3; Polarity: nonpolar; Nonpolar assumes identical substituents, so the bond dipoles cancel; different substituents can make a symmetric geometry polar",
+        "metadata": {
+          "centralAtom": "C",
+          "elementName": "Carbon",
+          "bonded": 4,
+          "lonePairs": 0,
+          "stericNumber": 4,
+          "axe": "AX4",
+          "electronGeometry": "tetrahedral",
+          "molecularGeometry": "tetrahedral",
+          "bondAngle": "109.5",
+          "hybridization": "sp3",
+          "polarity": "nonpolar"
+        }
+      }
+    },
+    {
+      "id": "ammonia",
+      "inputs": {
+        "vsepr-central": "N",
+        "vsepr-bonded": "3",
+        "vsepr-lone-pairs": "1"
+      },
+      "expect": {
+        "value": "trigonal pyramidal (AX3E), bond angle 107 degrees, sp3, polar",
+        "explanation": "Central atom: Nitrogen (N); Bonded atoms: 3; Lone pairs: 1; Steric number: 4; Electron-pair geometry: tetrahedral; Molecular geometry: trigonal pyramidal; Ideal bond angle: 107 degrees; Hybridization: sp3; Polarity: polar; The lone pair compresses the angle below the ideal 109.5 degrees.",
+        "metadata": {
+          "centralAtom": "N",
+          "elementName": "Nitrogen",
+          "bonded": 3,
+          "lonePairs": 1,
+          "stericNumber": 4,
+          "axe": "AX3E",
+          "electronGeometry": "tetrahedral",
+          "molecularGeometry": "trigonal pyramidal",
+          "bondAngle": "107",
+          "hybridization": "sp3",
+          "polarity": "polar"
+        }
+      }
+    },
+    {
+      "id": "carbon-dioxide",
+      "inputs": {
+        "vsepr-central": "C",
+        "vsepr-bonded": "2",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "linear (AX2), bond angle 180 degrees, sp, nonpolar",
+        "explanation": "Central atom: Carbon (C); Bonded atoms: 2; Lone pairs: 0; Steric number: 2; Electron-pair geometry: linear; Molecular geometry: linear; Ideal bond angle: 180 degrees; Hybridization: sp; Polarity: nonpolar; Nonpolar assumes identical substituents, so the bond dipoles cancel; different substituents can make a symmetric geometry polar",
+        "metadata": {
+          "centralAtom": "C",
+          "elementName": "Carbon",
+          "bonded": 2,
+          "lonePairs": 0,
+          "stericNumber": 2,
+          "axe": "AX2",
+          "electronGeometry": "linear",
+          "molecularGeometry": "linear",
+          "bondAngle": "180",
+          "hybridization": "sp",
+          "polarity": "nonpolar"
+        }
+      }
+    },
+    {
+      "id": "boron-trifluoride",
+      "inputs": {
+        "vsepr-central": "B",
+        "vsepr-bonded": "3",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "trigonal planar (AX3), bond angle 120 degrees, sp2, nonpolar",
+        "explanation": "Central atom: Boron (B); Bonded atoms: 3; Lone pairs: 0; Steric number: 3; Electron-pair geometry: trigonal planar; Molecular geometry: trigonal planar; Ideal bond angle: 120 degrees; Hybridization: sp2; Polarity: nonpolar; Nonpolar assumes identical substituents, so the bond dipoles cancel; different substituents can make a symmetric geometry polar",
+        "metadata": {
+          "centralAtom": "B",
+          "elementName": "Boron",
+          "bonded": 3,
+          "lonePairs": 0,
+          "stericNumber": 3,
+          "axe": "AX3",
+          "electronGeometry": "trigonal planar",
+          "molecularGeometry": "trigonal planar",
+          "bondAngle": "120",
+          "hybridization": "sp2",
+          "polarity": "nonpolar"
+        }
+      }
+    },
+    {
+      "id": "xenon-tetrafluoride",
+      "inputs": {
+        "vsepr-central": "Xe",
+        "vsepr-bonded": "4",
+        "vsepr-lone-pairs": "2"
+      },
+      "expect": {
+        "value": "square planar (AX4E2), bond angle 90 degrees, sp3d2, nonpolar",
+        "explanation": "Central atom: Xenon (Xe); Bonded atoms: 4; Lone pairs: 2; Steric number: 6; Electron-pair geometry: octahedral; Molecular geometry: square planar; Ideal bond angle: 90 degrees; Hybridization: sp3d2; Polarity: nonpolar; Nonpolar assumes identical substituents, so the bond dipoles cancel; different substituents can make a symmetric geometry polar",
+        "metadata": {
+          "centralAtom": "Xe",
+          "elementName": "Xenon",
+          "bonded": 4,
+          "lonePairs": 2,
+          "stericNumber": 6,
+          "axe": "AX4E2",
+          "electronGeometry": "octahedral",
+          "molecularGeometry": "square planar",
+          "bondAngle": "90",
+          "hybridization": "sp3d2",
+          "polarity": "nonpolar"
+        }
+      }
+    },
+    {
+      "id": "phosphorus-pentachloride",
+      "inputs": {
+        "vsepr-central": "P",
+        "vsepr-bonded": "5",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "trigonal bipyramidal (AX5), bond angle 120/90 degrees, sp3d, nonpolar",
+        "explanation": "Central atom: Phosphorus (P); Bonded atoms: 5; Lone pairs: 0; Steric number: 5; Electron-pair geometry: trigonal bipyramidal; Molecular geometry: trigonal bipyramidal; Ideal bond angle: 120/90 degrees; Hybridization: sp3d; Polarity: nonpolar; Nonpolar assumes identical substituents, so the bond dipoles cancel; different substituents can make a symmetric geometry polar",
+        "metadata": {
+          "centralAtom": "P",
+          "elementName": "Phosphorus",
+          "bonded": 5,
+          "lonePairs": 0,
+          "stericNumber": 5,
+          "axe": "AX5",
+          "electronGeometry": "trigonal bipyramidal",
+          "molecularGeometry": "trigonal bipyramidal",
+          "bondAngle": "120/90",
+          "hybridization": "sp3d",
+          "polarity": "nonpolar"
+        }
+      }
+    },
+    {
+      "id": "sulfur-hexafluoride",
+      "inputs": {
+        "vsepr-central": "S",
+        "vsepr-bonded": "6",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "octahedral (AX6), bond angle 90 degrees, sp3d2, nonpolar",
+        "explanation": "Central atom: Sulfur (S); Bonded atoms: 6; Lone pairs: 0; Steric number: 6; Electron-pair geometry: octahedral; Molecular geometry: octahedral; Ideal bond angle: 90 degrees; Hybridization: sp3d2; Polarity: nonpolar; Nonpolar assumes identical substituents, so the bond dipoles cancel; different substituents can make a symmetric geometry polar",
+        "metadata": {
+          "centralAtom": "S",
+          "elementName": "Sulfur",
+          "bonded": 6,
+          "lonePairs": 0,
+          "stericNumber": 6,
+          "axe": "AX6",
+          "electronGeometry": "octahedral",
+          "molecularGeometry": "octahedral",
+          "bondAngle": "90",
+          "hybridization": "sp3d2",
+          "polarity": "nonpolar"
+        }
+      }
+    },
+    {
+      "id": "sulfur-tetrafluoride",
+      "inputs": {
+        "vsepr-central": "S",
+        "vsepr-bonded": "4",
+        "vsepr-lone-pairs": "1"
+      },
+      "expect": {
+        "value": "seesaw (AX4E), bond angle 120/90 degrees, sp3d, polar",
+        "explanation": "Central atom: Sulfur (S); Bonded atoms: 4; Lone pairs: 1; Steric number: 5; Electron-pair geometry: trigonal bipyramidal; Molecular geometry: seesaw; Ideal bond angle: 120/90 degrees; Hybridization: sp3d; Polarity: polar",
+        "metadata": {
+          "centralAtom": "S",
+          "elementName": "Sulfur",
+          "bonded": 4,
+          "lonePairs": 1,
+          "stericNumber": 5,
+          "axe": "AX4E",
+          "electronGeometry": "trigonal bipyramidal",
+          "molecularGeometry": "seesaw",
+          "bondAngle": "120/90",
+          "hybridization": "sp3d",
+          "polarity": "polar"
+        }
+      }
+    },
+    {
+      "id": "chlorine-trifluoride",
+      "inputs": {
+        "vsepr-central": "Cl",
+        "vsepr-bonded": "3",
+        "vsepr-lone-pairs": "2"
+      },
+      "expect": {
+        "value": "T-shaped (AX3E2), bond angle 90 degrees, sp3d, polar",
+        "explanation": "Central atom: Chlorine (Cl); Bonded atoms: 3; Lone pairs: 2; Steric number: 5; Electron-pair geometry: trigonal bipyramidal; Molecular geometry: T-shaped; Ideal bond angle: 90 degrees; Hybridization: sp3d; Polarity: polar",
+        "metadata": {
+          "centralAtom": "Cl",
+          "elementName": "Chlorine",
+          "bonded": 3,
+          "lonePairs": 2,
+          "stericNumber": 5,
+          "axe": "AX3E2",
+          "electronGeometry": "trigonal bipyramidal",
+          "molecularGeometry": "T-shaped",
+          "bondAngle": "90",
+          "hybridization": "sp3d",
+          "polarity": "polar"
+        }
+      }
+    },
+    {
+      "id": "lowercase-central",
+      "inputs": {
+        "vsepr-central": "o",
+        "vsepr-bonded": "2",
+        "vsepr-lone-pairs": "2"
+      },
+      "expect": {
+        "value": "bent (AX2E2), bond angle 104.5 degrees, sp3, polar",
+        "explanation": "Central atom: Oxygen (O); Bonded atoms: 2; Lone pairs: 2; Steric number: 4; Electron-pair geometry: tetrahedral; Molecular geometry: bent; Ideal bond angle: 104.5 degrees; Hybridization: sp3; Polarity: polar; Two lone pairs compress the angle from the ideal 109.5 degrees to about 104.5 degrees.",
+        "metadata": {
+          "centralAtom": "O",
+          "elementName": "Oxygen",
+          "bonded": 2,
+          "lonePairs": 2,
+          "stericNumber": 4,
+          "axe": "AX2E2",
+          "electronGeometry": "tetrahedral",
+          "molecularGeometry": "bent",
+          "bondAngle": "104.5",
+          "hybridization": "sp3",
+          "polarity": "polar"
+        }
+      }
+    },
+    {
+      "id": "missing-central",
+      "inputs": {
+        "vsepr-central": "",
+        "vsepr-bonded": "2",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Central atom is required"
+      }
+    },
+    {
+      "id": "missing-bonded",
+      "inputs": {
+        "vsepr-central": "O",
+        "vsepr-bonded": "",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Bonded atoms must be a non-negative whole number"
+      }
+    },
+    {
+      "id": "fractional-bonded",
+      "inputs": {
+        "vsepr-central": "O",
+        "vsepr-bonded": "2.5",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Bonded atoms must be a non-negative whole number"
+      }
+    },
+    {
+      "id": "negative-bonded",
+      "inputs": {
+        "vsepr-central": "O",
+        "vsepr-bonded": "-1",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Bonded atoms must be a non-negative whole number"
+      }
+    },
+    {
+      "id": "negative-lone-pairs",
+      "inputs": {
+        "vsepr-central": "O",
+        "vsepr-bonded": "2",
+        "vsepr-lone-pairs": "-1"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Lone pairs must be a non-negative whole number"
+      }
+    },
+    {
+      "id": "steric-too-large",
+      "inputs": {
+        "vsepr-central": "I",
+        "vsepr-bonded": "7",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Steric number 7 is not supported; this calculator covers steric numbers 1 through 6"
+      }
+    },
+    {
+      "id": "unknown-element",
+      "inputs": {
+        "vsepr-central": "Xx",
+        "vsepr-bonded": "3",
+        "vsepr-lone-pairs": "1"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Element not found: Xx"
+      }
+    },
+    {
+      "id": "no-domain",
+      "inputs": {
+        "vsepr-central": "O",
+        "vsepr-bonded": "0",
+        "vsepr-lone-pairs": "0"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: A central atom needs at least one bonded atom or one lone pair"
+      }
+    },
+    {
+      "id": "unsupported-axe",
+      "inputs": {
+        "vsepr-central": "O",
+        "vsepr-bonded": "1",
+        "vsepr-lone-pairs": "1"
+      },
+      "expect": {
+        "value": "",
+        "explanation": "Error: Unsupported AXE combination: AX1E"
+      }
+    }
+  ]
+}

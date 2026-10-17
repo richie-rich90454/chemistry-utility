@@ -1,0 +1,28 @@
+{
+  "calculator": "nernst",
+  "contract": "calc-result-v1",
+  "cases": [
+    {
+      "id": "typical",
+      "inputs": {
+        "E-standard": "0.34",
+        "temperature": "298",
+        "n-electrons": "2",
+        "Q-reaction": "0.01"
+      },
+      "expect": {
+        "value": "E = 0.399 V",
+        "explanation": "E = E_standard - (R*T/(n*F))*ln(Q) = 0.340 - (2477.5720/(2.000 * 96485))*ln(0.01) = 0.399 V",
+        "metadata": {
+          "E": 0.399126500015748,
+          "E_standard": 0.34,
+          "temperature": 298,
+          "n_electrons": 2,
+          "Q": 0.01,
+          "gasConstant": 8.314,
+          "faradayConstant": 96485
+        }
+      }
+    }
+  ]
+}

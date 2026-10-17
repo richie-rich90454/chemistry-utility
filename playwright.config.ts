@@ -1,0 +1,25 @@
+import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./e2e",
+  timeout: 30000,
+  retries: 0,
+  use: {
+    baseURL: "http://localhost:5173",
+    headless: true,
+  },
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"], channel: "chrome" },
+    },
+  ],
+  webServer: {
+    command: "npm run build:web && npx vite preview --port 5173",
+    // the command rebuilds and prerenders before serving, so Playwright has to
+    // wait for the port instead of assuming the process is ready on start
+    url: "http://localhost:5173",
+    reuseExistingServer: true,
+    timeout: 120_000,
+  },
+});
