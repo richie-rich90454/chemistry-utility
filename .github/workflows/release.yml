@@ -36,13 +36,13 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.release.tag_name || github.sha }}
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -75,7 +75,7 @@ jobs:
           grep -Fx "index.html" web-archive-contents.txt
 
       - name: Upload website archive
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: package-web
           path: release/dist.zip
@@ -84,7 +84,7 @@ jobs:
           compression-level: 0
 
       - name: Upload frontend for desktop builds
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: frontend-dist
           path: dist/
@@ -128,21 +128,23 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.release.tag_name || github.sha }}
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - name: Setup Go (latest patch)
+        uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
+          check-latest: true
+          cache: true
           cache-dependency-path: core/go.sum
 
       - name: Install Linux dependencies
@@ -164,7 +166,7 @@ jobs:
         run: npm ci
 
       - name: Download production frontend
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: frontend-dist
           path: dist/
@@ -501,7 +503,7 @@ jobs:
           test "$COUNT" -eq 1
 
       - name: Upload desktop package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: package-${{ matrix.target }}
           path: release/
@@ -531,7 +533,7 @@ jobs:
 
     steps:
       - name: Download platform packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: package-*
           path: release/
@@ -638,7 +640,7 @@ jobs:
           cat release/SHA256SUMS.txt
 
       - name: Upload complete build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: complete-release-bundle
           path: release/
@@ -680,7 +682,7 @@ jobs:
 
     steps:
       - name: Download complete build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: complete-release-bundle
           path: release/

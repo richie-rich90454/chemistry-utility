@@ -9,25 +9,30 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: frontend-budget-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   timing-budget:
     name: Parser/Balancer Timing Budgets
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: 'npm'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Run parser/balancer timing budgets
         run: npx vitest run src/modules/parserTiming.test.ts

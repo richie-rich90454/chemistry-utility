@@ -1,16 +1,40 @@
+version: "2"
+
+run:
+  timeout: 5m
+
 linters:
+  # Explicitly enable only the selected linters.
+  # This prevents new default linters from unexpectedly
+  # changing CI behavior after tool upgrades.
+  default: none
+
   enable:
     - errcheck
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
     - unused
+
+  exclusions:
+    rules:
+      # Every error returned by the calculator port is user-facing copy that
+      # mirrors src/modules/calculators/*.ts verbatim, and both the TypeScript
+      # tests and the Go conformance vectors assert those exact strings.
+      # ST1005 (lower-case, unpunctuated error strings) is therefore excluded:
+      # rewriting them would change the UI and break the port's parity
+      # contract. This is an issue-level exclusion, so every other staticcheck
+      # check (including the QF and SA groups) stays enabled.
+      - linters:
+          - staticcheck
+        text: ST1005
+
+formatters:
+  enable:
     - gofmt
     - goimports
-  disable:
-    - lll
-    - funlen
-    - gocyclo
-run:
-  timeout: 5m
+
+  settings:
+    goimports:
+      local-prefixes:
+        - chemistry-utility/core

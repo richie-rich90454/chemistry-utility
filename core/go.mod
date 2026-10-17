@@ -2,6 +2,8 @@ module chemistry-utility/core
 
 go 1.26.0
 
+toolchain go1.26.9
+
 require github.com/wailsapp/wails/v2 v2.16.0
 
 require (

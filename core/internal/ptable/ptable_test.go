@@ -33,14 +33,10 @@ func validPayload(t *testing.T) string {
 }
 
 func TestGetData(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "chemutil-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	ptableJSON := validPayload(t)
-	err = os.WriteFile(filepath.Join(tmpDir, "ptable.json"), []byte(ptableJSON), 0644)
+	err := os.WriteFile(filepath.Join(tmpDir, "ptable.json"), []byte(ptableJSON), 0644)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,14 +60,10 @@ func TestMissingFile(t *testing.T) {
 }
 
 func TestTruncatedTableRejected(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "chemutil-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	truncated := `[{"atomicNumber":1,"symbol":"H","name":"Hydrogen","atomicMass":1.008,"period":1}]`
-	err = os.WriteFile(filepath.Join(tmpDir, "ptable.json"), []byte(truncated), 0644)
+	err := os.WriteFile(filepath.Join(tmpDir, "ptable.json"), []byte(truncated), 0644)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,15 +75,11 @@ func TestTruncatedTableRejected(t *testing.T) {
 }
 
 func TestLoadData(t *testing.T) {
-	tmpDir, err := os.MkdirTemp("", "chemutil-test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(tmpDir)
+	tmpDir := t.TempDir()
 
 	// Start with missing file
 	svc := New("/nonexistent/path/ptable.json")
-	_, err = svc.GetData()
+	_, err := svc.GetData()
 	if err == nil {
 		t.Error("expected error for missing file")
 	}

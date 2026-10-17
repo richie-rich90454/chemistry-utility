@@ -1,4 +1,11 @@
-# Normalize Go module files to LF so `go mod tidy` (auto-run by wails dev)
-# never marks them dirty or invalidates the Go build cache.
+# Normalize text files to LF in the repository and in every working tree so
+# that formatting and lint tooling agrees across Windows, Linux, and macOS.
+# This matches .editorconfig (end_of_line = lf) and stops Git's LF->CRLF
+# conversion warnings on Windows checkouts. Binary files are left untouched by
+# the text=auto detection.
+* text=auto eol=lf
+
+# Go module files must stay LF so `go mod tidy` (auto-run by wails dev) never
+# marks them dirty or invalidates the Go build cache.
 go.mod text eol=lf
 go.sum text eol=lf

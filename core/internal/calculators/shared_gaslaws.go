@@ -261,7 +261,8 @@ func vanDerWaals(inputs map[string]string) (CalcResult, error) {
 	if v-n*b <= 0 {
 		return CalcResult{}, errors.New("Volume is too small for the given amount of gas (V must be greater than n*b)")
 	}
-	pressure := (n*vdwR*temperature)/(v-n*b) - a*math.Pow(n/v, 2)
+	ratio := n / v
+	pressure := (n*vdwR*temperature)/(v-n*b) - a*ratio*ratio
 	formatted := formatFixed(pressure, 4)
 	return CalcResult{
 		Value:       "P=" + formatted + " atm",

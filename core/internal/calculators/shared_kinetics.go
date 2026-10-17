@@ -230,14 +230,14 @@ func integratedRateLaw(inputs map[string]string) (CalcResult, error) {
 		if t < 0 {
 			return CalcResult{}, errors.New("Time cannot be negative")
 		}
-		switch {
-		case order == 0:
+		switch order {
+		case 0:
 			result = math.Max(0, a0-k*t)
 			formula = "[A] = [A]\u2080 - kt"
-		case order == 1:
+		case 1:
 			result = a0 * math.Exp(-k*t)
 			formula = "[A] = [A]\u2080\u00B7e^(-kt)"
-		case order == 2:
+		case 2:
 			result = a0 / (1 + k*a0*t)
 			formula = "[A] = [A]\u2080 / (1 + k[A]\u2080t)"
 		default:
@@ -257,20 +257,20 @@ func integratedRateLaw(inputs map[string]string) (CalcResult, error) {
 		if a <= 0 {
 			return CalcResult{}, errors.New("Concentration must be positive")
 		}
-		switch {
-		case order == 0:
+		switch order {
+		case 0:
 			if a >= a0 {
 				return CalcResult{}, errors.New("Concentration must be less than initial concentration for zero order")
 			}
 			result = (a0 - a) / k
 			formula = "t = ([A]\u2080 - [A]) / k"
-		case order == 1:
+		case 1:
 			if a >= a0 {
 				return CalcResult{}, errors.New("Concentration must be less than initial concentration for first order")
 			}
 			result = math.Log(a0/a) / k
 			formula = "t = ln([A]\u2080/[A]) / k"
-		case order == 2:
+		case 2:
 			if a >= a0 {
 				return CalcResult{}, errors.New("Concentration must be less than initial concentration for second order")
 			}
