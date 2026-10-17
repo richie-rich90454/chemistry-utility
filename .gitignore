@@ -89,7 +89,6 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
@@ -159,10 +158,15 @@ tmp/
 Thumbs.db
 
 # Build output
-dist/
+/dist/
 build/bin/
 core/build/
 *.md5
+
+# The Go wrapper embeds core/dist, and go:embed fails if the directory has no
+# files. Keep the placeholder so a fresh clone compiles before the site is built.
+/core/dist/*
+!/core/dist/.gitkeep
 
 # Go air hot reload
 .trae
