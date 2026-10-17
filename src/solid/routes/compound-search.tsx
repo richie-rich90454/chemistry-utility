@@ -1,17 +1,9 @@
 /**
- * Visual verification: The Solid-rendered Compound Database Search card
- * should match the legacy #compound-search card in frontend/index.html.
- * Intentional diff: this route is always enabled — the Go backend
- * server (cmd/server/main.go) serves both the API (/api/v1/*) and the
- * static frontend in browser environments, so the searchCompounds /
- * fetchCompoundDetail HTTP calls succeed. It owns the loading, error,
- * and detail-panel state via Solid signals. Formula subscripts are
- * rendered via buildFormulaSegments (legacy built DOM nodes
- * imperatively). Cross-calculator prefill (Open in Molar Mass /
- * Stoichiometry) navigates to the target route without prefilling the
- * input — prefill requires a cross-route store and is deferred. No
- * Playwright screenshot test is added per task spec; parity is verified
- * by manual diff of the rendered DOM against the legacy markup.
+ * Compound Database Search route: look up compounds in the bundled dataset by
+ * name, formula, CAS number, or SMILES, and view a detail panel. The route
+ * owns loading, error, and detail state via Solid signals; formula subscripts
+ * are rendered from buildFormulaSegments. The dataset ships with the app, so
+ * search works offline with no server.
  */
 import type {JSX} from "solid-js";
 import type {CompoundResult, CompoundDetail, FormulaSegment} from "../../modules/compoundSearchUI.js";
@@ -135,10 +127,12 @@ function CompoundSearch(): JSX.Element {
                     <span class={styles.resultLabel}>SMILES:</span>
                     <span class={styles.resultValue}>{initialDetail.smiles}</span>
                 </div>
-                <div class={styles.resultRow}>
-                    <span class={styles.resultLabel}>InChI:</span>
-                    <span class={styles.resultValue}>{initialDetail.inchi}</span>
-                </div>
+                <Show when={initialDetail.inchi !== ""}>
+                    <div class={styles.resultRow}>
+                        <span class={styles.resultLabel}>InChI:</span>
+                        <span class={styles.resultValue}>{initialDetail.inchi}</span>
+                    </div>
+                </Show>
                 {propKeys.length > 0 && (
                     <div>
                         <h4 class={styles.detailPropertiesTitle}>Properties</h4>
